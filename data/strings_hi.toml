@@ -1,0 +1,272 @@
+# =====================================================================
+# Every user-facing string, in one file, to be read aloud before release
+# =====================================================================
+# ! RELEASE GATE: a native speaker reads every line here out loud before this
+# ! is put in front of a worker. Drafted Hindi is not reviewed Hindi — assume
+# ! it is wrong until someone has said each line to a person and fixed what
+# ! sounded off.
+#
+# ! Nothing in this file may state a threshold, a ₹ amount or a verdict. Those
+# ! come from data/schemes/*.toml, authored with a source_url. A scheme fact
+# ! that appears here would be a fact with no citation — the exact failure this
+# ! project is built to avoid.
+#
+# * Placeholders in {braces} are filled by sathi/render/templates.py. Keep them
+# * spelled exactly as they are or the render raises at startup, not at runtime
+# * in front of a worker.
+# * \n is a real line break. Keep sentences short — many users hear this as
+# * audio, not text.
+
+# =====================================================================
+[language]
+# =====================================================================
+# * Asked before anything else, and in both languages, because a worker who
+# * cannot read the question cannot answer it.
+ask = """नमस्ते / Hello 🙏
+अपनी भाषा चुनें — Choose your language"""
+hindi = "हिंदी"
+english = "English"
+changed = "भाषा हिंदी कर दी गई है।"
+
+# =====================================================================
+[consent]
+# =====================================================================
+ask = """नमस्ते! मैं योजना साथी हूँ।
+मैं आपसे कुछ आसान सवाल पूछूँगा और बताऊँगा कि सरकार की कौन सी योजनाएँ आपको मिल सकती हैं।
+
+आपका नाम, फ़ोन नंबर या आधार नंबर मैं नहीं पूछूँगा और न ही रखूँगा।
+सिर्फ़ गिनती के लिए यह रखा जाता है कि किस राज्य से, किस काम के लोग आए — नाम कभी नहीं।
+
+क्या हम शुरू करें?"""
+yes = "हाँ, शुरू करें"
+no = "नहीं"
+declined = "कोई बात नहीं। कुछ भी सहेजा नहीं गया। जब मन हो, /start लिखकर फिर शुरू कर सकते हैं।"
+
+# =====================================================================
+[questions]
+# =====================================================================
+# * Asked in this order. One question at a time — a worker on a slow phone
+# * should never see two questions in one message.
+state = "आप किस राज्य में रहते हैं?"
+state_retry = "यह राज्य मुझे समझ नहीं आया। नीचे दी सूची में से चुनें, या राज्य का नाम फिर लिखें।"
+age = "आपकी उम्र कितनी साल है? (सिर्फ़ अंक लिखें, जैसे 34)"
+age_retry = "उम्र सिर्फ़ अंकों में लिखें, जैसे 34।"
+occupation = "आप क्या काम करते हैं?"
+occupation_free = "अपने शब्दों में लिखें कि आप क्या काम करते हैं।"
+income_band = "महीने की कमाई लगभग कितनी है?"
+land_holding_band = "आपके पास कितनी ज़मीन है?"
+family_size = "घर में कुल कितने लोग हैं?"
+has_bank_account = "क्या आपका बैंक खाता है?"
+is_income_tax_payer = "क्या आप आयकर (इनकम टैक्स) भरते हैं?"
+# * EPFO / ESIC / NPS in one question, because that is how the schemes write
+# * their exclusion: "covered under any statutory social security scheme".
+is_statutory_scheme_member = """क्या आपकी नौकरी में इनमें से कोई कटौती होती है —
+पीएफ (EPFO), ईएसआईसी (ESIC), या एनपीएस (NPS)?"""
+known_schemes = """इनमें से कौन सी योजना आपके पास पहले से है?
+जो-जो पहले से हैं वे चुनें, फिर 'आगे बढ़ें' दबाएँ।"""
+
+# =====================================================================
+[buttons]
+# =====================================================================
+yes = "हाँ"
+no = "नहीं"
+dont_know = "पता नहीं"
+none_of_these = "इनमें से कोई नहीं"
+next = "आगे बढ़ें"
+back = "पीछे"
+other = "कोई और"
+correct = "हाँ, सही है"
+wrong = "नहीं, गलत है"
+show_more = "और दिखाएँ"
+
+# =====================================================================
+[income_bands]
+# =====================================================================
+# * Labels only. Which band a scheme accepts is a scheme rule and lives in
+# * data/schemes/*.toml with its source_url — never here.
+no_income    = "अभी कोई कमाई नहीं"
+upto_5000    = "₹5,000 तक"
+"5001_10000" = "₹5,000 – ₹10,000"
+"10001_15000" = "₹10,000 – ₹15,000"
+"15001_25000" = "₹15,000 – ₹25,000"
+above_25000  = "₹25,000 से ज़्यादा"
+
+# =====================================================================
+[land_bands]
+# =====================================================================
+landless        = "कोई ज़मीन नहीं"
+upto_1_hectare  = "1 हेक्टेयर तक"
+"1_to_2_hectare" = "1 से 2 हेक्टेयर"
+above_2_hectare = "2 हेक्टेयर से ज़्यादा"
+
+# =====================================================================
+[field_labels]
+# =====================================================================
+# * Short names for profile fields, used when telling a worker which answer was
+# * missing. Must cover every field in sathi/core/profile.py — test_render.py
+# * checks that, so a new field cannot ship without a Hindi label.
+state = "राज्य"
+age = "उम्र"
+occupation = "काम"
+income_band = "कमाई"
+land_holding_band = "ज़मीन"
+family_size = "घर के लोग"
+has_bank_account = "बैंक खाता"
+is_income_tax_payer = "आयकर"
+is_statutory_scheme_member = "पीएफ / ईएसआईसी / एनपीएस"
+known_schemes = "पहले से मिली योजनाएँ"
+
+# =====================================================================
+[confirm]
+# =====================================================================
+# ! The hallucination guard on free-text intake. An LLM guess is NEVER written
+# ! to the profile without this confirmation coming back "yes".
+occupation = """आपने कहा: “{said}”
+मैं इसे “{label}” में दर्ज कर रहा हूँ। सही है?"""
+rejected = "ठीक है, कोई बात नहीं। नीचे दी सूची में से चुनें।"
+
+# =====================================================================
+[result]
+# =====================================================================
+evaluating = "एक मिनट रुकिए, मैं देख रहा हूँ…"
+eligible_header = """आपके लिए {count} योजना(एँ) मिलीं।
+सबसे ऊपर वह है जिसमें सबसे ज़्यादा फ़ायदा है।"""
+scheme_line = """{index}. {name_hi} {new_badge}
+   क्या मिलेगा: {benefit}
+   क्यों मिलेगा: {why}
+   कहाँ जाना है: {where}"""
+new_badge = "🆕 (यह आपके पास अभी नहीं है)"
+value_line = "इनसे आपको साल भर में लगभग {total} रुपये मिल सकते हैं।"
+# ! Insurance is stated separately and never added to the line above. A ₹2 लाख
+# ! cover is money paid only if an accident happens; adding it to a pension
+# ! would tell a worker they are getting lakhs, which is false.
+cover_line = "इसके अलावा {total} रुपये तक का दुर्घटना बीमा भी है — यह रकम तभी मिलती है जब दुर्घटना हो।"
+# ! Used when insurance is the ONLY thing that matched. "इसके अलावा" needs
+# ! something to come after, and with no pension line above it reads as if a
+# ! sentence went missing.
+cover_only_line = "आपको {total} रुपये तक का दुर्घटना बीमा मिल सकता है — यह रकम तभी मिलती है जब दुर्घटना हो।"
+# ! Honest labelling, kept in the product and not only in the README: this is
+# ! entitlement we surfaced, not money anyone has received.
+value_caveat = "यह वह रकम है जिसके आप हक़दार हो सकते हैं — यह पैसा अभी मिला नहीं है। मिलने के लिए आवेदन करना होगा।"
+
+unknown_header = """{count} योजना(एँ) ऐसी हैं जिनके बारे में मैं पक्का नहीं कह सकता।
+मैं अंदाज़ा नहीं लगाऊँगा — गलत जानकारी पर आपका दिन और किराया बर्बाद होगा।"""
+unknown_line = """• {name_hi} — जो जानकारी नहीं मिली: {gap}
+   केंद्र पर यह पूछें: “क्या मैं {name_hi} के लिए पात्र हूँ?”"""
+unknown_reason_data = "इस योजना के नियम अभी हमने आधिकारिक स्रोत से जाँचे नहीं हैं"
+unknown_reason_profile = "आपसे यह जानकारी नहीं मिली: {fields}"
+
+ineligible_header = "इस समय ये योजनाएँ आपको नहीं मिलेंगी:"
+ineligible_line = "• {name_hi} — {reason}"
+
+no_match_header = """अभी किसी योजना में आप पूरे नहीं उतरे। यह बात यहीं ख़त्म नहीं होती।"""
+near_miss = "सबसे नज़दीक: {name_hi} — {reason}"
+no_match_footer = """फिर भी अपने नज़दीकी केंद्र पर एक बार बात करें। वहाँ राज्य की अलग योजनाएँ भी होती हैं जो मेरे पास दर्ज नहीं हैं।"""
+
+# =====================================================================
+[documents]
+# =====================================================================
+header = "{name_hi} के लिए ये काग़ज़ चाहिए:"
+line = "• {doc}"
+missing_header = "जो काग़ज़ आपके पास नहीं हैं, उनके बारे में:"
+missing_line = "• {doc} — {how}"
+# ! Generic on purpose. Where a particular document is made is a fact that
+# ! needs a source like any other; until that research exists, the honest
+# ! answer is "ask at the centre", not a confident wrong address.
+# ! Does not name a place. It used to say "ask at the CSC" even for a form the
+# ! document's own name says is handed over at the bank — advice that
+# ! contradicts the line above it. Where each document is actually issued is a
+# ! fact that needs a source, like every other fact here.
+# TODO: per-document guidance, researched and cited, replaces this line.
+how_generic = "यह काग़ज़ कहाँ और कैसे बनेगा, वहाँ जाकर पूछ लें"
+ask_which = "आपके पास इनमें से कौन से काग़ज़ हैं?"
+have_all = "आपके पास ज़रूरी काग़ज़ हैं। अब आवेदन कर सकते हैं।"
+
+# =====================================================================
+[where]
+# =====================================================================
+# * Location labels for paperwork.where_to_apply. Which one applies to a scheme
+# * is a scheme fact and comes from the TOML, not from here.
+csc = "नज़दीकी जन सेवा केंद्र (CSC)"
+bank_branch = "अपने बैंक की शाखा"
+post_office = "नज़दीकी डाकघर"
+eshram_centre = "ई-श्रम केंद्र या CSC"
+online = "ऑनलाइन पोर्टल पर"
+unknown = "नज़दीकी जन सेवा केंद्र (CSC) पर पूछें"
+
+# =====================================================================
+[pack]
+# =====================================================================
+offer = "क्या मैं आपके लिए एक काग़ज़ बना दूँ जिसे आप केंद्र पर दिखा सकें?"
+ready = """यह रहा आपका काग़ज़। इसे फ़ोन में रखें या प्रिंट करा लें।
+इसमें आपका नाम या आधार नहीं है — सिर्फ़ यह लिखा है कि आपको क्या पूछना है और क्या ले जाना है।"""
+title = "योजना साथी — आपकी सूची"
+# * Labels on the printed sheet. They were hardcoded in sathi/pack/pack.py,
+# * which broke this project's own rule that no user-facing string lives in a
+# * .py file — and they stayed Hindi on an English worker's sheet because of it.
+why = "क्यों"
+where = "कहाँ"
+carry = "साथ ले जाएँ"
+generated_on = "बनाया गया: {date}"
+disclaimer = """यह सरकारी काग़ज़ नहीं है। यह सिर्फ़ एक सूची है जिससे केंद्र पर बात करना आसान हो।
+आख़िरी फ़ैसला संबंधित विभाग का होगा।"""
+
+# =====================================================================
+[closing]
+# =====================================================================
+done = """बस इतना ही। शुभकामनाएँ!
+अगर काम न बने तो दोबारा /start लिखें।"""
+followup = "क्या 14 दिन बाद मैं एक बार पूछ सकता हूँ कि काम बना या नहीं?"
+
+# =====================================================================
+[commands]
+# =====================================================================
+# ! /about must keep saying, in plain words, that this is not a government
+# ! service. A worker who believes a bot is the sarkar will trust a wrong
+# ! answer more than they should.
+help = """मैं बताता हूँ कि सरकार की कौन सी योजनाएँ आपको मिल सकती हैं।
+
+/start — शुरू करें, या फिर से शुरू करें
+/language — हिंदी और English के बीच बदलें
+/schemes — मैं कौन सी योजनाएँ देखता हूँ, और उनके नियम कहाँ से लिए हैं
+/privacy — मैं क्या रखता हूँ, और क्या कभी नहीं पूछता
+/about — यह क्या है, और क्या नहीं है
+/clear — इस बातचीत के संदेश मिटाएँ
+/clearall — पिछले 48 घंटे के सारे संदेश मिटाएँ
+/cancel — रोकें और यह सत्र भूल जाएँ
+
+जवाब बटन दबाकर दें। उम्र और राज्य लिखकर भी बता सकते हैं।"""
+about = """योजना साथी असंगठित क्षेत्र के मज़दूरों के लिए एक मुफ़्त, ओपन-सोर्स मददगार है।
+
+यह सरकारी सेवा नहीं है और न ही कोई एजेंट। यह आपकी ओर से कोई आवेदन जमा नहीं करता और कभी पैसे नहीं माँगता।
+
+यह जानकारी सरकार पहले से myScheme.gov.in पर देती है — पर वह अंग्रेज़ी का वेब फ़ॉर्म है, जो मान लेता है कि आप पढ़ सकते हैं और 'हेक्टेयर में ज़मीन' का मतलब जानते हैं। यहाँ वही जानकारी बातचीत की तरह मिलती है, और अंत में एक सूची मिलती है जिसे आप केंद्र पर ले जा सकते हैं।
+
+यहाँ पात्रता तय होती है सरकारी पन्नों से लिए गए पक्के नियमों से — किसी AI के अंदाज़े से नहीं। जो नियम हमने जाँचे नहीं हैं, उनके बारे में हम साफ़ कह देते हैं कि पता नहीं।"""
+privacy = """मैं कभी नहीं पूछता: आपका नाम, फ़ोन नंबर, आधार नंबर। इस पूरे सिस्टम में ये खाने बने ही नहीं हैं, इसलिए ग़लती से भी सहेजे नहीं जा सकते।
+
+क्या रखा जाता है: सिर्फ़ गिनती — राज्य, उम्र का दायरा (जैसे 26-40), काम का प्रकार, और कमाई का दायरा। न ठीक उम्र, न ठीक कमाई, न गाँव।
+
+आपके जवाब सिर्फ़ बातचीत के दौरान याद रहते हैं और सत्र ख़त्म होते ही मिट जाते हैं। हर सत्र को एक बेतरतीब नंबर मिलता है जो आपके टेलीग्राम खाते से जुड़ा नहीं होता — इसलिए आपकी दो बातचीतें आपस में जोड़ी नहीं जा सकतीं।
+
+जो काग़ज़ मैं बनाता हूँ वह आपको भेजा जाता है, हमारे पास कभी सहेजा नहीं जाता।"""
+schemes_header = """मैं ये योजनाएँ देखता हूँ, और इनके नियम यहाँ से लिए गए हैं।
+हर नियम का सरकारी स्रोत है, जिसे आप ख़ुद जाँच सकते हैं:"""
+schemes_line = """• {name} ({code})
+   स्रोत: {url}
+   नियम जाँचे गए: {verified_on}"""
+schemes_unverified = "   ⚠ अभी आधिकारिक स्रोत से जाँचे नहीं गए — इस योजना के लिए मैं “पता नहीं” ही कहूँगा।"
+cancelled = "रोक दिया गया। कुछ भी सहेजा नहीं गया। फिर से शुरू करने के लिए /start भेजें।"
+# ! Telegram only lets a bot delete messages that are less than 48 hours old.
+# ! Saying so plainly is better than silently leaving older ones behind.
+cleared = "{count} संदेश मिटा दिए गए — इस बातचीत के वे संदेश जो मुझे याद थे। पुराने संदेश भी मिटाने हों तो /clearall भेजें।"
+cleared_all = "पिछले 48 घंटे के जितने संदेश मिट सकते थे, मिटा दिए गए। टेलीग्राम 48 घंटे से पुराने संदेश बॉट को मिटाने नहीं देता, इसलिए उससे पुराने संदेश वहीं रहेंगे — उन्हें आप ख़ुद हटा सकते हैं।"
+clear_nothing = "मिटाने के लिए कुछ नहीं मिला।"
+
+# =====================================================================
+[errors]
+# =====================================================================
+# ! An error message must never guess an answer to hide a failure.
+generic = "कुछ गड़बड़ हो गई। कृपया /start लिखकर फिर से शुरू करें।"
+no_schemes_loaded = "अभी योजनाओं की जानकारी तैयार नहीं है। थोड़ी देर बाद कोशिश करें।"
+pick_from_list = "कृपया नीचे दिए विकल्पों में से चुनें।"

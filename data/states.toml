@@ -1,0 +1,261 @@
+# =====================================================================
+# States and union territories — for the `state` profile field
+# =====================================================================
+# * Coarse location only. There is no district and no village field anywhere in
+# * this project, and a state alone cannot re-identify a worker.
+#
+# * A typed answer is matched against label_hi / label_en / aliases by plain
+# * substring — no LLM needed. `common = true` states appear as buttons first
+# * (Uttarakhand and its neighbours: that is where the pilot runs).
+
+[[state]]
+code = "UK"
+label_hi = "उत्तराखंड"
+label_en = "Uttarakhand"
+aliases = ["uttaranchal", "उत्तरांचल"]
+common = true
+
+[[state]]
+code = "UP"
+label_hi = "उत्तर प्रदेश"
+label_en = "Uttar Pradesh"
+aliases = ["up", "यूपी"]
+common = true
+
+[[state]]
+code = "DL"
+label_hi = "दिल्ली"
+label_en = "Delhi"
+aliases = ["ncr", "new delhi"]
+common = true
+
+[[state]]
+code = "HR"
+label_hi = "हरियाणा"
+label_en = "Haryana"
+aliases = []
+common = true
+
+[[state]]
+code = "HP"
+label_hi = "हिमाचल प्रदेश"
+label_en = "Himachal Pradesh"
+aliases = []
+common = true
+
+[[state]]
+code = "BR"
+label_hi = "बिहार"
+label_en = "Bihar"
+aliases = []
+common = true
+
+[[state]]
+code = "PB"
+label_hi = "पंजाब"
+label_en = "Punjab"
+aliases = []
+common = false
+
+[[state]]
+code = "RJ"
+label_hi = "राजस्थान"
+label_en = "Rajasthan"
+aliases = []
+common = false
+
+[[state]]
+code = "MP"
+label_hi = "मध्य प्रदेश"
+label_en = "Madhya Pradesh"
+aliases = []
+common = false
+
+[[state]]
+code = "MH"
+label_hi = "महाराष्ट्र"
+label_en = "Maharashtra"
+aliases = []
+common = false
+
+[[state]]
+code = "GJ"
+label_hi = "गुजरात"
+label_en = "Gujarat"
+aliases = []
+common = false
+
+[[state]]
+code = "WB"
+label_hi = "पश्चिम बंगाल"
+label_en = "West Bengal"
+aliases = ["bengal"]
+common = false
+
+[[state]]
+code = "JH"
+label_hi = "झारखंड"
+label_en = "Jharkhand"
+aliases = []
+common = false
+
+[[state]]
+code = "OD"
+label_hi = "ओडिशा"
+label_en = "Odisha"
+aliases = ["orissa"]
+common = false
+
+[[state]]
+code = "CG"
+label_hi = "छत्तीसगढ़"
+label_en = "Chhattisgarh"
+aliases = []
+common = false
+
+[[state]]
+code = "AS"
+label_hi = "असम"
+label_en = "Assam"
+aliases = []
+common = false
+
+[[state]]
+code = "KA"
+label_hi = "कर्नाटक"
+label_en = "Karnataka"
+aliases = []
+common = false
+
+[[state]]
+code = "TN"
+label_hi = "तमिलनाडु"
+label_en = "Tamil Nadu"
+aliases = []
+common = false
+
+[[state]]
+code = "KL"
+label_hi = "केरल"
+label_en = "Kerala"
+aliases = []
+common = false
+
+[[state]]
+code = "AP"
+label_hi = "आंध्र प्रदेश"
+label_en = "Andhra Pradesh"
+aliases = []
+common = false
+
+[[state]]
+code = "TS"
+label_hi = "तेलंगाना"
+label_en = "Telangana"
+aliases = ["telengana"]
+common = false
+
+[[state]]
+code = "JK"
+label_hi = "जम्मू और कश्मीर"
+label_en = "Jammu and Kashmir"
+aliases = ["j&k"]
+common = false
+
+[[state]]
+code = "GA"
+label_hi = "गोवा"
+label_en = "Goa"
+aliases = []
+common = false
+
+[[state]]
+code = "TR"
+label_hi = "त्रिपुरा"
+label_en = "Tripura"
+aliases = []
+common = false
+
+[[state]]
+code = "ML"
+label_hi = "मेघालय"
+label_en = "Meghalaya"
+aliases = []
+common = false
+
+[[state]]
+code = "MN"
+label_hi = "मणिपुर"
+label_en = "Manipur"
+aliases = []
+common = false
+
+[[state]]
+code = "MZ"
+label_hi = "मिजोरम"
+label_en = "Mizoram"
+aliases = []
+common = false
+
+[[state]]
+code = "NL"
+label_hi = "नागालैंड"
+label_en = "Nagaland"
+aliases = []
+common = false
+
+[[state]]
+code = "AR"
+label_hi = "अरुणाचल प्रदेश"
+label_en = "Arunachal Pradesh"
+aliases = []
+common = false
+
+[[state]]
+code = "SK"
+label_hi = "सिक्किम"
+label_en = "Sikkim"
+aliases = []
+common = false
+
+[[state]]
+code = "CH"
+label_hi = "चंडीगढ़"
+label_en = "Chandigarh"
+aliases = []
+common = false
+
+[[state]]
+code = "PY"
+label_hi = "पुदुचेरी"
+label_en = "Puducherry"
+aliases = ["pondicherry"]
+common = false
+
+[[state]]
+code = "LA"
+label_hi = "लद्दाख"
+label_en = "Ladakh"
+aliases = []
+common = false
+
+[[state]]
+code = "AN"
+label_hi = "अंडमान और निकोबार"
+label_en = "Andaman and Nicobar Islands"
+aliases = ["andaman"]
+common = false
+
+[[state]]
+code = "DN"
+label_hi = "दादरा और नगर हवेली और दमन और दीव"
+label_en = "Dadra and Nagar Haveli and Daman and Diu"
+aliases = ["daman", "diu", "dadra"]
+common = false
+
+[[state]]
+code = "LD"
+label_hi = "लक्षद्वीप"
+label_en = "Lakshadweep"
+aliases = []
+common = false

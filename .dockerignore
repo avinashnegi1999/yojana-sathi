@@ -1,0 +1,14 @@
+# ! Never bake secrets or session data into an image.
+.env
+*.db
+*.db-journal
+packs/
+impact.html
+
+.git/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+docs/
+CLAUDE.md

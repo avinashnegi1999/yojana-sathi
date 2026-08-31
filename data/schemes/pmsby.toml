@@ -1,0 +1,109 @@
+# =====================================================================
+# Pradhan Mantri Suraksha Bima Yojana — scheme rules
+# =====================================================================
+# ! SOURCE: the official scheme rules PDF published by the Department of
+# ! Financial Services on jansuraksha.gov.in, "RULES FOR THE PRADHAN MANTRI
+# ! SURAKSHA BIMA YOJANA (With effect from 1.6.2022)". Every value below is
+# ! quoted from that document; the wording is reproduced in the comments so a
+# ! reviewer can check a line without opening the PDF.
+#
+# ! TRANSCRIBED FROM THE SOURCE ON 2026-08-31 AND NOT YET CHECKED BY A SECOND
+# ! PAIR OF EYES. verified_by says so. Open the source, confirm each value, then
+# ! put your own name in verified_by. Until then, treat this as a draft that
+# ! happens to load.
+#
+# ! Note what is NOT here: no income threshold and no income-tax exclusion. The
+# ! earlier stub file had placeholders for both. The official rules contain
+# ! neither, so they were deleted rather than filled — an unsourced exclusion
+# ! would wrongly turn people away.
+#
+# ? The e-Shram FAQ mentions a variant for workers enrolled via e-Shram ("the
+# ? person should be between 18-59 years to be eligible for PMSBY through
+# ? eSHRAM registration"). That text sits in a commented-out block on their FAQ
+# ? page, so it is NOT encoded here — PMSBY's own rules (18-70) govern. Worth
+# ? confirming with a CSC operator.
+# =====================================================================
+
+# * IDENTITY
+code         = "PMSBY"
+name_en      = "Pradhan Mantri Suraksha Bima Yojana"
+name_hi      = "प्रधानमंत्री सुरक्षा बीमा योजना"
+authority    = "Department of Financial Services, Ministry of Finance"
+official_url = "https://jansuraksha.gov.in/Files/PMSBY/English/Rules.pdf"
+verified_on  = "2026-08-31"
+verified_by  = "unconfirmed — PENDING HUMAN VERIFICATION"
+
+# * WHAT THE WORKER GETS
+[benefit]
+# "Table of Benefits ... a Death — Rs. 2 Lakh"
+annual_value_inr = 200000
+value_basis      = "insurance_cover"
+# "Premium: Rs. 20/- per annum per member."
+premium_inr      = 20
+summary_hi       = "दुर्घटना बीमा। दुर्घटना में मृत्यु या पूरी तरह अपंग होने पर ₹2 लाख, एक आँख या एक हाथ-पैर चले जाने पर ₹1 लाख। सालाना ₹20 आपके बैंक खाते से अपने आप कटते हैं।"
+summary_en       = "Accident insurance. ₹2 lakh for accidental death or total permanent disability, ₹1 lakh for partial. Premium ₹20 a year, auto-debited from the bank or post office account."
+
+# =====================================================================
+# ELIGIBILITY — ALL [[criteria]] must pass.
+# =====================================================================
+
+[[criteria]]
+# "aged between 18 years (completed) and 70 years (age nearer birthday)"
+# ! Both ends inclusive, which is how the engine reads a `between`.
+field      = "age"
+op         = "between"
+value      = [18, 70]
+ask_hi     = "आपकी उम्र कितनी साल है?"
+pass_hi    = "आपकी उम्र 18 से 70 साल के बीच है, जो इस योजना के लिए ज़रूरी है"
+fail_hi    = "यह योजना 18 से 70 साल की उम्र वालों के लिए है। 18 साल के होते ही बैंक जाकर जुड़ सकते हैं।"
+ask_en     = "How old are you?"
+pass_en    = "You are between 18 and 70, which this scheme requires."
+fail_en    = "This scheme is for people aged 18 to 70. You can join at your bank the moment you turn 18."
+source_url = "https://jansuraksha.gov.in/Files/PMSBY/English/Rules.pdf"
+
+[[criteria]]
+# "All individual bank/ Post office account holders ... will be entitled to join"
+field      = "has_bank_account"
+op         = "eq"
+value      = true
+ask_hi     = "क्या आपका बैंक या डाकघर में खाता है?"
+pass_hi    = "आपका बैंक खाता है, इसी से यह बीमा जुड़ता है"
+fail_hi    = "इसके लिए बैंक या डाकघर में खाता चाहिए। जन धन खाता किसी भी बैंक शाखा में मुफ़्त खुल जाता है, फिर यह बीमा उसी से जुड़ जाएगा।"
+ask_en     = "Do you have a bank or post office account?"
+pass_en    = "You have a bank account, which is what the cover attaches to."
+fail_en    = "You need a bank or post office account for this. A Jan Dhan account opens free at any bank branch, and the cover attaches to it."
+source_url = "https://jansuraksha.gov.in/Files/PMSBY/English/Rules.pdf"
+
+# =====================================================================
+# EXCLUSIONS
+# =====================================================================
+# ! None. The official rules place no income, occupation or tax bar on PMSBY —
+# ! any bank/post office account holder in the age band may join. The rules do
+# ! limit cover to ONE account per person and terminate cover at 70 or on
+# ! account closure, but neither is an eligibility question we can ask a worker,
+# ! so neither is encoded. Both are stated in summary_hi instead.
+
+# =====================================================================
+# PAPERWORK
+# =====================================================================
+[paperwork]
+# "Enrolment form / Auto-debit authorization in the prescribed proforma shall be
+#  obtained and retained by the participating bank/ Post office."
+# "Aadhar would be the primary KYC for the bank/ Post office account."
+# ! Document names are deliberately worded the SAME across all three scheme
+# ! files. Each source names the same papers differently ("Aadhar card" here,
+# ! "Aadhaar Number" on e-Shram); showing a worker eight near-identical
+# ! buttons is a real cost for no accuracy gain. The post-office option is
+# ! kept in summary_hi instead of in the document name.
+documents      = ["आधार कार्ड", "बैंक पासबुक", "नामांकन एवं ऑटो-डेबिट सहमति फॉर्म (बैंक में मिलेगा)"]
+# ! Same order as `documents`. The flow tracks "do you have it?" by position, so
+# ! the loader ignores an English list of a different length rather than pairing
+# ! an answer with the wrong paper.
+documents_en   = ["Aadhaar card", "Bank passbook", "Enrolment and auto-debit consent form (available at the bank)"]
+# ? Post office also enrols. The field takes one value, so it names the bank —
+# ? the branch a worker already has an account with is the shorter trip.
+where_to_apply = "bank_branch"
+# "one-year cover ... 1st June to 31st May ... option to join / pay by auto-debit
+#  ... required to be given by 31st May of every year"
+renewal        = "हर साल 1 जून से 31 मई तक। खाते में पैसे रहें तो ऑटो-डेबिट से अपने आप चलता रहता है।"
+renewal_en     = "Yearly, 1 June to 31 May. It renews itself by auto-debit as long as the account has the balance."

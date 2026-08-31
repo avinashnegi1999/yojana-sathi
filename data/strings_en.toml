@@ -1,0 +1,230 @@
+# =====================================================================
+# Every user-facing string, in English
+# =====================================================================
+# ! This file must contain EVERY key that data/strings_hi.toml contains.
+# ! sathi/core/content.py asserts that, because a half-translated screen is
+# ! worse than either language on its own. A key missing here silently falls
+# ! back to Hindi at runtime, and the test is what stops that shipping.
+#
+# ! Same rule as the Hindi file: nothing here may state a threshold, a ₹ amount
+# ! or a verdict. Those live in data/schemes/*.toml with a source_url.
+#
+# * English is here for two real readers: younger workers who read English
+# * faster than Devanagari, and the CSC operator or NGO volunteer running this
+# * on someone else's behalf. Hindi remains the default.
+
+# =====================================================================
+[language]
+# =====================================================================
+ask = """नमस्ते / Hello 🙏
+अपनी भाषा चुनें — Choose your language"""
+hindi = "हिंदी"
+english = "English"
+changed = "Language set to English."
+
+# =====================================================================
+[consent]
+# =====================================================================
+ask = """Hello! I am Yojana Sathi.
+
+I will ask you a few simple questions and tell you which government schemes you may be entitled to.
+
+I will not ask for your name, phone number or Aadhaar number, and I do not store them.
+Only counts are kept — which state, which kind of work — never a name.
+
+Shall we begin?"""
+yes = "Yes, let's start"
+no = "No"
+declined = "That's alright. Nothing has been saved. Send /start whenever you want to begin."
+
+# =====================================================================
+[questions]
+# =====================================================================
+state = "Which state do you live in?"
+state_retry = "I could not recognise that state. Pick one below, or type the name again."
+age = "How old are you? (numbers only, e.g. 34)"
+age_retry = "Please write your age in numbers, e.g. 34."
+occupation = "What work do you do?"
+occupation_free = "Tell me in your own words what work you do."
+income_band = "Roughly how much do you earn in a month?"
+land_holding_band = "How much land do you have?"
+family_size = "How many people live in your household?"
+has_bank_account = "Do you have a bank account?"
+is_income_tax_payer = "Do you pay income tax?"
+is_statutory_scheme_member = """Does your work deduct any of these —
+PF (EPFO), ESIC, or NPS?"""
+known_schemes = """Which of these do you already have?
+Tap the ones you already hold, then press 'Next'."""
+
+# =====================================================================
+[buttons]
+# =====================================================================
+yes = "Yes"
+no = "No"
+dont_know = "Don't know"
+none_of_these = "None of these"
+next = "Next"
+back = "Back"
+other = "Something else"
+correct = "Yes, that's right"
+wrong = "No, that's wrong"
+show_more = "Show more"
+
+# =====================================================================
+[income_bands]
+# =====================================================================
+no_income    = "No income right now"
+upto_5000    = "Up to ₹5,000"
+"5001_10000" = "₹5,000 – ₹10,000"
+"10001_15000" = "₹10,000 – ₹15,000"
+"15001_25000" = "₹15,000 – ₹25,000"
+above_25000  = "More than ₹25,000"
+
+# =====================================================================
+[land_bands]
+# =====================================================================
+landless        = "No land"
+upto_1_hectare  = "Up to 1 hectare"
+"1_to_2_hectare" = "1 to 2 hectares"
+above_2_hectare = "More than 2 hectares"
+
+# =====================================================================
+[field_labels]
+# =====================================================================
+state = "state"
+age = "age"
+occupation = "work"
+income_band = "income"
+land_holding_band = "land"
+family_size = "household size"
+has_bank_account = "bank account"
+is_income_tax_payer = "income tax"
+is_statutory_scheme_member = "PF / ESIC / NPS"
+known_schemes = "schemes already held"
+
+# =====================================================================
+[confirm]
+# =====================================================================
+occupation = """You said: “{said}”
+I am recording this as “{label}”. Is that right?"""
+rejected = "No problem. Please pick from the list below."
+
+# =====================================================================
+[result]
+# =====================================================================
+evaluating = "One moment, I am checking…"
+eligible_header = """I found {count} scheme(s) for you.
+The one with the largest benefit is at the top."""
+scheme_line = """{index}. {name_hi} {new_badge}
+   What you get: {benefit}
+   Why you qualify: {why}
+   Where to go: {where}"""
+new_badge = "🆕 (you do not have this yet)"
+value_line = "These could be worth about ₹{total} to you in a year."
+cover_line = "On top of that there is accident insurance of up to ₹{total} — that amount is paid only if an accident happens."
+cover_only_line = "You can get accident insurance of up to ₹{total} — that amount is paid only if an accident happens."
+value_caveat = "This is what you may be entitled to — the money has not been paid yet. You have to apply for it."
+
+unknown_header = """There are {count} scheme(s) I cannot be sure about.
+I will not guess — a wrong answer costs you a day's wages and the fare."""
+unknown_line = """• {name_hi} — what I could not check: {gap}
+   Ask this at the centre: “Am I eligible for {name_hi}?”"""
+unknown_reason_data = "we have not yet checked this scheme's rules against an official source"
+unknown_reason_profile = "you did not tell me: {fields}"
+
+ineligible_header = "These schemes will not be available to you right now:"
+ineligible_line = "• {name_hi} — {reason}"
+
+no_match_header = """You did not fully qualify for any scheme right now. That is not the end of it."""
+near_miss = "Closest: {name_hi} — {reason}"
+no_match_footer = """Still, talk to your nearest centre once. States run their own schemes too, and those are not in my list."""
+
+# =====================================================================
+[documents]
+# =====================================================================
+header = "For {name_hi} you need these papers:"
+line = "• {doc}"
+missing_header = "About the papers you do not have:"
+missing_line = "• {doc} — {how}"
+how_generic = "ask where and how to get this when you go"
+ask_which = "Which of these papers do you already have?"
+have_all = "You have the papers you need. You can apply now."
+
+# =====================================================================
+[where]
+# =====================================================================
+csc = "your nearest Common Service Centre (CSC)"
+bank_branch = "your bank branch"
+post_office = "your nearest post office"
+eshram_centre = "an e-Shram centre or CSC"
+online = "on the online portal"
+unknown = "ask at your nearest Common Service Centre (CSC)"
+
+# =====================================================================
+[pack]
+# =====================================================================
+offer = "Shall I make you a sheet you can show at the centre?"
+ready = """Here is your sheet. Keep it on your phone or get it printed.
+It has no name and no Aadhaar on it — only what to ask for and what to carry."""
+title = "Yojana Sathi — your list"
+why = "Why"
+where = "Where"
+carry = "Take with you"
+generated_on = "Generated: {date}"
+disclaimer = """This is not a government document. It is only a list to make the conversation at the centre easier.
+The final decision rests with the concerned department."""
+
+# =====================================================================
+[closing]
+# =====================================================================
+done = """That's all. Good luck!
+If it does not work out, send /start again."""
+followup = "May I ask you once in 14 days whether it worked out?"
+
+# =====================================================================
+[commands]
+# =====================================================================
+help = """I tell you which government schemes you may be entitled to.
+
+/start — begin, or start again
+/language — switch between हिंदी and English
+/schemes — which schemes I know, and where their rules come from
+/privacy — what I store, and what I never ask for
+/about — what this is, and what it is not
+/clear — delete this conversation's messages
+/clearall — delete everything from the last 48 hours
+/cancel — stop and forget this session
+
+Answer by tapping the buttons. You can also type your age or your state."""
+about = """Yojana Sathi is a free, open-source helper for workers in the unorganised sector.
+
+It is NOT a government service and NOT an agent. It does not submit any application for you and it never asks for money.
+
+The government already publishes this information on myScheme.gov.in — but that is an English web form that assumes you can read, browse and know what "land holding in hectares" means. This is the same information as a spoken conversation, ending in a list you can carry to a centre.
+
+Eligibility here is decided by fixed rules taken from official government pages, not by an AI guessing. Where we have not checked a rule, we say so instead of guessing."""
+privacy = """What I never ask for: your name, your phone number, your Aadhaar number. Those fields do not exist anywhere in this system, so they cannot be stored by accident.
+
+What is kept: counts only — the state, an age band (like 26-40), the kind of work, and an income band. No exact age, no exact income, no village.
+
+Your answers live in memory only while we talk, and are gone when the session ends. Each session gets a random number that is not linked to your Telegram account, so two visits by you cannot be joined together.
+
+The sheet I make for you is sent to you and never saved on our side."""
+schemes_header = """These are the schemes I check, and where their rules come from.
+Every rule has an official source you can check yourself:"""
+schemes_line = """• {name} ({code})
+   Source: {url}
+   Rules checked on: {verified_on}"""
+schemes_unverified = "   ⚠ Not yet checked against an official source — I will say “I don't know” for this one."
+cancelled = "Stopped. Nothing was saved. Send /start to begin again."
+# ! Telegram only lets a bot delete messages under 48 hours old. Say so.
+cleared = "Deleted {count} message(s) — the ones from this conversation I still had a record of. Send /clearall to also remove older ones."
+cleared_all = "Cleared everything I could reach from the last 48 hours. Telegram does not let a bot delete messages older than that, so anything older stays — you can remove those yourself."
+clear_nothing = "There was nothing to delete."
+
+# =====================================================================
+[errors]
+# =====================================================================
+generic = "Something went wrong. Please send /start to begin again."
+no_schemes_loaded = "Scheme information is not ready yet. Please try again a little later."
+pick_from_list = "Please pick one of the options below."

@@ -1,0 +1,91 @@
+# =====================================================================
+# SCHEME RULE FILE — TEMPLATE
+# =====================================================================
+# ! Every unresearched value is the literal string "TODO", whatever type the
+# ! real value will be. Numbers too: annual_value_inr = "TODO", not 0.
+# ! The loader detects the string; it cannot detect a plausible-looking zero.
+#
+# ! A scheme with any "TODO" left in it still loads, but the rule engine will
+# ! return UNKNOWN for it instead of a verdict. That is correct behaviour, not
+# ! a bug — we would rather say "we could not check this" than send a worker
+# ! on a wasted trip to a CSC on a guessed threshold.
+#
+# ! Only fill a value you found on an official .gov.in source. Never from a
+# ! news article, a coaching site, an aggregator, or a chatbot.
+#
+# * Every source_url must deep-link the page carrying THAT value, not the
+# * site root. A reviewer has to be able to check one line in 30 seconds.
+# =====================================================================
+
+# * IDENTITY
+code         = "TODO"   # short uppercase key, e.g. "PMSBY". Must be unique.
+name_en      = "TODO"
+name_hi      = "TODO"
+authority    = "TODO"   # the ministry or department that actually runs it
+official_url = "TODO"
+verified_on  = "TODO"   # ISO date, e.g. "2026-09-12". Shown to judges as staleness.
+verified_by  = "TODO"   # your name. Someone has to own each number.
+
+# * OPTIONAL: schemes the worker must already hold before this one is possible.
+# * Use scheme codes. Delete the line if there are none.
+# prerequisites = ["ESHRAM"]
+
+# * WHAT THE WORKER GETS
+[benefit]
+annual_value_inr = "TODO"  # ₹ integer. For a cover, the cover amount.
+value_basis      = "TODO"  # annual_payout | insurance_cover | one_time | subsidy
+premium_inr      = "TODO"  # ₹/year the WORKER pays. 0 if free.
+summary_hi       = "TODO"  # 1-2 sentences. No jargon. A worker must understand it.
+summary_en       = "TODO"
+
+# =====================================================================
+# ELIGIBILITY — ALL [[criteria]] must pass. Blocks are asked in this order.
+# =====================================================================
+# field  must be a field on Profile (sathi/core/profile.py) — the loader checks.
+# op     between | in | not_in | lte | gte | eq | exists
+# value  between → [low, high] · in/not_in → list · lte/gte → number · eq → any
+
+[[criteria]]
+field      = "age"
+op         = "between"
+value      = "TODO"    # ! note whether the bounds are inclusive. It matters.
+ask_hi     = "TODO"    # the question as a worker would be asked it
+pass_hi    = "TODO"    # "you qualify because…" — one plain sentence
+fail_hi    = "TODO"    # "you don't qualify because…" + what they can do instead
+source_url = "TODO"
+
+[[criteria]]
+field      = "income_band"
+op         = "in"
+value      = "TODO"    # ? "family income" and "personal income" are different
+                       # ? rules. Record which one the scheme actually says.
+ask_hi     = "TODO"
+pass_hi    = "TODO"
+fail_hi    = "TODO"
+source_url = "TODO"
+
+# =====================================================================
+# EXCLUSIONS — ANY match makes the worker ineligible, with a stated reason.
+# =====================================================================
+# ! Exclusions are where these schemes actually get decided, and where the
+# ! internet is most often wrong. Find the authoritative list.
+
+[[exclusions]]
+field      = "is_income_tax_payer"
+op         = "eq"
+value      = true
+reason_hi  = "TODO"
+source_url = "TODO"
+
+# =====================================================================
+# PAPERWORK
+# =====================================================================
+# ! This is a [table] and it must stay at the bottom. In TOML, a bare key
+# ! written after a [[criteria]] or [[exclusions]] header belongs to THAT
+# ! block, not to the file. Keeping paperwork in its own table makes that
+# ! impossible to get wrong.
+
+[paperwork]
+documents      = ["TODO"]  # exact names as the office asks for them
+where_to_apply = "TODO"    # csc | bank_branch | post_office | eshram_centre | online
+renewal        = "TODO"    # "none" | "annual" | describe it

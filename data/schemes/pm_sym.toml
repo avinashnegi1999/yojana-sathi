@@ -1,0 +1,116 @@
+# =====================================================================
+# Pradhan Mantri Shram Yogi Maandhan (PM-SYM) — scheme rules
+# =====================================================================
+# ! SOURCE: maandhan.in, the official PM-SYM portal run by the Ministry of
+# ! Labour & Employment with CSC e-Governance Services. Two pages:
+# !   FAQs of PM-SYM      (last updated 13 Feb 2023)
+# !   Contribution Chart  (last updated 14 Feb 2023)
+# ! The FAQ wording is quoted in the comments beside each value.
+#
+# ! TRANSCRIBED FROM THE SOURCE ON 2026-08-31 AND NOT YET CHECKED BY A SECOND
+# ! PAIR OF EYES. Confirm each value at the source, then replace verified_by
+# ! with your own name. This is the scheme with the most exclusions, and
+# ! exclusions are where these schemes are actually decided.
+# =====================================================================
+
+# * IDENTITY
+code         = "PM_SYM"
+name_en      = "Pradhan Mantri Shram Yogi Maandhan"
+name_hi      = "प्रधानमंत्री श्रम योगी मानधन"
+authority    = "Ministry of Labour & Employment, Government of India"
+official_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=79&lid=63&page=74"
+verified_on  = "2026-08-31"
+verified_by  = "unconfirmed — PENDING HUMAN VERIFICATION"
+
+# * WHAT THE WORKER GETS
+[benefit]
+# "minimum pension is of Rs. 3000/- per month shall be paid. This pension will
+#  start on attaining the age of 60 years" → 3000 x 12 = 36000 a year.
+# ! This is the pension once it starts at 60, not money in the first year. The
+# ! ₹ metric labels every figure "annual entitlement surfaced", never delivered,
+# ! which is what keeps this honest.
+annual_value_inr = 36000
+value_basis      = "annual_payout"
+# ! Contribution depends on entry age: ₹55/month at 18, ₹200/month at 40, and
+# ! the Central Government matches it 1:1. A single number would be wrong for
+# ! almost every worker, so this field carries the range instead.
+premium_inr      = "₹55 से ₹200 प्रति माह — प्रवेश आयु पर निर्भर (18 साल = ₹55, 40 साल = ₹200)। सरकार उतनी ही राशि अपनी ओर से जमा करती है।"
+summary_hi       = "60 साल की उम्र के बाद हर महीने ₹3,000 पेंशन। आपकी मृत्यु के बाद पति/पत्नी को आधी पेंशन मिलती रहेगी। जितना आप जमा करेंगे, सरकार उतना ही अपनी ओर से जमा करेगी।"
+summary_en       = "A minimum pension of ₹3,000 a month after age 60, with 50% family pension to the spouse. The Government matches the worker's contribution 1:1."
+
+# =====================================================================
+# ELIGIBILITY — ALL [[criteria]] must pass.
+# =====================================================================
+
+[[criteria]]
+# "voluntary and contributory Pension Scheme for Unorganized Workers for entry
+#  age of 18 to 40 years"
+field      = "age"
+op         = "between"
+value      = [18, 40]
+ask_hi     = "आपकी उम्र कितनी साल है?"
+pass_hi    = "आपकी उम्र 18 से 40 साल के बीच है, जो इस पेंशन योजना में जुड़ने के लिए ज़रूरी है"
+fail_hi    = "इस पेंशन योजना में 18 से 40 साल की उम्र में ही जुड़ा जा सकता है। 40 पार कर चुके हैं तो जन सेवा केंद्र पर पूछें कि आपकी उम्र के लिए कौन सी योजना है।"
+ask_en     = "How old are you?"
+pass_en    = "You are between 18 and 40, which is the entry age for this pension."
+fail_en    = "You can only join this pension between 18 and 40. If you are past 40, ask at a Common Service Centre which scheme fits your age."
+source_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=79&lid=63&page=74"
+
+[[criteria]]
+# "with monthly income of Rs.15000 or less" (Q1); Q2 says "less than Rs 15,000".
+# ? The two FAQ answers differ at exactly ₹15,000. Our band 10001_15000 includes
+# ? ₹15,000, i.e. the more generous reading. Anyone sitting exactly on the line
+# ? should confirm at the CSC — worth checking with an operator.
+field      = "income_band"
+op         = "in"
+# ! "no_income" is in the list because zero is less than ₹15,000. Leaving it
+# ! out would silently deny the scheme to the poorest worker who reaches it —
+# ! a band added to the profile must be checked against every scheme's rule,
+# ! not just appended to the menu.
+value      = ["no_income", "upto_5000", "5001_10000", "10001_15000"]
+ask_hi     = "महीने की कमाई लगभग कितनी है?"
+pass_hi    = "आपकी महीने की कमाई ₹15,000 तक है, जो इस योजना के लिए ज़रूरी है"
+fail_hi    = "यह योजना उन्हीं के लिए है जिनकी महीने की कमाई ₹15,000 तक है।"
+ask_en     = "Roughly how much do you earn in a month?"
+pass_en    = "Your monthly income is ₹15,000 or less, which this scheme requires."
+fail_en    = "This scheme is only for workers earning up to ₹15,000 a month."
+source_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=79&lid=63&page=74"
+
+# =====================================================================
+# EXCLUSIONS — ANY match makes the worker ineligible.
+# =====================================================================
+
+[[exclusions]]
+# "any worker who is covered under any statutory Social Security Scheme such as
+#  NPS, ESIC, EPFO ... is not entitled to join the scheme" (Q6)
+field      = "is_statutory_scheme_member"
+op         = "eq"
+value      = true
+reason_hi  = "आप पहले से पीएफ (EPFO), ईएसआईसी या एनपीएस में हैं — ऐसे में यह योजना नहीं मिलती, क्योंकि वहाँ पहले से पेंशन का इंतज़ाम है"
+reason_en  = "You are already covered by EPFO, ESIC or NPS — this scheme is not available to you, because those already provide for a pension."
+source_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=79&lid=63&page=74"
+
+[[exclusions]]
+# "... and an income tax payee is not entitled to join the scheme" (Q6)
+field      = "is_income_tax_payer"
+op         = "eq"
+value      = true
+reason_hi  = "आयकर (इनकम टैक्स) भरने वालों को यह योजना नहीं मिलती"
+reason_en  = "Income tax payers are not eligible for this scheme."
+source_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=79&lid=63&page=74"
+
+# =====================================================================
+# PAPERWORK
+# =====================================================================
+[paperwork]
+# "The beneficiary has to provide Aadhar card, savings bank passbook and a
+#  Self-Certified form along with consent form for auto-debit facility." (Q14)
+# "No separate proof of age or the income has to be given." (Q7)
+documents      = ["आधार कार्ड", "बैंक पासबुक", "स्व-प्रमाणित फॉर्म और ऑटो-डेबिट सहमति फॉर्म (केंद्र पर मिलेगा)"]
+documents_en   = ["Aadhaar card", "Bank passbook", "Self-certified form and auto-debit consent form (available at the centre)"]
+# "First contribution is to be paid in cash at Common Service Centre." (Q8)
+where_to_apply = "csc"
+# "the beneficiary has to pay the prescribed monthly contribution till the age
+#  of 60 years" (Q15) — nothing to renew, but the monthly payment continues.
+renewal        = "कोई नवीनीकरण नहीं। 60 साल की उम्र तक हर महीने की किस्त जमा होती रहेगी।"
+renewal_en     = "Nothing to renew. The monthly contribution continues until you turn 60."

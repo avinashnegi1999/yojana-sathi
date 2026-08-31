@@ -1,0 +1,109 @@
+# =====================================================================
+# Occupation categories — the intake menu, NOT scheme rules
+# =====================================================================
+# * These are the eight pictorial categories a worker picks from, plus a
+# * free-text escape. They are a UI list, so they are safe for me to author.
+#
+# ! A scheme that defines its own occupation list (e.g. "building & other
+# ! construction worker" as the BOCW Act defines it) must map to these codes
+# ! during research — put the mapping in the scheme's [[criteria]] value list,
+# ! never by quietly renaming a code here.
+#
+# keywords_hi / keywords_en are for the NO-LLM path: free text is matched
+# against them by plain substring, then confirmed back to the worker. They are
+# a convenience, never an authority — a match is always confirmed, never
+# recorded silently.
+#
+# ! keywords_en carries ROMANISED HINDI too ("berojgar", "kaam nahi", "gaadi").
+# ! Plenty of people type Hindi in Latin letters, and the first real tester did
+# ! exactly that. It costs nothing here and saves a menu round-trip.
+#
+# * A phrase that matches nothing is no longer a dead end: the flow proposes
+# * "something else" and asks the worker to confirm it, so free text always has
+# * somewhere to go.
+
+[[occupation]]
+code        = "construction"
+label_hi    = "निर्माण मजदूर"
+label_en    = "Construction worker"
+emoji       = "🧱"
+keywords_hi = ["ईंट", "मिस्त्री", "राजमिस्त्री", "बेलदार", "निर्माण", "मकान", "सीमेंट", "मजदूरी", "ईंट", "मिस्त्री"]
+keywords_en = ["mason", "construction", "builder", "brick", "labourer", "mistri", "rajmistri", "beldar", "nirman", "majdoori", "makan", "cement", "site par kaam"]
+
+[[occupation]]
+code        = "agriculture"
+label_hi    = "खेती / खेत मजदूर"
+label_en    = "Farm worker or small farmer"
+emoji       = "🌾"
+keywords_hi = ["खेत", "खेती", "किसान", "फसल", "बुवाई", "कटाई"]
+keywords_en = ["farm", "farmer", "agriculture", "crop", "field", "kheti", "khet", "kisan", "fasal", "khet mazdoor"]
+
+[[occupation]]
+code        = "domestic_work"
+label_hi    = "घरेलू काम"
+label_en    = "Domestic worker"
+emoji       = "🧹"
+keywords_hi = ["घरेलू", "बर्तन", "झाड़ू", "सफाई घर", "खाना बनाना", "मेड"]
+keywords_en = ["domestic", "housemaid", "maid", "cook", "housekeeping", "gharelu", "bartan", "jhadu", "safai ghar", "khana banana", "bai", "kaam wali"]
+
+[[occupation]]
+code        = "street_vendor"
+label_hi    = "रेहड़ी / ठेला / छोटी दुकान"
+label_en    = "Street vendor or small shopkeeper"
+emoji       = "🛒"
+keywords_hi = ["ठेला", "रेहड़ी", "सब्जी", "फेरी", "दुकान", "खोमचा"]
+keywords_en = ["vendor", "hawker", "street", "shop", "cart", "vegetable", "fruit", "selling", "sell ", "stall", "thela", "rehri", "sabzi", "pheri", "dukan", "khomcha"]
+
+[[occupation]]
+code        = "transport"
+label_hi    = "ड्राइवर / परिवहन"
+label_en    = "Driver or transport worker"
+emoji       = "🚚"
+keywords_hi = ["ड्राइवर", "गाड़ी", "ऑटो", "टैक्सी", "ट्रक", "रिक्शा", "डिलीवरी"]
+keywords_en = ["driver", "auto", "taxi", "truck", "rickshaw", "delivery", "gaadi", "gadi", "auto", "taxi", "truck", "rickshaw", "e rickshaw", "delivery boy"]
+
+[[occupation]]
+code        = "manufacturing"
+label_hi    = "फैक्ट्री / कारखाना"
+label_en    = "Factory or workshop worker"
+emoji       = "🏭"
+keywords_hi = ["फैक्ट्री", "कारखाना", "मशीन", "प्लांट", "वर्कशॉप"]
+keywords_en = ["factory", "plant", "machine", "workshop", "industry", "factory", "karkhana", "machine", "plant"]
+
+[[occupation]]
+code        = "sanitation"
+label_hi    = "सफाई कर्मचारी / कचरा बीनना"
+label_en    = "Sanitation or waste work"
+emoji       = "🧼"
+keywords_hi = ["सफाई", "कचरा", "कूड़ा", "नाली", "सीवर"]
+keywords_en = ["sanitation", "waste", "garbage", "sweeper", "sewer", "safai", "kachra", "kooda", "naali", "sewer", "jamadar"]
+
+[[occupation]]
+code        = "home_based"
+label_hi    = "घर से काम / कारीगर"
+label_en    = "Home-based worker or artisan"
+emoji       = "🧵"
+keywords_hi = ["सिलाई", "बुनाई", "कढ़ाई", "बीड़ी", "अगरबत्ती", "हस्तशिल्प", "कारीगर"]
+keywords_en = ["tailor", "weaving", "embroidery", "artisan", "handicraft", "beedi", "silai", "bunai", "kadhai", "beedi", "agarbatti", "karigar", "dastkar"]
+
+# ! Being out of work is an ANSWER, not a missing answer. It was left out of the
+# ! first draft and a real tester hit it in the first five minutes: "i dont do
+# ! any job" had nowhere to go. The schemes we handle do not test occupation at
+# ! all, so someone with no work is screened exactly like anyone else.
+[[occupation]]
+code        = "no_work"
+label_hi    = "अभी कोई काम नहीं है"
+label_en    = "Not working right now"
+emoji       = "🚫"
+keywords_hi = ["काम नहीं", "बेरोज़गार", "बेरोजगार", "कुछ नहीं करता", "खाली", "नौकरी नहीं", "काम नहीं मिलता", "कोई काम नहीं", "बेकार"]
+keywords_en = ["no job", "no work", "unemployed", "jobless", "nothing", "not working", "dont work", "don't work", "dont do any job", "do not do any job", "dont have a job", "no employment", "not employed", "berojgar", "berozgar", "kaam nahi", "koi kaam nahi", "kuch nahi karta", "kuch bhi nahi", "bekar", "ghar par hu", "ghar par rehta"]
+
+# ! "other" is a real answer, not a failure. A worker whose job does not fit
+# ! must still be screened — the schemes we handle are mostly occupation-blind.
+[[occupation]]
+code        = "other"
+label_hi    = "कोई और काम"
+label_en    = "Something else"
+emoji       = "➕"
+keywords_hi = []
+keywords_en = []

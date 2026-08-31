@@ -1,0 +1,16 @@
+[project]
+name = "scheme-sathi"
+version = "0.1.0"
+description = "Vernacular welfare-scheme screening agent for India's unorganised workers"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+
+# * Empty on purpose. Everything so far is standard library: tomllib for the
+# * scheme rules, sqlite3 for the event log, urllib for Telegram. A dependency
+# * gets added only when the stdlib genuinely cannot do the job, and the reason
+# * goes in the comment next to it.
+dependencies = []
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"

@@ -1,0 +1,14 @@
+# ! Never commit these. The event DB and any generated pack contain session data.
+.env
+*.db
+*.db-journal
+packs/
+impact.html
+
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# * Local working notes, not part of the project.
+CLAUDE.md

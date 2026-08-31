@@ -1,0 +1,31 @@
+# * Fixture: an unresearched scheme file, kept so the dashboard's "never
+# * verified" path stays tested now that the real files are filled in.
+# ! Not a real scheme. The code is TEST_STUB so it cannot be mistaken for one.
+code         = "TEST_STUB"
+name_en      = "Unresearched fixture"
+name_hi      = "अनुसंधान-रहित नमूना"
+authority    = "Test"
+official_url = "TODO"
+verified_on  = "TODO"
+verified_by  = "TODO"
+
+[benefit]
+annual_value_inr = "TODO"
+value_basis      = "TODO"
+premium_inr      = "TODO"
+summary_hi       = "TODO"
+summary_en       = "TODO"
+
+[[criteria]]
+field      = "age"
+op         = "between"
+value      = "TODO"
+ask_hi     = "TODO"
+pass_hi    = "TODO"
+fail_hi    = "TODO"
+source_url = "TODO"
+
+[paperwork]
+documents      = ["TODO"]
+where_to_apply = "TODO"
+renewal        = "TODO"

@@ -1,0 +1,121 @@
+# =====================================================================
+# e-Shram registration (NDUW) — scheme rules
+# =====================================================================
+# ! SOURCE: the official FAQ page on eshram.gov.in, Ministry of Labour &
+# ! Employment. Quoted question numbers are from that page.
+#
+# ! TRANSCRIBED FROM THE SOURCE ON 2026-08-31 AND NOT YET CHECKED BY A SECOND
+# ! PAIR OF EYES.
+#
+# ! THE STRUCTURAL QUESTION IS ANSWERED, AND THE ANSWER IS "GATEWAY".
+# ! The FAQ describes e-Shram as "a centralised database of unorganised workers
+# ! ... to facilitate delivery of various social security benefits" (Q13). It
+# ! issues a UAN and a card. It states no payout of its own, so:
+# !   benefit.annual_value_inr = 0
+# !   benefit.value_basis      = "gateway"   ← new basis added for exactly this
+# ! Giving it a ₹ figure would double-count: the accident cover a registrant
+# ! gets IS PMSBY, which is already its own scheme file with its own value.
+# !
+# ! Consequence for the data model: no `prerequisites` concept was added. The
+# ! FAQ does not make e-Shram a precondition for PMSBY or PM-SYM — those have
+# ! their own eligibility — so a prerequisite link would be an invented rule.
+# ! If research later shows a state scheme that does require the UAN first,
+# ! `prerequisites = ["ESHRAM"]` already exists in the loader for it.
+# =====================================================================
+
+# * IDENTITY
+code         = "ESHRAM"
+# * The parenthetical is what it IS, not what it is called. It appears twice in
+# * one sentence on the result screen ("Am I eligible for …?"), so the long form
+# * lives in summary_en instead.
+name_en      = "e-Shram registration"
+name_hi      = "ई-श्रम पंजीकरण"
+authority    = "Ministry of Labour & Employment, Government of India"
+official_url = "https://eshram.gov.in/faqs"
+verified_on  = "2026-08-31"
+verified_by  = "unconfirmed — PENDING HUMAN VERIFICATION"
+
+# * WHAT THE WORKER GETS
+[benefit]
+# ! Zero is CORRECT here and is not a stub. e-Shram carries no payout of its
+# ! own; it is the UAN card that other schemes are delivered through. The
+# ! dashboard's ₹ total is unaffected by it, which is the honest outcome.
+annual_value_inr = 0
+value_basis      = "gateway"
+# "Registration on e-Shram portal is free. Workers are not required to pay any
+#  charges to any registering entity." (Q15)
+premium_inr      = 0
+# "The registered workers under eSHRAM portal, will be enrolled under PMSBY and
+#  premium for the first year will be borne by the Ministry of Labour &
+#  Employment, Government of India" (Q21)
+summary_hi       = "यह पैसा देने वाली योजना नहीं है — यह मज़दूरों का सरकारी पहचान पत्र (UAN) है, जिससे बाकी योजनाएँ आप तक पहुँचती हैं। कार्ड कभी ख़त्म नहीं होता और पंजीकरण मुफ़्त है। पोर्टल के अनुसार पंजीकृत मज़दूरों को प्रधानमंत्री सुरक्षा बीमा योजना में जोड़ा जाता है और पहले साल का प्रीमियम श्रम मंत्रालय भरता है।"
+summary_en       = "Not a payout scheme. It is the unorganised worker's national identity (a UAN card) through which other schemes are delivered. Registration is free and the card does not expire. Per the portal, registrants are enrolled in PMSBY with the first year's premium borne by the Ministry."
+
+# =====================================================================
+# ELIGIBILITY — ALL [[criteria]] must pass.
+# =====================================================================
+
+[[criteria]]
+# "A person aged 16 years or above who is engaged in unorganised work may
+#  register on eShram, subject to the applicable eligibility conditions."
+# ! No upper bound is stated on that page, so none is encoded. The FAQ elsewhere
+# ! says "No action is required merely because the worker turns 60", which reads
+# ! as no upper cut-off. `gte` rather than a made-up `between`.
+field      = "age"
+op         = "gte"
+value      = 16
+ask_hi     = "आपकी उम्र कितनी साल है?"
+pass_hi    = "आपकी उम्र 16 साल या उससे ऊपर है, जो पंजीकरण के लिए ज़रूरी है"
+fail_hi    = "ई-श्रम में 16 साल या उससे ऊपर की उम्र पर ही पंजीकरण होता है।"
+ask_en     = "How old are you?"
+pass_en    = "You are 16 or older, which registration requires."
+fail_en    = "e-Shram registration is only for people aged 16 and above."
+source_url = "https://eshram.gov.in/faqs"
+
+# =====================================================================
+# EXCLUSIONS
+# =====================================================================
+
+[[exclusions]]
+# "There are no income criteria for registering on e-Shram as unorganised
+#  worker. However, the worker should not be an income tax payee." (Q10)
+field      = "is_income_tax_payer"
+op         = "eq"
+value      = true
+reason_hi  = "आयकर (इनकम टैक्स) भरने वाले असंगठित मज़दूर की श्रेणी में नहीं आते, इसलिए ई-श्रम पंजीकरण नहीं होता"
+reason_en  = "Income tax payers are not counted as unorganised workers, so e-Shram registration is not available."
+source_url = "https://eshram.gov.in/faqs"
+
+[[exclusions]]
+# "Any worker who is a home-based worker, self-employed worker or a wage worker
+#  working in the unorganised sector and not a member of ESIC or EPFO, is called
+#  an unorganised worker." (Q3)
+# ? Our single profile field covers EPFO, ESIC *and* NPS in one question, because
+# ? PM-SYM bars all three. e-Shram's own wording names only ESIC and EPFO, so a
+# ? worker who holds NPS but neither of those is excluded here more strictly
+# ? than the FAQ requires. Splitting the field is the fix if that case turns up
+# ? in the field — flagged in sathi/core/profile.py too.
+field      = "is_statutory_scheme_member"
+op         = "eq"
+value      = true
+reason_hi  = "आप पीएफ (EPFO) या ईएसआईसी के सदस्य हैं — ऐसे मज़दूर संगठित क्षेत्र में गिने जाते हैं, इसलिए ई-श्रम पंजीकरण नहीं होता"
+reason_en  = "You are a member of EPFO or ESIC — such workers count as organised sector, so e-Shram registration is not available."
+source_url = "https://eshram.gov.in/faqs"
+
+# =====================================================================
+# PAPERWORK
+# =====================================================================
+[paperwork]
+# "Aadhaar Number; Aadhaar linked Mobile number. Note: If a worker does not have
+#  Aadhaar linked mobile number, he/ she may visit nearest Common Service Centre
+#  (CSC) or State Seva Kendra (SSK) and register through biometric
+#  authentication." (Q12)
+# ! Only what Q12 calls essential. Bank details are captured during
+# ! registration (Q11) but are not listed as a required document, so they are
+# ! not shown as one.
+documents      = ["आधार कार्ड", "आधार से जुड़ा मोबाइल नंबर (न हो तो केंद्र पर अंगूठे से पंजीकरण हो जाता है)"]
+documents_en   = ["Aadhaar card", "Aadhaar-linked mobile number (if you have none, a centre can register you by fingerprint)"]
+where_to_apply = "eshram_centre"
+# "The e-Shram card never expires." (Q16) / "there is no need to renew" (Q17)
+renewal        = "कोई नवीनीकरण नहीं। कार्ड कभी ख़त्म नहीं होता, पर जानकारी बदलने पर अपडेट करा लें।"
+renewal_en     = "Nothing to renew. The card never expires, but update it if your details change."
