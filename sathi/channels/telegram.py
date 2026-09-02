@@ -318,10 +318,18 @@ class TelegramBot:
             answer = cq.get("data", "")
             message_id = cq["message"].get("message_id")
             self._track(chat_id, message_id)
-            # * Stops the client's spinner. Failure here is cosmetic.
+            # ! Stops the client's spinner, and nothing more — so NOTHING here
+            # ! may abort the update. This caught only URLError, but Telegram
+            # ! rejects a stale query with HTTP 400 ("query is too old"), which
+            # ! `_call` raises as TelegramError. That escaped, the whole update
+            # ! was dropped, and a worker's tap did nothing at all.
+            # !
+            # ! Stale queries are routine, not exotic: every restart invalidates
+            # ! the pending ones, and a worker who taps a button on an older
+            # ! message produces one. Seen in the live journal on 2026-09-03.
             try:
                 _call(self.token, "answerCallbackQuery", {"callback_query_id": cq["id"]})
-            except urllib.error.URLError:
+            except (urllib.error.URLError, TelegramError, OSError, ValueError):
                 pass
         elif "message" in update:
             chat_id = str(update["message"]["chat"]["id"])
@@ -548,6 +556,31 @@ def _self_check() -> None:
         deletes.clear()
         reply = bot.clear_chat("42")
         assert not deletes and "कुछ नहीं" in reply.text
+
+        # ! A stale callback query must not take the update down with it. The
+        # ! ack is cosmetic; the worker's button press is not.
+        stale = []
+        prev_call = mod._call
+
+        def _stale_ack(token, method, payload):
+            if method == "answerCallbackQuery":
+                raise TelegramError(
+                    "answerCallbackQuery failed: 400 Bad Request: query is too old "
+                    "and response timeout expired or query ID is invalid"
+                )
+            stale.append((method, payload))
+            return prev_call(token, method, payload)
+
+        mod._call = _stale_ack
+        try:
+            bot.handle_update({
+                "callback_query": {"id": "stale", "data": "lang:hi",
+                                   "message": {"chat": {"id": 77}, "message_id": 3}},
+            })
+        finally:
+            mod._call = prev_call
+        assert any(m == "sendMessage" for m, _ in stale), \
+            "a stale callback ack aborted the update — the worker's tap did nothing"
 
         # ! The retry loop must SLEEP and back off. A revoked token returns a
         # ! 401 instantly, so a delay-free loop pegs a core and floods the log.
