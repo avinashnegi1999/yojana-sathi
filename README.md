@@ -241,6 +241,20 @@ Worth knowing about two of them:
   the channel adapter, and fuzzes the typed questions. It asserts its own
   coverage counters, because a green test that never reached the thing it checks
   is worse than no test.
+- `tests/test_rule_boundaries.py` — asks whether the **answers** are right, not
+  whether the code runs. Each scheme's rules are re-encoded from the official
+  source text, independently of `data/schemes/`, and compared against the engine
+  across every combination of the fields any rule touches — ~10,000 verdicts,
+  plus every named threshold one per line. Pressing every button cannot find a
+  wrong threshold; a wrong threshold renders a perfectly well-formed screen.
+
+## How this was built
+
+[`docs/LESSONS.md`](docs/LESSONS.md) — ten lessons from building it, including
+the ones that cost something.
+[`docs/BUILD_LOG.md`](docs/BUILD_LOG.md) — the unedited version: every bug, the
+headline numbers that turned out to be wrong, what is still open, and what I
+would do differently.
 
 ## Add a scheme
 
