@@ -30,7 +30,7 @@ class ReasonCode(Enum):
     CRITERION_FAIL = "criterion_fail"
     CRITERION_UNKNOWN = "criterion_unknown"
     EXCLUDED = "excluded"
-    UNVERIFIED_DATA = "unverified_data"  # ! the scheme file still has a TODO
+    UNVERIFIED_DATA = "unverified_data"  # ! unresearched OR not signed off
     BAD_RULE = "bad_rule"  # a scheme-file bug: surfaced, never swallowed
 
 
@@ -97,7 +97,8 @@ def evaluate(profile: Profile, scheme: Scheme) -> Result:
     """Decide one scheme for one worker. Pure function.
 
     Precedence, in order — a definite NO outranks a maybe:
-      1. scheme file still has a TODO   → UNKNOWN, always, no further checking
+      1. scheme not servable            → UNKNOWN, always, no further checking
+         (a "TODO" is left, OR no named human has signed `verified_by`)
       2. any exclusion definitely hits  → INELIGIBLE
       3. any criterion definitely fails → INELIGIBLE
       4. anything undecidable           → UNKNOWN
@@ -107,10 +108,21 @@ def evaluate(profile: Profile, scheme: Scheme) -> Result:
     basis = scheme.benefit.get("value_basis")
     basis = basis if isinstance(basis, str) else ""
 
-    # ! Rule 1. An unresearched scheme never produces a verdict, not even a
-    # ! negative one. "We haven't checked this yet" is the honest output, and it
-    # ! still helps: the worker gets a question to ask at the centre.
-    if scheme.stubs:
+    # ! Rule 1. A scheme nobody has finished never produces a verdict, not even
+    # ! a negative one. "We haven't checked this yet" is the honest output, and
+    # ! it still helps: the worker gets a question to ask at the centre.
+    #
+    # ! Two ways to be unfinished, and BOTH stop here. Values still reading
+    # ! "TODO" is the obvious one. The second — every value filled in but
+    # ! `verified_by` still saying PENDING HUMAN VERIFICATION — used to fall
+    # ! straight through this gate and serve real ELIGIBLE verdicts off
+    # ! transcription nobody had double-checked.
+    if not scheme.is_servable:
+        detail = (
+            ", ".join(scheme.stubs[:5])
+            if scheme.stubs
+            else f"awaiting sign-off: verified_by = {scheme.verified_by!r}"
+        )
         return Result(
             scheme_code=scheme.code,
             verdict=Verdict.UNKNOWN,
@@ -118,7 +130,7 @@ def evaluate(profile: Profile, scheme: Scheme) -> Result:
                 Reason(
                     code=ReasonCode.UNVERIFIED_DATA,
                     field="",
-                    detail=", ".join(scheme.stubs[:5]),
+                    detail=detail,
                 ),
             ),
             missing_fields=(),
@@ -234,6 +246,15 @@ def _self_check() -> None:
     assert evaluate(Profile(age=50), scheme()).verdict is Verdict.INELIGIBLE
     assert evaluate(Profile(), scheme()).verdict is Verdict.UNKNOWN
     assert evaluate(Profile(age=30), scheme(stubs=("benefit.annual_value_inr",))).verdict is Verdict.UNKNOWN
+    # ! Researched but unsigned must be UNKNOWN too. This is the regression that
+    # ! let PENDING-verification schemes serve real verdicts.
+    unsigned = scheme(verified_by="unconfirmed — PENDING HUMAN VERIFICATION")
+    assert not unsigned.stubs, "the point of this case is that there is no TODO"
+    assert evaluate(Profile(age=30), unsigned).verdict is Verdict.UNKNOWN
+    assert evaluate(Profile(age=30), unsigned).unverified
+    assert evaluate(Profile(age=30), unsigned).annual_value_inr == 0
+    assert evaluate(Profile(age=50), unsigned).verdict is Verdict.UNKNOWN, \
+        "an unsigned scheme must not even produce a NO"
     assert evaluate(Profile(age=30), scheme()).annual_value_inr == 12000
     assert evaluate(Profile(age=50), scheme()).annual_value_inr == 0
     print("engine.py OK")

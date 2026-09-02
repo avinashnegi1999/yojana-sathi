@@ -1,14 +1,22 @@
 """Load and validate scheme rule files from data/schemes/*.toml.
 
-# * Two kinds of problem, handled very differently:
-# *   STRUCTURAL  — unknown key, bad operator, a field we never ask about.
-# *                 Raises SchemeError. The app refuses to start.
-# *   UNVERIFIED  — a value still reads "TODO" because nobody has researched it.
-# *                 Loads fine, but the scheme is flagged and the rule engine
-# *                 must return UNKNOWN for it rather than guess.
+# * Three kinds of problem, handled very differently:
+# *   STRUCTURAL   — unknown key, bad operator, a field we never ask about.
+# *                  Raises SchemeError. The app refuses to start.
+# *   UNRESEARCHED — a value still reads "TODO" because nobody looked it up.
+# *                  Loads fine, but the rule engine must return UNKNOWN.
+# *   UNSIGNED     — every value is filled in, but `verified_by` still carries
+# *                  the PENDING marker, so no named human has checked the
+# *                  transcription against the source. Also UNKNOWN.
 #
 # ! That split is the whole anti-hallucination mechanism. A missing threshold
 # ! never becomes a plausible default; it becomes a visible admission.
+#
+# ! The last two used to be one state, and that was a real safety bug: a file
+# ! with no TODO left but `verified_by = "unconfirmed — PENDING HUMAN
+# ! VERIFICATION"` reported as "verified" at startup and served real verdicts,
+# ! which is precisely what the README promises the system will not do.
+# ! Researched is not signed off. See `is_servable`.
 """
 
 import tomllib
@@ -20,6 +28,11 @@ from sathi.core.profile import PROFILE_FIELDS
 # ! Every stub in a scheme file is this exact string, whatever the real type
 # ! would be. `annual_value_inr = "TODO"` is detectable; `= 0` is not.
 STUB = "TODO"
+
+# ! The exact phrase a scheme file carries in `verified_by` until a named human
+# ! has confirmed every value against the official source. Authored by hand in
+# ! each file and asserted by tests/test_schemes.py, so it cannot drift.
+PENDING_MARKER = "PENDING HUMAN VERIFICATION"
 
 OPERATORS = frozenset({"between", "in", "not_in", "lte", "gte", "eq", "exists"})
 
@@ -120,8 +133,33 @@ class Scheme:
     source_path: str = ""
 
     @property
-    def is_verified(self) -> bool:
+    def is_researched(self) -> bool:
+        """No "TODO" left in the file — somebody looked every value up.
+
+        # ! Not sign-off. One person reading a PDF once is still one person
+        # ! reading a PDF once.
+        """
         return not self.stubs
+
+    @property
+    def is_human_verified(self) -> bool:
+        """A named human confirmed every value against the official source.
+
+        # ! `verified_by` is the signature line. While it is blank, still the
+        # ! STUB, or still carries PENDING_MARKER, nobody has signed.
+        """
+        by = self.verified_by.strip()
+        return bool(by) and by != STUB and PENDING_MARKER not in by
+
+    @property
+    def is_servable(self) -> bool:
+        """May the engine return a real verdict for this scheme? Both gates.
+
+        # ! Everything that decides whether a worker is told "yes"/"no" rather
+        # ! than "we don't know yet" routes through this one property, so the
+        # ! two states can never drift apart again.
+        """
+        return self.is_researched and self.is_human_verified
 
     def name(self, lang: str = "hi") -> str:
         return self.name_en if lang == "en" and self.name_en else self.name_hi
@@ -319,3 +357,56 @@ def load_all(directory: Path | str = "data/schemes") -> dict[str, Scheme]:
             raise SchemeError(f"duplicate scheme code {scheme.code!r} in {path.name}")
         schemes[scheme.code] = scheme
     return schemes
+
+
+def _self_check() -> None:
+    """The verification states, which are the safety-critical part of loading.
+
+    # ! This module is the parser every rule passes through and it was the one
+    # ! module missing from check.py's SELF_CHECK_MODULES. Full structural
+    # ! coverage lives in tests/test_schemes.py; this is the smoke test that
+    # ! runs on import from check.py.
+    """
+
+    def scheme(**kw) -> Scheme:
+        base = dict(
+            code="T", name_en="T", name_hi="ट", authority="A", official_url="u",
+            verified_on="2026-09-01", verified_by="avinash",
+            benefit={"annual_value_inr": 1, "value_basis": "annual_payout"},
+            criteria=(), exclusions=(), documents=("x",),
+            where_to_apply="csc", renewal="none",
+        )
+        base.update(kw)
+        return Scheme(**base)
+
+    signed = scheme()
+    assert signed.is_researched and signed.is_human_verified and signed.is_servable
+
+    # ! The regression this module exists to prevent: research finished, nobody
+    # ! signed. Must NOT be servable, however complete the file looks.
+    pending = scheme(verified_by=f"unconfirmed — {PENDING_MARKER}")
+    assert pending.is_researched, "no stubs, so research really is done"
+    assert not pending.is_human_verified and not pending.is_servable
+
+    assert not scheme(verified_by=STUB).is_human_verified
+    assert not scheme(verified_by="   ").is_human_verified
+    assert not scheme(stubs=("benefit.annual_value_inr",)).is_servable
+
+    # * Stub discovery walks nested tables and lists, not just top-level keys.
+    found = _find_stubs({"a": STUB, "b": [{"c": STUB}], "d": 1})
+    assert set(found) == {"a", "b[0].c"}, found
+
+    # * Every shipped scheme file still parses, and says honestly where it is.
+    here = Path(__file__).resolve().parents[2] / "data" / "schemes"
+    if here.is_dir():
+        loaded = load_all(here)
+        assert loaded, "no scheme files loaded"
+        for code, sc in loaded.items():
+            assert sc.criteria, f"{code} has no criteria"
+            if not sc.is_servable:
+                print(f"  note: {code} is not servable yet → served as UNKNOWN")
+    print("schemes.py OK")
+
+
+if __name__ == "__main__":
+    _self_check()

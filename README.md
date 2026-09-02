@@ -14,24 +14,73 @@ Live on Telegram: [@YojanaSathiBot](https://t.me/YojanaSathiBot)
 >
 > **Those values have not yet been confirmed by a second pair of eyes.**
 > `verified_by` in each file says `unconfirmed — PENDING HUMAN VERIFICATION`,
-> and a test keeps that admission in place until a maintainer signs off. A wrong
-> threshold sends someone on a day-long trip that costs them a day's wages, so
-> please do not screen a real worker before that review.
+> and the app enforces that rather than merely admitting it: until a named
+> maintainer signs a file off, the rule engine returns `UNKNOWN` for that
+> scheme to every worker, contributes ₹0 to every number on the dashboard, and
+> says so at startup. A wrong threshold sends someone on a day-long trip that
+> costs them a day's wages, so nothing here will tell a worker "yes" on data
+> nobody has checked twice.
+>
+> The practical consequence today: **every scheme answers "we could not check
+> this yet"**. Sign-off is the last gate before this is useful in the field, and
+> `tests/test_schemes.py` fails the build if that claim and the data disagree.
 
 ---
 
 ## The problem
 
-India's unorganised sector is roughly **44 crore workers** — about **93% of the
-total workforce** — earning around **₹6,688/month** on average. Construction
-labourers, domestic workers, drivers, street vendors, farm labour, shop staff.
+India's unorganised sector is **43.99 crore workers** — the Economic Survey
+2021-22 figure for 2019-20, quoted by the Ministry of Labour & Employment in
+Parliament.[^1] The last full survey to split the workforce found **82.7% of it
+outside the organised sector** — 39.14 crore of 47.41 crore employed persons.[^2]
+Construction labourers, domestic workers, drivers, street vendors, farm labour,
+shop staff.
 
-The welfare infrastructure exists. Over **31.38 crore** unorganised workers are
-registered on e-Shram, with **14 central schemes** integrated (Nov 2025).
+What they earn sets the price of a wasted day. In the Government's own 2025
+labour force survey, a casual labourer earned **₹455 a day if male and ₹315 if
+female**; a self-employed worker earned **₹17,914 a month if male and ₹6,374 if
+female**.[^3]
 
-<!-- TODO: deep-link each figure above to its official source. Every other
-     number in this project carries a citation; these should not be the
-     exception just because they sit in the pitch. -->
+The welfare infrastructure exists. **31.48 crore** unorganised workers were
+registered on e-Shram as on 26 January 2026, with **14 central schemes**
+integrated into it — PMSBY, PMJJBY, PM-SVANidhi, AB-PMJAY, PM-KISAN, ONORC and
+others.[^4] The Ministry reported the count had reached 31.78 crore by 14 July
+2026.[^5]
+
+[^1]: Ministry of Labour & Employment, *Number of Workers In Unorganised Sector*,
+      Lok Sabha written reply, 24 July 2023 — "As per the Economic Survey,
+      2021-22, total number of people working in the unorganised sector is around
+      43.99 crores during 2019-20."
+      <https://www.pib.gov.in/PressReleasePage.aspx?PRID=1942079>
+
+[^2]: Ministry of Labour & Employment, *Workforce in Organised/ Unorganised
+      Sector*, 25 July 2016 — "the number of estimated employed persons in
+      2011-12 on usual status basis were 47.41 crore, of which 82.7% of workforce
+      (39.14 crore persons) was in unorganized sector." NSSO 2011-12 is the last
+      survey to publish this split; the PLFS series that replaced it does not
+      report the same organised/unorganised breakdown, which is why the year is
+      old and stated rather than hidden.
+      <https://www.pib.gov.in/newsite/PrintRelease.aspx?relid=147634&reg=48&lang=2>
+
+[^3]: National Statistical Office, MoSPI, *Press Note on Periodic Labour Force
+      Survey Annual Report, 2025* (January–December 2025), section 6 — casual
+      labour other than public works, ₹455 male / ₹315 female per day;
+      self-employment, ₹17,914 male / ₹6,374 female per month.
+      <https://www.mospi.gov.in/uploads/latestReleases/latest_release_1774607827733_3e8964a9-268b-4cc9-ad65-cfc8a9e32f08_Press_note_AR_PLFS_2025_23032025_V2.1_26032026_final.pdf>
+
+[^4]: Ministry of Labour & Employment, *e-Shram Cards for Unorganized Workers*,
+      2 February 2026 — "As on 26th January 2026, over 31.48 crore unorganised
+      workers have already been registered on eShram portal" and "fourteen (14)
+      schemes of different Central Ministries/ Departments have already been
+      integrated/ mapped with the eShram".
+      <https://www.pib.gov.in/PressReleasePage.aspx?PRID=2222263&reg=3&lang=2>
+
+[^5]: Ministry of Labour & Employment, Lok Sabha written reply, 21 July 2026, as
+      reported by DD News — over 31.78 crore registered as on 14 July 2026, with
+      fifteen central schemes mapped. Cited from the broadcaster because the
+      corresponding PIB release page could not be located; treat the 31.48 crore
+      figure above as the primary one.
+      <https://ddnews.gov.in/en/over-31-78-crore-unorganised-workers-registered-on-e-shram-portal-government/>
 
 ## The gap
 
@@ -40,7 +89,8 @@ It is not eligibility. Workers are already entitled. The blockers are:
 1. They do not know which schemes exist or apply to them.
 2. Rules are scattered, in English, in bureaucratic language.
 3. The paperwork is confusing, and **a failed trip to a Common Service Centre
-   costs a day's wages** — so the second attempt often never happens.
+   costs a day's wages** — ₹455 for a male casual labourer, ₹315 for a female
+   one[^3] — so the second attempt often never happens.
 
 A worker legally entitled to a pension or an accident cover simply never claims it.
 
@@ -180,7 +230,7 @@ Optional, all off by default and all tested in the off state:
 python3 check.py
 ```
 
-15 module self-checks and 5 test files, no framework and nothing to install.
+15 module self-checks and 6 test files, no framework and nothing to install.
 Worth knowing about two of them:
 
 - `tests/test_privacy.py` — the reason the privacy claim above is defensible

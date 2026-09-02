@@ -34,6 +34,14 @@ API = "https://api.telegram.org/bot{token}/{method}"
 _TIMEOUT_S = 65  # must exceed the long-poll timeout below
 _POLL_S = 50
 
+# ! run_forever used to retry with no delay at all. A recoverable blip was fine
+# ! — getUpdates blocks for _POLL_S, so the loop paced itself. A PERMANENT
+# ! error does not block: a revoked token returns 401 immediately, and the loop
+# ! became a hot spin burning a core and writing the same line to the log
+# ! forever. Back off on repeated failure, reset the moment a poll succeeds.
+_BACKOFF_START_S = 1.0
+_BACKOFF_MAX_S = 60.0
+
 # ! Telegram only lets a bot delete a message less than 48 hours old, so /clear
 # ! can never wipe everything. We track ids per chat and cap the list — a
 # ! long-running chat must not grow memory without bound.
@@ -383,13 +391,22 @@ class TelegramBot:
 
     def run_forever(self) -> None:
         print(f"[telegram] polling, {len(self.schemes)} scheme(s) loaded")
+        backoff = _BACKOFF_START_S
         while True:
             try:
                 self.poll_once()
-            except (urllib.error.URLError, TimeoutError, OSError, TelegramError) as e:
-                print(f"[telegram] network hiccup, retrying: {e}")
-            except json.JSONDecodeError as e:
-                print(f"[telegram] bad response, retrying: {e}")
+            except (urllib.error.URLError, TimeoutError, OSError, TelegramError,
+                    json.JSONDecodeError) as e:
+                # ! A wrong token and a dropped Wi-Fi look identical from here,
+                # ! and both are worth retrying — the operator may be fixing the
+                # ! token right now. What is never worth doing is retrying flat
+                # ! out. Say how long we are waiting so a misconfiguration is
+                # ! readable in the log instead of drowning in it.
+                print(f"[telegram] poll failed ({e}) — retrying in {backoff:.0f}s")
+                time.sleep(backoff)
+                backoff = min(backoff * 2, _BACKOFF_MAX_S)
+            else:
+                backoff = _BACKOFF_START_S
 
 
 def _self_check() -> None:
@@ -531,6 +548,31 @@ def _self_check() -> None:
         deletes.clear()
         reply = bot.clear_chat("42")
         assert not deletes and "कुछ नहीं" in reply.text
+
+        # ! The retry loop must SLEEP and back off. A revoked token returns a
+        # ! 401 instantly, so a delay-free loop pegs a core and floods the log.
+        class _Stop(Exception):
+            pass
+
+        slept: list[float] = []
+        attempts = []
+
+        def _always_fails():
+            attempts.append(1)
+            if len(attempts) > 4:
+                raise _Stop
+            raise TelegramError("401 Unauthorized: bot token is invalid")
+
+        real_sleep, bot.poll_once = time.sleep, _always_fails
+        time.sleep = slept.append
+        try:
+            bot.run_forever()
+        except _Stop:
+            pass
+        finally:
+            time.sleep = real_sleep
+            del bot.poll_once
+        assert slept == [1.0, 2.0, 4.0, 8.0], f"backoff did not double: {slept}"
 
         # ! A crash inside one conversation must not escape the poll loop.
         bot.sessions["42"].handle = lambda a: (_ for _ in ()).throw(RuntimeError("boom"))

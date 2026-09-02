@@ -14,6 +14,7 @@
 
 import sys
 import tempfile
+from dataclasses import replace
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -46,7 +47,22 @@ def _has_devanagari(text: str) -> bool:
 def _schemes(directory: Path):
     # ! The real scheme files, not fixtures. A walk over invented data would not
     # ! catch a long scheme name breaking a button or a missing English string.
-    return load_all(ROOT / "data" / "schemes")
+    #
+    # ! Signed for the walk, though. The engine refuses a verdict for any scheme
+    # ! whose `verified_by` still says PENDING HUMAN VERIFICATION, which is
+    # ! correct in production and useless here: every worker would come out
+    # ! UNKNOWN and the whole eligible-result half of the conversation — the
+    # ! result screen, the document checklist, the application pack — would stop
+    # ! being reachable, so this walk would silently stop covering it.
+    # !
+    # ! Only the signature is faked. Every threshold, name, string and document
+    # ! list is the shipped one. tests/test_schemes.py asserts separately that
+    # ! the shipped files are still honestly marked as unsigned.
+    real = load_all(ROOT / "data" / "schemes")
+    return {
+        code: replace(sc, verified_by="test-signature (tests/test_all_paths.py)")
+        for code, sc in real.items()
+    }
 
 
 # ! Counters, because a test that never reached the thing it checks is the trap

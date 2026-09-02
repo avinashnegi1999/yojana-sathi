@@ -1,0 +1,40 @@
+# =====================================================================
+# The same gate as `python3 check.py`, on every push and pull request.
+# =====================================================================
+# ! Deliberately not a matrix and not a cache. The project has zero third-party
+# ! dependencies, so there is nothing to install and nothing to cache — a build
+# ! that needs 40 lines of setup is a build that can fail for reasons unrelated
+# ! to the code. If this ever needs a `pip install`, something has gone wrong.
+
+name: checks
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          # ! Match the Dockerfile. tomllib needs 3.11+, and drifting from the
+          # ! image means CI green tells you nothing about what deploys.
+          python-version: '3.12'
+
+      # ! Self-checks AND every test file. Same command a maintainer runs
+      # ! locally, so a red build is always reproducible in one line.
+      - name: python3 check.py
+        run: python3 check.py
+
+      # ! The image runs check.py during build, so this proves the container
+      # ! that would actually ship still passes on a clean machine.
+      - name: docker build
+        run: docker build -t scheme-sathi:ci .

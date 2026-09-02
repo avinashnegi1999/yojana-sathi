@@ -24,13 +24,22 @@ from sathi.render import audio, llm
 def startup_report(schemes: dict) -> None:
     """Say out loud what is verified and what is not, every single start."""
     print(f"schemes loaded: {len(schemes)}")
+    servable = 0
     for code, sc in schemes.items():
+        # ! Not warnings to be silenced. Anything printed here as UNKNOWN is
+        # ! served to workers as UNKNOWN — that is the whole point.
         if sc.stubs:
-            # ! Not a warning to be silenced. These schemes are served as
-            # ! UNKNOWN, which is the whole point of the stub mechanism.
             print(f"  {code}: {len(sc.stubs)} unresearched value(s) → served as UNKNOWN")
+        elif not sc.is_human_verified:
+            # ! Never print "verified" off a file that says PENDING. The word
+            # ! used to appear here for exactly the schemes the README told
+            # ! people not to trust.
+            print(f"  {code}: PENDING HUMAN VERIFICATION → served as UNKNOWN")
         else:
-            print(f"  {code}: verified {sc.verified_on}")
+            servable += 1
+            print(f"  {code}: verified {sc.verified_on} by {sc.verified_by}")
+    if servable == 0:
+        print("  ! no scheme is signed off yet — every worker gets UNKNOWN for all of them.")
     print(f"LLM: {'on' if llm.is_available() else 'off (buttons + templated Hindi)'}")
     print(f"TTS: {'on' if audio.is_available() else 'off (text only)'}")
 

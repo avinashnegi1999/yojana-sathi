@@ -1,0 +1,69 @@
+# =====================================================================
+# Scheme Sathi — systemd unit
+# =====================================================================
+# ! This ONE file runs the bot identically on the Azure VM and on a laptop.
+# ! Nothing in it is Azure-specific, which is the point: start it locally
+# ! today, move to the VM when it exists, change nothing.
+#
+# ! No Docker. The bot has zero third-party dependencies, so a container
+# ! daemon would buy reproducibility we already have from the stdlib.
+#
+# Install (as root on the VM):
+#   cp sathi.service /etc/systemd/system/
+#   systemctl daemon-reload
+#   systemctl enable --now sathi
+#
+# Logs:  journalctl -u sathi -f
+# Stop:  systemctl stop sathi
+
+[Unit]
+Description=Scheme Sathi — welfare scheme screening bot (Telegram)
+Documentation=https://github.com/avinashnegi1999/yojana-sathi
+# * Long polling makes outbound calls only, so it needs the network up but
+# * no listening socket and no reverse proxy.
+After=network-online.target
+Wants=network-online.target
+
+# ! These two are [Unit] keys, not [Service] keys. Put in [Service] they are
+# ! silently ignored and the crash-loop limit below does not exist.
+StartLimitIntervalSec=300
+StartLimitBurst=10
+
+[Service]
+Type=simple
+User=sathi
+Group=sathi
+WorkingDirectory=/opt/sathi
+
+# ! Secrets live here, mode 0600, owned by the sathi user. Never in the unit
+# ! file — `systemctl show` prints Environment= lines to any user.
+EnvironmentFile=/etc/sathi/sathi.env
+
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 -m sathi.main --telegram
+
+# ! Telegram long polling drops connections routinely. Always restart, and
+# ! rate-limit so a genuine crash loop does not hammer their API.
+Restart=always
+RestartSec=10
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=sathi
+
+# * Hardening. The bot reads its data files and writes one SQLite DB; it has
+# * no business anywhere else on the disk.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/sathi
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+
+[Install]
+WantedBy=multi-user.target

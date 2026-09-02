@@ -171,6 +171,12 @@ def provenance(schemes_dir: str | Path = "data/schemes", today: date | None = No
             "verified_on": sc.verified_on,
             "age_days": age_days,
             "stubs": len(sc.stubs),
+            # ! Signed off by a named human, which is a different question from
+            # ! "has no TODO left". The dashboard has to show both or it
+            # ! overstates how much of the data is trustworthy.
+            "human_verified": sc.is_human_verified,
+            "verified_by": sc.verified_by,
+            "servable": sc.is_servable,
             "url": sc.official_url,
         })
     return out
@@ -256,7 +262,7 @@ def render(conn: sqlite3.Connection, since: str = "",
     n = numbers(conn, since)
     today = today or date.today()
     prov = provenance(schemes_dir, today)
-    unverified = [p for p in prov if p["stubs"]]
+    unverified = [p for p in prov if not p["servable"]]
     split = value_split(conn, schemes_dir, since)
 
     cards = [
@@ -306,20 +312,33 @@ def render(conn: sqlite3.Connection, since: str = "",
                  + "</section>")
 
     parts.append("<section><h2>Data provenance</h2><table>"
-                 "<tr><th>Scheme</th><th>Verified on</th><th>Age</th><th>Unverified values</th></tr>")
+                 "<tr><th>Scheme</th><th>Checked on</th><th>Age</th>"
+                 "<th>Unresearched values</th><th>Signed off by</th></tr>")
     for p in prov:
         age = "never verified" if p["age_days"] is None else f"{p['age_days']} days"
-        cls = " class='warn'" if p["stubs"] or p["age_days"] is None else ""
+        cls = " class='warn'" if not p["servable"] or p["age_days"] is None else ""
+        # * "0 unresearched values" and "nobody signed it" are both true of
+        # * every scheme today, and the row has to say so without contradicting
+        # * itself. The signature column is the one that gates the verdict.
+        signed = _e(p["verified_by"]) if p["human_verified"] else "— pending"
         parts.append(
             f"<tr{cls}><td>{_e(p['code'])}</td><td>{_e(p['verified_on'])}</td>"
-            f"<td>{_e(age)}</td><td>{p['stubs']}</td></tr>"
+            f"<td>{_e(age)}</td><td>{p['stubs']}</td><td>{signed}</td></tr>"
         )
     parts.append("</table>")
     if unverified:
+        stubbed = len([p for p in unverified if p["stubs"]])
+        unsigned = len([p for p in unverified if not p["stubs"]])
+        detail = []
+        if stubbed:
+            detail.append(f"{stubbed} still carry unresearched values")
+        if unsigned:
+            detail.append(f"{unsigned} are researched but awaiting human sign-off")
         parts.append(
-            f"<div class='note'><b>{len(unverified)} scheme(s) still carry unresearched "
-            f"values.</b> Those schemes are served to workers as “we could not check this”, "
-            f"never as a verdict, and they contribute ₹0 to every number above.</div>"
+            f"<div class='note'><b>{len(unverified)} scheme(s) are not yet servable "
+            f"({', '.join(detail)}).</b> Those schemes are served to workers as "
+            f"“we could not check this”, never as a verdict, and they contribute "
+            f"₹0 to every number above.</div>"
         )
     parts.append("</section>")
 

@@ -18,8 +18,10 @@
 import json
 import os
 import re
+import time
 import urllib.error
 import urllib.request
+from collections import deque
 
 from sathi.core.content import occupation_codes, occupations
 
@@ -27,6 +29,37 @@ _DEFAULT_URL = "https://api.anthropic.com/v1/messages"
 _DEFAULT_MODEL = "claude-sonnet-5"
 _TIMEOUT_S = 10
 _DIGITS = re.compile(r"\d+")
+
+# ! A public Telegram bot hands the whole internet a button that spends money.
+# ! Nobody has to break the rule engine to hurt us; they can paste a novel into
+# ! the "what work do you do?" box a thousand times. Two guards, both cheap:
+# !   1. a hard character cap on what a worker can send to the model, and
+# !   2. a rolling call budget for the process as a whole.
+# ! Both fail SOFT — over budget means "use the offline keyword matcher", which
+# ! is a fully supported path, never an error a worker sees.
+_MAX_INPUT_CHARS = 200
+_MAX_CALLS_PER_MIN = 30
+_MAX_CALLS_PER_DAY = 2000
+_DAY_S = 24 * 60 * 60
+_calls: deque[float] = deque()
+
+
+def _within_budget() -> bool:
+    """Consume one unit of the rolling call budget. False means fall back.
+
+    # ponytail: one budget for the whole process, not per chat — the bot has no
+    # ponytail: chat id down here and a global cap already stops the bill. Pass
+    # ponytail: a caller key through if one worker starving another matters.
+    """
+    now = time.monotonic()
+    while _calls and now - _calls[0] > _DAY_S:
+        _calls.popleft()
+    if len(_calls) >= _MAX_CALLS_PER_DAY:
+        return False
+    if sum(1 for t in _calls if now - t <= 60.0) >= _MAX_CALLS_PER_MIN:
+        return False
+    _calls.append(now)
+    return True
 
 
 def is_available() -> bool:
@@ -37,6 +70,10 @@ def _ask(system: str, user: str, max_tokens: int = 200) -> str | None:
     """One request. Any failure returns None — a session never dies on the LLM."""
     key = os.environ.get("LLM_API_KEY")
     if not key:
+        return None
+    # ! Budget checked here, at the single choke point, so a new caller cannot
+    # ! forget it. Same reason the whitelist lives in propose_occupation.
+    if not _within_budget():
         return None
     body = json.dumps(
         {
@@ -80,6 +117,9 @@ def propose_occupation(said: str) -> str | None:
     """
     if not said.strip() or not is_available():
         return None
+    # ! Truncate before the wire, not after. An occupation nobody can state in
+    # ! 200 characters is not an occupation; it is somebody testing the bot.
+    said = said.strip()[:_MAX_INPUT_CHARS]
     menu = "\n".join(f"{o.code}: {o.label_en} / {o.label_hi}" for o in occupations())
     reply = _ask(_OCCUPATION_SYSTEM, f"Codes:\n{menu}\n\nWorker said: {said}", max_tokens=20)
     if not reply:
@@ -140,6 +180,32 @@ def _self_check() -> None:
             assert mod.propose_occupation("ईंट") == "construction"
             mod._ask = lambda *a, **k: "brick_layer_9000"
             assert mod.propose_occupation("ईंट") is None, "unknown code must be discarded"
+
+            # ! The cap is on what leaves the process, so check the prompt the
+            # ! model would actually receive, not just the return value.
+            seen = []
+            mod._ask = lambda system, user, **k: seen.append(user) or "construction"
+            assert mod.propose_occupation("क" * 5000) == "construction"
+            assert "क" * (mod._MAX_INPUT_CHARS + 1) not in seen[-1], \
+                "a 5000-char answer reached the model uncut"
+
+            # ! The budget must run out and fail soft, never raise.
+            mod._ask = real
+            saved_calls = list(mod._calls)
+            try:
+                now = time.monotonic()
+                mod._calls.clear()
+                mod._calls.extend([now] * mod._MAX_CALLS_PER_DAY)
+                assert not mod._within_budget(), "daily cap did not bite"
+                mod._calls.clear()
+                mod._calls.extend([now] * mod._MAX_CALLS_PER_MIN)
+                assert not mod._within_budget(), "per-minute cap did not bite"
+                # * Over budget is a fallback, not a crash: no key needed to
+                # * prove it, because _ask returns None before it builds a body.
+                assert mod._ask("s", "u") is None
+            finally:
+                mod._calls.clear()
+                mod._calls.extend(saved_calls)
         finally:
             mod._ask = real
             os.environ.pop("LLM_API_KEY", None)

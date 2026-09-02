@@ -107,11 +107,15 @@ plausible default.
 
 ## Verification
 
-`python3 check.py` runs 14 module self-checks and 4 test files, with no
+`python3 check.py` runs 15 module self-checks and 6 test files, with no
 framework and nothing to install.
 
 - `tests/test_schemes.py` — the loader accepts good files and rejects the
   mistakes a human actually makes while authoring rules.
+- `tests/test_rule_boundaries.py` — asks whether the ANSWERS are right, not
+  just whether the code runs: an independent oracle of each scheme's official
+  rules is compared against the engine across every combination of the fields
+  any rule touches (~10,000 verdicts), plus each named threshold one per line.
 - `tests/test_rules.py` — a table of `(profile, scheme) → verdict`, every
   `UNKNOWN` path, and an assertion that importing `sathi.rules` pulls in no
   LLM module and no HTTP client at all.

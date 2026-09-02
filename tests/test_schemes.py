@@ -10,7 +10,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from sathi.core.schemes import STUB, SchemeError, load_all, load_scheme
+from sathi.core.profile import Profile
+from sathi.core.schemes import (
+    PENDING_MARKER,
+    STUB,
+    SchemeError,
+    load_all,
+    load_scheme,
+)
+from sathi.rules.engine import Verdict, evaluate
 
 GOOD = """
 code         = "TEST"
@@ -58,6 +66,14 @@ def _load(text: str):
         return load_scheme(p)
 
 
+def _unsigned(text: str) -> str:
+    """The same file with its signature taken off — researched, not signed."""
+    return text.replace(
+        'verified_by  = "avinash"',
+        f'verified_by  = "unconfirmed — {PENDING_MARKER}"',
+    )
+
+
 def _rejects(text: str, fragment: str) -> None:
     try:
         _load(text)
@@ -70,7 +86,7 @@ def _rejects(text: str, fragment: str) -> None:
 def test_good_file_loads():
     s = _load(GOOD)
     assert s.code == "TEST"
-    assert s.is_verified, f"no stubs expected, got {s.stubs}"
+    assert s.is_researched, f"no stubs expected, got {s.stubs}"
     assert s.annual_value_inr() == 12000
     assert s.criteria[0].op == "between" and s.criteria[0].value == [18, 40]
     assert s.exclusions[0].reason_hi == "आयकर"
@@ -81,7 +97,7 @@ def test_stub_marks_unverified_but_still_loads():
     # ! The whole anti-hallucination mechanism. An unresearched threshold must
     # ! load and be flagged, never crash and never silently default to a number.
     s = _load(GOOD.replace("value      = [18, 40]", f'value      = "{STUB}"'))
-    assert not s.is_verified
+    assert not s.is_researched
     assert "criteria[0].value" in s.stubs, s.stubs
     # ₹ must stay 0 while unverified, so it can never inflate an impact number
     s2 = _load(GOOD.replace("annual_value_inr = 12000", f'annual_value_inr = "{STUB}"'))
@@ -194,8 +210,73 @@ def test_filled_files_still_admit_they_are_unverified_by_a_human():
     # ! deliberately, not by accident.
     root = Path(__file__).resolve().parent.parent
     for code, s in load_all(root / "data" / "schemes").items():
-        assert "PENDING HUMAN VERIFICATION" in s.verified_by, \
+        assert PENDING_MARKER in s.verified_by, \
             f"{code}: verified_by is {s.verified_by!r} — if a human checked it, remove this test"
+
+
+# =====================================================================
+# THE VERIFICATION GATE
+# =====================================================================
+# ! These are the invariants, not conveniences. The bug they exist to prevent:
+# ! the app once treated "no TODO left" as "verified", so a file reading
+# ! `verified_by = "unconfirmed — PENDING HUMAN VERIFICATION"` printed as
+# ! "verified 2026-08-31" at startup and served real ELIGIBLE verdicts. The
+# ! README told people not to use it on real workers; the runtime did not.
+# ! Never delete a test in this block to make a build pass.
+
+
+def test_researched_is_not_the_same_as_signed_off():
+    s = _load(_unsigned(GOOD))
+    assert s.is_researched, "no TODO left, so research really is complete"
+    assert not s.is_human_verified, "nobody signed it"
+    assert not s.is_servable, "and therefore the engine may not use it"
+
+
+def test_blank_or_stub_signature_is_not_a_signature():
+    # * "TODO" loads — it is the normal state of a half-authored file — but it
+    # * is not a signature, so the scheme stays unservable.
+    assert not _load(GOOD.replace(
+        'verified_by  = "avinash"', f'verified_by  = "{STUB}"')).is_human_verified
+    # * A whitespace-only signature never even loads: the loader treats it as
+    # * the empty string. Checked here so the two layers cannot drift apart.
+    _rejects(GOOD.replace('verified_by  = "avinash"', 'verified_by  = " "'),
+             "expected a non-empty string")
+
+
+def test_unsigned_scheme_never_produces_a_verdict():
+    # ! Not even a NO. "We have not checked this yet" is the only honest answer,
+    # ! and turning a worker away on unchecked data is the expensive mistake.
+    s = _load(_unsigned(GOOD))
+    # ! Two of these are fully answered, so an UNKNOWN here can only come from
+    # ! the gate. Without them the test would pass for the wrong reason.
+    for profile in (Profile(age=30, is_income_tax_payer=False),   # would be ELIGIBLE
+                    Profile(age=99, is_income_tax_payer=True),    # would be INELIGIBLE
+                    Profile()):                                   # genuinely unknown
+        r = evaluate(profile, s)
+        assert r.verdict is Verdict.UNKNOWN, f"{profile} got {r.verdict}"
+        assert r.unverified and r.annual_value_inr == 0
+
+
+def test_signed_scheme_does_produce_a_verdict():
+    # * The gate has to be a gate, not a wall: a signed file still decides.
+    s = _load(GOOD)
+    assert s.is_servable
+    # * GOOD asks two things: age 18-40, and not an income-tax payer. Answer
+    # * both, or the result is UNKNOWN for the ordinary reason and proves nothing.
+    answered = Profile(age=30, is_income_tax_payer=False)
+    assert evaluate(answered, s).verdict is Verdict.ELIGIBLE
+    assert evaluate(Profile(age=55, is_income_tax_payer=False), s).verdict \
+        is Verdict.INELIGIBLE
+
+
+def test_no_shipped_scheme_is_servable_while_sign_off_is_pending():
+    # ! The end-to-end version of the invariant, on the real files. While the
+    # ! test above holds, this one must hold too — every shipped scheme reaches
+    # ! a worker as UNKNOWN. Both flip together on the day someone signs off.
+    root = Path(__file__).resolve().parent.parent
+    for code, s in load_all(root / "data" / "schemes").items():
+        assert not s.is_servable, f"{code} is servable but sign-off is pending"
+        assert evaluate(Profile(age=30), s).verdict is Verdict.UNKNOWN, code
 
 
 def run() -> None:

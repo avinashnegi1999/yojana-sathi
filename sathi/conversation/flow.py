@@ -177,7 +177,10 @@ class Conversation:
             lines.append(self._s("commands.schemes_line", name=sc.name(self.lang),
                                  code=code, url=sc.official_url,
                                  verified_on=sc.verified_on))
-            if sc.stubs:
+            # ! Covers both unfinished states — a leftover TODO and a file
+            # ! nobody has signed off. Gating this on `sc.stubs` alone showed a
+            # ! clean provenance line for schemes served as UNKNOWN.
+            if not sc.is_servable:
                 lines.append(self._s("commands.schemes_unverified"))
         return [Reply(text="\n".join(lines))]
 
@@ -306,10 +309,18 @@ class Conversation:
             return self._on_occupation_free(answer)
         return [self._ask_occupation()]
 
+    # ! A typed answer is the only unbounded thing a worker can put into the
+    # ! system, and it gets echoed straight back on the confirmation screen. A
+    # ! 4000-character paste would blow past Telegram's message limit and the
+    # ! send would fail with a bare 400, killing the session mid-conversation.
+    # ! No real occupation needs more than this.
+    MAX_TYPED_CHARS = 200
+
     def _on_occupation_free(self, answer: str) -> list[Reply]:
         """Free text → a PROPOSAL. Nothing is recorded until the worker agrees."""
         if not answer:
             return [Reply(text=self._s("questions.occupation_free"))]
+        answer = answer[:self.MAX_TYPED_CHARS]
         self._said_occupation = answer
         # * LLM first when a key is set, plain keywords otherwise. Both paths end
         # * at the same confirmation screen — that is what makes the LLM optional.
@@ -533,6 +544,16 @@ def _self_check() -> None:
     c.handle("state:UK")
     c.handle("34")
     assert c.profile.age == 34 and c.profile.state == "UK"
+
+    # ! A pasted essay must not reach the confirmation screen whole — Telegram
+    # ! rejects an oversized message and the session would die on a bare 400.
+    flood = Conversation(schemes)
+    flood.handle(LANG_HI); flood.handle(consent.YES)
+    flood.handle("state:UK"); flood.handle("34")
+    replies = flood.handle("क" * 5000)
+    assert len(flood._said_occupation) <= Conversation.MAX_TYPED_CHARS
+    assert all(len(r.text) < 4096 for r in replies), "a reply exceeded Telegram's limit"
+
     c.handle("occ:construction")
     c.handle("inc:upto_5000")
     c.handle("land:landless")

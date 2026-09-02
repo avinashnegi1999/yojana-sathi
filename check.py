@@ -20,6 +20,10 @@ sys.path.insert(0, str(ROOT))
 # * five things downstream of it.
 SELF_CHECK_MODULES = [
     "sathi.core.profile",
+    # ! The scheme loader was missing from this list for a long time — the one
+    # ! module that decides whether a rule is trustworthy was the one module the
+    # ! build gate never ran. It sits second because everything else reads it.
+    "sathi.core.schemes",
     "sathi.core.content",
     "sathi.rules.operators",
     "sathi.rules.engine",

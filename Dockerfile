@@ -28,5 +28,19 @@ ENV PYTHONUNBUFFERED=1 \
 
 VOLUME ["/data"]
 
+# ! Not root. The bot needs to read the code and write one SQLite file; giving
+# ! it the power to rewrite its own scheme rules buys nothing. /data is chowned
+# ! because the volume is the one thing it must be able to write.
+RUN useradd --create-home --uid 10001 sathi \
+    && mkdir -p /data \
+    && chown -R sathi:sathi /data /app
+USER sathi
+
+# ! Long polling means no port to probe, so health is "can the process still
+# ! load and validate every scheme file?" — which is exactly what breaks when a
+# ! volume goes read-only or a data file is truncated.
+HEALTHCHECK --interval=5m --timeout=30s --start-period=30s --retries=3 \
+    CMD ["python3", "-c", "from sathi.core.schemes import load_all; assert load_all('data/schemes')"]
+
 # * Long polling: no inbound port, no public URL, no TLS termination needed.
 CMD ["python3", "-m", "sathi.main", "--telegram"]
