@@ -58,10 +58,11 @@ land_holding_band = "आपके पास कितनी ज़मीन ह�
 family_size = "घर में कुल कितने लोग हैं?"
 has_bank_account = "क्या आपका बैंक खाता है?"
 is_income_tax_payer = "क्या आप आयकर (इनकम टैक्स) भरते हैं?"
-# * EPFO / ESIC / NPS in one question, because that is how the schemes write
-# * their exclusion: "covered under any statutory social security scheme".
-is_statutory_scheme_member = """क्या आपकी नौकरी में इनमें से कोई कटौती होती है —
-पीएफ (EPFO), ईएसआईसी (ESIC), या एनपीएस (NPS)?"""
+# ! Asked separately, because the schemes disagree. PM-SYM bars EPFO, ESIC and
+# ! NPS; e-Shram's definition of an unorganised worker names only ESIC and EPFO.
+# ! One question for all three made e-Shram stricter than its own source.
+is_epfo_or_esic_member = """क्या आपकी नौकरी में पीएफ (EPFO) या ईएसआईसी (ESIC) कटता है?"""
+is_nps_member = """क्या आप एनपीएस (NPS) पेंशन योजना में शामिल हैं?"""
 known_schemes = """इनमें से कौन सी योजना आपके पास पहले से है?
 जो-जो पहले से हैं वे चुनें, फिर 'आगे बढ़ें' दबाएँ।"""
 
@@ -113,7 +114,8 @@ land_holding_band = "ज़मीन"
 family_size = "घर के लोग"
 has_bank_account = "बैंक खाता"
 is_income_tax_payer = "आयकर"
-is_statutory_scheme_member = "पीएफ / ईएसआईसी / एनपीएस"
+is_epfo_or_esic_member = "पीएफ / ईएसआईसी"
+is_nps_member = "एनपीएस"
 known_schemes = "पहले से मिली योजनाएँ"
 
 # =====================================================================

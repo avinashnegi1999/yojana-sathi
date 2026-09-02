@@ -94,10 +94,10 @@ Every test that passed while those shipped was asserting on message text. The
 bugs were one layer out.
 
 What exists now is a walk that presses every button at every reachable screen in
-both languages — 948 paths — and, separately, a rule-validation test that
+both languages — 954 paths — and, separately, a rule-validation test that
 re-encodes each scheme's rules from the official source text independently of
-the data files and compares that against the engine across ~10,000
-combinations. The two find different things: one finds broken screens, the other
+the data files and compares that against the engine across every combination of
+the fields any rule touches — over 30,000 verdicts. The two find different things: one finds broken screens, the other
 finds wrong answers. Pressing every button can never catch a wrong threshold,
 because a wrong threshold renders a perfectly well-formed screen.
 
@@ -105,7 +105,7 @@ because a wrong threshold renders a perfectly well-formed screen.
 
 When I enforced the verification rule from lesson 4, no scheme could produce a
 verdict, so no worker reached an eligible result, so the application pack was
-never generated. The exhaustive walk quietly dropped from 948 paths to 180 and
+never generated. The exhaustive walk quietly dropped to a fifth of its paths and
 built **zero** packs — while still passing every assertion about the screens it
 did reach.
 

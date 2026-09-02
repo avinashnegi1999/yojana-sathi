@@ -64,9 +64,16 @@ def _oracle(code: str, p: Profile) -> bool | None:
         elif hit:
             excluded = True
 
-    age, income = p.age, p.income_band
-    tax, statutory, bank = (p.is_income_tax_payer, p.is_statutory_scheme_member,
-                            p.has_bank_account)
+    age, income, tax, bank = p.age, p.income_band, p.is_income_tax_payer, p.has_bank_account
+
+    # ! The oracle names the memberships the way each SOURCE names them, not the
+    # ! way the Profile stores them. Until 2026-09-03 both this file and the
+    # ! engine shared one "statutory member" abstraction covering EPFO, ESIC and
+    # ! NPS together — so the sweep could not tell that e-Shram's own wording
+    # ! excludes only EPFO and ESIC. Two implementations only catch a bug when
+    # ! they are free to disagree, and sharing an abstraction removes exactly
+    # ! that freedom. Keep these expressed per-scheme.
+    epfo_or_esic, nps = p.is_epfo_or_esic_member, p.is_nps_member
 
     if code == "PMSBY":
         # jansuraksha.gov.in rules PDF: "aged between 18 years (completed) and 70
@@ -79,14 +86,21 @@ def _oracle(code: str, p: Profile) -> bool | None:
         # a member of EPFO/ESIC/NPS, and not an income-tax payer.
         criterion(None if age is None else 18 <= age <= 40)
         criterion(None if income is None else income in PM_SYM_BANDS)
-        exclusion(statutory)
+        # "covered under any statutory Social Security Scheme such as NPS, ESIC,
+        #  EPFO" — all three bar entry, so either field alone disqualifies.
+        exclusion(epfo_or_esic)
+        exclusion(nps)
         exclusion(tax)
     elif code == "ESHRAM":
         # eshram.gov.in FAQ: 16 and above; an unorganised worker is one who is
         # not an EPFO/ESIC member and not an income-tax payer.
         criterion(None if age is None else age >= 16)
         exclusion(tax)
-        exclusion(statutory)
+        # ! EPFO/ESIC only. The FAQ defines an unorganised worker as one "not a
+        # ! member of ESIC or EPFO" and never mentions NPS, so NPS is absent
+        # ! here on purpose. This asymmetry with PM-SYM above is the whole
+        # ! reason the two fields exist.
+        exclusion(epfo_or_esic)
     else:
         raise AssertionError(f"no oracle for {code} — write one before shipping it")
 
@@ -118,19 +132,20 @@ def test_every_combination_matches_the_official_rules():
 
     checked = 0
     wrong = []
-    for age, income, bank, tax, statutory in itertools.product(
-        AGES, INCOME, TRI, TRI, TRI
+    for age, income, bank, tax, epfo, nps in itertools.product(
+        AGES, INCOME, TRI, TRI, TRI, TRI
     ):
         p = Profile(age=age, income_band=income, has_bank_account=bank,
-                    is_income_tax_payer=tax, is_statutory_scheme_member=statutory)
+                    is_income_tax_payer=tax, is_epfo_or_esic_member=epfo,
+                    is_nps_member=nps)
         for code, scheme in schemes.items():
             got = evaluate(p, scheme).verdict
             want = _expected(code, p)
             checked += 1
             if got is not want:
                 wrong.append(f"{code} age={age} income={income} bank={bank} "
-                             f"tax={tax} statutory={statutory}: got {got.value}, "
-                             f"official rules say {want.value}")
+                             f"tax={tax} epfo_or_esic={epfo} nps={nps}: "
+                             f"got {got.value}, official rules say {want.value}")
     assert not wrong, "\n  " + "\n  ".join(wrong[:20])
     # ! Coverage counter, same reason as test_all_paths: a sweep that swept
     # ! nothing passes silently.
@@ -148,7 +163,8 @@ def test_the_named_boundaries_individually():
 
     def verdict(code, **kw):
         base = dict(income_band="no_income", has_bank_account=True,
-                    is_income_tax_payer=False, is_statutory_scheme_member=False)
+                    is_income_tax_payer=False, is_epfo_or_esic_member=False,
+                    is_nps_member=False)
         base.update(kw)
         return evaluate(Profile(**base), schemes[code]).verdict
 
@@ -160,7 +176,8 @@ def test_the_named_boundaries_individually():
     assert verdict("PMSBY", age=30, has_bank_account=False) is N
     # ! PMSBY has NO tax or EPFO bar. If someone ever adds one, this fails.
     assert verdict("PMSBY", age=30, is_income_tax_payer=True) is E
-    assert verdict("PMSBY", age=30, is_statutory_scheme_member=True) is E
+    assert verdict("PMSBY", age=30, is_epfo_or_esic_member=True) is E
+    assert verdict("PMSBY", age=30, is_nps_member=True) is E
 
     # PM-SYM: 18 to 40 inclusive, ₹15,000 or less, no EPFO/ESIC/NPS, no tax.
     assert verdict("PM_SYM", age=17) is N and verdict("PM_SYM", age=18) is E
@@ -171,12 +188,16 @@ def test_the_named_boundaries_individually():
     # ! precisely because a worker with nothing coming in would not pick
     # ! "up to ₹5,000" — and an earlier list left it out entirely.
     assert verdict("PM_SYM", age=30, income_band="no_income") is E
-    assert verdict("PM_SYM", age=30, is_statutory_scheme_member=True) is N
+    assert verdict("PM_SYM", age=30, is_epfo_or_esic_member=True) is N
+    assert verdict("PM_SYM", age=30, is_nps_member=True) is N
     assert verdict("PM_SYM", age=30, is_income_tax_payer=True) is N
 
     # e-Shram: 16 and above, no EPFO/ESIC, no tax.
     assert verdict("ESHRAM", age=15) is N and verdict("ESHRAM", age=16) is E
-    assert verdict("ESHRAM", age=30, is_statutory_scheme_member=True) is N
+    assert verdict("ESHRAM", age=30, is_epfo_or_esic_member=True) is N
+    # ! NPS alone does NOT bar e-Shram. This single line is the bug that one
+    # ! conflated field made impossible to express, let alone catch.
+    assert verdict("ESHRAM", age=30, is_nps_member=True) is E
     assert verdict("ESHRAM", age=30, is_income_tax_payer=True) is N
 
 
@@ -189,11 +210,13 @@ def test_dont_know_never_becomes_a_no():
     schemes = _signed_schemes()
     for code in ("ESHRAM", "PM_SYM"):
         p = Profile(age=30, income_band="no_income", has_bank_account=True,
-                    is_income_tax_payer=None, is_statutory_scheme_member=False)
+                    is_income_tax_payer=None, is_epfo_or_esic_member=False,
+                    is_nps_member=False)
         assert evaluate(p, schemes[code]).verdict is Verdict.UNKNOWN, code
         p2 = Profile(
             age=30, income_band="no_income", has_bank_account=True,
-            is_income_tax_payer=None, is_statutory_scheme_member=True)
+            is_income_tax_payer=None, is_epfo_or_esic_member=True,
+            is_nps_member=False)
         assert evaluate(p2, schemes[code]).verdict is Verdict.INELIGIBLE, code
 
 
@@ -211,11 +234,49 @@ def test_eshram_has_no_upper_age_limit_yet():
     """
     schemes = _signed_schemes()
     old = Profile(age=70, income_band="no_income", has_bank_account=True,
-                  is_income_tax_payer=False, is_statutory_scheme_member=False)
+                  is_income_tax_payer=False, is_epfo_or_esic_member=False,
+                  is_nps_member=False)
     assert evaluate(old, schemes["ESHRAM"]).verdict is Verdict.ELIGIBLE, (
         "e-Shram now has an upper age bound — settle question A2 in "
         "docs/VERIFICATION.md and update this test deliberately"
     )
+
+
+def test_nps_alone_disqualifies_pm_sym_but_not_eshram():
+    """# ! The pair of cases that one conflated field made inexpressible.
+
+    PM-SYM's source bars "any statutory Social Security Scheme such as NPS,
+    ESIC, EPFO". e-Shram's source defines an unorganised worker as one who is
+    "not a member of ESIC or EPFO" — no mention of NPS anywhere.
+
+    So the two schemes must disagree about a worker who holds NPS and nothing
+    else. Before the split they could not: one field fed both rules, e-Shram
+    inherited PM-SYM's NPS bar, and a worker was turned away from the gateway
+    scheme that every other benefit is delivered through. A wrong NO here is a
+    missed entitlement, which is a correctness failure and not a safe default.
+    """
+    schemes = _signed_schemes()
+
+    def verdicts(**kw):
+        base = dict(age=30, income_band="no_income", has_bank_account=True,
+                    is_income_tax_payer=False)
+        base.update(kw)
+        p = Profile(**base)
+        return {c: evaluate(p, s).verdict for c, s in schemes.items()}
+
+    nps_only = verdicts(is_epfo_or_esic_member=False, is_nps_member=True)
+    assert nps_only["PM_SYM"] is Verdict.INELIGIBLE
+    assert nps_only["ESHRAM"] is Verdict.ELIGIBLE, (
+        "NPS alone must not bar e-Shram — its FAQ names only ESIC and EPFO"
+    )
+
+    epfo_only = verdicts(is_epfo_or_esic_member=True, is_nps_member=False)
+    assert epfo_only["PM_SYM"] is Verdict.INELIGIBLE
+    assert epfo_only["ESHRAM"] is Verdict.INELIGIBLE
+
+    # * PMSBY has no membership bar at all, so it is unmoved by either.
+    assert nps_only["PMSBY"] is Verdict.ELIGIBLE
+    assert epfo_only["PMSBY"] is Verdict.ELIGIBLE
 
 
 def run() -> None:

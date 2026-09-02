@@ -108,7 +108,7 @@ def _fixture_schemes(directory: Path) -> dict:
     return load_all(directory)
 
 
-def _answer_all(convo: Conversation, *, age="30", tax=DK, statutory=NO, known=(),
+def _answer_all(convo: Conversation, *, age="30", tax=DK, epfo=NO, nps=NO, known=(),
                 lang=LANG_HI) -> list:
     """Drive intake with button values only. No typed free text anywhere."""
     convo.start()
@@ -122,7 +122,10 @@ def _answer_all(convo: Conversation, *, age="30", tax=DK, statutory=NO, known=()
     convo.handle("fam:4")
     convo.handle(YES)  # bank account
     convo.handle(tax)
-    convo.handle(statutory)
+    # ! EPFO/ESIC and NPS are separate questions: PM-SYM bars all three, e-Shram
+    # ! only the first two, so one answer cannot serve both schemes.
+    convo.handle(epfo)
+    convo.handle(nps)
     for code in known:
         convo.handle(f"known:{code}")
     return convo.handle(NEXT)
@@ -249,7 +252,8 @@ def test_llm_path_and_button_path_agree():
             with_llm.handle("fam:4")
             with_llm.handle(YES)
             with_llm.handle(NO)   # income tax
-            with_llm.handle(NO)   # EPFO/ESIC/NPS
+            with_llm.handle(NO)   # EPFO/ESIC
+            with_llm.handle(NO)   # NPS
             got = with_llm.handle(NEXT)[0].text
         finally:
             llm._ask = real_ask
@@ -322,7 +326,8 @@ def test_not_working_is_an_answer_not_a_gap():
         convo.handle("occ:no_work")
         assert convo.profile.occupation == "no_work"
         convo.handle("inc:upto_5000"); convo.handle("land:landless"); convo.handle("fam:4")
-        convo.handle(YES); convo.handle(NO); convo.handle(NO)
+        # bank, income tax, EPFO/ESIC, NPS — four questions since the split
+        convo.handle(YES); convo.handle(NO); convo.handle(NO); convo.handle(NO)
         out = convo.handle(NEXT)
         assert "जाँच योजना A" in out[0].text, "being out of work must not block a match"
 
@@ -372,7 +377,8 @@ def test_a_worker_with_no_income_is_still_screened():
         convo.handle("inc:no_income")
         assert convo.profile.income_band == "no_income"
         convo.handle("land:landless"); convo.handle("fam:4")
-        convo.handle(YES); convo.handle(NO); convo.handle(NO)
+        # bank, income tax, EPFO/ESIC, NPS — four questions since the split
+        convo.handle(YES); convo.handle(NO); convo.handle(NO); convo.handle(NO)
         out = convo.handle(NEXT)
         assert "Test Scheme A" in out[0].text
 

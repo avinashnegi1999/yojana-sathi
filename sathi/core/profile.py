@@ -51,14 +51,21 @@ class Profile:
     family_size: int | None = None
     has_bank_account: bool | None = None
     is_income_tax_payer: bool | None = None
-    # ! Added because the researched exclusion lists need it, not speculatively:
-    # ! PM-SYM bars members of NPS, ESIC and EPFO, and e-Shram defines an
-    # ! unorganised worker as someone who is not an ESIC or EPFO member.
-    # ? One field covers all three schemes. A worker who holds NPS but not
-    # ? EPFO/ESIC is therefore also excluded from e-Shram, which is stricter
-    # ? than e-Shram's own wording. Splitting the field is the fix if that case
-    # ? ever shows up in the field — see docs/ARCHITECTURE.md.
-    is_statutory_scheme_member: bool | None = None
+    # ! Two fields, not one, and not three. The schemes do not agree on which
+    # ! memberships disqualify: PM-SYM bars EPFO, ESIC *and* NPS, while
+    # ! e-Shram's definition of an unorganised worker names only ESIC and EPFO.
+    # !
+    # ! These were a single `is_statutory_scheme_member` until 2026-09-03. That
+    # ! conflation silently made e-Shram stricter than its own source: a worker
+    # ! holding NPS alone was told INELIGIBLE for the one scheme that is the
+    # ! gateway to the others. A wrong NO is a missed entitlement, not a safe
+    # ! default.
+    # !
+    # ! Split in two rather than three because no scheme distinguishes EPFO
+    # ! from ESIC, and each extra field is another question a worker has to
+    # ! answer on a phone. Split further only when a scheme actually needs it.
+    is_epfo_or_esic_member: bool | None = None
+    is_nps_member: bool | None = None
     known_schemes: frozenset[str] = frozenset()  # ! drives the headline metric
 
     def age_band(self) -> str | None:
@@ -93,7 +100,10 @@ def _self_check() -> None:
     assert p.is_answered("age") and not p.is_answered("state")
     assert p.is_answered("known_schemes"), "empty known_schemes is a real answer"
     assert "age" in PROFILE_FIELDS and "aadhaar" not in PROFILE_FIELDS
-    assert "is_statutory_scheme_member" in PROFILE_FIELDS
+    assert "is_epfo_or_esic_member" in PROFILE_FIELDS
+    assert "is_nps_member" in PROFILE_FIELDS
+    assert "is_statutory_scheme_member" not in PROFILE_FIELDS, \
+        "the conflated field is gone; a scheme file still naming it must be fixed"
     print("profile.py OK")
 
 

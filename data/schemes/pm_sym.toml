@@ -83,11 +83,23 @@ source_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=79&lid=6
 [[exclusions]]
 # "any worker who is covered under any statutory Social Security Scheme such as
 #  NPS, ESIC, EPFO ... is not entitled to join the scheme" (Q6)
-field      = "is_statutory_scheme_member"
+# ! Two blocks, because the source names three schemes and the profile now
+# ! holds EPFO/ESIC separately from NPS. Either one alone disqualifies, which
+# ! is what "covered under ANY statutory Social Security Scheme" means.
+field      = "is_epfo_or_esic_member"
 op         = "eq"
 value      = true
-reason_hi  = "आप पहले से पीएफ (EPFO), ईएसआईसी या एनपीएस में हैं — ऐसे में यह योजना नहीं मिलती, क्योंकि वहाँ पहले से पेंशन का इंतज़ाम है"
-reason_en  = "You are already covered by EPFO, ESIC or NPS — this scheme is not available to you, because those already provide for a pension."
+reason_hi  = "आप पहले से पीएफ (EPFO) या ईएसआईसी में हैं — ऐसे में यह योजना नहीं मिलती, क्योंकि वहाँ पहले से पेंशन का इंतज़ाम है"
+reason_en  = "You are already covered by EPFO or ESIC — this scheme is not available to you, because those already provide for a pension."
+source_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=79&lid=63&page=74"
+
+[[exclusions]]
+# Same sentence as above; NPS is the third scheme it names.
+field      = "is_nps_member"
+op         = "eq"
+value      = true
+reason_hi  = "आप पहले से एनपीएस (NPS) में हैं — ऐसे में यह योजना नहीं मिलती, क्योंकि वहाँ पहले से पेंशन का इंतज़ाम है"
+reason_en  = "You are already covered by NPS — this scheme is not available to you, because it already provides for a pension."
 source_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=79&lid=63&page=74"
 
 [[exclusions]]

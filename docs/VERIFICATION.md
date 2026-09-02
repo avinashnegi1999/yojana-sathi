@@ -49,17 +49,28 @@ they will not get.
 - [ ] Confirmed 18–70 governs → leave as is
 - [ ] Confirmed 59 cap applies via the e-Shram route → needs a route-dependent rule; tell me
 
-### A3. e-Shram — does NPS alone disqualify?
-**File:** `data/schemes/eshram.toml`, the `is_statutory_scheme_member` exclusion.
-**Problem:** one profile field covers EPFO + ESIC + NPS, because PM-SYM bars all
-three. e-Shram's own Q3 names only ESIC and EPFO. So a worker holding NPS but
-neither of the other two is currently refused e-Shram more strictly than the FAQ
-requires.
-**Judgement:** rare in this population, and erring strict only under-promises. Fix is
-splitting the field.
+### A3. e-Shram — does NPS alone disqualify?  ✅ SETTLED 2026-09-03 — field split
+**File:** `data/schemes/eshram.toml`, now the `is_epfo_or_esic_member` exclusion.
+**Problem was:** one profile field covered EPFO + ESIC + NPS, because PM-SYM bars
+all three. e-Shram's own Q3 names only ESIC and EPFO, so a worker holding NPS and
+neither of the other two was refused e-Shram more strictly than the FAQ requires.
 
-- [ ] Accept as is for now (recommended — under-promising is the safe direction)
-- [ ] Split the field; tell me
+**This worksheet previously recommended accepting it**, on the grounds that
+erring strict only under-promises. That recommendation was wrong and has been
+reversed. e-Shram is the gateway through which the other schemes are delivered,
+so a wrong NO there is a missed entitlement, not a cautious default — and
+"stricter than the source says" is a correctness failure whichever direction it
+points.
+
+**Resolved by splitting** into `is_epfo_or_esic_member` and `is_nps_member` —
+two fields rather than three, because no scheme distinguishes EPFO from ESIC and
+each extra field costs the worker another question. PM-SYM excludes on either;
+e-Shram excludes on the first only. `tests/test_rule_boundaries.py` carries
+`test_nps_alone_disqualifies_pm_sym_but_not_eshram`, which fails if the two are
+ever conflated again.
+
+**Nothing left to decide here** — but the two new exclusions still need their
+source sentences ticked in sections C and D below.
 
 ---
 

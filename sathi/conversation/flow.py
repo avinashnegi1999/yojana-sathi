@@ -41,7 +41,8 @@ class State(Enum):
     FAMILY = "family_size"
     BANK = "has_bank_account"
     TAX = "is_income_tax_payer"
-    STATUTORY = "is_statutory_scheme_member"
+    EPFO_ESIC = "is_epfo_or_esic_member"
+    NPS = "is_nps_member"
     KNOWN_SCHEMES = "known_schemes"
     DOCUMENTS = "documents"
     PACK = "pack"
@@ -143,8 +144,11 @@ class Conversation:
                                       buttons=_yes_no(self.lang)),
             State.TAX: lambda: Reply(text=self._s("questions.is_income_tax_payer"),
                                      buttons=_yes_no(self.lang, with_dont_know=True)),
-            State.STATUTORY: lambda: Reply(
-                text=self._s("questions.is_statutory_scheme_member"),
+            State.EPFO_ESIC: lambda: Reply(
+                text=self._s("questions.is_epfo_or_esic_member"),
+                buttons=_yes_no(self.lang, with_dont_know=True)),
+            State.NPS: lambda: Reply(
+                text=self._s("questions.is_nps_member"),
                 buttons=_yes_no(self.lang, with_dont_know=True)),
             State.KNOWN_SCHEMES: self._ask_known_schemes,
             State.DOCUMENTS: self._ask_documents,
@@ -402,19 +406,35 @@ class Conversation:
             return [
                 Reply(text=self._s("errors.pick_from_list"), buttons=_yes_no(self.lang, with_dont_know=True))
             ]
-        self.state = State.STATUTORY
+        self.state = State.EPFO_ESIC
         return [
-            Reply(text=self._s("questions.is_statutory_scheme_member"),
+            Reply(text=self._s("questions.is_epfo_or_esic_member"),
                   buttons=_yes_no(self.lang, with_dont_know=True))
         ]
 
-    def _on_is_statutory_scheme_member(self, answer: str) -> list[Reply]:
+    # ! Two questions where there used to be one. PM-SYM excludes EPFO, ESIC and
+    # ! NPS alike; e-Shram excludes only EPFO and ESIC. Asking once and applying
+    # ! the answer to both made e-Shram stricter than its own source.
+    def _on_is_epfo_or_esic_member(self, answer: str) -> list[Reply]:
         if answer in (YES, NO):
-            self._set("is_statutory_scheme_member", answer == YES)
+            self._set("is_epfo_or_esic_member", answer == YES)
         elif answer != DK:
             # * Same as the tax question: "don't know" stays unset, and any
             # * scheme that excludes members comes back UNKNOWN rather than a
             # * verdict built on an answer the worker never gave.
+            return [
+                Reply(text=self._s("errors.pick_from_list"), buttons=_yes_no(self.lang, with_dont_know=True))
+            ]
+        self.state = State.NPS
+        return [
+            Reply(text=self._s("questions.is_nps_member"),
+                  buttons=_yes_no(self.lang, with_dont_know=True))
+        ]
+
+    def _on_is_nps_member(self, answer: str) -> list[Reply]:
+        if answer in (YES, NO):
+            self._set("is_nps_member", answer == YES)
+        elif answer != DK:
             return [
                 Reply(text=self._s("errors.pick_from_list"), buttons=_yes_no(self.lang, with_dont_know=True))
             ]
@@ -560,9 +580,11 @@ def _self_check() -> None:
     c.handle("fam:4")
     c.handle(YES)          # bank account
     c.handle(DK)           # income tax: don't know, stays unset
-    c.handle(NO)           # not an EPFO/ESIC/NPS member
+    c.handle(NO)           # not an EPFO/ESIC member
+    c.handle(NO)           # not in NPS either — a separate question since the split
     assert c.profile.is_income_tax_payer is None
-    assert c.profile.is_statutory_scheme_member is False
+    assert c.profile.is_epfo_or_esic_member is False
+    assert c.profile.is_nps_member is False
     out = c.handle(NEXT)   # knows none of them
     assert "योजना-A" in out[0].text and c.state is State.DOCUMENTS
     c.handle("doc:0")

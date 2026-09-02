@@ -90,12 +90,13 @@ source_url = "https://eshram.gov.in/faqs"
 # "Any worker who is a home-based worker, self-employed worker or a wage worker
 #  working in the unorganised sector and not a member of ESIC or EPFO, is called
 #  an unorganised worker." (Q3)
-# ? Our single profile field covers EPFO, ESIC *and* NPS in one question, because
-# ? PM-SYM bars all three. e-Shram's own wording names only ESIC and EPFO, so a
-# ? worker who holds NPS but neither of those is excluded here more strictly
-# ? than the FAQ requires. Splitting the field is the fix if that case turns up
-# ? in the field — flagged in sathi/core/profile.py too.
-field      = "is_statutory_scheme_member"
+# ! ESIC and EPFO only. The FAQ sentence above names exactly those two and does
+# ! NOT mention NPS, so NPS is deliberately absent from this exclusion — a
+# ! worker holding NPS alone still registers for e-Shram. Until 2026-09-03 one
+# ! profile field covered all three and this scheme inherited PM-SYM's NPS bar,
+# ! which turned an eligible worker away from the gateway to every other
+# ! scheme. Do not re-add NPS here without a source sentence that names it.
+field      = "is_epfo_or_esic_member"
 op         = "eq"
 value      = true
 reason_hi  = "आप पीएफ (EPFO) या ईएसआईसी के सदस्य हैं — ऐसे मज़दूर संगठित क्षेत्र में गिने जाते हैं, इसलिए ई-श्रम पंजीकरण नहीं होता"

@@ -149,7 +149,7 @@ The bot went live and I used it as a worker would. Six bugs in one session.
 The pattern is the lesson: my tests all drove one path a human thought of, and
 checked the text of the reply. The bugs were in the buttons and in paths nobody
 had clicked. `tests/test_all_paths.py` exists because of this session — it
-presses every button at every reachable screen in both languages, 948 paths, and
+presses every button at every reachable screen in both languages, 954 paths, and
 asserts its own coverage counters so a walk that never reached a screen fails
 rather than passing quietly.
 
@@ -219,7 +219,7 @@ better product.
 
 Enforcing the gate meant no scheme was servable, so no worker ever reached an
 eligible result, so the application pack was never generated. `test_all_paths.py`
-quietly fell from 948 paths to 180 and produced **zero** packs — it still passed
+quietly fell to a fifth of its paths and produced **zero** packs — it still passed
 every assertion about the screens it did reach.
 
 Its own coverage counter caught it:
@@ -294,13 +294,33 @@ it. Giving it a rupee figure would have double-counted the PMSBY cover it
 unlocks. Added `value_basis = "gateway"` so it can be surfaced as valuable
 without contributing a number.
 
-**One yes/no question covers three different memberships.** PM-SYM excludes
-members of EPFO, ESIC and NPS. e-Shram's definition of an unorganised worker
-excludes EPFO and ESIC but says nothing about NPS. I use a single
-`is_statutory_scheme_member` field, which makes the system *stricter* than
-e-Shram's own wording for a worker who holds NPS alone. That is a deliberate
-choice — under-promising is the safe direction — and it is written down as an
-open question rather than hidden.
+**One yes/no question covered three different memberships — and that was wrong.**
+PM-SYM excludes members of EPFO, ESIC and NPS. e-Shram's definition of an
+unorganised worker excludes EPFO and ESIC but says nothing about NPS. I used a
+single `is_statutory_scheme_member` field for both, which made the system
+stricter than e-Shram's own wording for a worker holding NPS alone.
+
+I wrote that down as a deliberate tradeoff and told myself under-promising was
+the safe direction. It is not. e-Shram is the gateway the other schemes are
+delivered through, so a wrong NO there is a missed entitlement — and "stricter
+than the source says" is a correctness failure whichever way it points. The
+worksheet recommended accepting it; that recommendation was reversed.
+
+Split on 3 September into `is_epfo_or_esic_member` and `is_nps_member`. Two
+fields, not three, because no scheme distinguishes EPFO from ESIC and every
+extra field is another question a worker answers on a phone.
+
+**The part that made this worth catching:** my own boundary test could not have
+found it. The independent oracle had copied the same `statutory = EPFO or ESIC
+or NPS` abstraction from the production model, so both sides of the comparison
+were wrong in the same way and 10,206 verdicts agreed perfectly. An oracle is
+not independent because it lives in another file — it is independent when it is
+free to disagree, which means expressing the rules the way each *source* words
+them rather than the way the code stores them. The oracle now names
+`epfo_or_esic` and `nps` separately per scheme, the sweep is up to 30,618
+verdicts, and `test_nps_alone_disqualifies_pm_sym_but_not_eshram` fails if the
+two are ever merged again. I verified that by reintroducing the bug on purpose
+and watching the test go red.
 
 **A premium is not always a number.** PM-SYM's monthly contribution depends on
 the age you join at: ₹55/month at 18, ₹200/month at 40. The field now accepts a
@@ -349,8 +369,9 @@ settle it — ask a CSC operator.
 **Two other judgement calls need a human, not another web page.** PM-SYM's
 income ceiling is written as both "₹15,000 or less" and "less than ₹15,000" on
 official pages, which changes who qualifies at exactly ₹15,000; the way to
-settle it is to call 14434. And whether NPS alone should disqualify someone
-from e-Shram is a reading of intent, not a fact to look up.
+settle it is to call 14434. (The third one, whether NPS alone should disqualify
+someone from e-Shram, was settled on 3 September by splitting the field — see
+the bugs section above.)
 
 **Nothing is signed off, so nobody real has been screened.** That is the
 blocking item, and it is not a code problem.

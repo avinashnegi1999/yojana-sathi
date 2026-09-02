@@ -115,7 +115,7 @@ framework and nothing to install.
 - `tests/test_rule_boundaries.py` — asks whether the ANSWERS are right, not
   just whether the code runs: an independent oracle of each scheme's official
   rules is compared against the engine across every combination of the fields
-  any rule touches (~10,000 verdicts), plus each named threshold one per line.
+  any rule touches (~30,000 verdicts), plus each named threshold one per line.
 - `tests/test_rules.py` — a table of `(profile, scheme) → verdict`, every
   `UNKNOWN` path, and an assertion that importing `sathi.rules` pulls in no
   LLM module and no HTTP client at all.
@@ -142,10 +142,13 @@ source, not by taste.
 - **No `prerequisites` link was added.** Neither PMSBY nor PM-SYM requires the
   e-Shram UAN in its own rules, so asserting one would be an invented rule. The
   loader already accepts `prerequisites` if a scheme is ever found that needs it.
-- **`Profile.is_statutory_scheme_member`.** PM-SYM bars members of NPS, ESIC and
-  EPFO; e-Shram defines an unorganised worker as someone who is not an ESIC or
-  EPFO member. Neither rule was expressible before, so the field was added — for
-  a researched exclusion, not speculatively.
+- **`Profile.is_epfo_or_esic_member` and `Profile.is_nps_member`.** PM-SYM bars
+  members of NPS, ESIC and EPFO; e-Shram defines an unorganised worker as someone
+  who is not an ESIC or EPFO member, and never mentions NPS. These were one
+  `is_statutory_scheme_member` field until 2026-09-03, which silently gave
+  e-Shram PM-SYM's NPS bar and refused the gateway scheme to a worker who held
+  NPS alone. Two fields, not three: no scheme distinguishes EPFO from ESIC, and
+  every extra field is another question a worker answers on a phone.
 - **`premium_inr` may be a sentence.** PM-SYM's contribution runs ₹55/month at
   entry age 18 to ₹200/month at 40. One integer would be wrong for nearly every
   worker. The field is never summed, only shown, so prose is safe there;

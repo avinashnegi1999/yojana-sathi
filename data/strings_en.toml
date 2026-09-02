@@ -51,8 +51,8 @@ land_holding_band = "How much land do you have?"
 family_size = "How many people live in your household?"
 has_bank_account = "Do you have a bank account?"
 is_income_tax_payer = "Do you pay income tax?"
-is_statutory_scheme_member = """Does your work deduct any of these —
-PF (EPFO), ESIC, or NPS?"""
+is_epfo_or_esic_member = """Does your work deduct PF (EPFO) or ESIC?"""
+is_nps_member = """Are you enrolled in the National Pension System (NPS)?"""
 known_schemes = """Which of these do you already have?
 Tap the ones you already hold, then press 'Next'."""
 
@@ -99,7 +99,8 @@ land_holding_band = "land"
 family_size = "household size"
 has_bank_account = "bank account"
 is_income_tax_payer = "income tax"
-is_statutory_scheme_member = "PF / ESIC / NPS"
+is_epfo_or_esic_member = "PF / ESIC"
+is_nps_member = "NPS"
 known_schemes = "schemes already held"
 
 # =====================================================================

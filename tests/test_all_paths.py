@@ -25,7 +25,9 @@ from sathi.conversation.flow import LANG_EN, LANG_HI, Conversation, State
 from sathi.core.schemes import load_all
 from sathi.metrics.events import EventLog
 
-MAX_DEPTH = 20
+# ! Deepest complete session, plus headroom. Splitting the statutory-membership
+# ! question in two on 2026-09-03 added a step and tripped this at exactly 20.
+MAX_DEPTH = 24
 DEVANAGARI = ("ऀ", "ॿ")
 
 # * States that legitimately show no buttons: they want typed input.
