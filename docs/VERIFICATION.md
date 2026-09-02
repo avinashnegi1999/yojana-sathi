@@ -108,7 +108,8 @@ Source, all rows: **maandhan.in FAQs (last updated 13 Feb 2023)** and the
 | [ ] | 50% family pension in the summary | the FAQ's spouse/family pension answer |
 | [ ] | `premium_inr` range ₹55–₹200/month by entry age | Contribution Chart: ₹55 at 18, ₹200 at 40 |
 | [ ] | Government matches 1:1, stated in the summary | "the Central Government shall give equal matching contribution" |
-| [ ] | exclusion: EPFO / ESIC / NPS member | Q6 "any worker who is covered under any statutory Social Security Scheme such as NPS, ESIC, EPFO … is not entitled to join" |
+| [ ] | exclusion: `is_epfo_or_esic_member` | Q6 "any worker who is covered under any statutory Social Security Scheme such as NPS, ESIC, EPFO … is not entitled to join" |
+| [ ] | exclusion: `is_nps_member` — a **second** block, same sentence | Q6, same sentence: NPS is the third scheme it names. Both blocks must exist; either alone disqualifies |
 | [ ] | exclusion: income tax payer | Q6 "… and an income tax payee is not entitled to join the scheme" |
 | [ ] | `documents` = Aadhaar, passbook, self-certified + auto-debit form | Q14 "The beneficiary has to provide Aadhar card, savings bank passbook and a Self-Certified form along with consent form for auto-debit facility." |
 | [ ] | no separate age or income proof needed | Q7 "No separate proof of age or the income has to be given." |
@@ -128,7 +129,8 @@ Source, all rows: **eshram.gov.in FAQ** <https://eshram.gov.in/faqs>
 | [ ] | `premium_inr = 0` | Q15 "Registration on e-Shram portal is free. Workers are not required to pay any charges to any registering entity." |
 | [ ] | PMSBY first-year premium borne by the Ministry, stated in the summary | Q21 "will be enrolled under PMSBY and premium for the first year will be borne by the Ministry of Labour & Employment" |
 | [ ] | exclusion: income tax payer | Q10 "There are no income criteria … However, the worker should not be an income tax payee." |
-| [ ] | exclusion: ESIC / EPFO member | Q3 "… not a member of ESIC or EPFO, is called an unorganised worker." — **see A3** |
+| [ ] | exclusion: `is_epfo_or_esic_member` | Q3 "… not a member of ESIC or EPFO, is called an unorganised worker." |
+| [ ] | **no NPS exclusion here** — confirm Q3 and the rest of the FAQ nowhere names NPS | absence check. A3 settled 2026-09-03: NPS alone must NOT bar e-Shram. Re-adding it needs a source sentence that names NPS |
 | [ ] | `documents` = Aadhaar + Aadhaar-linked mobile, biometric fallback | Q12 "Aadhaar Number; Aadhaar linked Mobile number. Note: If a worker does not have Aadhaar linked mobile number, he/ she may visit nearest CSC or SSK and register through biometric authentication." |
 | [ ] | card never expires, no renewal | Q16 "The e-Shram card never expires." / Q17 "there is no need to renew" |
 | [ ] | **No e-Shram prerequisite was encoded** for PMSBY or PM-SYM. Confirm the FAQ nowhere makes the UAN a precondition for them | absence check |
