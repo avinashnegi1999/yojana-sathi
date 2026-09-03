@@ -498,3 +498,56 @@ Scheme Sathi promising myself I would not repeat that, and then spent an
 afternoon writing deployment scripts I did not run for two days. The pattern is
 the same each time: shipping feels like a task that needs a clear day, and
 building feels like progress. Only one of them is measured.
+
+
+---
+
+## 3 September 2026 — deployed, and the wrong problem was being solved
+
+The bot had been running on a laptop for three days. Every plan for fixing that
+went through Azure for Students, which was stuck behind academic verification,
+and before that Fly.io, which was stuck behind a card that declines international
+transactions. Two vendors, one wall.
+
+The wall was never the vendor. It was the card. Asking "can we use AWS instead"
+turned out to be the right question for the wrong reason: AWS needs the same
+card, but an account had already been created and carried $120 of credit. Nothing
+about the card was solved. It simply stopped mattering.
+
+`deploy/provision-aws.sh` mirrors the Azure script rather than replacing it:
+imported SSH key so the provider never holds the private half, one address
+allowed on port 22, the current Ubuntu image resolved from Canonical's SSM
+parameter instead of a hardcoded AMI id that rots, encrypted volume, IMDSv2
+required, and a zero-spend budget that stays silent while credit covers the bill
+and mails the day it stops. It refuses to build a second instance if one exists,
+because two pollers on one bot token steal each other's updates.
+
+`install-on-vm.sh` needed **one line** — the key path. Everything else was
+already host-agnostic, which is the payoff for having written the unit file to
+be identical everywhere.
+
+Two bugs, both found by running it rather than reading it. AWS rejects non-ASCII
+in a security group description, so an em dash killed the call. And the budget
+alert email had been hardcoded into a file destined for a public repository.
+
+Verified rather than assumed: the test suite ran **on the instance** before the
+service started, the process holds an established connection to Telegram, the
+event log sits on the persistent volume and passes an integrity check, and the
+machine was rebooted on purpose to watch the bot come back by itself. It did.
+
+### The lesson above, tested
+
+The last entry in this log ends: *"Deploy before you polish — I have now learned
+this twice."* It was written about scripts that had sat unrun for two days.
+
+Deployment took under an hour once it was attempted, and most of that was
+waiting for an instance to boot. The estimate that had kept it parked — that
+shipping needs a clear day — was wrong by an order of magnitude, and it had been
+wrong the entire time it was preventing the work.
+
+What deploying did **not** do is worth stating plainly, because a running service
+is easy to mistake for a finished one. No scheme has a human signature yet, so
+the engine answers `UNKNOWN` to every worker by design. A bot that is up
+continuously and helps nobody is still up continuously. The remaining work is a
+phone call to a scheme helpline and a question to a CSC operator — neither of
+which is code, and neither of which deployment moved an inch.

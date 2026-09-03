@@ -122,8 +122,12 @@ matching, and this project does not try to replace them. Scheme Sathi is
      ! "potential reach". If a number is not in the event log it does not go on
      ! this page. -->
 
-_Not yet deployed. This section stays empty until it can be filled from the
-event log._
+_Running since 3 September 2026 on a single small cloud instance, restarted
+under systemd and verified to survive a reboot. **No numbers yet, and the
+reason is deliberate:** no scheme has been signed off by a human, so the engine
+answers `UNKNOWN` to every worker and the event log contains no eligible
+result to report. This section stays empty until that changes — it will be
+filled from `python3 -m sathi.metrics.report`, not from an estimate._
 
 Two ₹ figures are reported, never one. An annual pension (PM-SYM, ₹36,000/year)
 and an accident cover (PMSBY, ₹2,00,000 paid only on a claim) are different
