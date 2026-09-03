@@ -33,6 +33,10 @@ earning exactly ₹15,000 is told they qualify.
 **Settle it:** ask a CSC operator, or the PM-SYM helpline 14434, which reading they
 apply in practice.
 
+**Re-checked 2026-09-03:** both readings are still live on the page, in these words —
+*"15000 or less."* and *"with monthly income less than Rs 15,000/-."* The contradiction
+is the source's, not a transcription slip, so only the helpline settles it.
+
 - [ ] Confirmed ₹15,000 inclusive → leave as is
 - [ ] Confirmed ₹15,000 exclusive → the band must be split; tell me and I'll do it
 
@@ -45,6 +49,21 @@ text sits in a commented-out block on their page, which is why it was not encode
 **Risk if wrong:** a 65-year-old registering through e-Shram is told they get cover
 they will not get.
 **Settle it:** ask a CSC operator what happens to a 65-year-old enrolling via e-Shram.
+
+**Re-checked 2026-09-03, page re-fetched.** Q40 is *still* inside an unclosed HTML
+comment ending `//-->`, so no visitor sees it — the original note holds, and this
+cannot be settled by reading the page. Two separate facts got conflated and are
+worth keeping apart:
+
+- **e-Shram registration** has no upper age bound in the visible FAQ. *"A person
+  aged 16 years or above … may register on eShram"*, and separately *"What action is
+  required … after attaining the age of 60 years? No action is required merely
+  because the worker turns 60."* The file's `age >= 16` matches what the page shows.
+- **PMSBY via the e-Shram route** is what the hidden Q40 caps at 59. That is a PMSBY
+  question, not an e-Shram one.
+
+So the exposure is narrower than "every worker over 60 gets a wrong answer": a 65-year-old
+is told correctly about e-Shram, and possibly wrongly about PMSBY cover.
 
 - [ ] Confirmed 18–70 governs → leave as is
 - [ ] Confirmed 59 cap applies via the e-Shram route → needs a route-dependent rule; tell me
