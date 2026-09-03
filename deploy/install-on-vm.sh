@@ -2,7 +2,8 @@
 # =====================================================================
 # Scheme Sathi — put the code on the VM and start it
 # =====================================================================
-# Usage:  ./install-on-vm.sh azureuser@<ip>
+# Usage:  ./install-on-vm.sh ubuntu@<ip>        # AWS
+#         ./install-on-vm.sh azureuser@<ip>     # Azure
 #
 # Re-runnable. Running it again is how you deploy an update: it re-syncs
 # the code, keeps the database and the secrets, and restarts the service.
@@ -12,7 +13,7 @@
 set -euo pipefail
 
 TARGET="${1:?usage: install-on-vm.sh user@host}"
-KEY="${KEY:-$HOME/.ssh/sathi_azure}"
+KEY="${KEY:-$([[ -f "$HOME/.ssh/sathi_aws" ]] && echo "$HOME/.ssh/sathi_aws" || echo "$HOME/.ssh/sathi_azure")}"
 SRC="$(cd "$(dirname "$0")/.." && pwd)"
 SSH=(ssh -i "$KEY" -o StrictHostKeyChecking=accept-new "$TARGET")
 
