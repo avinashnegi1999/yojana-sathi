@@ -72,7 +72,8 @@ def build(
     # ! has no such field to leak.
     if recap:
         parts.append(f"<div class='note'><b>{_e(s('pack.your_answers', lang))}</b>"
-                     f"<p>{_e(recap)}</p></div>")
+                     f"<ul>" + "".join(f"<li>{_e(l.lstrip('• '))}</li>"
+                                       for l in recap.splitlines()) + "</ul></div>")
 
     for i, r in enumerate(eligible, start=1):
         sc = schemes[r.scheme_code]
@@ -110,10 +111,17 @@ def build(
         parts.append("</ul></div>")
 
     if unknown:
-        parts.append(f"<div class='note'><b>{_e(s('result.unknown_header', lang, count=len(unknown)))}</b><ul>")
-        for r in unknown:
-            sc = schemes[r.scheme_code]
-            parts.append(f"<li>{_e(templates.s('result.unknown_line', lang, name_hi=sc.name(lang), gap=templates._gap(r, sc, lang)))}</li>")
+        # ! Same grouping as the screen, from the same function. The bullet and
+        # ! the question come from <ul>/<li> here, not from the chat string —
+        # ! reusing that one printed "• •" inside a list.
+        shared, items = templates.unknown_parts(results, schemes, lang)
+        parts.append(f"<div class='note'><b>{_e(s('result.unknown_header', lang, count=len(items)))}</b>")
+        if shared:
+            parts.append(f"<p>{_e(s('result.unknown_shared', lang, gap=shared))}</p>")
+        parts.append("<ul>")
+        for name, gap in items:
+            ask = _e(s("pack.ask_at_centre", lang, name_hi=name))
+            parts.append(f"<li><b>{_e(name)}</b>{'' if not gap else ' — ' + _e(gap)}<br>{ask}</li>")
         parts.append("</ul></div>")
 
     # ! Split, for the same reason as on screen: a cover is not annual income.

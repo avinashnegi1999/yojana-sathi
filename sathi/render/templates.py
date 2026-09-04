@@ -135,27 +135,40 @@ def eligible_block(results: tuple[Result, ...], schemes: dict[str, Scheme],
     return "\n\n".join(lines)
 
 
+def unknown_parts(results: tuple[Result, ...], schemes: dict[str, Scheme],
+                  lang: str = "hi") -> tuple[str, list[tuple[str, str]]]:
+    """(shared reason, [(scheme name, its own reason)]).
+
+    # ! One reason, said once, when every unsure scheme is unsure for the same
+    # ! one — which is today's case, nothing is signed off. Repeating a long
+    # ! sentence per scheme pushes the actionable line, the question to ask at
+    # ! the centre, off a phone screen.
+    #
+    # ! The screen and the printed sheet must not each decide this on their own.
+    # ! They did, and the sheet went on repeating a sentence the screen had
+    # ! already grouped — the same block written twice, drifting apart.
+    """
+    hits = [r for r in results if r.verdict is Verdict.UNKNOWN]
+    gaps = [_gap(r, schemes[r.scheme_code], lang) for r in hits]
+    names = [schemes[r.scheme_code].name(lang) for r in hits]
+    if len(hits) > 1 and len(set(gaps)) == 1:
+        return gaps[0], [(n, "") for n in names]
+    return "", list(zip(names, gaps))
+
+
 def unknown_block(results: tuple[Result, ...], schemes: dict[str, Scheme],
                   lang: str = "hi") -> str:
-    hits = [r for r in results if r.verdict is Verdict.UNKNOWN]
-    if not hits:
+    shared, items = unknown_parts(results, schemes, lang)
+    if not items:
         return ""
-    lines = [s("result.unknown_header", lang, count=len(hits))]
-    gaps = [_gap(r, schemes[r.scheme_code], lang) for r in hits]
-
-    # ! One reason, said once. Today every scheme is unsure for the same reason
-    # ! — nobody has signed the values off — so the per-scheme version printed
-    # ! the identical sentence three times and pushed the actionable line, the
-    # ! question to ask at the centre, out of sight on a phone.
-    if len(hits) > 1 and len(set(gaps)) == 1:
-        lines.append(s("result.unknown_shared", lang, gap=gaps[0]))
-        lines.extend(s("result.unknown_line_bare", lang, name_hi=schemes[r.scheme_code].name(lang))
-                     for r in hits)
-        return "\n\n".join(lines[:2]) + "\n" + "\n".join(lines[2:])
-
-    for r, gap in zip(hits, gaps):
-        lines.append(s("result.unknown_line", lang, name_hi=schemes[r.scheme_code].name(lang), gap=gap))
-    return "\n\n".join(lines)
+    head = [s("result.unknown_header", lang, count=len(items))]
+    if shared:
+        head.append(s("result.unknown_shared", lang, gap=shared))
+        bullets = [s("result.unknown_line_bare", lang, name_hi=n) for n, _ in items]
+        return "\n\n".join(head) + "\n" + "\n".join(bullets)
+    return "\n\n".join(
+        head + [s("result.unknown_line", lang, name_hi=n, gap=g) for n, g in items]
+    )
 
 
 def ineligible_block(results: tuple[Result, ...], schemes: dict[str, Scheme],

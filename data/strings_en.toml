@@ -179,6 +179,7 @@ offer = "Shall I make you a sheet you can show at the centre?"
 # ! questions — it is the only thing they can take away today.
 offer_no_match = "Shall I still make you a sheet — your answers, and what to ask at the centre?"
 your_answers = "What you told me"
+ask_at_centre = "Ask: “Am I eligible for {name_hi}?”"
 ready = """Here is your sheet. Keep it on your phone or get it printed.
 It has no name and no Aadhaar on it — only what to ask for and what to carry."""
 title = "Yojana Sathi — your list"

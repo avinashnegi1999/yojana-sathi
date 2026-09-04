@@ -457,7 +457,7 @@ class Conversation:
 
     # * ---------------------------------------------------------- answer recap
 
-    def _recap(self) -> str:
+    def _recap(self, *, header: bool = True) -> str:
         """Every answer read back, because a button press leaves no message.
 
         # ! Not a debug aid. A worker is about to spend a day's wages acting on
@@ -492,11 +492,10 @@ class Conversation:
             ("is_nps_member", yn(p.is_nps_member)),
             ("known_schemes", ", ".join(held) if held else self._s("recap.none")),
         ]
-        return "\n".join(
-            [self._s("recap.header")]
-            + [self._s("recap.line", label=self._s(f"field_labels.{f}"), value=v)
-               for f, v in pairs]
-        )
+        # * The sheet puts the heading on the box, so it asks for the lines only.
+        lines = [self._s("recap.line", label=self._s(f"field_labels.{f}"), value=v)
+                 for f, v in pairs]
+        return "\n".join(([self._s("recap.header")] if header else []) + lines)
 
     # * -------------------------------------------------------------- results
 
@@ -570,7 +569,7 @@ class Conversation:
         if answer == YES:
             filename, blob = pack.build(
                 self._results, self.schemes, frozenset(self._known),
-                frozenset(self._have_docs), lang=self.lang, recap=self._recap()
+                frozenset(self._have_docs), lang=self.lang, recap=self._recap(header=False)
             )
             self._event("pack_generated")
             replies.append(Reply(text=self._s("pack.ready"), document=(filename, blob)))
