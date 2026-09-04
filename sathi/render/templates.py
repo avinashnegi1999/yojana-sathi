@@ -141,9 +141,20 @@ def unknown_block(results: tuple[Result, ...], schemes: dict[str, Scheme],
     if not hits:
         return ""
     lines = [s("result.unknown_header", lang, count=len(hits))]
-    for r in hits:
-        sc = schemes[r.scheme_code]
-        lines.append(s("result.unknown_line", lang, name_hi=sc.name(lang), gap=_gap(r, sc, lang)))
+    gaps = [_gap(r, schemes[r.scheme_code], lang) for r in hits]
+
+    # ! One reason, said once. Today every scheme is unsure for the same reason
+    # ! — nobody has signed the values off — so the per-scheme version printed
+    # ! the identical sentence three times and pushed the actionable line, the
+    # ! question to ask at the centre, out of sight on a phone.
+    if len(hits) > 1 and len(set(gaps)) == 1:
+        lines.append(s("result.unknown_shared", lang, gap=gaps[0]))
+        lines.extend(s("result.unknown_line_bare", lang, name_hi=schemes[r.scheme_code].name(lang))
+                     for r in hits)
+        return "\n\n".join(lines[:2]) + "\n" + "\n".join(lines[2:])
+
+    for r, gap in zip(hits, gaps):
+        lines.append(s("result.unknown_line", lang, name_hi=schemes[r.scheme_code].name(lang), gap=gap))
     return "\n\n".join(lines)
 
 
@@ -274,6 +285,16 @@ def _self_check() -> None:
     assert not unsigned["E"].is_human_verified and unsigned["E"].is_researched
     text_unsigned = result_message(evaluate_all(Profile(age=30), unsigned), unsigned, frozenset())
     assert s("result.unknown_reason_unsigned") in text_unsigned, text_unsigned
+
+    # ! Three schemes, one shared reason: the sentence appears once, and every
+    # ! scheme still carries its own question to ask at the centre.
+    many = {c: replace(scheme(c, 9000, [18, 40]),
+                       verified_by="unconfirmed — PENDING HUMAN VERIFICATION")
+            for c in ("X", "Y", "Z")}
+    shared = result_message(evaluate_all(Profile(age=30), many), many, frozenset())
+    assert shared.count(s("result.unknown_reason_unsigned")) == 1, shared
+    for c in ("X", "Y", "Z"):
+        assert f"योजना-{c}" in shared
     assert s("result.unknown_reason_data") not in text_unsigned, \
         "a researched scheme must not claim nobody checked its source"
     assert "उम्र इस योजना के दायरे से बाहर" in text, "ineligible reason must be the authored one"

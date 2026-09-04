@@ -136,6 +136,11 @@ unknown_reason_data = "we have not yet checked this scheme's rules against an of
 # ! what is known and reads to a tester as a broken bot.
 unknown_reason_unsigned = "the rules are written down, but a person has not confirmed them yet — until they do I will not put a number on it"
 unknown_reason_profile = "you did not tell me: {fields}"
+# ! When every unsure scheme is unsure for the SAME reason, that reason is
+# ! said once. Repeating a 27-word sentence per scheme buries the one thing
+# ! the worker has to act on — the question to ask at the centre.
+unknown_shared = "For all of them: {gap}."
+unknown_line_bare = "• {name_hi} — ask: “Am I eligible for {name_hi}?”"
 
 ineligible_header = "These schemes will not be available to you right now:"
 ineligible_line = "• {name_hi} — {reason}"
