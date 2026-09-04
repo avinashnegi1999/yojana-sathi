@@ -229,3 +229,14 @@ clear_nothing = "There was nothing to delete."
 generic = "Something went wrong. Please send /start to begin again."
 no_schemes_loaded = "Scheme information is not ready yet. Please try again a little later."
 pick_from_list = "Please pick one of the options below."
+
+# =====================================================================
+[recap]
+# =====================================================================
+# ! Buttons leave no trace in the chat: a tapped answer is a callback, not a
+# ! message. Without this block a worker cannot scroll up and check what was
+# ! recorded before walking to a centre on the strength of it.
+header = "This is what you told me:"
+line = "• {label}: {value}"
+not_answered = "you did not say"
+none = "none"

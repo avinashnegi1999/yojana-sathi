@@ -140,7 +140,7 @@ def test_full_session_with_no_llm_key_reaches_a_pack():
         convo = Conversation(schemes, log, channel="cli")
 
         out = _answer_all(convo, tax=NO)
-        text = out[0].text
+        text = out[1].text  # * [0] is the answer recap
         assert "जाँच योजना A" in text and "12,000" in text
         assert "आपकी उम्र इस योजना के दायरे में है" in text, "authored pass reason must show"
         # * The stubbed scheme appears, honestly, as something we could not check.
@@ -195,7 +195,7 @@ def test_ineligible_worker_gets_a_reason_and_never_a_dead_end():
         schemes = _fixture_schemes(directory)
         convo = Conversation(schemes, None)
         out = _answer_all(convo, age="65", tax=NO)
-        text = out[0].text
+        text = out[1].text
         assert "यह योजना 18 से 40 साल वालों के लिए है" in text
         assert "नज़दीकी केंद्र" in text, "a no-match must still point somewhere"
         assert convo.state is State.DONE, "no eligible scheme means no paperwork step"
@@ -207,7 +207,7 @@ def test_exclusion_is_explained_in_the_workers_own_result():
         schemes = _fixture_schemes(directory)
         convo = Conversation(schemes, None)
         out = _answer_all(convo, tax=YES)  # income-tax payer
-        assert "आयकर भरने वालों को यह योजना नहीं मिलती" in out[0].text
+        assert "आयकर भरने वालों को यह योजना नहीं मिलती" in out[1].text
 
 
 def test_dont_know_leaves_the_answer_unset_and_yields_unknown():
@@ -219,8 +219,8 @@ def test_dont_know_leaves_the_answer_unset_and_yields_unknown():
         # ! "Don't know" must not be read as "no". The scheme with a tax
         # ! exclusion becomes UNKNOWN, with a question to ask at the centre.
         assert convo.profile.is_income_tax_payer is None
-        assert "जाँच योजना A" in out[0].text
-        assert "पक्का नहीं कह सकता" in out[0].text
+        assert "जाँच योजना A" in out[1].text
+        assert "पक्का नहीं कह सकता" in out[1].text
 
 
 def test_llm_path_and_button_path_agree():
@@ -277,13 +277,14 @@ def test_english_gives_the_same_verdicts_with_no_devanagari():
         out = _answer_all(en_convo, tax=NO, lang=LANG_EN)
 
         assert hi_convo.profile == en_convo.profile, "language changed a recorded answer"
-        text = out[0].text
+        text = out[1].text
         assert "Test Scheme A" in text, text
         # ! The fixture authors pass_en/fail_en, so an English session must not
-        # ! fall back to Devanagari anywhere in the result screen.
+        # ! fall back to Devanagari anywhere in the result screen — recap included,
+        # ! since that is assembled from the same string files.
         assert "qualify" in text.lower()
-        assert not any("\u0900" <= ch <= "\u097f" for ch in text), \
-            "Devanagari leaked into the English result screen"
+        assert not any(_devanagari(r.text) for r in out), \
+            "Devanagari leaked into an English result screen"
 
 
 def test_free_text_occupation_never_loops_back_to_the_same_menu():
@@ -329,7 +330,7 @@ def test_not_working_is_an_answer_not_a_gap():
         # bank, income tax, EPFO/ESIC, NPS — four questions since the split
         convo.handle(YES); convo.handle(NO); convo.handle(NO); convo.handle(NO)
         out = convo.handle(NEXT)
-        assert "जाँच योजना A" in out[0].text, "being out of work must not block a match"
+        assert "जाँच योजना A" in out[1].text, "being out of work must not block a match"
 
 
 def _devanagari(text: str) -> bool:
@@ -380,7 +381,7 @@ def test_a_worker_with_no_income_is_still_screened():
         # bank, income tax, EPFO/ESIC, NPS — four questions since the split
         convo.handle(YES); convo.handle(NO); convo.handle(NO); convo.handle(NO)
         out = convo.handle(NEXT)
-        assert "Test Scheme A" in out[0].text
+        assert "Test Scheme A" in out[1].text
 
 
 def test_declining_consent_stores_nothing():

@@ -455,6 +455,49 @@ class Conversation:
         self._event("known_schemes_declared")
         return self._evaluate()
 
+    # * ---------------------------------------------------------- answer recap
+
+    def _recap(self) -> str:
+        """Every answer read back, because a button press leaves no message.
+
+        # ! Not a debug aid. A worker is about to spend a day's wages acting on
+        # ! these answers and has no other way to see what was recorded — the
+        # ! taps are callbacks, and nothing in the chat says which one was hit.
+        """
+        p = self.profile
+        unset = self._s("recap.not_answered")
+
+        def yn(value: bool | None) -> str:
+            # * "Don't know" leaves the field None, and that is worth showing:
+            # * it is why a scheme came back UNKNOWN rather than a verdict.
+            return unset if value is None else self._s("buttons." + ("yes" if value else "no"))
+
+        def band(section: str, code: str | None) -> str:
+            return self._s(f"{section}.{code}") if code else unset
+
+        state = next((x for x in content.states() if x.code == p.state), None)
+        occ = content.occupation(p.occupation) if p.occupation else None
+        held = [self.schemes[c].name(self.lang) for c in sorted(self._known) if c in self.schemes]
+
+        pairs = [
+            ("state", state.label(self.lang) if state else unset),
+            ("age", str(p.age) if p.age is not None else unset),
+            ("occupation", occ.label(self.lang) if occ else unset),
+            ("income_band", band("income_bands", p.income_band)),
+            ("land_holding_band", band("land_bands", p.land_holding_band)),
+            ("family_size", str(p.family_size) if p.family_size is not None else unset),
+            ("has_bank_account", yn(p.has_bank_account)),
+            ("is_income_tax_payer", yn(p.is_income_tax_payer)),
+            ("is_epfo_or_esic_member", yn(p.is_epfo_or_esic_member)),
+            ("is_nps_member", yn(p.is_nps_member)),
+            ("known_schemes", ", ".join(held) if held else self._s("recap.none")),
+        ]
+        return "\n".join(
+            [self._s("recap.header")]
+            + [self._s("recap.line", label=self._s(f"field_labels.{f}"), value=v)
+               for f, v in pairs]
+        )
+
     # * -------------------------------------------------------------- results
 
     def _evaluate(self) -> list[Reply]:
@@ -470,7 +513,9 @@ class Conversation:
 
         text = templates.result_message(self._results, self.schemes,
                                         frozenset(self._known), self.lang)
-        replies = [Reply(text=text)]
+        # * Recap first: the worker sees what was recorded, then the verdict
+        # * built on it. Its own message so a long result cannot push it away.
+        replies = [Reply(text=self._recap()), Reply(text=text)]
         self._event("guidance_shown")
 
         self._required_docs = checklist.required_documents(self._results, self.schemes, self.lang)
@@ -586,7 +631,17 @@ def _self_check() -> None:
     assert c.profile.is_epfo_or_esic_member is False
     assert c.profile.is_nps_member is False
     out = c.handle(NEXT)   # knows none of them
-    assert "योजना-A" in out[0].text and c.state is State.DOCUMENTS
+
+    # ! The recap ships BEFORE the verdict. A tapped answer is a callback and
+    # ! leaves nothing in the chat, so this is the worker's only chance to see
+    # ! what the verdict was built on. Assert the shape, an unanswered field,
+    # ! and a value that came from a button rather than from typing.
+    uk = next(x for x in content.states() if x.code == "UK")
+    assert s("recap.header") in out[0].text
+    assert uk.label("hi") in out[0].text and "34" in out[0].text
+    assert content.occupation("construction").label("hi") in out[0].text
+    assert s("recap.not_answered") in out[0].text, "the skipped tax question must say so"
+    assert "योजना-A" in out[1].text and c.state is State.DOCUMENTS
     c.handle("doc:0")
     out = c.handle(NEXT)
     assert s("documents.have_all") in out[0].text
