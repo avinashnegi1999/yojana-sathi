@@ -78,10 +78,16 @@ def _blocking_text(result: Result, scheme: Scheme, lang: str = "hi") -> str:
     return c.text("fail", lang) if c else reason.text_hi
 
 
-def _gap(result: Result, lang: str = "hi") -> str:
+def _gap(result: Result, scheme: Scheme, lang: str = "hi") -> str:
     """Why a scheme came out UNKNOWN, in one phrase."""
     if result.unverified:
-        return s("result.unknown_reason_data", lang)
+        # ! The engine carries ONE flag for two different admissions, because
+        # ! neither one may produce a verdict. The worker is owed the difference:
+        # ! "nobody has looked this up" and "one person looked it up and is
+        # ! waiting on a second" are not the same sentence, and the first is a
+        # ! lie once the file is researched. Scheme.is_researched is the split.
+        key = "unknown_reason_unsigned" if scheme.is_researched else "unknown_reason_data"
+        return s(f"result.{key}", lang)
     if result.missing_fields:
         return s(
             "result.unknown_reason_profile", lang,
@@ -137,7 +143,7 @@ def unknown_block(results: tuple[Result, ...], schemes: dict[str, Scheme],
     lines = [s("result.unknown_header", lang, count=len(hits))]
     for r in hits:
         sc = schemes[r.scheme_code]
-        lines.append(s("result.unknown_line", lang, name_hi=sc.name(lang), gap=_gap(r, lang)))
+        lines.append(s("result.unknown_line", lang, name_hi=sc.name(lang), gap=_gap(r, sc, lang)))
     return "\n\n".join(lines)
 
 
@@ -260,7 +266,16 @@ def _self_check() -> None:
     a_line = next(l for l in text.splitlines() if "योजना-A" in l)
     assert s("result.new_badge") not in a_line, "A is already known — no badge"
     assert "पैसा अभी मिला नहीं" in text, "the surfaced-not-delivered caveat must always ship"
+    # ! C is unresearched (a stub); E is researched but unsigned. They must not
+    # ! give a worker the same sentence — that conflation shipped once already.
     assert "योजना-C" in text and s("result.unknown_reason_data") in text
+    unsigned = {"E": replace(scheme("E", 9000, [18, 40]),
+                             verified_by="unconfirmed — PENDING HUMAN VERIFICATION")}
+    assert not unsigned["E"].is_human_verified and unsigned["E"].is_researched
+    text_unsigned = result_message(evaluate_all(Profile(age=30), unsigned), unsigned, frozenset())
+    assert s("result.unknown_reason_unsigned") in text_unsigned, text_unsigned
+    assert s("result.unknown_reason_data") not in text_unsigned, \
+        "a researched scheme must not claim nobody checked its source"
     assert "उम्र इस योजना के दायरे से बाहर" in text, "ineligible reason must be the authored one"
     assert "{" not in text, "unfilled placeholder reached the worker"
 

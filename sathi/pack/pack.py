@@ -104,7 +104,7 @@ def build(
         parts.append(f"<div class='note'><b>{_e(s('result.unknown_header', lang, count=len(unknown)))}</b><ul>")
         for r in unknown:
             sc = schemes[r.scheme_code]
-            parts.append(f"<li>{_e(templates.s('result.unknown_line', lang, name_hi=sc.name(lang), gap=templates._gap(r, lang)))}</li>")
+            parts.append(f"<li>{_e(templates.s('result.unknown_line', lang, name_hi=sc.name(lang), gap=templates._gap(r, sc, lang)))}</li>")
         parts.append("</ul></div>")
 
     # ! Split, for the same reason as on screen: a cover is not annual income.

@@ -131,6 +131,10 @@ I will not guess — a wrong answer costs you a day's wages and the fare."""
 unknown_line = """• {name_hi} — what I could not check: {gap}
    Ask this at the centre: “Am I eligible for {name_hi}?”"""
 unknown_reason_data = "we have not yet checked this scheme's rules against an official source"
+# ! A researched-but-unsigned scheme is NOT an unresearched one. Saying "nobody
+# ! looked it up" when one person did, and is waiting on a second, understates
+# ! what is known and reads to a tester as a broken bot.
+unknown_reason_unsigned = "the rules are written down, but a person has not confirmed them yet — until they do I will not put a number on it"
 unknown_reason_profile = "you did not tell me: {fields}"
 
 ineligible_header = "These schemes will not be available to you right now:"
