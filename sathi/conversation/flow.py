@@ -524,12 +524,13 @@ class Conversation:
             replies.append(self._ask_documents())
             return replies
 
-        # * Nothing eligible → no paperwork to carry. End honestly, not with an
-        # * offer of a pack that would list nothing.
-        self.state = State.DONE
-        replies.append(Reply(text=self._s("closing.done"), end=True))
-        if self.log and self.session:
-            self.log.log(self.session, "session_complete", profile=self.profile)
+        # * Nothing eligible, so there is no paperwork to gather — but the sheet
+        # * is not empty. It carries the answers given and the question to ask
+        # * for every scheme we could not decide, which is the whole of what this
+        # * worker can walk in with today. Skipping the documents step and going
+        # * straight to the offer keeps it to one tap.
+        self.state = State.PACK
+        replies.append(Reply(text=self._s("pack.offer_no_match"), buttons=_yes_no(self.lang)))
         return replies
 
     def _on_documents(self, answer: str) -> list[Reply]:
@@ -569,7 +570,7 @@ class Conversation:
         if answer == YES:
             filename, blob = pack.build(
                 self._results, self.schemes, frozenset(self._known),
-                frozenset(self._have_docs), lang=self.lang
+                frozenset(self._have_docs), lang=self.lang, recap=self._recap()
             )
             self._event("pack_generated")
             replies.append(Reply(text=self._s("pack.ready"), document=(filename, blob)))

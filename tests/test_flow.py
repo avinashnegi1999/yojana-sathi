@@ -22,6 +22,7 @@ from sathi.conversation import consent
 from sathi.conversation.flow import (
     DK, LANG_EN, LANG_HI, NEXT, NO, YES, Conversation, State,
 )
+from sathi.core.content import s
 from sathi.core.schemes import load_all
 from sathi.metrics.events import EventLog
 from sathi.metrics.report import _connect, numbers, render
@@ -198,7 +199,18 @@ def test_ineligible_worker_gets_a_reason_and_never_a_dead_end():
         text = out[1].text
         assert "यह योजना 18 से 40 साल वालों के लिए है" in text
         assert "नज़दीकी केंद्र" in text, "a no-match must still point somewhere"
-        assert convo.state is State.DONE, "no eligible scheme means no paperwork step"
+
+        # ! No eligible scheme means no documents to gather, but the sheet is
+        # ! still offered: it carries the answers and the questions to ask, and
+        # ! this worker is precisely the one who walks in with nothing else.
+        assert convo.state is State.PACK, "a no-match must still be offered the sheet"
+        out = convo.handle(YES)
+        filename, blob = out[0].document
+        assert filename.endswith(".html")
+        page = blob.decode("utf-8")
+        assert s("pack.your_answers") in page, "the sheet must carry the answers given"
+        assert "65" in page, "an answer the worker gave is missing from the sheet"
+        assert out[-1].end and convo.state is State.DONE
 
 
 def test_exclusion_is_explained_in_the_workers_own_result():

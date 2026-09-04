@@ -51,6 +51,7 @@ def build(
     have_docs: frozenset[str] = frozenset(),
     today: date | None = None,
     lang: str = "hi",
+    recap: str = "",
 ) -> tuple[str, bytes]:
     """Return (filename, bytes). Nothing touches the filesystem."""
     eligible = [r for r in results if r.verdict is Verdict.ELIGIBLE]
@@ -64,6 +65,14 @@ def build(
         f"<h1>{_e(s('pack.title', lang))}</h1>",
         f"<p class='meta'>{_e(s('pack.generated_on', lang, date=stamp))}</p>",
     ]
+
+    # ! The answers go on the sheet, not just on the screen. A counter clerk
+    # ! asks the same questions again, and the worker cannot re-open a chat they
+    # ! have scrolled past. Still no name, no phone, no Aadhaar — the Profile
+    # ! has no such field to leak.
+    if recap:
+        parts.append(f"<div class='note'><b>{_e(s('pack.your_answers', lang))}</b>"
+                     f"<p>{_e(recap)}</p></div>")
 
     for i, r in enumerate(eligible, start=1):
         sc = schemes[r.scheme_code]
