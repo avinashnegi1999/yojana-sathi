@@ -259,6 +259,8 @@ the ones that cost something.
 [`docs/BUILD_LOG.md`](docs/BUILD_LOG.md) — the unedited version: every bug, the
 headline numbers that turned out to be wrong, what is still open, and what I
 would do differently.
+[`docs/assessment/`](docs/assessment/README.md) — a scored breakdown of where
+this stands, including why product maturity is a 7 while the engineering is not.
 
 ## Add a scheme
 
