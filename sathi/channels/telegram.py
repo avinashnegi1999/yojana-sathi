@@ -160,6 +160,8 @@ class TelegramBot:
         # ! one defaults to Hindi, so an English worker's /help or /clear came
         # ! back in Hindi. The choice is a preference, not session state.
         self._lang: dict[str, str] = {}
+        # ! Only the current question's keyboard may answer this session.
+        self._active_keyboard: dict[str, int] = {}
         self._offset = 0
 
     # * ------------------------------------------------------------- sending
@@ -173,7 +175,12 @@ class TelegramBot:
             # ! "reply_markup": null, which Telegram answers with a bare 400.
             payload["reply_markup"] = markup
         sent = _call(self.token, "sendMessage", payload)
-        self._track(chat_id, (sent.get("result") or {}).get("message_id"))
+        message_id = (sent.get("result") or {}).get("message_id")
+        self._track(chat_id, message_id)
+        if markup is not None:
+            self._active_keyboard.pop(chat_id, None)
+            if message_id:
+                self._active_keyboard[chat_id] = message_id
         if reply.audio is not None:
             try:
                 up = _upload(self.token, chat_id, reply.audio.name,
@@ -324,19 +331,30 @@ class TelegramBot:
             answer = cq.get("data", "")
             message_id = cq["message"].get("message_id")
             self._track(chat_id, message_id)
+            stale = (not message_id or chat_id not in self.sessions
+                     or message_id != self._active_keyboard.get(chat_id))
+            ack = {"callback_query_id": cq["id"]}
+            if stale:
+                ack["text"] = s("errors.stale_button", self._lang.get(chat_id, DEFAULT_LANG))
+            else:
+                # ! Retire before dispatch: duplicate toggles stay in the SAME
+                # ! state, and a later session can revisit that state too.
+                self._active_keyboard.pop(chat_id, None)
             # ! Stops the client's spinner, and nothing more — so NOTHING here
             # ! may abort the update. This caught only URLError, but Telegram
             # ! rejects a stale query with HTTP 400 ("query is too old"), which
             # ! `_call` raises as TelegramError. That escaped, the whole update
             # ! was dropped, and a worker's tap did nothing at all.
             # !
-            # ! Stale queries are routine, not exotic: every restart invalidates
-            # ! the pending ones, and a worker who taps a button on an older
-            # ! message produces one. Seen in the live journal on 2026-09-03.
+            # ! Query expiry is separate from keyboard retirement. A failed
+            # ! acknowledgement must neither drop a current answer nor revive
+            # ! a retired one.
             try:
-                _call(self.token, "answerCallbackQuery", {"callback_query_id": cq["id"]})
+                _call(self.token, "answerCallbackQuery", ack)
             except (urllib.error.URLError, TelegramError, OSError, ValueError):
                 pass
+            if stale:
+                return
         elif "message" in update:
             chat_id = str(update["message"]["chat"]["id"])
             answer = update["message"].get("text", "")
@@ -359,12 +377,17 @@ class TelegramBot:
                 # ! Session over: drop the profile from memory immediately. It is
                 # ! never written anywhere, and now it is not held anywhere either.
                 self.sessions.pop(chat_id, None)
+                self._active_keyboard.pop(chat_id, None)
 
     def _dispatch(self, chat_id: str, answer: str,
                   message_id: int | None = None) -> list[Reply]:
         """Slash command, or an answer to the question we asked."""
         word = answer.strip().split()[0].lower() if answer.strip() else ""
         command = COMMANDS.get(word)
+        # ! Informational replies leave the question live. Every other turn
+        # ! answers, replaces or clears it, even if the state stays the same.
+        if command not in ("help", "about", "privacy", "schemes"):
+            self._active_keyboard.pop(chat_id, None)
         if command is None:
             return self._conversation(chat_id).handle(answer)
 
@@ -447,7 +470,9 @@ def _self_check() -> None:
 
     sent: list[tuple[str, dict]] = []
     real_call, real_upload = mod._call, mod._upload
-    mod._call = lambda token, method, payload: (sent.append((method, payload)), {"result": []})[1]
+    mod._call = lambda token, method, payload: (
+        sent.append((method, payload)) or {"result": {"message_id": len(sent) + 1}}
+    )
     mod._upload = lambda *a, **k: sent.append(("sendDocument", {"filename": a[2]})) or {}
     try:
         bot = TelegramBot(schemes, token="test-token")
@@ -502,6 +527,7 @@ def _self_check() -> None:
 
         # ! The clear receipt may be the last message standing in the chat, so
         # ! it carries both languages.
+        bot._sent["42"] = []  # * No tracked messages, including clear receipts.
         nothing = bot.clear_chat("42", "en")
         assert "nothing to delete" in nothing.text and "कुछ नहीं" in nothing.text, nothing.text
         deep_reply = bot.clear_chat("42", "en", from_message_id=3, deep=True)
@@ -563,10 +589,12 @@ def _self_check() -> None:
         reply = bot.clear_chat("42")
         assert not deletes and "कुछ नहीं" in reply.text
 
-        # ! A stale callback query must not take the update down with it. The
-        # ! ack is cosmetic; the worker's button press is not.
+        # ! A failed acknowledgement of the CURRENT keyboard must not abort
+        # ! its answer. Query expiry and keyboard retirement are different.
         stale = []
         prev_call = mod._call
+        bot.handle_update({"message": {"chat": {"id": 77}, "text": "/start"}})
+        language_keyboard = len(sent) + 1
 
         def _stale_ack(token, method, payload):
             if method == "answerCallbackQuery":
@@ -581,7 +609,7 @@ def _self_check() -> None:
         try:
             bot.handle_update({
                 "callback_query": {"id": "stale", "data": "lang:hi",
-                                   "message": {"chat": {"id": 77}, "message_id": 3}},
+                                   "message": {"chat": {"id": 77}, "message_id": language_keyboard}},
             })
         finally:
             mod._call = prev_call
@@ -632,6 +660,123 @@ def _self_check() -> None:
         # * A malformed upload response must not raise — _track ignores no id.
         mod._upload = lambda *a, **k: {}
         bot.send("77", Reply(text="pack", document=("pack.html", b"x")))
+
+        # ! Use the keyboard IDs actually returned by the wire stub. Fabricated
+        # ! callbacks cannot prove which question the worker is answering.
+        delivered, acknowledgements = [], []
+        fail_ack = False
+
+        def _keyboard_wire(token, method, payload):
+            if method == "answerCallbackQuery":
+                acknowledgements.append(payload)
+                if fail_ack:
+                    raise TelegramError("answerCallbackQuery failed: query is too old")
+                return {"ok": True, "result": True}
+            assert method == "sendMessage", method
+            mid = len(delivered) + 100
+            delivered.append((mid, payload))
+            return {"ok": True, "result": {"message_id": mid}}
+
+        mod._call = _keyboard_wire
+        guarded = TelegramBot(schemes, token="test-token")
+
+        def _message(text):
+            guarded.handle_update({"message": {"chat": {"id": 88}, "text": text}})
+
+        def _tap(value, mid=None):
+            if mid is None:
+                mid = delivered[-1][0]
+            guarded.handle_update({"callback_query": {
+                "id": str(len(acknowledgements)), "data": value,
+                "message": {"chat": {"id": 88}, "message_id": mid},
+            }})
+
+        def _reach_bank():
+            _message("/start")
+            _tap("lang:en")
+            _tap("consent_yes")
+            _tap("state:UK")
+            _message("30")
+            for answer in ("occ:construction", "inc:upto_5000", "land:landless", "fam:4"):
+                _tap(answer)
+            assert guarded.sessions["88"].state.value == "has_bank_account"
+            return delivered[-1][0]
+
+        # ! Double bank Yes must not answer the unseen tax question.
+        bank_keyboard = _reach_bank()
+        _tap("yes", bank_keyboard)
+        tax_keyboard = delivered[-1][0]
+        count = len(delivered)
+        _tap("yes", bank_keyboard)
+        current = guarded.sessions["88"]
+        assert current.profile.has_bank_account is True
+        assert current.profile.is_income_tax_payer is None, "duplicate bank tap answered tax"
+        assert current.state.value == "is_income_tax_payer" and len(delivered) == count
+        assert acknowledgements[-1].get("text") == s("errors.stale_button", "en")
+
+        # ! Info messages must not replace the live question keyboard.
+        for command in ("/help", "/about", "/privacy", "/schemes"):
+            _message(command)
+        _tap("no", tax_keyboard)
+        assert current.profile.is_income_tax_payer is False
+        assert current.state.value == "is_epfo_or_esic_member"
+
+        # ! A repeated checkbox tap must not toggle a selection back off.
+        _tap("no")
+        _tap("no")
+        assert current.state.value == "known_schemes"
+        known_keyboard = delivered[-1][0]
+        _tap("known:A", known_keyboard)
+        _tap("known:A", known_keyboard)
+        assert current._known == {"A"}, "duplicate tap unselected a known scheme"
+        _tap("next")
+        assert current.state.value == "documents"
+        docs_keyboard = delivered[-1][0]
+        _tap("doc:0", docs_keyboard)
+        _tap("doc:0", docs_keyboard)
+        assert current._have_docs == {"आधार"}, "duplicate tap unselected a document"
+
+        # ! The same state in a new session must not revive an old keyboard.
+        new_bank_keyboard = _reach_bank()
+        current = guarded.sessions["88"]
+        _tap("yes", bank_keyboard)
+        assert current.profile.has_bank_account is None
+        assert current.state.value == "has_bank_account"
+
+        # ! Even a failed stale toast must leave the retired tap rejected.
+        fail_ack = True
+        _tap("yes", bank_keyboard)
+        assert current.profile.has_bank_account is None
+        assert current.state.value == "has_bank_account"
+        fail_ack = False
+        _tap("yes", new_bank_keyboard)
+        assert current.profile.has_bank_account is True
+
+        # ! Typed advancement, language replacement and cancellation retire
+        # ! old keyboards too; the toast uses the current language.
+        tax_keyboard = delivered[-1][0]
+        _message("no")
+        _tap("yes", tax_keyboard)
+        assert current.profile.is_epfo_or_esic_member is None
+        epfo_keyboard = delivered[-1][0]
+        _message("/language")
+        _tap("yes", epfo_keyboard)
+        assert current.profile.is_epfo_or_esic_member is None
+        assert acknowledgements[-1].get("text") == s("errors.stale_button", "hi")
+        last_keyboard = delivered[-1][0]
+        _message("/cancel")
+        _tap("yes", last_keyboard)
+        assert "88" not in guarded.sessions, "a stale tap recreated a cancelled session"
+
+        # ! Normal completion retires the pack offer, including its No button.
+        _reach_bank()
+        for answer in ("yes", "no", "no", "no", "next", "next"):
+            _tap(answer)
+        assert guarded.sessions["88"].state.value == "pack"
+        pack_keyboard = delivered[-1][0]
+        _tap("no", pack_keyboard)
+        _tap("no", pack_keyboard)
+        assert "88" not in guarded.sessions, "a stale tap recreated a completed session"
     finally:
         mod._call, mod._upload = real_call, real_upload
     print("telegram.py OK")

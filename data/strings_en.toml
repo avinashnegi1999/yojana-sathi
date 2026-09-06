@@ -244,6 +244,7 @@ clear_nothing = "There was nothing to delete."
 generic = "Something went wrong. Please send /start to begin again."
 no_schemes_loaded = "Scheme information is not ready yet. Please try again a little later."
 pick_from_list = "Please pick one of the options below."
+stale_button = "This button is no longer active. Use the latest question, or send /start to begin again."
 
 # =====================================================================
 [recap]

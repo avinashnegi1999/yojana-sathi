@@ -223,8 +223,13 @@ def test_commands_at_every_state():
     problems: list[str] = []
     with tempfile.TemporaryDirectory() as d:
         schemes = _schemes(Path(d))
+        # ! The walk used to end "no, next" and stall at NPS, so KNOWN_SCHEMES,
+        # ! DOCUMENTS, PACK and DONE were never reached by a test that claims to
+        # ! cover every state. NPS needs its own answer before "next" means
+        # ! anything.
         walk = [LANG_EN, "consent_yes", "state:UK", "30", "occ:construction",
-                "inc:upto_5000", "land:landless", "fam:4", "yes", "no", "no", "next"]
+                "inc:upto_5000", "land:landless", "fam:4", "yes", "no", "no", "no",
+                "next", "next", "yes"]
 
         for stop in range(len(walk) + 1):
             for command in ("help", "about", "privacy"):
@@ -276,23 +281,55 @@ def test_every_command_through_the_adapter_at_every_state():
     with tempfile.TemporaryDirectory() as d:
         schemes = _schemes(Path(d))
         walk = ["lang:en", "consent_yes", "state:UK", "30", "occ:construction",
-                "inc:upto_5000", "land:landless", "fam:4", "yes", "no", "no", "next"]
+                "inc:upto_5000", "land:landless", "fam:4", "yes", "no", "no", "no",
+                "next", "next", "yes"]
 
         sent: list[tuple[str, dict]] = []
+        # ! The adapter accepts a tap only from the keyboard it last delivered,
+        # ! so a fabricated message_id is now rejected as stale. Record what the
+        # ! wire actually returned and tap THAT. Fabricated ids left this whole
+        # ! walk rejected — every command below was being exercised against the
+        # ! opening screen while the suite still reported green.
+        live_keyboard: dict[str, int] = {}
         real_call, real_upload = mod._call, mod._upload
-        mod._call = lambda token, method, payload: (
-            sent.append((method, payload)) or {"ok": True, "result": {"message_id": len(sent)}}
-        )
+
+        def _wire(token, method, payload):
+            sent.append((method, payload))
+            mid = len(sent)
+            if method == "sendMessage":
+                # * Mirror the adapter: any reply replaces the live keyboard, and
+                # * a reply without buttons leaves none — which is how we know the
+                # * next answer has to be typed rather than tapped.
+                live_keyboard.pop(str(payload["chat_id"]), None)
+                if payload.get("reply_markup"):
+                    live_keyboard[str(payload["chat_id"])] = mid
+            return {"ok": True, "result": {"message_id": mid}}
+
+        mod._call = _wire
         mod._upload = lambda *a, **k: sent.append(("sendDocument", {"file": a[2]})) or {"ok": True}
         try:
             for stop in range(len(walk) + 1):
                 for word in sorted(COMMANDS):
                     bot = TelegramBot(schemes, token="test-token")
                     chat = "77"
+                    live_keyboard.pop(chat, None)
+                    # * A real worker arrives via /start; that is what puts the
+                    # * first keyboard on screen. The walk used to skip it and
+                    # * invent ids instead.
+                    bot.handle_update({"message": {
+                        "chat": {"id": int(chat)}, "message_id": 1, "text": "/start"}})
                     for i, step in enumerate(walk[:stop]):
+                        mid = live_keyboard.get(chat)
+                        if mid is None:
+                            # * No buttons on screen — the age question. A worker
+                            # * types here, so the walk must type here too.
+                            bot.handle_update({"message": {
+                                "chat": {"id": int(chat)},
+                                "message_id": 400 + i, "text": step}})
+                            continue
                         bot.handle_update({"callback_query": {
                             "id": str(i), "data": step,
-                            "message": {"chat": {"id": int(chat)}, "message_id": i + 1}}})
+                            "message": {"chat": {"id": int(chat)}, "message_id": mid}}})
                     before = len(sent)
                     try:
                         bot.handle_update({"message": {
