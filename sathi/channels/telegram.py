@@ -130,6 +130,23 @@ def _upload(token: str, chat_id: str, filename: str, blob: bytes, caption: str) 
         return json.loads(resp.read().decode("utf-8"))
 
 
+# * Telegram failures split in two, and the difference decides whether a worker
+# * keeps their answers. "Too Many Requests" and the 5xx family mean the API is
+# * busy or broken and will work again shortly — the conversation is fine. A 400
+# * means we sent something Telegram refused, which is our bug and leaves the turn
+# * half-applied. Matching on the code in the message rather than carrying the
+# * status through TelegramError keeps this to one place; the codes are the two
+# * digits after "failed: ".
+_TRANSIENT_CODES = ("429", "500", "502", "503", "504")
+
+
+def _is_transient(err: Exception) -> bool:
+    """True when retrying later is the right response and the session should live."""
+    text = str(err)
+    return any(f" {code} " in f" {text} " or f": {code} " in text
+               for code in _TRANSIENT_CODES)
+
+
 def keyboard(buttons: tuple[Button, ...]) -> dict | None:
     """Two per row: big tap targets for a worker on a cheap phone outdoors."""
     if not buttons:
@@ -420,27 +437,52 @@ class TelegramBot:
             self._offset = update["update_id"] + 1
             try:
                 self.handle_update(update)
+            except (urllib.error.URLError, TimeoutError):
+                # ! Telegram is unreachable. That says nothing about this worker's
+                # ! conversation, so do NOT discard it. Re-raise so run_forever
+                # ! backs off; the session stays and their next tap carries on.
+                # * Caught before the OSError family below on purpose: URLError is
+                # * an OSError, but a plain OSError is usually ours (a missing pack
+                # * file, a bad handle) and that DOES leave the turn half-applied.
+                raise
+            except TelegramError as e:
+                # ! 429 and 5xx mean "busy, try shortly" — the worker's answers are
+                # ! fine and must survive. A 400/403 means we sent something bad,
+                # ! which is our bug and leaves the turn partly applied.
+                if _is_transient(e):
+                    raise
+                print(f"[telegram] update {update.get('update_id')} failed: {e}")
+                self._abandon(update, e)
+                continue
             except Exception as e:  # noqa: BLE001
                 # ! One broken conversation must never take the bot down while
                 # ! other workers are mid-session. Log it and keep serving.
                 print(f"[telegram] update {update.get('update_id')} failed: {e}")
-                # ! The turn may have partly changed the profile or sent only
-                # ! some replies. Discard it; replay could record answers twice.
-                try:
-                    message = (update.get("message") or
-                               (update.get("callback_query") or {}).get("message") or {})
-                    chat_id = (message.get("chat") or {}).get("id")
-                    if chat_id is None:
-                        continue  # * No destination for a recovery notice.
-                    chat_id = str(chat_id)
-                    convo = self.sessions.pop(chat_id, None)
-                    self._active_keyboard.pop(chat_id, None)
-                    lang = convo.lang if convo else self._lang.get(chat_id, DEFAULT_LANG)
-                    self._lang[chat_id] = lang
-                    self.send(chat_id, Reply(text=s("errors.screening_stopped", lang)))
-                except Exception as recovery_error:  # noqa: BLE001 — recovery must not stop polling
-                    print(f"[telegram] recovery notice failed: {type(recovery_error).__name__}")
+                self._abandon(update, e)
         return len(updates)
+
+    def _abandon(self, update: dict, cause: Exception) -> None:
+        """Drop a conversation this bot can no longer reason about, and say so.
+
+        # ! Only for a fault in OUR handling. The turn may have partly changed the
+        # ! profile or sent only some replies, and replay could record answers
+        # ! twice — so the answers go, and the worker is told to start again.
+        # ! A transport failure is NOT this: see the callers.
+        """
+        try:
+            message = (update.get("message") or
+                       (update.get("callback_query") or {}).get("message") or {})
+            chat_id = (message.get("chat") or {}).get("id")
+            if chat_id is None:
+                return  # * No destination for a recovery notice.
+            chat_id = str(chat_id)
+            convo = self.sessions.pop(chat_id, None)
+            self._active_keyboard.pop(chat_id, None)
+            lang = convo.lang if convo else self._lang.get(chat_id, DEFAULT_LANG)
+            self._lang[chat_id] = lang
+            self.send(chat_id, Reply(text=s("errors.screening_stopped", lang)))
+        except Exception as recovery_error:  # noqa: BLE001 — recovery must not stop polling
+            print(f"[telegram] recovery notice failed: {type(recovery_error).__name__}")
 
     def run_forever(self) -> None:
         print(f"[telegram] polling, {len(self.schemes)} scheme(s) loaded")
@@ -907,6 +949,50 @@ def _self_check() -> None:
         assert "88" not in guarded.sessions, "a stale tap recreated a completed session"
     finally:
         mod._call, mod._upload = real_call, real_upload
+    # ! A busy Telegram must not cost a worker their answers. 429 and the 5xx
+    # ! family mean "try again shortly", not "this conversation is broken" —
+    # ! before this split, a 30-second rate limit discarded a half-finished
+    # ! screening AND the notice explaining it was rate-limited too, so the
+    # ! worker lost everything and was told nothing.
+    for code, transient in (("429 Too Many Requests: retry after 30", True),
+                            ("502 Bad Gateway", True),
+                            ("500 Internal Server Error", True),
+                            ("400 Bad Request: message is too long", False),
+                            ("403 Forbidden: bot was blocked by the user", False)):
+        assert _is_transient(TelegramError(f"sendMessage failed: {code}")) is transient, code
+
+    class _Stub:
+        """A session that answers normally, so the failure lands on the SEND."""
+        lang = DEFAULT_LANG
+        state = type("S", (), {"value": "consent"})()
+        def handle(self, answer):
+            return [Reply(text="next question", buttons=(Button("a", "a"),))]
+
+    keep = TelegramBot(schemes, token="test-token")
+    keep.sessions["31"] = _Stub()
+    keep._active_keyboard["31"] = 7
+    update = {"update_id": 1, "callback_query": {"id": "z", "data": "land:landless",
+              "message": {"chat": {"id": 31}, "message_id": 7}}}
+    mod._call = lambda token, method, payload: ({"result": [update]} if method == "getUpdates"
+        else (_ for _ in ()).throw(TelegramError("sendMessage failed: 429 Too Many Requests")))
+    try:
+        keep.poll_once()
+        raise AssertionError("a rate limit must reach run_forever, which backs off")
+    except TelegramError:
+        pass
+    assert "31" in keep.sessions, "a rate limit must not discard a worker's answers"
+    # ! The keyboard stays retired, and that is deliberate. The handler already
+    # ! ran before the send failed, so the conversation may have advanced even
+    # ! though the worker never saw the next question. Putting the old keyboard
+    # ! back would let its buttons answer the NEW state — the exact bug the
+    # ! message_id guard exists to stop. Dead buttons plus a "no longer active"
+    # ! toast is the honest outcome; the worker restarts with /start.
+    # ! Known limitation: the update's offset has already advanced, so the lost
+    # ! reply is not redelivered. Fixing that needs the offset to move only after
+    # ! a turn commits, which is a bigger change than this one and risks double
+    # ! -writing events. Preserving the answers is the improvement here.
+    assert keep._active_keyboard.get("31") is None
+
     print("telegram.py OK")
 
 
