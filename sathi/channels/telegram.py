@@ -188,7 +188,7 @@ class TelegramBot:
                 # ! Track the upload too, or /clear leaves it behind. _track
                 # ! ignores a missing id, so a malformed response is harmless.
                 self._track(chat_id, (up.get("result") or {}).get("message_id"))
-            except (OSError, urllib.error.URLError):
+            except Exception:  # noqa: BLE001 — optional audio cannot invalidate delivered text
                 pass  # * audio is an extra; the text already carried the message
         if reply.document is not None:
             filename, blob = reply.document
@@ -424,6 +424,22 @@ class TelegramBot:
                 # ! One broken conversation must never take the bot down while
                 # ! other workers are mid-session. Log it and keep serving.
                 print(f"[telegram] update {update.get('update_id')} failed: {e}")
+                # ! The turn may have partly changed the profile or sent only
+                # ! some replies. Discard it; replay could record answers twice.
+                try:
+                    message = (update.get("message") or
+                               (update.get("callback_query") or {}).get("message") or {})
+                    chat_id = (message.get("chat") or {}).get("id")
+                    if chat_id is None:
+                        continue  # * No destination for a recovery notice.
+                    chat_id = str(chat_id)
+                    convo = self.sessions.pop(chat_id, None)
+                    self._active_keyboard.pop(chat_id, None)
+                    lang = convo.lang if convo else self._lang.get(chat_id, DEFAULT_LANG)
+                    self._lang[chat_id] = lang
+                    self.send(chat_id, Reply(text=s("errors.screening_stopped", lang)))
+                except Exception as recovery_error:  # noqa: BLE001 — recovery must not stop polling
+                    print(f"[telegram] recovery notice failed: {type(recovery_error).__name__}")
         return len(updates)
 
     def run_forever(self) -> None:
@@ -641,12 +657,124 @@ def _self_check() -> None:
             del bot.poll_once
         assert slept == [1.0, 2.0, 4.0, 8.0], f"backoff did not double: {slept}"
 
-        # ! A crash inside one conversation must not escape the poll loop.
-        bot.sessions["42"].handle = lambda a: (_ for _ in ()).throw(RuntimeError("boom"))
-        mod._call = lambda token, method, payload: {"result": [
-            {"update_id": 7, "message": {"chat": {"id": 42}, "text": "x"}}
-        ]} if method == "getUpdates" else {"result": []}
-        bot.poll_once()  # must not raise
+        # ! A failed turn needs both a reset and a visible restart instruction.
+        # ! Exercise the poll boundary, including a second chat in the same batch.
+        for lang in ("hi", "en"):
+            for failure in ("handler", "question", "document", "notice"):
+                attempts, delivered, pending = [], [], []
+                armed = False
+
+                def _recovery_wire(token, method, payload):
+                    if method == "getUpdates":
+                        batch = pending[:]
+                        pending.clear()
+                        return {"ok": True, "result": batch}
+                    if method == "answerCallbackQuery":
+                        return {"ok": True, "result": True}
+                    assert method == "sendMessage", method
+                    attempts.append(payload)
+                    if armed and payload["chat_id"] == "42":
+                        if failure == "notice" or (failure == "question" and
+                                payload["text"] == s("questions.state", lang)):
+                            raise TelegramError("sendMessage failed: injected failure")
+                    mid = 1000 + len(attempts)
+                    delivered.append((mid, payload))
+                    return {"ok": True, "result": {"message_id": mid}}
+
+                def _fail_handler(answer):
+                    raise RuntimeError("injected handler failure")
+
+                def _fail_upload(*args, **kwargs):
+                    raise OSError("injected upload failure")
+
+                mod._call, mod._upload = _recovery_wire, _fail_upload
+                recovering = TelegramBot(schemes, token="test-token")
+                for chat in (42, 99):
+                    for answer in ("/start", f"lang:{lang}"):
+                        recovering.handle_update({"message": {
+                            "chat": {"id": chat}, "text": answer}})
+                affected = recovering.sessions["42"]
+                neighbour = recovering.sessions["99"]
+                assert affected.state.value == neighbour.state.value == "consent"
+                answer = "consent_yes"
+                if failure in ("handler", "notice"):
+                    affected.handle = _fail_handler
+                elif failure == "document":
+                    for answer in ("consent_yes", "state:UK", "30", "occ:construction",
+                                   "inc:upto_5000", "land:landless", "fam:4", "yes",
+                                   "no", "no", "no", "next", "next"):
+                        recovering.handle_update({"message": {
+                            "chat": {"id": 42}, "text": answer}})
+                    assert affected.state.value == "pack"
+                    answer = "yes"
+                keyboard_id = next(mid for mid, p in reversed(delivered)
+                                   if p["chat_id"] == "42" and "reply_markup" in p)
+                pending.extend([
+                    {"update_id": 7, "callback_query": {
+                        "id": "failure", "data": answer,
+                        "message": {"chat": {"id": 42}, "message_id": keyboard_id}}},
+                    {"update_id": 8, "message": {"chat": {"id": 99}, "text": "consent_yes"}},
+                ])
+                armed = True
+                assert recovering.poll_once() == 2
+                assert "42" not in recovering.sessions, f"{failure}: broken session survived"
+                assert "42" not in recovering._active_keyboard
+                notice = s("errors.screening_stopped", lang)
+                assert "/start" in notice
+                assert sum(p["chat_id"] == "42" and p["text"] == notice for p in attempts) == 1
+                assert any(p["chat_id"] == "42" and p["text"] == notice
+                           for _, p in delivered) == (failure != "notice")
+                assert recovering.sessions["99"] is neighbour
+                assert neighbour.state.value == "state", "another chat stopped progressing"
+                assert delivered[-1][1]["text"] == s("questions.state", lang)
+                assert recovering._offset == 9
+                before = len(attempts)
+                assert recovering.poll_once() == 0 and len(attempts) == before, "delivery was retried"
+
+                armed = False
+                recovering.handle_update({"message": {"chat": {"id": 42}, "text": "/start"}})
+                restarted = recovering.sessions["42"]
+                assert restarted is not affected and restarted.state.value == "language"
+                assert restarted.lang == lang
+                assert restarted.profile.age is None
+                assert recovering._active_keyboard["42"] == delivered[-1][0]
+
+        # ! Audio is optional even when its response is malformed. The real
+        # ! question handler still runs; only the upload crosses a fake wire.
+        from pathlib import Path
+
+        for audio_error in (OSError, TelegramError, ValueError):
+            attempts, delivered, pending = [], [], []
+            armed = False
+            mod._call = _recovery_wire
+            recovering = TelegramBot(schemes, token="test-token")
+            for answer in ("/start", "lang:en"):
+                recovering.handle_update({"message": {"chat": {"id": 42}, "text": answer}})
+            current = recovering.sessions["42"]
+            real_handle = current.handle
+            uploaded = []
+
+            def _with_audio(answer):
+                replies = real_handle(answer)
+                replies[0].audio = Path(__file__)  # * Existing bytes; no generated test file.
+                return replies
+
+            def _broken_audio(*args, **kwargs):
+                uploaded.append(True)
+                raise audio_error("injected audio failure")
+
+            current.handle = _with_audio
+            mod._upload = _broken_audio
+            pending.append({"update_id": 10, "message": {
+                "chat": {"id": 42}, "text": "consent_yes"}})
+            before = len(delivered)
+            assert recovering.poll_once() == 1
+            assert uploaded == [True], "the audio failure was never reached"
+            assert recovering.sessions.get("42") is current, "optional audio reset the session"
+            assert current.state.value == "state"
+            assert len(delivered) == before + 1
+            assert delivered[-1][1]["text"] == s("questions.state", "en")
+            assert recovering._active_keyboard["42"] == delivered[-1][0]
 
         # ! A delivered pack carries the answer recap. It used to survive /clear
         # ! because send() threw away the id _upload() hands back.
