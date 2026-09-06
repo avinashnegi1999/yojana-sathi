@@ -244,7 +244,12 @@ def test_llm_path_and_button_path_agree():
         schemes = _fixture_schemes(directory)
 
         buttons_only = Conversation(schemes, None)
-        expected = _answer_all(buttons_only, tax=NO)[0].text
+        # ! Compare EVERY reply, not reply[0]. reply[0] is the answer recap,
+        # ! which is built from the profile and is identical whatever the engine
+        # ! decided — so the old assertion could not see a changed result at all.
+        # ! reply[1] is the verdict. Comparing the whole list means a new reply
+        # ! inserted at the front cannot quietly blind this test again.
+        expected = [r.text for r in _answer_all(buttons_only, tax=NO)]
 
         saved, real_ask = os.environ.get("LLM_API_KEY"), llm._ask
         os.environ["LLM_API_KEY"] = "test-not-a-real-key"
@@ -266,7 +271,7 @@ def test_llm_path_and_button_path_agree():
             with_llm.handle(NO)   # income tax
             with_llm.handle(NO)   # EPFO/ESIC
             with_llm.handle(NO)   # NPS
-            got = with_llm.handle(NEXT)[0].text
+            got = [r.text for r in with_llm.handle(NEXT)]
         finally:
             llm._ask = real_ask
             os.environ.pop("LLM_API_KEY", None)
