@@ -12,6 +12,7 @@
 # ! log's session id is an unrelated uuid4 — see sathi/metrics/events.py.
 """
 
+import http.client
 import json
 import mimetypes
 import os
@@ -27,7 +28,9 @@ from sathi.core.schemes import Scheme
 from sathi.metrics.events import EventLog
 
 class TelegramError(Exception):
-    pass
+    def __init__(self, message: str, status: int | None = None) -> None:
+        super().__init__(message)
+        self.status = status
 
 
 API = "https://api.telegram.org/bot{token}/{method}"
@@ -88,6 +91,11 @@ def _call(token: str, method: str, payload: dict) -> dict:
         data=json.dumps(payload).encode("utf-8"),
         headers={"content-type": "application/json"},
     )
+    return _request(req, method)
+
+
+def _request(req: urllib.request.Request, method: str) -> dict:
+    """Classify failures at the wire boundary, for JSON and uploads alike."""
     try:
         with urllib.request.urlopen(req, timeout=_TIMEOUT_S) as resp:
             return json.loads(resp.read().decode("utf-8"))
@@ -95,10 +103,23 @@ def _call(token: str, method: str, payload: dict) -> dict:
         # ! Telegram puts the actual reason in the body. A bare "400 Bad Request"
         # ! in the log costs an hour; the description costs nothing to keep.
         try:
-            detail = json.loads(e.read().decode("utf-8")).get("description", "")
-        except Exception:  # noqa: BLE001 — the error path must not raise
-            detail = ""
-        raise TelegramError(f"{method} failed: {e.code} {detail or e.reason}") from e
+            body = json.loads(e.read().decode("utf-8"))
+        except (ValueError, OSError, http.client.HTTPException):
+            body = {}
+        if not isinstance(body, dict):
+            body = {}
+        detail = body.get("description", "")
+        parameters = body.get("parameters") or {}
+        retry_after = parameters.get("retry_after") if isinstance(parameters, dict) else None
+        # ! Wait here so even optional audio or callback acknowledgements cannot
+        # ! swallow a 429 and immediately issue another request. No delivery retry.
+        if e.code == 429 and isinstance(retry_after, int) and retry_after > 0:
+            time.sleep(retry_after)
+        raise TelegramError(f"{method} failed: {e.code} {detail or e.reason}", e.code) from e
+    except (OSError, http.client.HTTPException, ValueError) as e:
+        # ! A reset/truncated response is a network failure. Catch it here so a
+        # ! genuine file or parsing error in a handler still takes the reset path.
+        raise urllib.error.URLError(f"{method}: {type(e).__name__}") from e
 
 
 def _upload(token: str, chat_id: str, filename: str, blob: bytes, caption: str) -> dict:
@@ -126,25 +147,19 @@ def _upload(token: str, chat_id: str, filename: str, blob: bytes, caption: str) 
         data=body,
         headers={"content-type": f"multipart/form-data; boundary={boundary}"},
     )
-    with urllib.request.urlopen(req, timeout=_TIMEOUT_S) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    return _request(req, "sendDocument")
 
 
 # * Telegram failures split in two, and the difference decides whether a worker
 # * keeps their answers. "Too Many Requests" and the 5xx family mean the API is
 # * busy or broken and will work again shortly — the conversation is fine. A 400
-# * means we sent something Telegram refused, which is our bug and leaves the turn
-# * half-applied. Matching on the code in the message rather than carrying the
-# * status through TelegramError keeps this to one place; the codes are the two
-# * digits after "failed: ".
-_TRANSIENT_CODES = ("429", "500", "502", "503", "504")
+# * means we sent something Telegram refused, which leaves the turn half-applied.
+# * Use the HTTP status, never a number that happens to occur in its description.
 
 
-def _is_transient(err: Exception) -> bool:
+def _is_transient(err: TelegramError) -> bool:
     """True when retrying later is the right response and the session should live."""
-    text = str(err)
-    return any(f" {code} " in f" {text} " or f": {code} " in text
-               for code in _TRANSIENT_CODES)
+    return err.status == 429 or (err.status is not None and 500 <= err.status < 600)
 
 
 def keyboard(buttons: tuple[Button, ...]) -> dict | None:
@@ -239,13 +254,17 @@ class TelegramBot:
                        {"chat_id": chat_id, "message_id": message_id}).get("ok")
             return "deleted" if ok else "error"
         except TelegramError as e:
+            if _is_transient(e):
+                raise  # ! Stop clearing on an outage; let the poller back off.
             detail = str(e).lower()
             if "not found" in detail:
                 return "absent"
             if "can't be deleted" in detail or "cant be deleted" in detail:
                 return "refused"
             return "error"
-        except (urllib.error.URLError, OSError):
+        except urllib.error.URLError:
+            raise
+        except OSError:
             return "error"
 
     @staticmethod
@@ -273,7 +292,13 @@ class TelegramBot:
         try:
             return bool(_call(self.token, "deleteMessages",
                               {"chat_id": chat_id, "message_ids": ids}).get("ok"))
-        except (TelegramError, urllib.error.URLError, OSError):
+        except TelegramError as e:
+            if _is_transient(e):
+                raise  # ! A busy API must not trigger per-message fallback.
+            return False
+        except urllib.error.URLError:
+            raise
+        except OSError:
             return False
 
     def clear_chat(self, chat_id: str, lang: str = "hi",
@@ -440,7 +465,8 @@ class TelegramBot:
             except (urllib.error.URLError, TimeoutError):
                 # ! Telegram is unreachable. That says nothing about this worker's
                 # ! conversation, so do NOT discard it. Re-raise so run_forever
-                # ! backs off; the session stays and their next tap carries on.
+                # ! backs off. Answers stay in memory, but a failed question send
+                # ! leaves no live keyboard; preserving state is not redelivery.
                 # * Caught before the OSError family below on purpose: URLError is
                 # * an OSError, but a plain OSError is usually ours (a missing pack
                 # * file, a bad handle) and that DOES leave the turn half-applied.
@@ -959,7 +985,8 @@ def _self_check() -> None:
                             ("500 Internal Server Error", True),
                             ("400 Bad Request: message is too long", False),
                             ("403 Forbidden: bot was blocked by the user", False)):
-        assert _is_transient(TelegramError(f"sendMessage failed: {code}")) is transient, code
+        assert _is_transient(TelegramError(f"sendMessage failed: {code}",
+                                         int(code.split()[0]))) is transient, code
 
     class _Stub:
         """A session that answers normally, so the failure lands on the SEND."""
@@ -974,7 +1001,7 @@ def _self_check() -> None:
     update = {"update_id": 1, "callback_query": {"id": "z", "data": "land:landless",
               "message": {"chat": {"id": 31}, "message_id": 7}}}
     mod._call = lambda token, method, payload: ({"result": [update]} if method == "getUpdates"
-        else (_ for _ in ()).throw(TelegramError("sendMessage failed: 429 Too Many Requests")))
+        else (_ for _ in ()).throw(TelegramError("sendMessage failed: 429 Too Many Requests", 429)))
     try:
         keep.poll_once()
         raise AssertionError("a rate limit must reach run_forever, which backs off")
@@ -988,10 +1015,138 @@ def _self_check() -> None:
     # ! message_id guard exists to stop. Dead buttons plus a "no longer active"
     # ! toast is the honest outcome; the worker restarts with /start.
     # ! Known limitation: the update's offset has already advanced, so the lost
-    # ! reply is not redelivered. Fixing that needs the offset to move only after
-    # ! a turn commits, which is a bigger change than this one and risks double
-    # ! -writing events. Preserving the answers is the improvement here.
+    # ! reply is not redelivered. Retrying delivery separately could leave the
+    # ! offset and events alone, but delivery retries/queues are outside this
+    # ! change. Preserving answers in memory does not restore the missing prompt.
     assert keep._active_keyboard.get("31") is None
+
+    # ! Exercise the real JSON and multipart boundaries, not an invented
+    # ! TelegramError from a mock: HTTPError itself is also a URLError.
+    import io
+    import http.client
+
+    real_urlopen, real_sleep = urllib.request.urlopen, time.sleep
+    mod._call, mod._upload = real_call, real_upload
+    try:
+        for wire in (
+            lambda: real_call("test-token", "sendMessage", {"chat_id": "31", "text": "x"}),
+            lambda: real_upload("test-token", "31", "pack.html", b"x", ""),
+        ):
+            for status in (400, 403, 429, 500, 501, 502, 503, 504):
+                def _http_failure(req, timeout):
+                    # ! A number in the description must not become the status.
+                    body = json.dumps({"description": "request 502 failed",
+                                       "parameters": {"retry_after": 30}}).encode()
+                    raise urllib.error.HTTPError(req.full_url, status, "failure", {},
+                                                 io.BytesIO(body))
+
+                urllib.request.urlopen = _http_failure
+                pauses = []
+                time.sleep = pauses.append
+                try:
+                    wire()
+                    raise AssertionError("HTTP failure was swallowed")
+                except TelegramError as error:
+                    assert _is_transient(error) == (status == 429 or status >= 500), status
+                assert pauses == ([30] if status == 429 else []), (status, pauses)
+
+            for failure in (ConnectionResetError("connection reset"),
+                            http.client.IncompleteRead(b"partial")):
+                class _BrokenRead:
+                    def __enter__(self):
+                        return self
+                    def __exit__(self, *args):
+                        pass
+                    def read(self):
+                        raise failure
+
+                urllib.request.urlopen = lambda *args, **kwargs: _BrokenRead()
+                try:
+                    wire()
+                    raise AssertionError("broken response was swallowed")
+                except urllib.error.URLError:
+                    pass  # * The poller preserves sessions for network failures.
+
+        # ! Trace those wire failures through a real, advancing conversation.
+        for status in (400, 403, None):
+            recovering = TelegramBot(schemes, token="test-token")
+            current = recovering._conversation("31")
+            current.handle("lang:en")
+            assert current.state.value == "consent"
+            real_handle = current.handle
+
+            def _with_document(answer):
+                replies = real_handle(answer)
+                replies[0].document = ("pack.html", b"x")
+                return replies
+
+            current.handle = _with_document
+            recovering._active_keyboard["31"] = 7
+            delivered, failures = [], []
+
+            def _recovering_wire(req, timeout):
+                method = req.full_url.rsplit("/", 1)[1]
+                if method == "getUpdates":
+                    result = [{"update_id": 1, "message": {
+                        "chat": {"id": 31}, "text": "consent_yes"}}]
+                else:
+                    target = "sendMessage" if status is None else "sendDocument"
+                    if method == target and not failures:
+                        failures.append(method)
+                        if status is None:
+                            raise ConnectionResetError("connection reset")
+                        raise urllib.error.HTTPError(req.full_url, status, "failure", {},
+                                                     io.BytesIO(b'{}'))
+                    if method == "sendMessage":
+                        delivered.append(json.loads(req.data)["text"])
+                    result = {"message_id": 8}
+                return io.BytesIO(json.dumps({"ok": True, "result": result}).encode())
+
+            urllib.request.urlopen = _recovering_wire
+            try:
+                recovering.poll_once()
+                assert status is not None, "connection reset did not reach backoff"
+            except urllib.error.URLError:
+                assert status is None, "permanent upload failure bypassed recovery"
+            assert failures, "wire failure was never exercised"
+            assert current.state.value == "state", "test never advanced the intake"
+            assert recovering._offset == 2
+            assert "31" not in recovering._active_keyboard
+            if status is None:
+                assert recovering.sessions.get("31") is current
+                assert not delivered, "network outage caused a restart notice"
+            else:
+                assert "31" not in recovering.sessions
+                assert delivered[-1] == s("errors.screening_stopped", "en")
+    finally:
+        urllib.request.urlopen, time.sleep = real_urlopen, real_sleep
+        mod._call, mod._upload = real_call, real_upload
+
+    # ! A failed batch must not turn a rate limit/outage into 1000 more requests.
+    try:
+        for deep in (False, True):
+            for failure in (TelegramError("busy", 429), TelegramError("unavailable", 503),
+                            urllib.error.URLError("offline")):
+                clearing = TelegramBot(schemes, token="test-token")
+                if not deep:
+                    clearing._track("31", 1200)
+                attempts = []
+
+                def _failed_delete(token, method, payload):
+                    attempts.append(method)
+                    raise failure
+
+                mod._call = _failed_delete
+                try:
+                    clearing.clear_chat("31", from_message_id=1200, deep=deep)
+                    raise AssertionError("clear swallowed a temporary API failure")
+                except (TelegramError, urllib.error.URLError):
+                    pass
+                assert attempts == ["deleteMessages" if deep else "deleteMessage"], attempts
+                if not deep:
+                    assert clearing._sent["31"], "failed deletion forgot tracked messages"
+    finally:
+        mod._call = real_call
 
     print("telegram.py OK")
 
