@@ -124,8 +124,35 @@ class Conversation:
 
     def set_language(self, lang: str) -> list[Reply]:
         """/language — switch mid-conversation, keeping every answer given so far."""
+        was = self.lang
         self.lang = content.normalise_lang(lang)
+        if was != self.lang and self._required_docs:
+            self._relabel_documents(was)
         return [Reply(text=self._s("language.changed")), self._current_question()]
+
+    def _relabel_documents(self, was: str) -> None:
+        """Carry document answers across a language switch.
+
+        # ! Both the buttons and the pack look documents up BY NAME, and the name
+        # ! is language-specific. Without this, switching language after ticking
+        # ! documents left the chat saying the worker had everything while the
+        # ! pack listed the same documents as missing — the worker walks to the
+        # ! centre unprepared, which is the exact trip this project exists to
+        # ! make worthwhile.
+        # * Pair by position WITHIN each scheme, never by index into the deduped
+        # * required list: that list drops repeats, and two schemes can share a
+        # * document name in one language without sharing it in the other, so the
+        # * two lists are not guaranteed to be the same length. Scheme.docs()
+        # * already refuses to use a translation of a different length, so
+        # * position within one scheme is the one pairing that is always sound.
+        """
+        rename: dict[str, str] = {}
+        for scheme in self.schemes.values():
+            for before, after in zip(scheme.docs(was), scheme.docs(self.lang)):
+                rename[before] = after
+        self._have_docs = {rename.get(d, d) for d in self._have_docs}
+        self._required_docs = checklist.required_documents(
+            self._results, self.schemes, self.lang)
 
     def _current_question(self) -> Reply:
         """Re-ask whatever we are waiting on, in the current language."""
@@ -704,6 +731,33 @@ def _self_check() -> None:
         c6.start(); c6.handle(LANG_HI); c6.handle(consent.YES); c6.handle("state:UK")
         c6.handle(good)
         assert c6.profile.age == want, f"{good!r} must be accepted as {want}"
+
+    # * A language switch must carry document answers with it. Before this, the
+    # * chat said "you have everything" while the pack listed the same documents
+    # * as missing, and the worker walked to the centre without the paperwork.
+    from sathi.core.schemes import load_all as _load_all
+    live = _load_all()
+    assert live, "shipped scheme files must load for this check to mean anything"
+    sample = next(iter(live.values()))
+    en_doc, hi_doc = sample.docs("en")[0], sample.docs("hi")[0]
+    assert en_doc != hi_doc, "pick a scheme whose translation actually differs"
+
+    c7 = Conversation(live)
+    c7.lang = "en"
+    c7._results = ()
+    c7._required_docs = (en_doc,)
+    c7._have_docs = {en_doc}
+    c7.lang = "hi"
+    c7._relabel_documents("en")
+    assert hi_doc in c7._have_docs, \
+        "a document ticked in English must stay ticked after switching to Hindi"
+    assert en_doc not in c7._have_docs, \
+        "the stale English label must not linger — the pack compares Hindi names"
+
+    # * And back again, so neither direction is the special case.
+    c7.lang = "en"
+    c7._relabel_documents("hi")
+    assert c7._have_docs == {en_doc}, c7._have_docs
 
     print("flow.py OK")
 
