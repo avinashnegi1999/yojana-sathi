@@ -109,6 +109,14 @@ known_schemes = "schemes already held"
 occupation = """You said: “{said}”
 I am recording this as “{label}”. Is that right?"""
 rejected = "No problem. Please pick from the list below."
+tax = """You selected:
+Monthly income: {income}
+Income tax: Yes
+
+Keep these answers?"""
+keep_both = "Keep both"
+change_income = "Change income"
+change_tax = "Change tax answer"
 
 # =====================================================================
 [result]

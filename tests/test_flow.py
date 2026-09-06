@@ -13,6 +13,7 @@
 import os
 import sys
 import tempfile
+from dataclasses import replace
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -23,6 +24,7 @@ from sathi.conversation.flow import (
     DK, LANG_EN, LANG_HI, NEXT, NO, YES, Conversation, State,
 )
 from sathi.core.content import s
+from sathi.core.profile import INCOME_BANDS
 from sathi.core.schemes import load_all
 from sathi.metrics.events import EventLog
 from sathi.metrics.report import _connect, numbers, render
@@ -123,6 +125,10 @@ def _answer_all(convo: Conversation, *, age="30", tax=DK, epfo=NO, nps=NO, known
     convo.handle("fam:4")
     convo.handle(YES)  # bank account
     convo.handle(tax)
+    if tax == YES:
+        assert convo.state is State.TAX_CONFIRM
+        convo.handle("tax:keep")
+    assert convo.state is State.EPFO_ESIC
     # ! EPFO/ESIC and NPS are separate questions: PM-SYM bars all three, e-Shram
     # ! only the first two, so one answer cannot serve both schemes.
     convo.handle(epfo)
@@ -130,6 +136,132 @@ def _answer_all(convo: Conversation, *, age="30", tax=DK, epfo=NO, nps=NO, known
     for code in known:
         convo.handle(f"known:{code}")
     return convo.handle(NEXT)
+
+
+def test_tax_yes_confirmation_and_isolated_edits():
+    schemes = load_all()
+    log = EventLog(":memory:")
+    try:
+        for lang in ("hi", "en"):
+            for band in INCOME_BANDS:
+                for choice in ("keep", "income", NO, DK):
+                    convo = Conversation(schemes, log)
+                    for answer in (f"lang:{lang}", "consent_yes", "state:UK", "30",
+                                   "occ:construction", f"inc:{band}", "land:landless", "fam:4", YES):
+                        convo.handle(answer)
+                    assert convo.state is State.TAX
+                    before = replace(convo.profile)
+                    reply = convo.handle(YES)[0]
+                    assert convo.state.value == "tax_confirm", "tax Yes skipped confirmation"
+                    confirmed = replace(before, is_income_tax_payer=True)
+                    assert convo.profile == confirmed
+                    assert s(f"income_bands.{band}", lang) in reply.text
+                    assert reply.button_values() == {"tax:keep", "tax:income", "tax:answer"}
+                    assert all(b.label.strip() for b in reply.buttons)
+                    if lang == "en":
+                        assert not _devanagari(reply.text + "".join(b.label for b in reply.buttons))
+                    # ! Junk and a language round trip must not approve anything.
+                    convo.handle("unexpected")
+                    convo.set_language("en" if lang == "hi" else "hi")
+                    convo.set_language(lang)
+                    assert convo.state.value == "tax_confirm" and convo.profile == confirmed
+                    if choice == "income":
+                        reply = convo.handle("tax:income")[0]
+                        assert reply.text == s("questions.income_band", lang)
+                        assert convo.profile == confirmed, "opening an edit changed an answer"
+                        convo.handle("invalid_band")
+                        assert convo.state.value == "tax_income" and convo.profile == confirmed
+                        new_band = "above_25000" if band != "above_25000" else "no_income"
+                        reply = convo.handle(f"inc:{new_band}")[0]
+                        confirmed = replace(confirmed, income_band=new_band)
+                        assert convo.profile == confirmed, "income edit changed another field"
+                        assert convo.state.value == "tax_confirm"
+                        assert s(f"income_bands.{new_band}", lang) in reply.text
+                        convo.handle("tax:keep")
+                    elif choice == "keep":
+                        convo.handle("tax:keep")
+                    else:
+                        reply = convo.handle("tax:answer")[0]
+                        assert reply.text == s("questions.is_income_tax_payer", lang)
+                        assert convo.profile == confirmed
+                        assert reply.button_values() == {YES, NO, DK}
+                        convo.handle(choice)
+                        confirmed = replace(confirmed, is_income_tax_payer=False if choice == NO else None)
+                    assert convo.profile == confirmed
+                    assert convo.state is State.EPFO_ESIC, "an edit restarted the intake or looped"
+                    for answer in (NO, NO, NEXT):
+                        convo.handle(answer)
+                    assert convo.state is State.PACK  # * Shipped schemes remain unsigned.
+                    convo.handle(NO)
+                    assert convo.state is State.DONE
+        # ! No and Don't know proceed normally; neither asks for confirmation.
+        for answer, value in ((NO, False), (DK, None)):
+            convo = Conversation(schemes)
+            for step in (LANG_EN, "consent_yes", "state:UK", "30", "occ:construction",
+                         "inc:upto_5000", "land:landless", "fam:4", YES):
+                convo.handle(step)
+            before = replace(convo.profile)
+            convo.handle(answer)
+            assert convo.state is State.EPFO_ESIC
+            assert convo.profile == replace(before, is_income_tax_payer=value)
+    finally:
+        log.close()
+
+
+def test_tax_confirmation_keyboard_retires_and_reasks_through_telegram():
+    import sathi.channels.telegram as telegram
+    from unittest.mock import patch
+
+    delivered, acks = [], []
+
+    def wire(token, method, payload):
+        if method == "answerCallbackQuery":
+            acks.append(payload)
+            return {"ok": True, "result": True}
+        assert method == "sendMessage"
+        mid = 100 + len(delivered)
+        delivered.append((mid, payload))
+        return {"ok": True, "result": {"message_id": mid}}
+
+    bot = telegram.TelegramBot(load_all(), token="test-token")
+
+    def tap(value, mid=None):
+        bot.handle_update({"callback_query": {
+            "id": str(len(acks)), "data": value,
+            "message": {"chat": {"id": 42}, "message_id": mid if mid is not None else delivered[-1][0]},
+        }})
+
+    with patch.object(telegram, "_call", wire):
+        bot.handle_update({"message": {"chat": {"id": 42}, "text": "/start"}})
+        for answer in (LANG_EN, "consent_yes", "state:UK"):
+            tap(answer)
+        bot.handle_update({"message": {"chat": {"id": 42}, "text": "30"}})
+        for answer in ("occ:construction", "inc:upto_5000", "land:landless", "fam:4", YES, YES):
+            tap(answer)
+        convo = bot.sessions["42"]
+        assert convo.state.value == "tax_confirm"
+        old_confirm = delivered[-1][0]
+        tap("tax:income")
+        income_keyboard = delivered[-1][0]
+        before = replace(convo.profile)
+        tap("tax:keep", old_confirm)
+        assert convo.state.value == "tax_income" and convo.profile == before
+        assert acks[-1].get("text") == s("errors.stale_button", "en")
+        tap("inc:above_25000", income_keyboard)
+        assert convo.state.value == "tax_confirm" and convo.profile.income_band == "above_25000"
+        replacement = delivered[-1][0]
+        assert replacement != old_confirm
+        tap("tax:keep", old_confirm)
+        assert convo.state.value == "tax_confirm"
+        tap("tax:answer", replacement)
+        assert convo.state is State.TAX
+        tap(YES)
+        assert convo.state.value == "tax_confirm"
+        current_confirm = delivered[-1][0]
+        tap("tax:keep", current_confirm)
+        assert convo.state is State.EPFO_ESIC and convo.profile.is_income_tax_payer is True
+        tap("tax:answer", current_confirm)
+        assert convo.state is State.EPFO_ESIC and convo.profile.is_epfo_or_esic_member is None
 
 
 def test_full_session_with_no_llm_key_reaches_a_pack():

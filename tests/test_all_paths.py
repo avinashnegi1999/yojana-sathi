@@ -194,6 +194,8 @@ def test_every_button_in_both_languages():
                     frontier.append(path + ["30" if convo.state is State.AGE else "ईंट का काम"])
 
             assert ended, f"[{code}] no path ever reached the end of a session"
+            assert {State.TAX_CONFIRM, State.TAX_INCOME} <= {key[0] for key in visited}, \
+                "the exhaustive button walk missed the tax confirmation or income edit"
             print(f"  .. {code}: {explored} paths walked, {ended} completed sessions")
 
         # ! Whatever those hundreds of sessions wrote, it must still be coarse.
@@ -230,6 +232,7 @@ def test_commands_at_every_state():
         walk = [LANG_EN, "consent_yes", "state:UK", "30", "occ:construction",
                 "inc:upto_5000", "land:landless", "fam:4", "yes", "no", "no", "no",
                 "next", "next", "yes"]
+        reached = set()
 
         for stop in range(len(walk) + 1):
             for command in ("help", "about", "privacy"):
@@ -248,6 +251,7 @@ def test_commands_at_every_state():
             for step in walk[:stop]:
                 convo.handle(step)
             state_before = convo.state
+            reached.add(state_before)
             for reply in convo.scheme_list():
                 _check_reply(reply, walk[:stop], "en", problems)
             if convo.state is not state_before:
@@ -263,6 +267,9 @@ def test_commands_at_every_state():
             if convo2.profile != profile_before:
                 problems.append(f"/language at {state_before.value} lost an answer")
 
+        assert reached == set(State) - {
+            State.OCCUPATION_FREE, State.OCCUPATION_CONFIRM, State.TAX_CONFIRM, State.TAX_INCOME,
+        }, "the tax-No command walk must reach DONE without entering confirmation"
     assert not problems, "\n".join(f"  - {p}" for p in sorted(set(problems))[:25])
 
 
@@ -283,6 +290,7 @@ def test_every_command_through_the_adapter_at_every_state():
         walk = ["lang:en", "consent_yes", "state:UK", "30", "occ:construction",
                 "inc:upto_5000", "land:landless", "fam:4", "yes", "no", "no", "no",
                 "next", "next", "yes"]
+        reached = set()
 
         sent: list[tuple[str, dict]] = []
         # ! The adapter accepts a tap only from the keyboard it last delivered,
@@ -316,6 +324,7 @@ def test_every_command_through_the_adapter_at_every_state():
                     # * A real worker arrives via /start; that is what puts the
                     # * first keyboard on screen. The walk used to skip it and
                     # * invent ids instead.
+                    path_start = len(sent)
                     bot.handle_update({"message": {
                         "chat": {"id": int(chat)}, "message_id": 1, "text": "/start"}})
                     for i, step in enumerate(walk[:stop]):
@@ -330,6 +339,16 @@ def test_every_command_through_the_adapter_at_every_state():
                         bot.handle_update({"callback_query": {
                             "id": str(i), "data": step,
                             "message": {"chat": {"id": int(chat)}, "message_id": mid}}})
+                    assert not any(m == "answerCallbackQuery" and p.get("text")
+                                   for m, p in sent[path_start:]), "a walk tap was rejected as stale"
+                    if stop == len(walk):
+                        assert chat not in bot.sessions
+                        assert sent[-1][0] == "sendMessage"
+                        assert sent[-1][1]["text"] == mod.s("closing.done", "en")
+                        reached.add(State.DONE)
+                    else:
+                        assert chat in bot.sessions, "walk lost its session before DONE"
+                        reached.add(bot.sessions[chat].state)
                     before = len(sent)
                     try:
                         bot.handle_update({"message": {
@@ -351,6 +370,9 @@ def test_every_command_through_the_adapter_at_every_state():
         finally:
             mod._call, mod._upload = real_call, real_upload
 
+        assert reached == set(State) - {
+            State.OCCUPATION_FREE, State.OCCUPATION_CONFIRM, State.TAX_CONFIRM, State.TAX_INCOME,
+        }, "the adapter's tax-No walk must reach DONE without entering confirmation"
     assert not problems, "\n".join(f"  - {p}" for p in sorted(set(problems))[:25])
 
 

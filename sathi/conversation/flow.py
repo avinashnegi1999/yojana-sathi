@@ -41,6 +41,8 @@ class State(Enum):
     FAMILY = "family_size"
     BANK = "has_bank_account"
     TAX = "is_income_tax_payer"
+    TAX_CONFIRM = "tax_confirm"
+    TAX_INCOME = "tax_income"
     EPFO_ESIC = "is_epfo_or_esic_member"
     NPS = "is_nps_member"
     KNOWN_SCHEMES = "known_schemes"
@@ -165,12 +167,14 @@ class Conversation:
             State.OCCUPATION_FREE: lambda: Reply(text=self._s("questions.occupation_free")),
             State.OCCUPATION_CONFIRM: self._ask_occupation,
             State.INCOME: self._ask_income,
+            State.TAX_INCOME: self._ask_income,
             State.LAND: self._ask_land,
             State.FAMILY: self._ask_family,
             State.BANK: lambda: Reply(text=self._s("questions.has_bank_account"),
                                       buttons=_yes_no(self.lang)),
             State.TAX: lambda: Reply(text=self._s("questions.is_income_tax_payer"),
                                      buttons=_yes_no(self.lang, with_dont_know=True)),
+            State.TAX_CONFIRM: self._ask_tax_confirm,
             State.EPFO_ESIC: lambda: Reply(
                 text=self._s("questions.is_epfo_or_esic_member"),
                 buttons=_yes_no(self.lang, with_dont_know=True)),
@@ -244,6 +248,16 @@ class Conversation:
             text=self._s("questions.income_band"),
             buttons=tuple(Button(self._s(f"income_bands.{b}"), f"inc:{b}")
                           for b in INCOME_BANDS),
+        )
+
+    def _ask_tax_confirm(self) -> Reply:
+        # ! Every tax Yes gets the same neutral check. The income band is
+        # ! context, never evidence that the worker's tax answer is wrong.
+        return Reply(
+            text=self._s("confirm.tax", income=self._s(f"income_bands.{self.profile.income_band}")),
+            buttons=(Button(self._s("confirm.keep_both"), "tax:keep"),
+                     Button(self._s("confirm.change_income"), "tax:income"),
+                     Button(self._s("confirm.change_tax"), "tax:answer")),
         )
 
     def _ask_land(self) -> Reply:
@@ -399,8 +413,14 @@ class Conversation:
         if band not in INCOME_BANDS:
             return [Reply(text=self._s("errors.pick_from_list"), buttons=self._ask_income().buttons)]
         self._set("income_band", band)
+        if self.state is State.TAX_INCOME:
+            self.state = State.TAX_CONFIRM
+            return [self._ask_tax_confirm()]
         self.state = State.LAND
         return [self._ask_land()]
+
+    def _on_tax_income(self, answer: str) -> list[Reply]:
+        return self._on_income_band(answer)
 
     def _on_land_holding_band(self, answer: str) -> list[Reply]:
         band = answer.split(":", 1)[1] if answer.startswith("land:") else answer
@@ -432,18 +452,25 @@ class Conversation:
         if answer in (YES, NO):
             self._set("is_income_tax_payer", answer == YES)
         elif answer == DK:
-            # * Left unset on purpose → any scheme excluding tax payers comes
-            # * back UNKNOWN, with "ask this at the centre" attached.
-            pass
+            # ! An explicit edit to Don't know must clear a previous Yes too.
+            self._set("is_income_tax_payer", None)
         else:
             return [
                 Reply(text=self._s("errors.pick_from_list"), buttons=_yes_no(self.lang, with_dont_know=True))
             ]
-        self.state = State.EPFO_ESIC
-        return [
-            Reply(text=self._s("questions.is_epfo_or_esic_member"),
-                  buttons=_yes_no(self.lang, with_dont_know=True))
-        ]
+        self.state = State.TAX_CONFIRM if answer == YES else State.EPFO_ESIC
+        return [self._current_question()]
+
+    def _on_tax_confirm(self, answer: str) -> list[Reply]:
+        # ! Only the worker's explicit re-answer changes a field. Keep both
+        # ! continues at the next question without writing either answer again.
+        if answer == "tax:keep":
+            self.state = State.EPFO_ESIC
+        elif answer == "tax:income":
+            self.state = State.TAX_INCOME
+        elif answer == "tax:answer":
+            self.state = State.TAX
+        return [self._current_question()]
 
     # ! Two questions where there used to be one. PM-SYM excludes EPFO, ESIC and
     # ! NPS alike; e-Shram excludes only EPFO and ESIC. Asking once and applying
