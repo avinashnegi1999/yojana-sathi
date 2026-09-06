@@ -176,13 +176,19 @@ class TelegramBot:
         self._track(chat_id, (sent.get("result") or {}).get("message_id"))
         if reply.audio is not None:
             try:
-                _upload(self.token, chat_id, reply.audio.name,
-                        reply.audio.read_bytes(), "")
+                up = _upload(self.token, chat_id, reply.audio.name,
+                             reply.audio.read_bytes(), "")
+                # ! Track the upload too, or /clear leaves it behind. _track
+                # ! ignores a missing id, so a malformed response is harmless.
+                self._track(chat_id, (up.get("result") or {}).get("message_id"))
             except (OSError, urllib.error.URLError):
                 pass  # * audio is an extra; the text already carried the message
         if reply.document is not None:
             filename, blob = reply.document
-            _upload(self.token, chat_id, filename, blob, "")
+            up = _upload(self.token, chat_id, filename, blob, "")
+            # ! The pack carries the answer recap. An untracked pack survives
+            # ! /clear, which is the one thing /clear exists to prevent.
+            self._track(chat_id, (up.get("result") or {}).get("message_id"))
 
     # * -------------------------------------------------------------- /clear
 
@@ -613,6 +619,19 @@ def _self_check() -> None:
             {"update_id": 7, "message": {"chat": {"id": 42}, "text": "x"}}
         ]} if method == "getUpdates" else {"result": []}
         bot.poll_once()  # must not raise
+
+        # ! A delivered pack carries the answer recap. It used to survive /clear
+        # ! because send() threw away the id _upload() hands back.
+        mod._upload = lambda *a, **k: {"result": {"message_id": 9911}}
+        mod._call = lambda token, method, payload: {"result": []}
+        bot._sent.pop("77", None)
+        bot.send("77", Reply(text="pack", document=("pack.html", b"<html></html>")))
+        assert 9911 in [mid for mid, _ in bot._sent.get("77", [])], \
+            "an uploaded pack must be tracked, or /clear cannot delete it"
+
+        # * A malformed upload response must not raise — _track ignores no id.
+        mod._upload = lambda *a, **k: {}
+        bot.send("77", Reply(text="pack", document=("pack.html", b"x")))
     finally:
         mod._call, mod._upload = real_call, real_upload
     print("telegram.py OK")

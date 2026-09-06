@@ -290,8 +290,14 @@ class Conversation:
         return [Reply(text=self._s("questions.age"))]
 
     def _on_age(self, answer: str) -> list[Reply]:
-        digits = "".join(ch for ch in answer if ch.isdigit())
-        if not digits or not (1 <= int(digits) <= 120):
+        # ! Reject the whole input, never repair it. Stripping non-digits turned
+        # ! "9.5" into 95 and "-5" into 5 — a silently wrong age changes which
+        # ! schemes a worker is told about, and nothing in the chat shows it.
+        # * isdecimal(), not isdigit(): isdigit() accepts superscripts like "²",
+        # * which int() then rejects with ValueError. isdecimal() still accepts
+        # * Devanagari "३४" and Arabic-Indic "٣٤", which this bot's users type.
+        digits = answer.strip()
+        if not digits.isdecimal() or not (1 <= int(digits) <= 120):
             return [Reply(text=self._s("questions.age_retry"))]
         self._set("age", int(digits))
         self.state = State.OCCUPATION
@@ -683,6 +689,22 @@ def _self_check() -> None:
     assert "example.gov.in" not in c4.scheme_list()[0].text
     assert c4.state is State.OCCUPATION, "an info command must not advance the flow"
     assert c4.cancel()[0].end and c4.profile.age is None, "cancel drops the profile"
+
+    # * Age is rejected whole, never repaired. Every one of these used to be
+    # * silently accepted as a DIFFERENT number, or to raise inside int().
+    c5 = Conversation(schemes)
+    c5.start(); c5.handle(LANG_HI); c5.handle(consent.YES); c5.handle("state:UK")
+    for bad in ("9.5", "-5", "\u00b2", "3_4", "34 \u0938\u093e\u0932", "0", "200", "", "  "):
+        c5.handle(bad)
+        assert c5.profile.age is None, f"{bad!r} must be re-asked, not repaired into an age"
+        assert c5.state is State.AGE, f"{bad!r} must not advance past the age question"
+    # * Devanagari and Arabic-Indic digits are what these users actually type.
+    for good, want in (("34", 34), ("\u0969\u096a", 34), ("\u0663\u0664", 34), ("  29  ", 29)):
+        c6 = Conversation(schemes)
+        c6.start(); c6.handle(LANG_HI); c6.handle(consent.YES); c6.handle("state:UK")
+        c6.handle(good)
+        assert c6.profile.age == want, f"{good!r} must be accepted as {want}"
+
     print("flow.py OK")
 
 
