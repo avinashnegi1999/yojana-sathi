@@ -13,6 +13,7 @@
 import hashlib
 import os
 import sqlite3
+import threading
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -87,7 +88,13 @@ class EventLog:
         self.db_path = str(db_path or os.environ.get("DB_PATH", "./sathi.db"))
         # ! On a deployed container this must point at a persistent volume. An
         # ! ephemeral disk means every impact number is lost on the next restart.
-        self._conn = sqlite3.connect(self.db_path)
+        # ! check_same_thread=False because the WhatsApp adapter answers the
+        # ! webhook on one thread and drains the work queue on another, and both
+        # ! log. The lock below is what makes that safe: sqlite3 will hand the
+        # ! connection to any thread, but an execute and its commit must not
+        # ! interleave with another thread's.
+        self._conn = sqlite3.connect(self.db_path, check_same_thread=False)
+        self._lock = threading.Lock()
         self._conn.row_factory = sqlite3.Row
         self._conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
         self._conn.commit()
@@ -151,7 +158,8 @@ class EventLog:
             raise PrivacyError(f"value_inr must be an integer ₹, got {value_inr!r}")
 
         event_id = str(uuid.uuid4())
-        self._conn.execute(
+        with self._lock:
+            self._conn.execute(
             "INSERT INTO events (event_id, session_id, ts, event_type, scheme_code,"
             " state, age_band, occupation, income_band, value_inr, channel)"
             " VALUES (?,?,?,?,?,?,?,?,?,?,?)",
@@ -166,10 +174,10 @@ class EventLog:
                 row["occupation"],
                 row["income_band"],
                 value_inr,
-                session.channel,
-            ),
-        )
-        self._conn.commit()
+                    session.channel,
+                ),
+            )
+            self._conn.commit()
         return event_id
 
     def log_results(self, session: Session, profile: Profile, results, known: frozenset[str]) -> None:
@@ -213,32 +221,35 @@ class EventLog:
             return None
         digest = hashlib.sha256(f"{salt}:{channel}:{channel_id}".encode()).hexdigest()
         now = datetime.now(timezone.utc)
-        self._conn.execute(
-            "INSERT OR IGNORE INTO followups (id, channel, due_ts, created_ts)"
-            " VALUES (?,?,?,?)",
-            (
-                digest,
-                channel,
-                (now + timedelta(days=days)).isoformat(timespec="seconds"),
-                now.isoformat(timespec="seconds"),
-            ),
-        )
-        self._conn.commit()
+        with self._lock:
+            self._conn.execute(
+                "INSERT OR IGNORE INTO followups (id, channel, due_ts, created_ts)"
+                " VALUES (?,?,?,?)",
+                (
+                    digest,
+                    channel,
+                    (now + timedelta(days=days)).isoformat(timespec="seconds"),
+                    now.isoformat(timespec="seconds"),
+                ),
+            )
+            self._conn.commit()
         return digest
 
     def purge_followups(self, max_age_days: int = 30) -> int:
         """Delete answered or stale rows. The only DELETE in the project."""
         cutoff = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).isoformat()
-        cur = self._conn.execute(
-            "DELETE FROM followups WHERE response IS NOT NULL OR created_ts < ?", (cutoff,)
-        )
-        self._conn.commit()
+        with self._lock:
+            cur = self._conn.execute(
+                "DELETE FROM followups WHERE response IS NOT NULL OR created_ts < ?", (cutoff,)
+            )
+            self._conn.commit()
         return cur.rowcount
 
     # * ----------------------------------------------------------------- read
 
     def query(self, sql: str, params: tuple = ()) -> list[sqlite3.Row]:
-        return list(self._conn.execute(sql, params))
+        with self._lock:
+            return list(self._conn.execute(sql, params))
 
     def close(self) -> None:
         self._conn.close()
