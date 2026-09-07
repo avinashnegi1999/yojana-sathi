@@ -568,7 +568,7 @@ def test_events_survive_a_restart_and_the_dashboard_renders():
 
         conn = _connect(str(db))
         n = numbers(conn)
-        assert n["screened"] == 6 and n["surfaced"] == 6 and n["value_inr"] == 72000
+        assert n["screened"] == 6 and n["surfaced"] == 6
         page = render(conn, schemes_dir=directory)
         assert "₹72,000" in page and "not money received" in page
         assert "never verified" in page, "the stubbed fixture must show as unverified"

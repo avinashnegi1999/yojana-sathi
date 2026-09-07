@@ -209,7 +209,7 @@ def evaluate_all(profile: Profile, schemes: dict[str, Scheme]) -> tuple[Result, 
 
 
 def total_value(results: tuple[Result, ...], only_codes: frozenset[str] | None = None) -> int:
-    """₹ across eligible results. `only_codes` narrows it to newly surfaced ones.
+    """Annual payout ₹ only. `only_codes` narrows it to newly surfaced ones.
 
     # ! This is "annual entitlement surfaced", never "money delivered". The
     # ! label travels with the number everywhere it is shown.
@@ -217,7 +217,8 @@ def total_value(results: tuple[Result, ...], only_codes: frozenset[str] | None =
     return sum(
         r.annual_value_inr
         for r in results
-        if r.is_eligible and (only_codes is None or r.scheme_code in only_codes)
+        if r.is_eligible and r.value_basis == "annual_payout"
+        and (only_codes is None or r.scheme_code in only_codes)
     )
 
 

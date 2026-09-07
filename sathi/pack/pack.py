@@ -125,7 +125,7 @@ def build(
         parts.append("</ul></div>")
 
     # ! Split, for the same reason as on screen: a cover is not annual income.
-    payout = sum(r.annual_value_inr for r in eligible if r.value_basis != "insurance_cover")
+    payout = sum(r.annual_value_inr for r in eligible if r.value_basis == "annual_payout")
     cover = sum(r.annual_value_inr for r in eligible if r.value_basis == "insurance_cover")
     if payout or cover:
         money = []

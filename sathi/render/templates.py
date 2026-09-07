@@ -120,7 +120,7 @@ def eligible_block(results: tuple[Result, ...], schemes: dict[str, Scheme],
     # ! Two different kinds of money, never added together. A pension is what
     # ! arrives every year; a cover is what is paid only if something happens.
     # ! One number for both would overstate a worker's position by lakhs.
-    payout = sum(r.annual_value_inr for r in hits if r.value_basis != "insurance_cover")
+    payout = sum(r.annual_value_inr for r in hits if r.value_basis == "annual_payout")
     cover = sum(r.annual_value_inr for r in hits if r.value_basis == "insurance_cover")
     if payout:
         lines.append(s("result.value_line", lang, total=rupees(payout)))

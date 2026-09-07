@@ -56,11 +56,6 @@ def numbers(conn: sqlite3.Connection, since: str = "") -> dict:
         conn,
         f"SELECT COUNT(*) FROM events WHERE event_type='scheme_newly_surfaced'{where}", p,
     )
-    value = _scalar(
-        conn,
-        f"SELECT COALESCE(SUM(value_inr),0) FROM events"
-        f" WHERE event_type='scheme_newly_surfaced'{where}", p,
-    )
     packs = _scalar(
         conn, f"SELECT COUNT(*) FROM events WHERE event_type='pack_generated'{where}", p
     )
@@ -83,7 +78,6 @@ def numbers(conn: sqlite3.Connection, since: str = "") -> dict:
         "matched": matched,
         "per_worker": round(matched / screened, 2) if screened else 0.0,
         "surfaced": surfaced,
-        "value_inr": value,
         "packs": packs,
         "median_minutes": round(statistics.median(durations), 1) if durations else 0.0,
         "sessions_total": _scalar(
@@ -118,7 +112,7 @@ def value_split(conn, schemes_dir: str | Path = "data/schemes", since: str = "")
         kind = basis.get(row["scheme_code"])
         if kind == "insurance_cover":
             out["cover"] += row["v"]
-        elif kind:
+        elif kind == "annual_payout":
             out["payout"] += row["v"]
         else:
             # * A scheme code in the log that no longer has a file. Counted
@@ -211,8 +205,8 @@ code { background: #eef0f3; padding: .1rem .3rem; border-radius: .25rem; }
 """
 
 _METHOD = [
-    ("Workers screened", "COUNT(DISTINCT session_id) WHERE event_type='eligibility_evaluated'"),
-    ("Schemes matched per worker", "COUNT(scheme_matched) / workers screened"),
+    ("Screening sessions evaluated", "COUNT(DISTINCT session_id) WHERE event_type='eligibility_evaluated'"),
+    ("Schemes matched per screening", "COUNT(scheme_matched) / screening sessions evaluated"),
     ("Newly surfaced", "COUNT(scheme_newly_surfaced) — matched AND not in the worker's own declared list"),
     ("Entitlement surfaced", "SUM(value_inr) over scheme_newly_surfaced, split by the scheme's value_basis"),
     ("Accident cover surfaced", "the same sum restricted to value_basis='insurance_cover'; never added to the line above"),
@@ -246,12 +240,12 @@ def _table(rows: list[tuple[str, int, bool]], head: str) -> str:
     if not rows:
         return "<p class='sub'>No data yet.</p>"
     top = max((n for _, n, sup in rows if not sup), default=1) or 1
-    out = [f"<table><tr><th>{_e(head)}</th><th>Workers</th><th></th></tr>"]
+    out = [f"<table><tr><th>{_e(head)}</th><th>Sessions</th><th></th></tr>"]
     for label, n, suppressed in rows:
         shown = f"&lt;{K_ANON}" if suppressed else str(n)
         width = 0 if suppressed else int(100 * n / top)
         out.append(
-            f"<tr><td>{_e(label)}</td><td>{shown}</td>"
+            f"<tr><td>{'Suppressed group' if suppressed else _e(label)}</td><td>{shown}</td>"
             f"<td><div class='bar' style='width:{width}%'></div></td></tr>"
         )
     return "".join(out) + "</table>"
@@ -269,8 +263,8 @@ def render(conn: sqlite3.Connection, since: str = "",
         ("hero", f"{n['surfaced']}", "schemes newly surfaced to a worker"),
         ("hero", f"₹{split['payout']:,}", "annual entitlement surfaced (not delivered)"),
         ("", f"₹{split['cover']:,}", "accident cover surfaced (pays only on a claim)"),
-        ("", f"{n['screened']}", "workers screened"),
-        ("", f"{n['per_worker']}", "schemes matched per worker"),
+        ("", f"{n['screened']}", "screening sessions evaluated"),
+        ("", f"{n['per_worker']}", "schemes matched per screening"),
         ("", f"{n['packs']}", "application packs generated"),
         ("", f"{n['median_minutes']} min", "median session length"),
     ]
@@ -293,11 +287,14 @@ def render(conn: sqlite3.Connection, since: str = "",
     # ! The honest-labelling note sits above the fold, not in a footnote.
     parts.append(
         "<div class='note'><b>What the ₹ figures are.</b> The first is the annual value "
-        "of payout schemes a worker was shown and did not already know about. The second "
+        "of annual payout schemes identified by the engine and not declared already held. "
+        "PM-SYM is a future pension from age 60, subject to contributions and scheme terms. The second "
         "is insurance cover, which pays only if an accident happens — it is kept separate "
         "because adding a ₹2,00,000 cover to a ₹36,000 pension would overstate what a "
         "worker actually receives. Both are entitlement surfaced, not money received. We "
-        "do not claim delivery we have not verified.</div>"
+        "do not claim delivery we have not verified. Counts describe screening sessions, "
+        "not distinct people; repeated visits cannot be deduplicated. Events are recorded "
+        "when generated, so a transport failure may prevent the worker receiving them.</div>"
     )
 
     parts.append("<section><h2>Sessions per week</h2>" + _sparkline(by_week(conn, since)) + "</section>")
@@ -306,7 +303,8 @@ def render(conn: sqlite3.Connection, since: str = "",
                  + "</section>")
     parts.append("<section><h2>Where workers are</h2>"
                  + _table(distribution(conn, "state", "eligibility_evaluated", since), "State")
-                 + f"<p class='sub'>Cells below {K_ANON} workers are suppressed.</p></section>")
+                 + f"<p class='sub'>Dimension labels and counts below {K_ANON} sessions are suppressed. "
+                 "Headline totals are unsuppressed; this is not a guarantee of anonymity.</p></section>")
     parts.append("<section><h2>Work they do</h2>"
                  + _table(distribution(conn, "occupation", "eligibility_evaluated", since), "Occupation")
                  + "</section>")
@@ -406,7 +404,7 @@ def _self_check() -> None:
         conn = _connect(str(db))
         n = numbers(conn)
         assert n["screened"] == 7, n
-        assert n["surfaced"] == 12 and n["value_inr"] == 6 * 236000, n
+        assert n["surfaced"] == 12 and "value_inr" not in n, n
         assert n["packs"] == 1
 
         # ! A cover must land in its own bucket, never in the payout total.
