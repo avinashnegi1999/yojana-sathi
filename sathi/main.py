@@ -2,6 +2,7 @@
 
     python3 -m sathi.main                 # one screening in the terminal
     python3 -m sathi.main --telegram      # run the bot (needs TELEGRAM_TOKEN)
+    python3 -m sathi.main --whatsapp      # serve the webhook (needs WHATSAPP_*)
     python3 -m sathi.main --no-db         # don't write to the event log
 
 # ! The terminal mode is the week-6 acceptance test, not a toy: with
@@ -81,6 +82,13 @@ def run_cli(schemes: dict, log: EventLog | None) -> int:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Scheme Sathi")
     ap.add_argument("--telegram", action="store_true", help="run the Telegram bot")
+    # ! One process, one channel. Two pollers on one Telegram token steal each
+    # ! other's updates, and one process serving both would take both down
+    # ! together; deploy/ runs a unit per channel.
+    ap.add_argument("--whatsapp", action="store_true",
+                    help="serve the WhatsApp webhook (behind a TLS proxy)")
+    ap.add_argument("--port", type=int, default=None,
+                    help="webhook port (default WHATSAPP_PORT, else 8080)")
     ap.add_argument("--schemes", default="data/schemes")
     ap.add_argument("--db", default=os.environ.get("DB_PATH", "./sathi.db"))
     ap.add_argument("--no-db", action="store_true", help="run without the event log")
@@ -100,12 +108,24 @@ def main(argv: list[str] | None = None) -> int:
     startup_report(schemes)
     log = None if args.no_db else EventLog(args.db)
     try:
+        if args.telegram and args.whatsapp:
+            print("pick one channel per process — see deploy/RUNBOOK.md", file=sys.stderr)
+            return 2
         if args.telegram:
             from sathi.channels.telegram import TelegramBot, TelegramError
 
             try:
                 TelegramBot(schemes, log).run_forever()
             except TelegramError as e:
+                print(e, file=sys.stderr)
+                return 2
+            return 0
+        if args.whatsapp:
+            from sathi.channels.whatsapp import WhatsAppBot, WhatsAppError
+
+            try:
+                WhatsAppBot(schemes, log).serve_forever(args.port)
+            except WhatsAppError as e:
                 print(e, file=sys.stderr)
                 return 2
             return 0

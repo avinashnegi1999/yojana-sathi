@@ -36,7 +36,9 @@ SELF_CHECK_MODULES = [
     "sathi.pack.pack",
     "sathi.conversation.consent",
     "sathi.conversation.flow",
+    "sathi.channels.router",
     "sathi.channels.telegram",
+    "sathi.channels.whatsapp",
 ]
 
 

@@ -6,6 +6,10 @@ walk to claim it.**
 
 Live on Telegram: [@YojanaSathiBot](https://t.me/YojanaSathiBot)
 
+WhatsApp speaks the same conversation from the same rule engine. The channel is
+built and verified end to end against Meta's test number — a real phone, a full
+screening, the same Hindi — but it is not yet live on a public number.
+
 > **Status — read before you use it on anyone.**
 > The software is complete and tested end to end. All three scheme files are
 > filled from official sources — the PMSBY rules PDF on `jansuraksha.gov.in`,
@@ -190,6 +194,7 @@ git clone <repo> && cd scheme-sathi
 python3 check.py                     # every self-check and test, nothing to install
 python3 -m sathi.main                # one screening in the terminal, buttons only
 python3 -m sathi.main --telegram     # the bot (needs TELEGRAM_TOKEN)
+python3 -m sathi.main --whatsapp     # the webhook (needs WHATSAPP_*, behind TLS)
 python3 -m sathi.metrics.report --out impact.html   # the impact dashboard
 ```
 
@@ -259,6 +264,8 @@ the ones that cost something.
 [`docs/BUILD_LOG.md`](docs/BUILD_LOG.md) — the unedited version: every bug, the
 headline numbers that turned out to be wrong, what is still open, and what I
 would do differently.
+[`docs/assessment/`](docs/assessment/README.md) — a scored breakdown of where
+this stands, including why product maturity is a 7 while the engineering is not.
 
 ## Add a scheme
 

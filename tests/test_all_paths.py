@@ -20,6 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from sathi.channels import whatsapp
 from sathi.channels.telegram import keyboard
 from sathi.conversation.flow import LANG_EN, LANG_HI, Conversation, State
 from sathi.core.schemes import load_all
@@ -69,7 +70,7 @@ def _schemes(directory: Path):
 
 # ! Counters, because a test that never reached the thing it checks is the trap
 # ! this whole file exists to close. The walk asserts these are non-zero.
-CHECKED = {"replies": 0, "buttons": 0, "packs": 0}
+CHECKED = {"replies": 0, "buttons": 0, "packs": 0, "wa_rows": 0, "wa_buttons": 0}
 
 
 def _check_reply(reply, path, lang, problems, echoed=()):
@@ -131,6 +132,30 @@ def _check_reply(reply, path, lang, problems, echoed=()):
         payload["reply_markup"] = markup
     if None in payload.values():
         problems.append(f"{where}: null in the outgoing payload")
+
+    # ! And what the OTHER channel would put on the wire. WhatsApp's limits are
+    # ! far tighter than Telegram's — three buttons, ten list rows, a 24
+    # ! character row title — so a screen that outgrows them has to fail here
+    # ! rather than as a 400 in front of a worker.
+    try:
+        rendered = whatsapp.interactive(reply.text, reply.buttons, lang)
+    except whatsapp.WhatsAppError as e:
+        problems.append(f"{where}: WhatsApp cannot render this screen: {e}")
+    else:
+        action = rendered["interactive"]["action"] if reply.buttons else {}
+        for row in (action.get("sections") or [{}])[0].get("rows", []):
+            CHECKED["wa_rows"] += 1
+            if len(row["title"]) > whatsapp._ROW_TITLE:
+                problems.append(f"{where}: list row title too long: {row['title']!r}")
+            if len(row.get("description", "")) > whatsapp._ROW_DESC:
+                problems.append(f"{where}: list row description too long: {row}")
+            if not row["id"]:
+                problems.append(f"{where}: list row with no id: {row}")
+        for button in action.get("buttons", []):
+            CHECKED["wa_buttons"] += 1
+            title = button["reply"]["title"]
+            if len(title) > whatsapp._BUTTON_TITLE:
+                problems.append(f"{where}: reply button title too long: {title!r}")
 
 
 def test_every_button_in_both_languages():
@@ -194,6 +219,8 @@ def test_every_button_in_both_languages():
                     frontier.append(path + ["30" if convo.state is State.AGE else "ईंट का काम"])
 
             assert ended, f"[{code}] no path ever reached the end of a session"
+            assert {State.TAX_CONFIRM, State.TAX_INCOME} <= {key[0] for key in visited}, \
+                "the exhaustive button walk missed the tax confirmation or income edit"
             print(f"  .. {code}: {explored} paths walked, {ended} completed sessions")
 
         # ! Whatever those hundreds of sessions wrote, it must still be coarse.
@@ -212,8 +239,13 @@ def test_every_button_in_both_languages():
 
     assert CHECKED["packs"] >= 2, f"no pack was ever generated or checked: {CHECKED}"
     assert CHECKED["buttons"] > 500, f"too few buttons exercised: {CHECKED}"
+    # ! Both WhatsApp shapes have to be exercised, or the caps above are checked
+    # ! on paper only: three options ride on reply buttons, more become a list.
+    assert CHECKED["wa_rows"] > 100 and CHECKED["wa_buttons"] > 100, \
+        f"a WhatsApp render path was never walked: {CHECKED}"
     print(f"  .. checked {CHECKED['replies']} replies, {CHECKED['buttons']} buttons, "
-          f"{CHECKED['packs']} packs, {len(rows)} events")
+          f"{CHECKED['packs']} packs, {len(rows)} events, "
+          f"{CHECKED['wa_buttons']}+{CHECKED['wa_rows']} WhatsApp buttons/rows")
 
     assert not problems, "\n".join(f"  - {p}" for p in sorted(set(problems))[:25])
 
@@ -223,8 +255,14 @@ def test_commands_at_every_state():
     problems: list[str] = []
     with tempfile.TemporaryDirectory() as d:
         schemes = _schemes(Path(d))
+        # ! The walk used to end "no, next" and stall at NPS, so KNOWN_SCHEMES,
+        # ! DOCUMENTS, PACK and DONE were never reached by a test that claims to
+        # ! cover every state. NPS needs its own answer before "next" means
+        # ! anything.
         walk = [LANG_EN, "consent_yes", "state:UK", "30", "occ:construction",
-                "inc:upto_5000", "land:landless", "fam:4", "yes", "no", "no", "next"]
+                "inc:upto_5000", "land:landless", "fam:4", "yes", "no", "no", "no",
+                "next", "next", "yes"]
+        reached = set()
 
         for stop in range(len(walk) + 1):
             for command in ("help", "about", "privacy"):
@@ -243,6 +281,7 @@ def test_commands_at_every_state():
             for step in walk[:stop]:
                 convo.handle(step)
             state_before = convo.state
+            reached.add(state_before)
             for reply in convo.scheme_list():
                 _check_reply(reply, walk[:stop], "en", problems)
             if convo.state is not state_before:
@@ -258,6 +297,9 @@ def test_commands_at_every_state():
             if convo2.profile != profile_before:
                 problems.append(f"/language at {state_before.value} lost an answer")
 
+        assert reached == set(State) - {
+            State.OCCUPATION_FREE, State.OCCUPATION_CONFIRM, State.TAX_CONFIRM, State.TAX_INCOME,
+        }, "the tax-No command walk must reach DONE without entering confirmation"
     assert not problems, "\n".join(f"  - {p}" for p in sorted(set(problems))[:25])
 
 
@@ -270,29 +312,74 @@ def test_every_command_through_the_adapter_at_every_state():
     # ! adapter shows up here rather than in someone's chat.
     """
     import sathi.channels.telegram as mod
-    from sathi.channels.telegram import COMMANDS, TelegramBot
+    from sathi.channels.router import COMMANDS
+    from sathi.channels.telegram import TelegramBot
 
     problems: list[str] = []
     with tempfile.TemporaryDirectory() as d:
         schemes = _schemes(Path(d))
         walk = ["lang:en", "consent_yes", "state:UK", "30", "occ:construction",
-                "inc:upto_5000", "land:landless", "fam:4", "yes", "no", "no", "next"]
+                "inc:upto_5000", "land:landless", "fam:4", "yes", "no", "no", "no",
+                "next", "next", "yes"]
+        reached = set()
 
         sent: list[tuple[str, dict]] = []
+        # ! The adapter accepts a tap only from the keyboard it last delivered,
+        # ! so a fabricated message_id is now rejected as stale. Record what the
+        # ! wire actually returned and tap THAT. Fabricated ids left this whole
+        # ! walk rejected — every command below was being exercised against the
+        # ! opening screen while the suite still reported green.
+        live_keyboard: dict[str, int] = {}
         real_call, real_upload = mod._call, mod._upload
-        mod._call = lambda token, method, payload: (
-            sent.append((method, payload)) or {"ok": True, "result": {"message_id": len(sent)}}
-        )
+
+        def _wire(token, method, payload):
+            sent.append((method, payload))
+            mid = len(sent)
+            if method == "sendMessage":
+                # * Mirror the adapter: any reply replaces the live keyboard, and
+                # * a reply without buttons leaves none — which is how we know the
+                # * next answer has to be typed rather than tapped.
+                live_keyboard.pop(str(payload["chat_id"]), None)
+                if payload.get("reply_markup"):
+                    live_keyboard[str(payload["chat_id"])] = mid
+            return {"ok": True, "result": {"message_id": mid}}
+
+        mod._call = _wire
         mod._upload = lambda *a, **k: sent.append(("sendDocument", {"file": a[2]})) or {"ok": True}
         try:
             for stop in range(len(walk) + 1):
                 for word in sorted(COMMANDS):
                     bot = TelegramBot(schemes, token="test-token")
                     chat = "77"
+                    live_keyboard.pop(chat, None)
+                    # * A real worker arrives via /start; that is what puts the
+                    # * first keyboard on screen. The walk used to skip it and
+                    # * invent ids instead.
+                    path_start = len(sent)
+                    bot.handle_update({"message": {
+                        "chat": {"id": int(chat)}, "message_id": 1, "text": "/start"}})
                     for i, step in enumerate(walk[:stop]):
+                        mid = live_keyboard.get(chat)
+                        if mid is None:
+                            # * No buttons on screen — the age question. A worker
+                            # * types here, so the walk must type here too.
+                            bot.handle_update({"message": {
+                                "chat": {"id": int(chat)},
+                                "message_id": 400 + i, "text": step}})
+                            continue
                         bot.handle_update({"callback_query": {
                             "id": str(i), "data": step,
-                            "message": {"chat": {"id": int(chat)}, "message_id": i + 1}}})
+                            "message": {"chat": {"id": int(chat)}, "message_id": mid}}})
+                    assert not any(m == "answerCallbackQuery" and p.get("text")
+                                   for m, p in sent[path_start:]), "a walk tap was rejected as stale"
+                    if stop == len(walk):
+                        assert chat not in bot.sessions
+                        assert sent[-1][0] == "sendMessage"
+                        assert sent[-1][1]["text"] == mod.s("closing.done", "en")
+                        reached.add(State.DONE)
+                    else:
+                        assert chat in bot.sessions, "walk lost its session before DONE"
+                        reached.add(bot.sessions[chat].state)
                     before = len(sent)
                     try:
                         bot.handle_update({"message": {
@@ -314,6 +401,9 @@ def test_every_command_through_the_adapter_at_every_state():
         finally:
             mod._call, mod._upload = real_call, real_upload
 
+        assert reached == set(State) - {
+            State.OCCUPATION_FREE, State.OCCUPATION_CONFIRM, State.TAX_CONFIRM, State.TAX_INCOME,
+        }, "the adapter's tax-No walk must reach DONE without entering confirmation"
     assert not problems, "\n".join(f"  - {p}" for p in sorted(set(problems))[:25])
 
 

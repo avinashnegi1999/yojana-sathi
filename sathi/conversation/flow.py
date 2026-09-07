@@ -41,6 +41,8 @@ class State(Enum):
     FAMILY = "family_size"
     BANK = "has_bank_account"
     TAX = "is_income_tax_payer"
+    TAX_CONFIRM = "tax_confirm"
+    TAX_INCOME = "tax_income"
     EPFO_ESIC = "is_epfo_or_esic_member"
     NPS = "is_nps_member"
     KNOWN_SCHEMES = "known_schemes"
@@ -124,8 +126,35 @@ class Conversation:
 
     def set_language(self, lang: str) -> list[Reply]:
         """/language — switch mid-conversation, keeping every answer given so far."""
+        was = self.lang
         self.lang = content.normalise_lang(lang)
+        if was != self.lang and self._required_docs:
+            self._relabel_documents(was)
         return [Reply(text=self._s("language.changed")), self._current_question()]
+
+    def _relabel_documents(self, was: str) -> None:
+        """Carry document answers across a language switch.
+
+        # ! Both the buttons and the pack look documents up BY NAME, and the name
+        # ! is language-specific. Without this, switching language after ticking
+        # ! documents left the chat saying the worker had everything while the
+        # ! pack listed the same documents as missing — the worker walks to the
+        # ! centre unprepared, which is the exact trip this project exists to
+        # ! make worthwhile.
+        # * Pair by position WITHIN each scheme, never by index into the deduped
+        # * required list: that list drops repeats, and two schemes can share a
+        # * document name in one language without sharing it in the other, so the
+        # * two lists are not guaranteed to be the same length. Scheme.docs()
+        # * already refuses to use a translation of a different length, so
+        # * position within one scheme is the one pairing that is always sound.
+        """
+        rename: dict[str, str] = {}
+        for scheme in self.schemes.values():
+            for before, after in zip(scheme.docs(was), scheme.docs(self.lang)):
+                rename[before] = after
+        self._have_docs = {rename.get(d, d) for d in self._have_docs}
+        self._required_docs = checklist.required_documents(
+            self._results, self.schemes, self.lang)
 
     def _current_question(self) -> Reply:
         """Re-ask whatever we are waiting on, in the current language."""
@@ -138,12 +167,14 @@ class Conversation:
             State.OCCUPATION_FREE: lambda: Reply(text=self._s("questions.occupation_free")),
             State.OCCUPATION_CONFIRM: self._ask_occupation,
             State.INCOME: self._ask_income,
+            State.TAX_INCOME: self._ask_income,
             State.LAND: self._ask_land,
             State.FAMILY: self._ask_family,
             State.BANK: lambda: Reply(text=self._s("questions.has_bank_account"),
                                       buttons=_yes_no(self.lang)),
             State.TAX: lambda: Reply(text=self._s("questions.is_income_tax_payer"),
                                      buttons=_yes_no(self.lang, with_dont_know=True)),
+            State.TAX_CONFIRM: self._ask_tax_confirm,
             State.EPFO_ESIC: lambda: Reply(
                 text=self._s("questions.is_epfo_or_esic_member"),
                 buttons=_yes_no(self.lang, with_dont_know=True)),
@@ -219,6 +250,16 @@ class Conversation:
                           for b in INCOME_BANDS),
         )
 
+    def _ask_tax_confirm(self) -> Reply:
+        # ! Every tax Yes gets the same neutral check. The income band is
+        # ! context, never evidence that the worker's tax answer is wrong.
+        return Reply(
+            text=self._s("confirm.tax", income=self._s(f"income_bands.{self.profile.income_band}")),
+            buttons=(Button(self._s("confirm.keep_both"), "tax:keep"),
+                     Button(self._s("confirm.change_income"), "tax:income"),
+                     Button(self._s("confirm.change_tax"), "tax:answer")),
+        )
+
     def _ask_land(self) -> Reply:
         return Reply(
             text=self._s("questions.land_holding_band"),
@@ -290,8 +331,14 @@ class Conversation:
         return [Reply(text=self._s("questions.age"))]
 
     def _on_age(self, answer: str) -> list[Reply]:
-        digits = "".join(ch for ch in answer if ch.isdigit())
-        if not digits or not (1 <= int(digits) <= 120):
+        # ! Reject the whole input, never repair it. Stripping non-digits turned
+        # ! "9.5" into 95 and "-5" into 5 — a silently wrong age changes which
+        # ! schemes a worker is told about, and nothing in the chat shows it.
+        # * isdecimal(), not isdigit(): isdigit() accepts superscripts like "²",
+        # * which int() then rejects with ValueError. isdecimal() still accepts
+        # * Devanagari "३४" and Arabic-Indic "٣٤", which this bot's users type.
+        digits = answer.strip()
+        if not digits.isdecimal() or not (1 <= int(digits) <= 120):
             return [Reply(text=self._s("questions.age_retry"))]
         self._set("age", int(digits))
         self.state = State.OCCUPATION
@@ -366,8 +413,14 @@ class Conversation:
         if band not in INCOME_BANDS:
             return [Reply(text=self._s("errors.pick_from_list"), buttons=self._ask_income().buttons)]
         self._set("income_band", band)
+        if self.state is State.TAX_INCOME:
+            self.state = State.TAX_CONFIRM
+            return [self._ask_tax_confirm()]
         self.state = State.LAND
         return [self._ask_land()]
+
+    def _on_tax_income(self, answer: str) -> list[Reply]:
+        return self._on_income_band(answer)
 
     def _on_land_holding_band(self, answer: str) -> list[Reply]:
         band = answer.split(":", 1)[1] if answer.startswith("land:") else answer
@@ -399,18 +452,25 @@ class Conversation:
         if answer in (YES, NO):
             self._set("is_income_tax_payer", answer == YES)
         elif answer == DK:
-            # * Left unset on purpose → any scheme excluding tax payers comes
-            # * back UNKNOWN, with "ask this at the centre" attached.
-            pass
+            # ! An explicit edit to Don't know must clear a previous Yes too.
+            self._set("is_income_tax_payer", None)
         else:
             return [
                 Reply(text=self._s("errors.pick_from_list"), buttons=_yes_no(self.lang, with_dont_know=True))
             ]
-        self.state = State.EPFO_ESIC
-        return [
-            Reply(text=self._s("questions.is_epfo_or_esic_member"),
-                  buttons=_yes_no(self.lang, with_dont_know=True))
-        ]
+        self.state = State.TAX_CONFIRM if answer == YES else State.EPFO_ESIC
+        return [self._current_question()]
+
+    def _on_tax_confirm(self, answer: str) -> list[Reply]:
+        # ! Only the worker's explicit re-answer changes a field. Keep both
+        # ! continues at the next question without writing either answer again.
+        if answer == "tax:keep":
+            self.state = State.EPFO_ESIC
+        elif answer == "tax:income":
+            self.state = State.TAX_INCOME
+        elif answer == "tax:answer":
+            self.state = State.TAX
+        return [self._current_question()]
 
     # ! Two questions where there used to be one. PM-SYM excludes EPFO, ESIC and
     # ! NPS alike; e-Shram excludes only EPFO and ESIC. Asking once and applying
@@ -683,6 +743,49 @@ def _self_check() -> None:
     assert "example.gov.in" not in c4.scheme_list()[0].text
     assert c4.state is State.OCCUPATION, "an info command must not advance the flow"
     assert c4.cancel()[0].end and c4.profile.age is None, "cancel drops the profile"
+
+    # * Age is rejected whole, never repaired. Every one of these used to be
+    # * silently accepted as a DIFFERENT number, or to raise inside int().
+    c5 = Conversation(schemes)
+    c5.start(); c5.handle(LANG_HI); c5.handle(consent.YES); c5.handle("state:UK")
+    for bad in ("9.5", "-5", "\u00b2", "3_4", "34 \u0938\u093e\u0932", "0", "200", "", "  "):
+        c5.handle(bad)
+        assert c5.profile.age is None, f"{bad!r} must be re-asked, not repaired into an age"
+        assert c5.state is State.AGE, f"{bad!r} must not advance past the age question"
+    # * Devanagari and Arabic-Indic digits are what these users actually type.
+    for good, want in (("34", 34), ("\u0969\u096a", 34), ("\u0663\u0664", 34), ("  29  ", 29)):
+        c6 = Conversation(schemes)
+        c6.start(); c6.handle(LANG_HI); c6.handle(consent.YES); c6.handle("state:UK")
+        c6.handle(good)
+        assert c6.profile.age == want, f"{good!r} must be accepted as {want}"
+
+    # * A language switch must carry document answers with it. Before this, the
+    # * chat said "you have everything" while the pack listed the same documents
+    # * as missing, and the worker walked to the centre without the paperwork.
+    from sathi.core.schemes import load_all as _load_all
+    live = _load_all()
+    assert live, "shipped scheme files must load for this check to mean anything"
+    sample = next(iter(live.values()))
+    en_doc, hi_doc = sample.docs("en")[0], sample.docs("hi")[0]
+    assert en_doc != hi_doc, "pick a scheme whose translation actually differs"
+
+    c7 = Conversation(live)
+    c7.lang = "en"
+    c7._results = ()
+    c7._required_docs = (en_doc,)
+    c7._have_docs = {en_doc}
+    c7.lang = "hi"
+    c7._relabel_documents("en")
+    assert hi_doc in c7._have_docs, \
+        "a document ticked in English must stay ticked after switching to Hindi"
+    assert en_doc not in c7._have_docs, \
+        "the stale English label must not linger — the pack compares Hindi names"
+
+    # * And back again, so neither direction is the special case.
+    c7.lang = "en"
+    c7._relabel_documents("hi")
+    assert c7._have_docs == {en_doc}, c7._have_docs
+
     print("flow.py OK")
 
 

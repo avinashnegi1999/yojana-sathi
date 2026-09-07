@@ -78,10 +78,12 @@ plausible default.
 | `sathi/pack/checklist.py` | Which documents are needed, which are missing |
 | `sathi/pack/pack.py` | The one-page pack, built in memory, never written server-side |
 | `sathi/channels/base.py` | `ChannelMessage` / `Reply` — the channel boundary |
+| `sathi/channels/router.py` | Sessions, slash commands, keyboard retirement — shared by every channel |
 | `sathi/channels/telegram.py` | Long-polling adapter, `urllib` only |
+| `sathi/channels/whatsapp.py` | Cloud API adapter: signed webhook in, `urllib` out |
 | `sathi/metrics/events.py` | The **only** writer to the event log |
 | `sathi/metrics/report.py` | `impact.html` — the six numbers, provenance, methodology |
-| `sathi/main.py` | Terminal session, Telegram bot, startup verification report |
+| `sathi/main.py` | Terminal session, one channel per process, startup verification report |
 
 ## Decisions worth knowing before you change something
 
