@@ -322,7 +322,7 @@ class Conversation:
         else:
             match = content.match_state(answer)
             code = match.code if match else None
-        if not code:
+        if code not in {st.code for st in content.states()}:
             # * No guessing at a half-recognised state. Re-ask with the buttons.
             retry = self._ask_state()
             return [Reply(text=self._s("questions.state_retry"), buttons=retry.buttons)]
@@ -338,7 +338,7 @@ class Conversation:
         # * which int() then rejects with ValueError. isdecimal() still accepts
         # * Devanagari "३४" and Arabic-Indic "٣٤", which this bot's users type.
         digits = answer.strip()
-        if not digits.isdecimal() or not (1 <= int(digits) <= 120):
+        if len(digits) > 3 or not digits.isdecimal() or not (1 <= int(digits) <= 120):
             return [Reply(text=self._s("questions.age_retry"))]
         self._set("age", int(digits))
         self.state = State.OCCUPATION
@@ -432,8 +432,8 @@ class Conversation:
 
     def _on_family_size(self, answer: str) -> list[Reply]:
         raw = answer.split(":", 1)[1] if answer.startswith("fam:") else answer
-        digits = "".join(ch for ch in raw if ch.isdigit())
-        if not digits or not (1 <= int(digits) <= 30):
+        digits = raw.strip()
+        if len(digits) > 2 or not digits.isdecimal() or not (1 <= int(digits) <= 30):
             return [Reply(text=self._s("errors.pick_from_list"), buttons=self._ask_family().buttons)]
         self._set("family_size", int(digits))
         self.state = State.BANK
@@ -594,8 +594,11 @@ class Conversation:
 
     def _on_documents(self, answer: str) -> list[Reply]:
         if answer.startswith("doc:"):
+            index = answer.split(":", 1)[1]
+            if not index.isdecimal() or len(index) > 3:
+                return [self._ask_documents()]
             try:
-                doc = self._required_docs[int(answer.split(":", 1)[1])]
+                doc = self._required_docs[int(index)]
             except (ValueError, IndexError):
                 return [self._ask_documents()]
             self._have_docs.symmetric_difference_update({doc})

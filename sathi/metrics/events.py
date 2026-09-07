@@ -19,7 +19,8 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from sathi.core.profile import Profile
+from sathi.core import content
+from sathi.core.profile import AGE_BANDS, INCOME_BANDS, Profile
 
 SCHEMA_PATH = Path(__file__).resolve().parent / "schema.sql"
 
@@ -136,6 +137,8 @@ class EventLog:
                 f"{event_type!r} attempted before consent_granted — "
                 f"no consent, no events. This is the code path enforcing it."
             )
+        if session.id not in self._consented and (profile is not None or dims):
+            raise ConsentError("profile dimensions require consent, including on session events")
 
         row = {k: None for k in COARSE_FIELDS}
         if profile is not None:
@@ -151,9 +154,17 @@ class EventLog:
                 )
             row.update(dims)
 
+        allowed = {
+            "state": {st.code for st in content.states()},
+            "age_band": {label for label, _, _ in AGE_BANDS} | {"under-18"},
+            "occupation": content.occupation_codes(),
+            "income_band": INCOME_BANDS,
+        }
         for k, v in row.items():
-            if v is not None and not isinstance(v, str):
-                raise PrivacyError(f"dimension {k} must be a string band, got {v!r}")
+            # ! A whitelisted column is not enough: arbitrary text in `state`
+            # ! used to retain anything a worker sent after the `state:` prefix.
+            if v is not None and (not isinstance(v, str) or v not in allowed[k]):
+                raise PrivacyError(f"dimension {k} must be a recognised coarse band")
         if value_inr is not None and not isinstance(value_inr, int):
             raise PrivacyError(f"value_inr must be an integer ₹, got {value_inr!r}")
 
