@@ -39,6 +39,7 @@ SELF_CHECK_MODULES = [
     "sathi.channels.router",
     "sathi.channels.telegram",
     "sathi.channels.whatsapp",
+    "sathi.preview",
 ]
 
 

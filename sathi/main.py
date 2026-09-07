@@ -87,6 +87,9 @@ def main(argv: list[str] | None = None) -> int:
     # ! together; deploy/ runs a unit per channel.
     ap.add_argument("--whatsapp", action="store_true",
                     help="serve the WhatsApp webhook (behind a TLS proxy)")
+    ap.add_argument("--preview", metavar="CHANNEL", default=None,
+                    help="render a screening as telegram or whatsapp would, "
+                         "in the terminal, sending nothing")
     ap.add_argument("--port", type=int, default=None,
                     help="webhook port (default WHATSAPP_PORT, else 8080)")
     ap.add_argument("--schemes", default="data/schemes")
@@ -108,6 +111,12 @@ def main(argv: list[str] | None = None) -> int:
     startup_report(schemes)
     log = None if args.no_db else EventLog(args.db)
     try:
+        if args.preview:
+            # ! Before the channels, and before either token is required: the
+            # ! whole point is to see a keyboard without credentials.
+            from sathi.preview import run as preview_run
+
+            return preview_run(args.preview, schemes, log)
         if args.telegram and args.whatsapp:
             print("pick one channel per process — see deploy/RUNBOOK.md", file=sys.stderr)
             return 2

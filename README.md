@@ -195,6 +195,7 @@ python3 check.py                     # every self-check and test, nothing to ins
 python3 -m sathi.main                # one screening in the terminal, buttons only
 python3 -m sathi.main --telegram     # the bot (needs TELEGRAM_TOKEN)
 python3 -m sathi.main --whatsapp     # the webhook (needs WHATSAPP_*, behind TLS)
+python3 -m sathi.main --preview whatsapp   # what the wire would carry — no token, nothing sent
 python3 -m sathi.metrics.report --out impact.html   # the impact dashboard
 ```
 
