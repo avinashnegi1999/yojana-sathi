@@ -1,15 +1,21 @@
 # Scheme value verification worksheet
 
 Every number and rule in `data/schemes/` transcribed on 2026-08-31, with the exact
-sentence it came from and a deep link. Your job is **ticking, not researching**:
-open the link, find the quoted sentence, confirm it still says that, tick.
+sentence it came from and a deep link. Open the link, find the clause, compare
+the file and record MATCH/MISMATCH. Read the [7 September source audit](SCHEME_AUDIT.md)
+first: missing conditions and conflicting sources must be resolved before ticking.
+This worksheet is not itself a human signature.
 
 When all boxes are ticked:
 
-1. Replace `verified_by = "unconfirmed — PENDING HUMAN VERIFICATION"` with your own
-   name and the date, in all three files.
-2. Delete `test_filled_files_still_admit_they_are_unverified_by_a_human` from
-   `tests/test_schemes.py`.
+1. Only for a completely approved file, replace
+   `verified_by = "unconfirmed — PENDING HUMAN VERIFICATION"` with the actual
+   reviewer's name and date; set `verified_on` to that review date.
+2. Update the two production-state tests in `tests/test_schemes.py`
+   (`test_filled_files_still_admit_they_are_unverified_by_a_human` and
+   `test_no_shipped_scheme_is_servable_while_sign_off_is_pending`) to reflect
+   precisely which files were approved. Keep the synthetic unsigned/stub gate
+   tests permanently; do not delete the safety invariant to obtain a green build.
 3. `python3 check.py` must still pass.
 
 Until then **nobody real should be screened.** A wrong threshold sends a worker on a
@@ -17,21 +23,25 @@ wasted trip to a CSC.
 
 ---
 
-## A. The two judgement calls — do these first
+## A. Source ambiguities — do these first
 
-These are not transcription. Both need a decision from you, and both change who the
-bot admits. Neither can be settled by re-reading the page; a CSC operator or a phone
-call to the helpline settles them.
+These affect who the bot admits. Seek current official written clarification;
+record any helpline/CSC response as operational evidence, not a replacement for
+the governing source. Keep the file unsigned while material ambiguity remains.
 
 ### A1. PM-SYM — is ₹15,000 in or out?
 **File:** `data/schemes/pm_sym.toml`, the `income_band` criterion.
 **Problem:** the same FAQ page says both. Q1: *"with monthly income of Rs.15000 or
 less"*. Q2: *"less than Rs 15,000"*.
-**What we did:** took the generous reading — band `10001_15000` passes, so a worker
-earning exactly ₹15,000 is told they qualify.
+**Encoded interpretation:** band `10001_15000` passes in signed test fixtures.
+Production remains UNKNOWN because the file is unsigned.
 **Risk if wrong:** someone on exactly ₹15,000 walks to a CSC and is turned away.
 **Settle it:** ask a CSC operator, or the PM-SYM helpline 14434, which reading they
 apply in practice.
+
+**7 September 2026 evidence:** [PIB's PM-SYM explanation](https://www.pib.gov.in/Pressreleaseshare.aspx?PRID=2108082&lang=2&reg=48)
+supports an inclusive ₹15,000 ceiling. Review this against the governing terms;
+the older FAQ timed out during this audit. No approval is recorded here.
 
 **Re-checked 2026-09-03:** both readings are still live on the page, in these words —
 *"15000 or less."* and *"with monthly income less than Rs 15,000/-."* The contradiction
@@ -62,11 +72,18 @@ worth keeping apart:
 - **PMSBY via the e-Shram route** is what the hidden Q40 caps at 59. That is a PMSBY
   question, not an e-Shram one.
 
-So the exposure is narrower than "every worker over 60 gets a wrong answer": a 65-year-old
-is told correctly about e-Shram, and possibly wrongly about PMSBY cover.
+**7 September 2026 correction:** the visible e-Shram FAQ supports 16+, but
+[NIC's e-Shram page](https://www.nic.gov.in/project/%E0%A4%88-%E0%A4%B6%E0%A5%8D%E0%A4%B0%E0%A4%AE/)
+still describes 16–59. Keeping a UAN after 60 does not independently prove new
+registration is allowed after 60. Neither result is human-verified. The obsolete
+automatic-PMSBY/first-premium promise was removed from the e-Shram summaries;
+linked insurance must be checked separately.
 
 - [ ] Confirmed 18–70 governs → leave as is
 - [ ] Confirmed 59 cap applies via the e-Shram route → needs a route-dependent rule; tell me
+- [ ] Resolve e-Shram new-registration age separately from PMSBY
+- [ ] Resolve PMSBY entry 18–70 versus cover terminating at 70 (nearest birthday),
+  documented in [PIB's PMSBY note](https://www.pib.gov.in/PressNoteDetails.aspx?ModuleId=3&NoteId=154426&lang=1&reg=1)
 
 ### A3. e-Shram — does NPS alone disqualify?  ✅ SETTLED 2026-09-03 — field split
 **File:** `data/schemes/eshram.toml`, now the `is_epfo_or_esic_member` exclusion.
@@ -90,6 +107,18 @@ ever conflated again.
 
 **Nothing left to decide here** — but the two new exclusions still need their
 source sentences ticked in sections C and D below.
+
+### A4. Conditions not represented by current questions
+
+- [ ] Confirm unorganised-worker status for PM-SYM/e-Shram. Occupation is collected
+  but not used by these rules; no-work/student answers are not proof of employment.
+- [ ] Resolve whether PM-SYM excludes every NPS subscription or government-funded
+  NPS specifically, using the [Lok Sabha answer](https://sansad.in/getFile/loksabhaquestions/annex/185/AU148_kMKeD0.pdf?source=pqals).
+- [ ] Resolve the other-government-pension exclusion in the newer PIB explanation.
+- [ ] Confirm account/mobile/consent prerequisites and which are screening
+  conditions versus application preparation steps.
+- [ ] Have an engineer encode any missing conditions and regression cases before
+  signing. Do not approve an incomplete rule set merely because each existing row matches.
 
 ---
 
@@ -146,7 +175,7 @@ Source, all rows: **eshram.gov.in FAQ** <https://eshram.gov.in/faqs>
 | [ ] | age `gte 16`, **no upper bound** | "A person aged 16 years or above who is engaged in unorganised work may register" + "No action is required merely because the worker turns 60" |
 | [ ] | `annual_value_inr = 0`, basis `gateway` — this zero is correct, not a stub | Q13 "a centralised database of unorganised workers … to facilitate delivery of various social security benefits" — confirm the FAQ promises no payout of its own |
 | [ ] | `premium_inr = 0` | Q15 "Registration on e-Shram portal is free. Workers are not required to pay any charges to any registering entity." |
-| [ ] | PMSBY first-year premium borne by the Ministry, stated in the summary | Q21 "will be enrolled under PMSBY and premium for the first year will be borne by the Ministry of Labour & Employment" |
+| [ ] | No automatic PMSBY or free-first-premium promise | Current Q13/Q42 describes registration and access to benefits; the unsupported older summary was removed on 7 Sep 2026 |
 | [ ] | exclusion: income tax payer | Q10 "There are no income criteria … However, the worker should not be an income tax payee." |
 | [ ] | exclusion: `is_epfo_or_esic_member` | Q3 "… not a member of ESIC or EPFO, is called an unorganised worker." |
 | [ ] | **no NPS exclusion here** — confirm Q3 and the rest of the FAQ nowhere names NPS | absence check. A3 settled 2026-09-03: NPS alone must NOT bar e-Shram. Re-adding it needs a source sentence that names NPS |
@@ -160,9 +189,22 @@ Source, all rows: **eshram.gov.in FAQ** <https://eshram.gov.in/faqs>
 
 - [ ] All boxes above ticked
 - [ ] `verified_by = "Avinash Negi, <date>"` in all three files
-- [ ] `test_filled_files_still_admit_they_are_unverified_by_a_human` deleted
+- [ ] Both production-state tests updated for the approved files; synthetic gate tests retained
 - [ ] `python3 check.py` passes
 - [ ] Only now: screen a real person
 
 If a source has changed since 2026-08-31, do not edit the value quietly — say what
 moved and the `verified_on` date has to move with it.
+
+## F. Reviewer record — copy one row per value or condition
+
+Leave blank until a real person completes the comparison. A screenshot or saved
+official PDF should contain no worker identifiers. Record the document version,
+page/table or FAQ number so another reviewer can reproduce the decision.
+
+| Scheme / field | Source URL / clause / source date | Repo value | MATCH / MISMATCH / AMBIGUOUS | Correction / unresolved question | Reviewer's name | Review date | Approved |
+|---|---|---|---|---|---|---|---|
+| | | | | | | | [ ] |
+
+For each scheme: reviewer ______; date ______; reviewed file/commit ______;
+all material ambiguities resolved [ ]; required rule changes tested [ ]; approve [ ].

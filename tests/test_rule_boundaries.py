@@ -1,7 +1,10 @@
 """Are the verdicts RIGHT? Run: python3 tests/test_rule_boundaries.py
 
 # ! Every other test asks whether the software works. This one asks whether the
-# ! ANSWER is correct, which is a different question and the one that costs a
+# ! ANSWER matches the encoded source interpretation, which is a different
+# ! question from channel behavior. Unresolved source conflicts remain human
+# ! gates in docs/SCHEME_AUDIT.md; this sweep cannot establish legal correctness.
+# ! A wrong answer costs a
 # ! worker a day's wages when we get it wrong.
 #
 # ! The method is an independent oracle. `_oracle()` below re-encodes each
@@ -125,7 +128,7 @@ def _signed_schemes() -> dict:
     }
 
 
-def test_every_combination_matches_the_official_rules():
+def test_every_combination_matches_the_encoded_source_interpretation():
     schemes = _signed_schemes()
     missing = set(schemes) - {"PMSBY", "PM_SYM", "ESHRAM"}
     assert not missing, f"a scheme was added with no oracle: {sorted(missing)}"
@@ -150,7 +153,7 @@ def test_every_combination_matches_the_official_rules():
     # ! Coverage counter, same reason as test_all_paths: a sweep that swept
     # ! nothing passes silently.
     assert checked > 5000, f"only {checked} verdicts checked"
-    print(f"  .. {checked:,} verdicts checked against the official rules")
+    print(f"  .. {checked:,} verdicts checked against the encoded source interpretation")
 
 
 def test_the_named_boundaries_individually():
@@ -225,8 +228,9 @@ def test_eshram_has_no_upper_age_limit_yet():
 
     e-Shram's own FAQ says "16 and above", but other official e-Shram pages
     describe registration as 16-59. The files encode "16 and above", so a
-    70-year-old is currently told YES. If 16-59 turns out to be correct, every
-    worker aged 60+ is getting a wrong answer today.
+    70-year-old in this signed TEST fixture receives YES. Production remains
+    UNKNOWN because the scheme is unsigned. If 16-59 is confirmed, the rule and
+    oracle both need correction before human sign-off.
 
     This test PASSES on the current reading. It exists to fail loudly the day
     someone adds an upper bound without updating docs/VERIFICATION.md — and to

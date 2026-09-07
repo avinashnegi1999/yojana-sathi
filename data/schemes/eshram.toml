@@ -13,8 +13,8 @@
 # ! issues a UAN and a card. It states no payout of its own, so:
 # !   benefit.annual_value_inr = 0
 # !   benefit.value_basis      = "gateway"   ← new basis added for exactly this
-# ! Giving it a ₹ figure would double-count: the accident cover a registrant
-# ! gets IS PMSBY, which is already its own scheme file with its own value.
+# ! Linked schemes have separate eligibility and enrolment. Registration alone
+# ! must not be described as automatic insurance cover.
 # !
 # ! Consequence for the data model: no `prerequisites` concept was added. The
 # ! FAQ does not make e-Shram a precondition for PMSBY or PM-SYM — those have
@@ -45,11 +45,10 @@ value_basis      = "gateway"
 # "Registration on e-Shram portal is free. Workers are not required to pay any
 #  charges to any registering entity." (Q15)
 premium_inr      = 0
-# "The registered workers under eSHRAM portal, will be enrolled under PMSBY and
-#  premium for the first year will be borne by the Ministry of Labour &
-#  Employment, Government of India" (Q21)
-summary_hi       = "यह पैसा देने वाली योजना नहीं है — यह मज़दूरों का सरकारी पहचान पत्र (UAN) है, जिससे बाकी योजनाएँ आप तक पहुँचती हैं। कार्ड कभी ख़त्म नहीं होता और पंजीकरण मुफ़्त है। पोर्टल के अनुसार पंजीकृत मज़दूरों को प्रधानमंत्री सुरक्षा बीमा योजना में जोड़ा जाता है और पहले साल का प्रीमियम श्रम मंत्रालय भरता है।"
-summary_en       = "Not a payout scheme. It is the unorganised worker's national identity (a UAN card) through which other schemes are delivered. Registration is free and the card does not expire. Per the portal, registrants are enrolled in PMSBY with the first year's premium borne by the Ministry."
+# ! Rechecked 2026-09-07: visible FAQ Q13/Q42 describes registration and benefit
+# ! facilitation, not a current promise of automatic insurance or free premium.
+summary_hi       = "यह पैसा देने वाली योजना नहीं है — यह मज़दूरों का सरकारी पहचान पत्र (UAN) है, जिससे योजनाओं तक पहुँचने में मदद मिलती है। कार्ड कभी ख़त्म नहीं होता और पंजीकरण मुफ़्त है। हर जुड़ी योजना की पात्रता और आवेदन की शर्तें अलग हैं।"
+summary_en       = "A registration service with no payout of its own. It gives unorganised workers a UAN card to help access schemes. Registration is free and the card does not expire. Linked schemes have separate eligibility and application requirements."
 
 # =====================================================================
 # ELIGIBILITY — ALL [[criteria]] must pass.
