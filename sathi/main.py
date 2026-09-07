@@ -109,7 +109,8 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     startup_report(schemes)
-    log = None if args.no_db else EventLog(args.db)
+    # ! Preview traffic is synthetic and must never enter the impact database.
+    log = None if args.no_db or args.preview else EventLog(args.db)
     try:
         if args.preview:
             # ! Before the channels, and before either token is required: the

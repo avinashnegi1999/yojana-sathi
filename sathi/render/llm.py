@@ -1,9 +1,7 @@
 """Optional LLM layer. Strictly outside the rule engine.
 
-# ! The model does exactly two jobs here:
-# !   1. Map free text to an occupation CODE — which is then confirmed by the
+# ! The model has one job: map free text to an occupation CODE, confirmed by the
 # !      worker before it enters the profile. A rejected guess is discarded.
-# !   2. Rephrase Hindi a human authored, for a specific listener.
 # ! It never sees a threshold, never produces a ₹ figure, never produces a
 # ! verdict, and never answers a scheme question from its own knowledge.
 #
@@ -17,7 +15,6 @@
 
 import json
 import os
-import re
 import time
 import urllib.error
 import urllib.request
@@ -28,7 +25,6 @@ from sathi.core.content import occupation_codes, occupations
 _DEFAULT_URL = "https://api.anthropic.com/v1/messages"
 _DEFAULT_MODEL = "claude-sonnet-5"
 _TIMEOUT_S = 10
-_DIGITS = re.compile(r"\d+")
 
 # ! A public Telegram bot hands the whole internet a button that spends money.
 # ! Nobody has to break the rule engine to hurt us; they can paste a novel into
@@ -129,41 +125,13 @@ def propose_occupation(said: str) -> str | None:
     return code if code in occupation_codes() else None
 
 
-_REPHRASE_SYSTEM = """Rewrite the Hindi below so a worker with little schooling
-understands it easily. Keep every number, every rupee amount, every scheme name
-and every meaning exactly as they are. Add nothing. Remove no fact. Do not
-explain, do not advise, do not mention eligibility rules of your own.
-Reply with the rewritten Hindi only."""
-
-
-def rephrase(text: str, audience_hint: str = "") -> str:
-    """Simplify authored Hindi. Returns the original on any doubt.
-
-    # ! Guard, not trust: if the rewrite introduces a number the original did
-    # ! not contain, it is discarded. That is the one failure mode that could
-    # ! put a fabricated ₹ figure in front of a worker.
-    """
-    if not text.strip() or not is_available():
-        return text
-    user = f"{audience_hint}\n\n{text}".strip()
-    out = _ask(_REPHRASE_SYSTEM, user, max_tokens=800)
-    if not out:
-        return text
-    if set(_DIGITS.findall(out)) - set(_DIGITS.findall(text)):
-        return text  # ! invented a number — throw the whole rewrite away
-    return out
-
-
 def _self_check() -> None:
     # * Runs with no key and no network: this IS the supported configuration.
     saved = os.environ.pop("LLM_API_KEY", None)
     try:
         assert not is_available()
         assert propose_occupation("मैं ईंट लगाता हूँ") is None
-        assert rephrase("आपको ₹12,000 मिलेंगे") == "आपको ₹12,000 मिलेंगे"
-        assert rephrase("") == ""
-
-        # * The number guard, exercised without a network by faking one reply.
+        # * Classification is the only model call; eligibility stays templated.
         import sys
 
         mod = sys.modules[__name__]  # * the running copy, not a second import
@@ -171,11 +139,6 @@ def _self_check() -> None:
         os.environ["LLM_API_KEY"] = "test-not-a-real-key"
         real = mod._ask
         try:
-            mod._ask = lambda *a, **k: "आपको ₹99,999 मिलेंगे"
-            assert mod.rephrase("आपको ₹12,000 मिलेंगे") == "आपको ₹12,000 मिलेंगे", \
-                "a rewrite that invents a number must be discarded"
-            mod._ask = lambda *a, **k: "आपको बारह हज़ार रुपये मिलेंगे 12,000"
-            assert "बारह" in mod.rephrase("आपको ₹12,000 मिलेंगे")
             mod._ask = lambda *a, **k: "construction"
             assert mod.propose_occupation("ईंट") == "construction"
             mod._ask = lambda *a, **k: "brick_layer_9000"
