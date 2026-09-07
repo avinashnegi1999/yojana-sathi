@@ -12,6 +12,7 @@ import hmac
 import json
 import sys
 import threading
+import time
 import urllib.error
 import urllib.request
 from http.server import ThreadingHTTPServer
@@ -105,7 +106,16 @@ def run() -> None:
         # ! generating a pack takes longer than that.
         status, _ = _request(base + "/", payload, _sign(payload))
         assert status == 200, status
-        assert bot._work.qsize() == 1, "the webhook was processed inside the request"
+        # ! The 200 is sent BEFORE the enqueue, deliberately — so the client can
+        # ! see the response while the handler thread has not queued yet. Wait
+        # ! for the queue rather than sampling it, or this races on a loaded
+        # ! machine and fails in CI while passing on a fast laptop.
+        deadline = time.monotonic() + 5
+        while bot._work.qsize() == 0 and time.monotonic() < deadline:
+            time.sleep(0.005)
+        assert bot._work.qsize() == 1, "the signed message was never queued"
+        # ! This is the real claim: the request thread acknowledged and walked
+        # ! away, it did not run the conversation itself.
         assert not bot.sessions, "the request thread ran the conversation itself"
 
         assert bot.work_once(block=False) is True
