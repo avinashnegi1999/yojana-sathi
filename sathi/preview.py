@@ -95,7 +95,7 @@ def run(channel: str, schemes: dict[str, Scheme], log=None) -> int:
         mod._post = lambda token, path, payload: (
             sent.append(payload) or {"messages": [{"id": f"wamid.{len(sent)}"}]})
         mod._upload = lambda *a, **k: sent.append({"type": "document",
-                                                   "text": "<pack.pdf>"}) or {"id": "media.1"}
+                                                   "text": "<pack.txt>"}) or "media.1"
         limit = mod._BODY_MAX
 
         def feed(text: str | None, tap: str | None) -> None:
@@ -103,9 +103,10 @@ def run(channel: str, schemes: dict[str, Scheme], log=None) -> int:
             if tap is None:
                 message |= {"type": "text", "text": {"body": text}}
             else:
-                # ! No context id: a tap without one skips the stale-keyboard
-                # ! check, which is what we want when there is no real phone.
-                message |= {"type": "interactive", "interactive": {
+                # ! Exercise the same active-keyboard check as a real phone.
+                message |= {"type": "interactive",
+                            "context": {"id": bot._active_keyboard.get("911", "")},
+                            "interactive": {
                     "type": "button_reply", "button_reply": {"id": tap, "title": tap}}}
             bot.handle_update({"messages": [message]})
 
@@ -123,7 +124,7 @@ def run(channel: str, schemes: dict[str, Scheme], log=None) -> int:
             return {"ok": True, "result": {"message_id": state["mid"]}}
 
         mod._call = _call
-        mod._upload = lambda *a, **k: sent.append({"text": "<pack.pdf>"}) or {"ok": True}
+        mod._upload = lambda *a, **k: sent.append({"text": "<pack.html>"}) or {"ok": True}
         limit = 4096
 
         def feed(text: str | None, tap: str | None) -> None:

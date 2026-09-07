@@ -16,7 +16,7 @@
 # ! _tag() instead. Nothing in this file writes a phone number anywhere.
 #
 # ! Meta retries a webhook it thinks failed, so the same message can arrive
-# ! twice. We answer 200 first and process afterwards, and drop ids we have
+# ! twice. We enqueue before answering 200, process afterwards, and drop ids we have
 # ! already handled — a replayed answer would otherwise be recorded twice.
 """
 
@@ -27,6 +27,7 @@ import http.client
 import json
 import os
 import queue
+import signal
 import threading
 import time
 import urllib.error
@@ -63,9 +64,12 @@ _LIST_BUTTON = 20
 _TEXT_MAX = 4096
 _BODY_MAX = 1024        # ! an interactive message's body is a QUARTER of a text
 
-# ! Meta's own retry window is minutes; a few hundred ids is far more than
-# ! enough and keeps a long-running process from growing without bound.
+# ! ponytail: only the latest 500 ids survive in memory; restart/eviction loses
+# ! deduplication. A durable hashed receipt store is needed for stronger delivery.
 _SEEN_MAX = 500
+_WEBHOOK_MAX = 256 * 1024
+_QUEUE_MAX = 128
+_LOG_SALT = os.urandom(32)
 
 # ! WhatsApp accepts a narrow list of audio types and .wav is not among them,
 # ! but TTS_CMD's example produces exactly that. Rather than shell out to a
@@ -107,15 +111,9 @@ def _request(req: urllib.request.Request, what: str) -> dict:
         with urllib.request.urlopen(req, timeout=_TIMEOUT_S) as resp:
             return json.loads(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
-        # ! Meta puts the reason in error.message. A bare "400 Bad Request" in
-        # ! the log costs an hour; the description costs nothing to keep.
-        try:
-            body = json.loads(e.read().decode("utf-8"))
-        except (ValueError, OSError, http.client.HTTPException):
-            body = {}
-        error = body.get("error") if isinstance(body, dict) else None
-        detail = (error or {}).get("message", "") if isinstance(error, dict) else ""
-        raise WhatsAppError(f"{what} failed: {e.code} {detail or e.reason}", e.code) from e
+        # ! Provider descriptions can echo phone numbers, IDs or credentials.
+        # ! Status is sufficient to classify retryable failures without PII.
+        raise WhatsAppError(f"WhatsApp request failed: HTTP {e.code}", e.code) from e
     except (OSError, http.client.HTTPException, ValueError) as e:
         # ! A reset or truncated response is a network failure. Catch it here so
         # ! a genuine file or parsing error in a handler still takes the reset
@@ -308,8 +306,8 @@ def pack_as_text(filename: str, blob: bytes) -> tuple[str, bytes]:
 
 
 def _tag(key: str) -> str:
-    """A stable, non-reversible handle for a phone number, for logs only."""
-    return hashlib.sha256(key.encode("utf-8")).hexdigest()[:8]
+    """A process-local log handle; a secret prevents phone-number guessing."""
+    return hmac.new(_LOG_SALT, key.encode("utf-8"), hashlib.sha256).hexdigest()[:8]
 
 
 def valid_signature(secret: str, body: bytes, header: str) -> bool:
@@ -318,7 +316,7 @@ def valid_signature(secret: str, body: bytes, header: str) -> bool:
     # ! compare_digest, never ==. A byte-at-a-time comparison leaks the
     # ! expected signature to anyone patient enough to measure the answer.
     """
-    if not header.startswith("sha256="):
+    if not header.isascii() or not header.startswith("sha256="):
         return False
     expected = hmac.new(secret.encode("utf-8"), body, hashlib.sha256).hexdigest()
     return hmac.compare_digest(expected, header[len("sha256="):])
@@ -353,22 +351,24 @@ class WhatsAppBot(Router):
         # ! can be dropped; the set is what gets asked.
         self._seen: list[str] = []
         self._seen_set: set[str] = set()
-        self._work: queue.Queue = queue.Queue()
+        self._work: queue.Queue = queue.Queue(maxsize=_QUEUE_MAX)
 
     # * ------------------------------------------------------------- sending
 
     def send(self, key: str, reply: Reply) -> None:
         lang = self._lang.get(key, DEFAULT_LANG)
         text = reply.text
-        if reply.buttons and len(text) > _BODY_MAX:
+        if len(text) > (_BODY_MAX if reply.buttons else _TEXT_MAX):
             # ! An interactive body holds a quarter of what a text message does,
             # ! and a result message can exceed it. Send the long part as text,
             # ! then a short prompt that carries the options.
-            self._deliver(key, {"type": "text",
-                                "text": {"preview_url": False, "body": text[:_TEXT_MAX]}})
-            text = s("errors.pick_from_list", lang)
+            for start in range(0, len(text), _TEXT_MAX):
+                sent = self._deliver(key, {"type": "text", "text": {
+                    "preview_url": False, "body": text[start:start + _TEXT_MAX]}})
+            text = s("errors.pick_from_list", lang) if reply.buttons else ""
 
-        sent = self._deliver(key, interactive(text, reply.buttons, lang))
+        if text or reply.buttons:
+            sent = self._deliver(key, interactive(text, reply.buttons, lang))
         if reply.buttons:
             self._active_keyboard.pop(key, None)
             wamid = self._wamid(sent)
@@ -423,7 +423,8 @@ class WhatsAppBot(Router):
         if kind == "interactive":
             block = message.get("interactive") or {}
             reply = block.get("button_reply") or block.get("list_reply") or {}
-            return reply.get("id", ""), (message.get("context") or {}).get("id")
+            # ! Missing context is an unbound tap, never an ordinary typed answer.
+            return reply.get("id", ""), (message.get("context") or {}).get("id") or ""
         if kind == "button":
             # * A template quick-reply. Not used by the flow today, but it
             # * arrives in the same shape and costs one line to accept.
@@ -467,7 +468,7 @@ class WhatsAppBot(Router):
 
     def enqueue(self, value: dict) -> None:
         """Hand a verified webhook body to the worker thread and return."""
-        self._work.put(value)
+        self._work.put_nowait(value)
 
     def work_once(self, block: bool = True, timeout: float | None = None) -> bool:
         """Process one queued webhook. One thread, so sessions need no lock."""
@@ -475,6 +476,18 @@ class WhatsAppBot(Router):
             value = self._work.get(block=block, timeout=timeout)
         except queue.Empty:
             return False
+        try:
+            if value is None:
+                return False
+            # ! One failed recipient must not discard the rest of a Meta batch.
+            for message in value.get("messages") or []:
+                self._process_message(message)
+        finally:
+            self._work.task_done()
+        return True
+
+    def _process_message(self, message: dict) -> None:
+        value = {"messages": [message]}
         try:
             self.handle_update(value)
         except (urllib.error.URLError, TimeoutError):
@@ -484,16 +497,15 @@ class WhatsAppBot(Router):
             print("[whatsapp] send failed: network unreachable — session kept")
         except WhatsAppError as e:
             if _is_transient(e):
-                print(f"[whatsapp] {e} — session kept")
+                print(f"[whatsapp] HTTP {e.status} — session kept")
             else:
-                print(f"[whatsapp] {e}")
+                print(f"[whatsapp] send failed: HTTP {e.status}")
                 self._abandon(value)
         except Exception as e:  # noqa: BLE001
             # ! One broken conversation must never stop the worker thread while
             # ! other workers are mid-session.
-            print(f"[whatsapp] update failed: {e}")
+            print(f"[whatsapp] update failed: {type(e).__name__}")
             self._abandon(value)
-        return True
 
     def _abandon(self, value: dict) -> None:
         """Find the worker behind a failed webhook, then let the router drop it."""
@@ -508,23 +520,89 @@ class WhatsAppBot(Router):
     # * -------------------------------------------------------------- server
 
     def serve_forever(self, port: int | None = None) -> None:
-        port = port or int(os.environ.get("WHATSAPP_PORT", "8080"))
+        port = int(os.environ.get("WHATSAPP_PORT", "8080")) if port is None else port
         # ! Loopback by default. Plain HTTP on purpose — Meta requires HTTPS, so
         # ! this must sit behind a proxy that terminates TLS (deploy/RUNBOOK.md);
         # ! a self-signed certificate here would be refused by Meta while
         # ! looking like it worked. Binding every interface would also publish
         # ! an unencrypted copy of the endpoint beside the encrypted one.
         host = os.environ.get("WHATSAPP_BIND", "127.0.0.1")
+        server = ThreadingHTTPServer((host, port), _webhook_handler(self))
+        # ! Finish accepting active requests before putting the stop sentinel
+        # ! behind the last accepted batch. Otherwise an HTTP thread can enqueue
+        # ! after the worker has exited and still tell Meta it accepted the work.
+        server.daemon_threads = False
         worker = threading.Thread(target=self._drain, daemon=True, name="sathi-whatsapp")
         worker.start()
-        server = ThreadingHTTPServer((host, port), _webhook_handler(self))
-        print(f"[whatsapp] listening on {host}:{port}, "
-              f"{len(self.schemes)} scheme(s) loaded")
-        server.serve_forever()
+
+        def stop(signum, frame):
+            raise KeyboardInterrupt
+
+        main_thread = threading.current_thread() is threading.main_thread()
+        previous_term = signal.signal(signal.SIGTERM, stop) if main_thread else None
+        try:
+            print(f"[whatsapp] listening on {host}:{server.server_address[1]}, "
+                  f"{len(self.schemes)} scheme(s) loaded")
+            server.serve_forever()
+        finally:
+            try:
+                server.server_close()
+                self._work.put(None)
+                # ! main.py closes the shared event database after this returns.
+                # ! Join first so no worker can write through a closed connection.
+                worker.join()
+            finally:
+                if main_thread:
+                    signal.signal(signal.SIGTERM, previous_term)
 
     def _drain(self) -> None:
-        while True:
-            self.work_once()
+        while self.work_once():
+            pass
+
+
+def _webhook_messages(payload: dict, phone_number_id: str) -> list[dict]:
+    """Validate a whole batch before acceptance; retain no contact-name objects."""
+    def objects(value):
+        if not isinstance(value, list) or any(not isinstance(v, dict) for v in value):
+            raise ValueError("expected object list")
+        return value
+
+    if not isinstance(payload, dict):
+        raise ValueError("expected object")
+    messages = []
+    for entry in objects(payload.get("entry", [])):
+        for change in objects(entry.get("changes", [])):
+            value = change.get("value", {})
+            if not isinstance(value, dict):
+                raise ValueError("expected value object")
+            metadata = value.get("metadata", {})
+            if not isinstance(metadata, dict):
+                raise ValueError("expected metadata object")
+            if metadata.get("phone_number_id", phone_number_id) != phone_number_id:
+                continue
+            for message in objects(value.get("messages", [])):
+                for field in ("id", "from", "type"):
+                    if not isinstance(message.get(field), str) or not 0 < len(message[field]) <= 256:
+                        raise ValueError("invalid message identity")
+                if not message["from"].isascii() or not message["from"].isdigit():
+                    raise ValueError("invalid sender")
+                for field in ("text", "interactive", "context", "button"):
+                    if field in message and not isinstance(message[field], dict):
+                        raise ValueError("invalid message object")
+                for field in ("button_reply", "list_reply"):
+                    block = message.get("interactive", {})
+                    if field in block and not isinstance(block[field], dict):
+                        raise ValueError("invalid interactive reply")
+                answer, tapped = WhatsAppBot._answer(message)
+                if not isinstance(answer, str) or len(answer) > _TEXT_MAX:
+                    raise ValueError("invalid answer")
+                if tapped is not None and (not isinstance(tapped, str) or len(tapped) > 256):
+                    raise ValueError("invalid context")
+                messages.append({k: message[k] for k in (
+                    "id", "from", "type", "text", "interactive", "context", "button") if k in message})
+                if len(messages) > 100:
+                    raise ValueError("too many messages")
+    return messages
 
 
 def _webhook_handler(bot: WhatsAppBot) -> type[BaseHTTPRequestHandler]:
@@ -533,8 +611,15 @@ def _webhook_handler(bot: WhatsAppBot) -> type[BaseHTTPRequestHandler]:
     class Handler(BaseHTTPRequestHandler):
         protocol_version = "HTTP/1.1"
 
+        def setup(self) -> None:
+            self.request.settimeout(5)
+            super().setup()
+
         def _respond(self, status: int, body: bytes = b"") -> None:
+            # ! Close after every request, including rejected bodies left unread.
+            self.close_connection = True
             self.send_response(status)
+            self.send_header("connection", "close")
             self.send_header("content-type", "text/plain; charset=utf-8")
             self.send_header("content-length", str(len(body)))
             self.end_headers()
@@ -550,14 +635,34 @@ def _webhook_handler(bot: WhatsAppBot) -> type[BaseHTTPRequestHandler]:
             challenge = (query.get("hub.challenge") or [""])[0]
             # ! compare_digest here too: this token is a shared secret and the
             # ! endpoint answers strangers.
-            if mode == "subscribe" and hmac.compare_digest(token, bot.verify_token):
+            if mode == "subscribe" and hmac.compare_digest(
+                    token.encode("utf-8"), bot.verify_token.encode("utf-8")):
                 self._respond(200, challenge.encode("utf-8"))
             else:
                 self._respond(403)
 
         def do_POST(self) -> None:  # noqa: N802
-            length = int(self.headers.get("content-length") or 0)
-            body = self.rfile.read(length) if length else b""
+            try:
+                lengths = self.headers.get_all("content-length") or []
+                if len(lengths) != 1 or self.headers.get("transfer-encoding"):
+                    raise ValueError("ambiguous body length")
+                length = int(lengths[0])
+                if length < 0:
+                    raise ValueError("negative body length")
+            except ValueError:
+                self._respond(400)
+                return
+            if length > _WEBHOOK_MAX:
+                self._respond(413)
+                return
+            try:
+                body = self.rfile.read(length)
+            except TimeoutError:
+                self._respond(408)
+                return
+            if len(body) != length:
+                self._respond(400)
+                return
             signature = self.headers.get("x-hub-signature-256", "")
             if not valid_signature(bot.app_secret, body, signature):
                 # ! Say nothing useful. An attacker probing the endpoint learns
@@ -566,18 +671,19 @@ def _webhook_handler(bot: WhatsAppBot) -> type[BaseHTTPRequestHandler]:
                 return
             try:
                 payload = json.loads(body.decode("utf-8"))
-            except (ValueError, UnicodeDecodeError):
+                messages = _webhook_messages(payload, bot.phone_number_id)
+            except (ValueError, RecursionError):
                 self._respond(400)
                 return
-            # ! Answer FIRST. Meta retries anything it does not see acknowledged
-            # ! within seconds, and a screening that generates a pack takes
-            # ! longer than that. The queue is what makes the 200 honest.
+            # ! Acknowledge acceptance, not processing. If capacity is exhausted,
+            # ! Meta must retry; a 200 followed by failed enqueue loses answers.
+            try:
+                if messages:
+                    bot.enqueue({"messages": messages})
+            except queue.Full:
+                self._respond(503)
+                return
             self._respond(200)
-            for entry in payload.get("entry") or []:
-                for change in entry.get("changes") or []:
-                    value = change.get("value") or {}
-                    if value.get("messages"):
-                        bot.enqueue(value)
 
         def log_message(self, *args) -> None:
             # ! Silence. The default access log writes the request line and the
@@ -818,7 +924,7 @@ def _self_check() -> None:
             _post("t", "1/messages", {"to": "911"})
             raise AssertionError("an HTTP failure was swallowed")
         except WhatsAppError as e:
-            assert e.status == 400 and "Unsupported post request" in str(e), e
+            assert e.status == 400 and "Unsupported post request" not in str(e), e
 
         class _BrokenRead:
             def __enter__(self):

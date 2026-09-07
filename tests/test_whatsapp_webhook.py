@@ -12,7 +12,6 @@ import hmac
 import json
 import sys
 import threading
-import time
 import urllib.error
 import urllib.request
 from http.server import ThreadingHTTPServer
@@ -49,7 +48,8 @@ def _sign(body: bytes) -> str:
     return "sha256=" + hmac.new(SECRET.encode(), body, hashlib.sha256).hexdigest()
 
 
-def _request(url: str, body: bytes | None = None, signature: str | None = None) -> int:
+def _request(url: str, body: bytes | None = None,
+             signature: str | None = None) -> tuple[int, bytes]:
     headers = {"content-type": "application/json"} if body else {}
     if signature is not None:
         headers["x-hub-signature-256"] = signature
@@ -106,13 +106,7 @@ def run() -> None:
         # ! generating a pack takes longer than that.
         status, _ = _request(base + "/", payload, _sign(payload))
         assert status == 200, status
-        # ! The 200 is sent BEFORE the enqueue, deliberately — so the client can
-        # ! see the response while the handler thread has not queued yet. Wait
-        # ! for the queue rather than sampling it, or this races on a loaded
-        # ! machine and fails in CI while passing on a fast laptop.
-        deadline = time.monotonic() + 5
-        while bot._work.qsize() == 0 and time.monotonic() < deadline:
-            time.sleep(0.005)
+        # ! Acceptance precedes the 200; a full queue must request redelivery.
         assert bot._work.qsize() == 1, "the signed message was never queued"
         # ! This is the real claim: the request thread acknowledged and walked
         # ! away, it did not run the conversation itself.
