@@ -69,6 +69,9 @@ other = "Something else"
 correct = "Yes, that's right"
 wrong = "No, that's wrong"
 show_more = "Show more"
+# ! WhatsApp shows more than three options as a list behind a button, and
+# ! that button needs its own label. Telegram never asks for one.
+choose = "Choose"
 
 # =====================================================================
 [income_bands]
@@ -231,7 +234,7 @@ privacy = """What I never ask for: your name, your phone number, your Aadhaar nu
 
 What is kept: counts only — the state, an age band (like 26-40), the kind of work, and an income band. No exact age, no exact income, no village.
 
-Your answers live in memory only while we talk, and are gone when the session ends. Each session gets a random number that is not linked to your Telegram account, so two visits by you cannot be joined together.
+Your answers live in memory only while we talk, and are gone when the session ends. Each session gets a random number that is not linked to your account on this app, so two visits by you cannot be joined together.
 
 The sheet I make for you is sent to you and never saved on our side."""
 schemes_header = """These are the schemes I check, and where their rules come from.
@@ -245,6 +248,10 @@ cancelled = "Stopped. Nothing was saved. Send /start to begin again."
 cleared = "Deleted {count} message(s) — the ones from this conversation I still had a record of. Send /clearall to also remove older ones."
 cleared_all = "Cleared everything I could reach from the last 48 hours. Telegram does not let a bot delete messages older than that, so anything older stays — you can remove those yourself."
 clear_nothing = "There was nothing to delete."
+# ! Not every channel lets a bot delete its own messages — the WhatsApp
+# ! Cloud API has no delete endpoint at all. Say that plainly rather than
+# ! reporting a clear that did not happen.
+clear_unsupported = "This app does not let me delete messages from your phone, so I could not remove this conversation. You can delete it yourself: press and hold this chat in your chat list, then choose Delete."
 
 # =====================================================================
 [errors]

@@ -22,8 +22,8 @@ import urllib.request
 import uuid
 
 from sathi.channels.base import Button, Reply
-from sathi.conversation.flow import Conversation
-from sathi.core.content import DEFAULT_LANG, LANGS, s
+from sathi.channels.router import Router
+from sathi.core.content import DEFAULT_LANG, s
 from sathi.core.schemes import Scheme
 from sathi.metrics.events import EventLog
 
@@ -69,17 +69,6 @@ _DELETE_BATCH = 100
 # ! questions. Conflating them made /clearall stop dead after a /clear, which is
 # ! exactly the case a second clear is for.
 _CLEAR_REFUSAL_STREAK = 40
-
-# * Commands are handled here, not in the flow, because they are a channel
-# * affordance. The flow exposes plain methods; this maps slash words onto them.
-COMMANDS = {
-    "/start": "start", "/restart": "start",
-    "/language": "language", "/lang": "language",
-    "/help": "help", "/about": "about", "/privacy": "privacy",
-    "/schemes": "schemes", "/cancel": "cancel", "/stop": "cancel",
-    "/clear": "clear", "/clearall": "clearall", "/clear_all": "clearall",
-}
-
 
 def _call(token: str, method: str, payload: dict) -> dict:
     # ! Drop keys we have no value for. Telegram rejects an explicit null
@@ -175,25 +164,20 @@ def keyboard(buttons: tuple[Button, ...]) -> dict | None:
     }
 
 
-class TelegramBot:
+class TelegramBot(Router):
+    """Sessions, commands and languages come from Router. This is the wire."""
+
+    channel = "telegram"
+
     def __init__(self, schemes: dict[str, Scheme], log: EventLog | None = None,
                  token: str | None = None) -> None:
+        super().__init__(schemes, log)
         self.token = token or os.environ.get("TELEGRAM_TOKEN", "")
         if not self.token:
             raise TelegramError("TELEGRAM_TOKEN is not set — see .env.example")
-        self.schemes = schemes
-        self.log = log
-        self.sessions: dict[str, Conversation] = {}
         # ! chat_id -> [(message_id, sent_at)] so /clear has something to delete.
         # ! In memory only: it dies with the process, like the profiles do.
         self._sent: dict[str, list[tuple[int, float]]] = {}
-        # ! The language outlives the session. A Conversation is rebuilt whenever
-        # ! one ends — after /cancel, after a completed screening — and a fresh
-        # ! one defaults to Hindi, so an English worker's /help or /clear came
-        # ! back in Hindi. The choice is a preference, not session state.
-        self._lang: dict[str, str] = {}
-        # ! Only the current question's keyboard may answer this session.
-        self._active_keyboard: dict[str, int] = {}
         self._offset = 0
 
     # * ------------------------------------------------------------- sending
@@ -267,19 +251,6 @@ class TelegramBot:
         except OSError:
             return "error"
 
-    @staticmethod
-    def _bilingual(key: str, lang: str, **fmt) -> str:
-        """The same message in both languages, the worker's own first.
-
-        # ! Used for the clear receipts. After a clear this may be the only
-        # ! message left standing in the chat, with no earlier screen to give it
-        # ! context — so it has to be readable whichever language the reader
-        # ! has. Same reasoning as the language picker.
-        """
-        first = s(key, lang, **fmt)
-        second = next(s(key, other, **fmt) for other in LANGS if other != lang)
-        return f"{first}\n\n{second}" if first != second else first
-
     def _delete_batch(self, chat_id: str, ids: list[int]) -> bool:
         """Delete up to 100 messages in one call. Telegram skips what it cannot.
 
@@ -301,8 +272,9 @@ class TelegramBot:
         except OSError:
             return False
 
-    def clear_chat(self, chat_id: str, lang: str = "hi",
-                   from_message_id: int | None = None, deep: bool = False) -> Reply:
+    def clear_chat(self, chat_id: str, lang: str = DEFAULT_LANG,
+                   from_message_id: int | str | None = None,
+                   deep: bool = False) -> Reply:
         """Delete this chat's messages, ours and the worker's, within 48 hours.
 
         # ! Best effort by design, and the reply says so. Telegram refuses
@@ -358,13 +330,6 @@ class TelegramBot:
 
     # * ------------------------------------------------------------ receiving
 
-    def _conversation(self, chat_id: str, fresh: bool = False) -> Conversation:
-        if fresh or chat_id not in self.sessions:
-            convo = Conversation(self.schemes, self.log, channel="telegram")
-            convo.lang = self._lang.get(chat_id, DEFAULT_LANG)
-            self.sessions[chat_id] = convo
-        return self.sessions[chat_id]
-
     def handle_update(self, update: dict) -> None:
         """One update in, replies out. Pure translation plus a dict lookup."""
         if "callback_query" in update:
@@ -407,52 +372,7 @@ class TelegramBot:
         else:
             return
 
-        replies = self._dispatch(chat_id, answer, message_id)
-        # * Remember the language for whatever comes after this session ends.
-        convo = self.sessions.get(chat_id)
-        if convo is not None:
-            self._lang[chat_id] = convo.lang
-
-        for reply in replies:
-            self.send(chat_id, reply)
-            if reply.end:
-                # ! Session over: drop the profile from memory immediately. It is
-                # ! never written anywhere, and now it is not held anywhere either.
-                self.sessions.pop(chat_id, None)
-                self._active_keyboard.pop(chat_id, None)
-
-    def _dispatch(self, chat_id: str, answer: str,
-                  message_id: int | None = None) -> list[Reply]:
-        """Slash command, or an answer to the question we asked."""
-        word = answer.strip().split()[0].lower() if answer.strip() else ""
-        command = COMMANDS.get(word)
-        # ! Informational replies leave the question live. Every other turn
-        # ! answers, replaces or clears it, even if the state stays the same.
-        if command not in ("help", "about", "privacy", "schemes"):
-            self._active_keyboard.pop(chat_id, None)
-        if command is None:
-            return self._conversation(chat_id).handle(answer)
-
-        if command == "start":
-            return self._conversation(chat_id, fresh=True).start()
-
-        convo = self._conversation(chat_id)
-        if command == "language":
-            # * Toggle. Two languages means a switch needs no submenu.
-            return convo.set_language("en" if convo.lang == "hi" else "hi")
-        if command == "cancel":
-            replies = convo.cancel()
-            self.sessions.pop(chat_id, None)
-            return replies
-        if command in ("clear", "clearall"):
-            # * /clear is exact and cheap: only what this process tracked.
-            # * /clearall also walks ids backwards to reach messages from before
-            # * the last restart — more thorough, many more API calls.
-            return [self.clear_chat(chat_id, convo.lang, message_id,
-                                    deep=command == "clearall")]
-        if command == "schemes":
-            return convo.scheme_list()
-        return convo.info(command)  # help | about | privacy
+        self.turn(chat_id, answer, message_id)
 
     def poll_once(self) -> int:
         updates = _call(self.token, "getUpdates", {
@@ -488,12 +408,11 @@ class TelegramBot:
         return len(updates)
 
     def _abandon(self, update: dict, cause: Exception) -> None:
-        """Drop a conversation this bot can no longer reason about, and say so.
+        """Find the chat behind a failed update, then let the router drop it.
 
-        # ! Only for a fault in OUR handling. The turn may have partly changed the
-        # ! profile or sent only some replies, and replay could record answers
-        # ! twice — so the answers go, and the worker is told to start again.
-        # ! A transport failure is NOT this: see the callers.
+        # ! Recovery must never stop the poller: a chat we cannot even address
+        # ! is a reason to log and carry on, not to take the bot down while
+        # ! other workers are mid-session.
         """
         try:
             message = (update.get("message") or
@@ -501,12 +420,7 @@ class TelegramBot:
             chat_id = (message.get("chat") or {}).get("id")
             if chat_id is None:
                 return  # * No destination for a recovery notice.
-            chat_id = str(chat_id)
-            convo = self.sessions.pop(chat_id, None)
-            self._active_keyboard.pop(chat_id, None)
-            lang = convo.lang if convo else self._lang.get(chat_id, DEFAULT_LANG)
-            self._lang[chat_id] = lang
-            self.send(chat_id, Reply(text=s("errors.screening_stopped", lang)))
+            self.abandon(str(chat_id))
         except Exception as recovery_error:  # noqa: BLE001 — recovery must not stop polling
             print(f"[telegram] recovery notice failed: {type(recovery_error).__name__}")
 

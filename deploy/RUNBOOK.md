@@ -71,6 +71,92 @@ systemctl --user disable --now sathi
 | Bot silently dead, instance gone | credit exhausted or Free Plan expired | AWS: Billing > Budgets — the zero-spend alert fires the day real money starts. Azure: portal > Cost Management |
 | Impact numbers reset to zero | `DB_PATH` not on the persistent disk | must be `/var/lib/sathi/sathi.db`, never `/tmp` |
 
+## WhatsApp — a second channel, a second unit
+
+The Telegram bot needs no inbound port. The WhatsApp one does, because Meta
+pushes webhooks instead of letting us poll. Nothing about the Telegram deploy
+changes; `sathi-whatsapp.service` runs beside `sathi.service`.
+
+**Start the paperwork before the deploy.** Meta business verification takes days
+to weeks, can fail, and needs a phone number that is not already on WhatsApp. It
+runs asynchronously, so begin it first and read the rest of this while it sits in
+a queue. Nothing below can be tested without it.
+
+Four secrets go into `/etc/sathi/sathi.env` (mode 0600, owned by `sathi`):
+
+    WHATSAPP_TOKEN=            # System User token, NOT the 24-hour test token
+    WHATSAPP_PHONE_NUMBER_ID=
+    WHATSAPP_APP_SECRET=       # signs every webhook; the adapter refuses to start without it
+    WHATSAPP_VERIFY_TOKEN=     # any string you choose; Meta echoes it back once
+
+### TLS, which the webhook cannot do without
+
+Meta will only call an HTTPS URL with a certificate it trusts, so the adapter
+serves plain HTTP on `127.0.0.1:8080` and something in front holds the
+certificate. Caddy is the smallest thing that does this correctly — one line of
+config and it renews on its own:
+
+    sudo apt install -y caddy
+    # /etc/caddy/Caddyfile
+    13.206.84.69.nip.io {
+        reverse_proxy 127.0.0.1:8080
+    }
+    sudo systemctl restart caddy
+
+`nip.io` resolves `<ip>.nip.io` to that IP, which is how this gets a real
+certificate without buying a domain — Let's Encrypt will not issue one for a bare
+IP address. A real domain is better and is the only change needed later.
+
+Then open 443, which the security group currently does not:
+
+    aws ec2 authorize-security-group-ingress --group-name sathi-sg \
+        --protocol tcp --port 443 --cidr 0.0.0.0/0
+
+Port 8080 stays closed to the internet. The adapter binds loopback
+(`WHATSAPP_BIND`) so an unencrypted copy of the endpoint is never published
+beside the encrypted one.
+
+### Wire it up
+
+    sudo cp deploy/sathi-whatsapp.service /etc/systemd/system/
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now sathi-whatsapp
+
+In the Meta dashboard → WhatsApp → Configuration, set the callback URL to
+`https://13.206.84.69.nip.io/` and the verify token to `WHATSAPP_VERIFY_TOKEN`,
+then subscribe to the **messages** field. Saving it triggers one GET, which the
+adapter answers with the challenge.
+
+### Verify a deploy actually worked
+
+    # the handshake, from your laptop — 200 and the challenge echoed back
+    curl -i "https://13.206.84.69.nip.io/?hub.mode=subscribe&hub.challenge=42&hub.verify_token=$WHATSAPP_VERIFY_TOKEN"
+
+    # a forged webhook must be refused: 403, and nothing in the journal
+    curl -i -X POST -d '{}' https://13.206.84.69.nip.io/
+
+    journalctl -u sathi-whatsapp -f     # "listening on 127.0.0.1:8080"
+
+A real message from a real phone is the only end-to-end proof. Nothing before
+that shows what the buttons look like on a worker's screen.
+
+### What differs from Telegram, in use
+
+- **Three buttons per message.** Longer question screens become a list behind a
+  "Choose" button — one extra tap on occupation, income, land, family size,
+  known schemes and documents.
+- **`/clear` and `/clearall` cannot work.** The Cloud API has no delete endpoint
+  at all, so the bot says so and tells the worker to delete the chat themselves.
+  On Telegram both commands still do what they always did.
+- **The application pack arrives as `.txt`, not `.html`.** WhatsApp refuses HTML
+  documents; the pack is flattened to text and nothing in it is lost, but it no
+  longer prints as a page.
+- **Voice notes need a supported format.** `.wav` is not one. Point `TTS_CMD` at
+  something writing `.ogg` (opus) or `.mp3`, or WhatsApp gets text only.
+- **The 24-hour window.** Replies to a worker who wrote first are free and
+  unrestricted. That covers the whole screening; only the unbuilt follow-up
+  sender would need pre-approved templates.
+
 ## Rollback
 
 There is no build artifact to roll back to — the code is the repo. Check out the
@@ -79,6 +165,9 @@ deploy, so a rollback never loses event history.
 
 ## What this deliberately does not have
 
-No reverse proxy, no TLS, no inbound port, no Docker, no CI. Long polling makes
-all four unnecessary. Add CI when a second person can deploy; add Docker when
-something needs a dependency.
+No Docker, and no reverse proxy, TLS or inbound port on the Telegram side — long
+polling makes all of those unnecessary there, and that is still the channel to
+reach for first when something has to work today. The WhatsApp unit needs the
+proxy and the port because Meta pushes rather than lets us poll; it is additive
+and cannot take the Telegram bot down with it. Add Docker when something needs a
+dependency.

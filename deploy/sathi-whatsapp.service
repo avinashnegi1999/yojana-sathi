@@ -1,0 +1,74 @@
+# =====================================================================
+# Scheme Sathi — systemd unit, WhatsApp channel
+# =====================================================================
+# ! A SECOND unit beside sathi.service, not a replacement. One process per
+# ! channel: two pollers on one Telegram token steal each other's updates,
+# ! and a single process serving both would take both down together.
+#
+# ! This one LISTENS, which sathi.service never does. It binds loopback and
+# ! speaks plain HTTP; Caddy in front of it holds the certificate and is the
+# ! only thing the internet can reach. See RUNBOOK.md → "WhatsApp".
+#
+# Install (as root on the VM):
+#   cp sathi-whatsapp.service /etc/systemd/system/
+#   systemctl daemon-reload
+#   systemctl enable --now sathi-whatsapp
+#
+# Logs:  journalctl -u sathi-whatsapp -f
+# Stop:  systemctl stop sathi-whatsapp
+
+[Unit]
+Description=Scheme Sathi — welfare scheme screening bot (WhatsApp webhook)
+Documentation=https://github.com/avinashnegi1999/yojana-sathi
+After=network-online.target
+Wants=network-online.target
+
+# ! [Unit] keys, not [Service] keys. Put in [Service] they are silently
+# ! ignored and the crash-loop limit below does not exist.
+StartLimitIntervalSec=300
+StartLimitBurst=10
+
+[Service]
+Type=simple
+User=sathi
+Group=sathi
+WorkingDirectory=/opt/sathi
+
+# ! Secrets live here, mode 0600, owned by the sathi user. Never in the unit
+# ! file — `systemctl show` prints Environment= lines to any user. This file
+# ! carries WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_APP_SECRET
+# ! and WHATSAPP_VERIFY_TOKEN; the adapter refuses to start without all four.
+EnvironmentFile=/etc/sathi/sathi.env
+
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 -m sathi.main --whatsapp
+
+Restart=always
+RestartSec=10
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=sathi-whatsapp
+
+# * Same hardening as the Telegram unit, plus the socket restrictions that
+# * only matter for a process that accepts connections.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/sathi
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+# ! No IPAddressDeny here, tempting as it looks. This unit LISTENS on loopback
+# ! but TALKS to graph.facebook.com, and an address filter applies in both
+# ! directions — locking it to localhost would silently stop every reply from
+# ! ever being sent. The listening socket is confined by WHATSAPP_BIND instead,
+# ! and by a security group that never opens 8080 to the internet.
+
+[Install]
+WantedBy=multi-user.target

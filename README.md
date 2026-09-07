@@ -190,6 +190,7 @@ git clone <repo> && cd scheme-sathi
 python3 check.py                     # every self-check and test, nothing to install
 python3 -m sathi.main                # one screening in the terminal, buttons only
 python3 -m sathi.main --telegram     # the bot (needs TELEGRAM_TOKEN)
+python3 -m sathi.main --whatsapp     # the webhook (needs WHATSAPP_*, behind TLS)
 python3 -m sathi.metrics.report --out impact.html   # the impact dashboard
 ```
 
