@@ -6,6 +6,10 @@ walk to claim it.**
 
 Live on Telegram: [@YojanaSathiBot](https://t.me/YojanaSathiBot)
 
+WhatsApp speaks the same conversation from the same rule engine. The channel is
+built and verified end to end against Meta's test number — a real phone, a full
+screening, the same Hindi — but it is not yet live on a public number.
+
 > **Status — read before you use it on anyone.**
 > The software is complete and tested end to end. All three scheme files are
 > filled from official sources — the PMSBY rules PDF on `jansuraksha.gov.in`,
