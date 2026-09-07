@@ -1,0 +1,89 @@
+# Demo script — honest 2–3 minute walkthrough
+
+Prepared **8 September 2026**. This script is not a recorded demo or proof of
+live availability. It uses shipped unsigned scheme data and fictional answers.
+Keep **“OFFLINE ENGINEERING PREVIEW — NOT A REAL WORKER”** visible throughout.
+
+## Golden path, tested locally
+
+From the repository root run either:
+
+- `python3 -m sathi.main --preview telegram --no-db`
+- `python3 -m sathi.main --preview whatsapp --no-db`
+
+No channel token or network send is needed; `--no-db` keeps these synthetic
+sessions out of impact data. The renderer prints the buttons/lists that the
+channel would send, but terminal preview is not a real Android rendering test.
+
+Enter one answer per prompt. Numbers select visible buttons; `UK` and `30` are
+typed text. The path was exercised in both languages and both channels.
+
+| Prompt | Input | Meaning |
+|---|---|---|
+| Language | `1` | Hindi; use `2` for English |
+| Consent | `1` | Agree in this fictional demonstration |
+| State | `UK` | Uttarakhand |
+| Age | `30` | Fictional adult |
+| Occupation | `1` | Construction worker |
+| Income | `2` | Up to ₹5,000 monthly |
+| Land | `1` | No land |
+| Household | `4` | Four people |
+| Bank account | `1` | Yes |
+| Income tax | `2` | No |
+| EPFO/ESIC | `2` | No |
+| NPS | `2` | No |
+| Schemes already held | `4` | None of these |
+| Sheet offer | `1` | Accept |
+| Exit | blank line | End preview |
+
+Expected: an answer recap, three **UNKNOWN** scheme results explaining pending
+human confirmation, a sheet offer, simulated document send and closing message.
+There must be no eligible verdict or entitlement amount for these unsigned
+schemes. Income in the answer recap is the fictional input, not a benefit.
+If the menu changes, follow the stated meaning and rerun before recording.
+
+## Narration and shots
+
+| Segment | Show | Suggested narration |
+|---|---|---|
+| Problem, about 20 seconds | README problem citation | “India's unorganised sector had an estimated 43.99 crore workers in 2019–20. Yojana Sathi is testing a simpler way to understand scheme eligibility and next steps. That national estimate is the population context, not our user count.” |
+| Worker interaction, about 45 seconds | Hindi golden path; speed up repetitive intake transparently | “The worker chooses Hindi or English, gives consent, and answers short questions. Buttons work without a language model. We ask EPFO/ESIC and NPS separately because government schemes treat them differently. The recap shows what was recorded.” |
+| Safety, about 30 seconds | UNKNOWN result, then `data/schemes/` verification marker | “Compute first, narrate second. Python rules decide. Missing answers and unverified scheme data remain unknown. Our current production files still need human sign-off, so this screen refuses to tell this fictional worker they qualify.” |
+| Sources and application help, about 30 seconds | One official link from a scheme TOML; `docs/SCHEME_AUDIT.md`; checklist test | “Every reviewed value is traced to an official source. The current unsigned sheet gives questions to ask, not an approved application. A separate synthetic test demonstrates the eligible document-checklist path; that fixture is not a real government scheme or a human verification.” |
+| Channels and privacy, about 25 seconds | English WhatsApp preview list, architecture diagram | “Both adapters invoke the same conversation and rule engine. Preview sends nothing and records no events. Live metrics use coarse categories and random session IDs; the platforms still handle account identifiers and messages. This is not an end-to-end anonymity claim.” |
+| Honest close, about 15 seconds | Readiness human gates | “Software checks and a deployment record are not worker impact. The remaining gates are human scheme and Hindi review, a voluntary worker pilot, an accessible recorded demo and AgentFoundry eligibility confirmation.” |
+
+The problem figure is a dated government estimate, confirmed in the
+[Ministry of Labour parliamentary reply, 24 July 2023](https://www.pib.gov.in/PressReleasePage.aspx?PRID=1942079).
+Do not describe it as a current census or as people proven unable to claim benefits.
+
+## Showing the checklist without falsifying production status
+
+Run `python3 tests/test_flow.py` and show the named
+`test_full_session_with_no_llm_key_reaches_a_pack` and
+`test_unverified_scheme_never_produces_a_verdict_or_rupees` checks with the
+`VERIFIED` / `STUBBED` fixture definitions in that file. Label the first
+**SYNTHETIC TEST SCHEME — NOT GOVERNMENT DATA**. It exercises the real
+conversation, missing-document explanation and pack generation in a temporary
+directory. This does not prove the source values have been human-verified.
+
+Preview's document marker represents a stubbed upload. It is not a downloaded
+PDF or evidence that an attachment rendered on a phone. The core produces HTML;
+the WhatsApp adapter renders its supported text attachment. Show actual file
+contents only if generated by the code, and label the data source. Do not edit
+production `verified_by`, swap fixture files into `data/schemes`, or disable the
+gate for filming.
+
+## Recording checklist
+
+- [ ] Run `python3 check.py` on the commit being filmed; retain actual output.
+- [ ] Rehearse the path with `--no-db` and verify UNKNOWN remains visible.
+- [ ] Prepare English preview at the same state so the language comparison is
+      short; explain if recordings are cut together.
+- [ ] Open the official source before filming; hide personal browser tabs.
+- [ ] Keep terminal environment, tokens, chat handles, phone numbers, local
+      databases and real worker information off screen.
+- [ ] State any historical AWS/Meta-test-number evidence as historical; do not
+      imply this local audit performed a new cloud or phone verification.
+- [ ] Add a tested judge-accessible video/live URL to the submission only after
+      it exists. No demo URL has been invented here.
