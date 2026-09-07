@@ -7,6 +7,8 @@
 # ! different things to say to someone deciding whether to lose a day's wages.
 """
 
+from math import isfinite
+
 from sathi.core.schemes import STUB
 
 
@@ -23,12 +25,15 @@ def _is_stub(v: object) -> bool:
     return False
 
 
-def _num(v: object, where: str) -> float:
+def _num(v: object, where: str) -> int | float:
     # * bool is a subclass of int in Python. Comparing True to an age band is a
     # * scheme-file bug, so it is an error, not a silent 1.
     if isinstance(v, bool) or not isinstance(v, (int, float)):
         raise OperatorError(f"{where}: expected a number, got {v!r}")
-    return float(v)
+    if isinstance(v, float) and not isfinite(v):
+        raise OperatorError(f"{where}: expected a finite number")
+    # ! Keep integers exact: float conversion rounds boundaries and can overflow.
+    return v
 
 
 def apply(op: str, actual: object, expected: object) -> bool | None:
@@ -46,6 +51,18 @@ def apply(op: str, actual: object, expected: object) -> bool | None:
     if actual is None:
         return None
 
+    if op in ("eq", "in", "not_in"):
+        values = [expected] if op == "eq" else expected
+        if not isinstance(values, (list, tuple)):
+            raise OperatorError(f"{op!r} needs a list, got {expected!r}")
+        for value in values:
+            if type(actual) in (int, float) and type(value) in (int, float):
+                _num(actual, f"{op}.actual")
+                _num(value, f"{op}.value")
+            elif type(actual) is not type(value):
+                # ! Python equates True with 1; malformed data is UNKNOWN instead.
+                raise OperatorError(f"{op!r}: comparison types do not match")
+
     if op == "between":
         if not isinstance(expected, (list, tuple)) or len(expected) != 2:
             raise OperatorError(f"'between' needs a [low, high] pair, got {expected!r}")
@@ -58,8 +75,6 @@ def apply(op: str, actual: object, expected: object) -> bool | None:
         return lo <= _num(actual, "between.actual") <= hi
 
     if op in ("in", "not_in"):
-        if not isinstance(expected, (list, tuple)):
-            raise OperatorError(f"{op!r} needs a list, got {expected!r}")
         hit = actual in expected
         return hit if op == "in" else not hit
 
@@ -69,7 +84,9 @@ def apply(op: str, actual: object, expected: object) -> bool | None:
         return _num(actual, "gte.actual") >= _num(expected, "gte.value")
 
     if op == "eq":
-        # * Exact match, no coercion. "yes" != True, 18 != "18".
+        # * Exact match, no coercion. A mismatched pair — "18" against 18, or
+        # * True against 1 — was already rejected above as a scheme-file bug,
+        # * so by here both sides are the same kind of thing.
         return actual == expected
 
     raise OperatorError(f"unknown operator {op!r}")
@@ -90,7 +107,7 @@ def _self_check() -> None:
 
     assert apply("lte", 3, 5) is True and apply("gte", 3, 5) is False
     assert apply("eq", True, True) is True and apply("eq", False, True) is False
-    assert apply("eq", "18", 18) is False, "no type coercion"
+    assert apply("eq", 18, 18.0) is True, "numeric equality remains exact"
 
     assert apply("exists", None, STUB) is False, "exists decides even with a stub"
     assert apply("exists", "construction", STUB) is True
@@ -100,6 +117,7 @@ def _self_check() -> None:
         ("between", "thirty", [18, 40]),
         ("in", "x", "not-a-list"),
         ("lte", True, 5),
+        ("eq", "18", 18),
         ("nonsense", 1, 1),
     ):
         try:

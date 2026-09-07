@@ -21,6 +21,7 @@
 
 import tomllib
 from dataclasses import dataclass, field
+from math import isfinite
 from pathlib import Path
 
 from sathi.core.profile import PROFILE_FIELDS
@@ -180,7 +181,7 @@ class Scheme:
     def annual_value_inr(self) -> int:
         """₹ figure for the impact metric. 0 while unverified — never a guess."""
         v = self.benefit.get("annual_value_inr")
-        return v if isinstance(v, int) else 0
+        return v if self.is_servable and type(v) is int and v >= 0 else 0
 
 
 def _find_stubs(node, path: str = "") -> list[str]:
@@ -231,12 +232,17 @@ def _parse_criterion(raw: dict, where: str, *, exclusion: bool) -> Criterion:
         if raw["op"] == "between":
             if not (isinstance(v, list) and len(v) == 2):
                 raise SchemeError(f"{where}: op 'between' needs a [low, high] pair, got {v!r}")
-            if any(x != STUB and not isinstance(x, (int, float)) for x in v):
-                raise SchemeError(f"{where}: 'between' bounds must be numbers, got {v!r}")
+            if any(x != STUB and (type(x) not in (int, float)
+                                  or (type(x) is float and not isfinite(x))) for x in v):
+                raise SchemeError(f"{where}: 'between' bounds must be finite numbers, got {v!r}")
+            if STUB not in v and v[0] > v[1]:
+                raise SchemeError(f"{where}: 'between' bounds are reversed")
         elif raw["op"] in ("in", "not_in") and not isinstance(v, list):
             raise SchemeError(f"{where}: op {raw['op']!r} needs a list, got {v!r}")
-        elif raw["op"] in ("lte", "gte") and not isinstance(v, (int, float)):
-            raise SchemeError(f"{where}: op {raw['op']!r} needs a number, got {v!r}")
+        elif raw["op"] in ("lte", "gte") and (
+            type(v) not in (int, float) or (type(v) is float and not isfinite(v))
+        ):
+            raise SchemeError(f"{where}: op {raw['op']!r} needs a finite number, got {v!r}")
 
     for k in keys - {"field", "op", "value"}:
         _check_str(raw[k], f"{where}.{k}")
@@ -278,9 +284,11 @@ def load_scheme(path: Path) -> Scheme:
     b = raw["benefit"]
     # ! annual_value_inr stays strictly an integer: it feeds the headline metric
     # ! and a string there would silently become 0 in a total.
-    if b["annual_value_inr"] != STUB and not isinstance(b["annual_value_inr"], int):
+    if b["annual_value_inr"] != STUB and (
+        type(b["annual_value_inr"]) is not int or b["annual_value_inr"] < 0
+    ):
         raise SchemeError(
-            f"{where}.benefit.annual_value_inr: expected ₹ as an integer, "
+            f"{where}.benefit.annual_value_inr: expected ₹ as a non-negative integer, "
             f"got {b['annual_value_inr']!r}"
         )
     # * premium_inr may be a sentence instead of a number, because some schemes
@@ -297,6 +305,18 @@ def load_scheme(path: Path) -> Scheme:
     if b["value_basis"] != STUB and b["value_basis"] not in VALUE_BASES:
         raise SchemeError(
             f"{where}.benefit.value_basis: {b['value_basis']!r} not in {sorted(VALUE_BASES)}"
+        )
+    # ! Only annual_payout and insurance_cover are summed — by templates.py, by
+    # ! pack.py, by engine.total_value() and by report.value_split(). A one_time
+    # ! or subsidy scheme carrying a ₹ figure would land in no total at all, and
+    # ! nothing would report the shortfall. Refuse the file instead of quietly
+    # ! under-reporting what a worker was shown.
+    if (b["value_basis"] not in (STUB, "annual_payout", "insurance_cover")
+            and b["annual_value_inr"] != STUB and b["annual_value_inr"] > 0):
+        raise SchemeError(
+            f"{where}.benefit: value_basis {b['value_basis']!r} carries "
+            f"₹{b['annual_value_inr']}, but no total sums that basis. Set the "
+            f"value to 0, or extend the payout/cover split before shipping it."
         )
     _require_keys(raw["paperwork"], _PAPERWORK_KEYS | _PAPERWORK_OPTIONAL,
                   _PAPERWORK_KEYS, f"{where}.paperwork")

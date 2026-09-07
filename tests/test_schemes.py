@@ -133,6 +133,20 @@ def test_rejects_bad_value_basis():
              "value_basis")
 
 
+def test_rejects_unsummable_basis_carrying_money():
+    # ! A basis outside the payout/cover split is counted nowhere. Silent zero
+    # ! is worse than a load failure, because nobody goes looking for it.
+    for basis in ("one_time", "subsidy", "gateway"):
+        _rejects(GOOD.replace('value_basis      = "annual_payout"',
+                              f'value_basis      = "{basis}"'),
+                 "no total sums that basis")
+    # * The same basis at ₹0 is legitimate — e-Shram is exactly this.
+    ok = _load(GOOD.replace('value_basis      = "annual_payout"',
+                            'value_basis      = "gateway"')
+                   .replace("annual_value_inr = 12000", "annual_value_inr = 0"))
+    assert ok.annual_value_inr() == 0
+
+
 def test_rejects_bad_apply_location():
     _rejects(GOOD.replace('where_to_apply = "csc"', 'where_to_apply = "somewhere"'),
              "where_to_apply")
@@ -277,6 +291,35 @@ def test_no_shipped_scheme_is_servable_while_sign_off_is_pending():
     for code, s in load_all(root / "data" / "schemes").items():
         assert not s.is_servable, f"{code} is servable but sign-off is pending"
         assert evaluate(Profile(age=30), s).verdict is Verdict.UNKNOWN, code
+
+
+def test_rejects_nonfinite_boolean_and_reversed_thresholds():
+    for value in ("[18, nan]", "[18, inf]", "[true, 40]", "[40, 18]"):
+        _rejects(GOOD.replace("value      = [18, 40]", f"value      = {value}"),
+                 "between")
+
+
+def test_rejects_negative_or_boolean_money():
+    for value in ("-1", "true"):
+        _rejects(GOOD.replace("annual_value_inr = 12000", f"annual_value_inr = {value}"),
+                 "annual_value_inr")
+
+
+def test_unsigned_scheme_value_accessor_returns_zero():
+    assert _load(_unsigned(GOOD)).annual_value_inr() == 0
+
+
+def test_eshram_does_not_promise_automatic_insurance():
+    root = Path(__file__).resolve().parent.parent
+    sc = load_all(root / "data" / "schemes")["ESHRAM"]
+    assert "PMSBY" not in sc.summary("en")
+    assert "पहले साल का प्रीमियम" not in sc.summary("hi")
+
+
+def test_large_integer_threshold_loads_without_float_overflow():
+    large = 10 ** 400
+    sc = _load(GOOD.replace("value      = [18, 40]", f"value      = [18, {large}]"))
+    assert sc.criteria[0].value == [18, large]
 
 
 def run() -> None:

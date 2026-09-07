@@ -193,6 +193,47 @@ def test_engine_does_not_import_an_llm():
             assert banned not in source, f"{path.name} mentions {banned}"
 
 
+def test_nonfinite_numbers_are_unknown_not_a_verdict():
+    for value in (float("nan"), float("inf"), -float("inf")):
+        for op, expected in (("between", [18, 40]), ("lte", 40), ("gte", 18)):
+            sc = scheme(criteria=(Criterion("age", op, expected, "u"),))
+            result = evaluate(Profile(age=value), sc)
+            assert result.verdict is Verdict.UNKNOWN, (value, op, result.verdict)
+            assert result.reasons_with(ReasonCode.BAD_RULE)
+
+
+def test_total_value_never_adds_insurance_to_annual_pension():
+    from dataclasses import replace
+
+    payout = evaluate(Profile(age=30), AGE_ONLY)
+    cover = replace(payout, scheme_code="COVER", annual_value_inr=200000,
+                    value_basis="insurance_cover")
+    one_time = replace(payout, scheme_code="GRANT", annual_value_inr=1000,
+                       value_basis="one_time")
+    assert total_value((payout, cover, one_time)) == 12000
+    assert total_value((payout, cover), only_codes=frozenset({"COVER"})) == 0
+
+
+def test_wrong_comparison_types_are_unknown_not_verdicts():
+    cases = (
+        ("eq", True, 1), ("eq", "yes", True), ("eq", "18", 18),
+        ("in", True, [1]), ("in", 18, ["18"]),
+        ("not_in", "18", [18]), ("in", "a", ["a", 1]),
+        ("eq", float("nan"), 18), ("in", 18, [float("inf")]),
+    )
+    for op, actual, expected in cases:
+        sc = scheme(criteria=(Criterion("age", op, expected, "u"),))
+        result = evaluate(Profile(age=actual), sc)
+        assert result.verdict is Verdict.UNKNOWN, (op, actual, expected, result.verdict)
+        assert result.reasons_with(ReasonCode.BAD_RULE)
+
+
+def test_integer_comparisons_are_exact_and_do_not_overflow():
+    sc = scheme(criteria=(Criterion("age", "lte", 2 ** 53, "u"),))
+    assert evaluate(Profile(age=2 ** 53 + 1), sc).verdict is Verdict.INELIGIBLE
+    assert evaluate(Profile(age=10 ** 400), AGE_ONLY).verdict is Verdict.INELIGIBLE
+
+
 def run() -> None:
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):
