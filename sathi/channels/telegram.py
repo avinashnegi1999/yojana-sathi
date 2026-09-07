@@ -315,7 +315,7 @@ class TelegramBot(Router):
                     # * batch does not lose the rest of the window.
                     for message_id in chunk:
                         deleted += self._delete(chat_id, message_id) == "deleted"
-            print(f"[telegram] /clearall chat={chat_id} scanned={len(candidates)} "
+            print(f"[telegram] /clearall scanned={len(candidates)} "
                   f"batches={batches}")
 
         self._sent[chat_id] = []
@@ -332,6 +332,11 @@ class TelegramBot(Router):
 
     def handle_update(self, update: dict) -> None:
         """One update in, replies out. Pure translation plus a dict lookup."""
+        message = (update.get("message") or
+                   (update.get("callback_query") or {}).get("message") or {})
+        # ! A group chat would merge different workers into one sensitive profile.
+        if (message.get("chat") or {}).get("type", "private") != "private":
+            return
         if "callback_query" in update:
             cq = update["callback_query"]
             chat_id = str(cq["message"]["chat"]["id"])
@@ -379,6 +384,8 @@ class TelegramBot(Router):
             "offset": self._offset, "timeout": _POLL_S,
         }).get("result", [])
         for update in updates:
+            if update["update_id"] < self._offset:
+                continue
             self._offset = update["update_id"] + 1
             try:
                 self.handle_update(update)
@@ -397,13 +404,13 @@ class TelegramBot(Router):
                 # ! which is our bug and leaves the turn partly applied.
                 if _is_transient(e):
                     raise
-                print(f"[telegram] update {update.get('update_id')} failed: {e}")
+                print(f"[telegram] update failed: TelegramError status={e.status}")
                 self._abandon(update, e)
                 continue
             except Exception as e:  # noqa: BLE001
                 # ! One broken conversation must never take the bot down while
                 # ! other workers are mid-session. Log it and keep serving.
-                print(f"[telegram] update {update.get('update_id')} failed: {e}")
+                print(f"[telegram] update failed: {type(e).__name__}")
                 self._abandon(update, e)
         return len(updates)
 
@@ -437,7 +444,8 @@ class TelegramBot(Router):
                 # ! token right now. What is never worth doing is retrying flat
                 # ! out. Say how long we are waiting so a misconfiguration is
                 # ! readable in the log instead of drowning in it.
-                print(f"[telegram] poll failed ({e}) — retrying in {backoff:.0f}s")
+                print(f"[telegram] poll failed ({type(e).__name__}, "
+                      f"status={getattr(e, 'status', None)}) — retrying in {backoff:.0f}s")
                 time.sleep(backoff)
                 backoff = min(backoff * 2, _BACKOFF_MAX_S)
             else:
