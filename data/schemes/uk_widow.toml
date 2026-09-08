@@ -1,0 +1,84 @@
+# Source-researched draft, 8 September 2026. No human sign-off is claimed.
+# Benefit reference: https://budget.uk.gov.in/files/Budget_Speech__1.pdf paragraph 189.
+# ! Pending: reconcile income scope, pension overlap and current government orders before human sign-off.
+code = "UK_WIDOW"
+name_en = "Uttarakhand widow pension"
+name_hi = "उत्तराखंड विधवा पेंशन"
+authority = "Government of Uttarakhand"
+official_url = "https://socialwelfare.uk.gov.in/service/widow-pension/"
+verified_on = "2026-09-08"
+verified_by = "unconfirmed — PENDING HUMAN VERIFICATION"
+
+[benefit]
+annual_value_inr = 18000
+value_basis = "annual_payout"
+premium_inr = 0
+summary_en = "₹1,500 monthly pension after approval. Apply through ssp.uk.gov.in or assisted services. Eligibility and documents are checked by the department. Do not add multiple pension routes together as guaranteed payments."
+summary_hi = "स्वीकृति के बाद ₹1,500 मासिक पेंशन। ssp.uk.gov.in या सहायता केंद्र से आवेदन करें। विभाग पात्रता और दस्तावेज़ जाँचता है। अलग-अलग पेंशन विकल्पों को जोड़कर निश्चित भुगतान न मानें।"
+
+[[criteria]]
+field = "state"
+op = "eq"
+value = "UK"
+ask_en = "Which state do you live in?"
+ask_hi = "आप किस राज्य में रहते हैं?"
+pass_en = "You reported living in Uttarakhand; residence documents are checked during application."
+pass_hi = "आपने उत्तराखंड में रहना बताया है; आवेदन में निवास के दस्तावेज़ जाँचे जाएँगे।"
+fail_en = "This is a Uttarakhand state pension; ask about the scheme in your own state."
+fail_hi = "यह उत्तराखंड की पेंशन है; अपने राज्य की योजना के बारे में पूछें।"
+source_url = "https://socialwelfare.uk.gov.in/service/widow-pension/"
+
+[[criteria]]
+field = "age"
+op = "gte"
+value = 18
+ask_en = "How old are you?"
+ask_hi = "आपकी उम्र कितनी है?"
+pass_en = "Your reported age meets the entry-age condition."
+pass_hi = "आपकी बताई उम्र प्रवेश की आयु-शर्त पूरी करती है।"
+fail_en = "Your reported age is outside the entry-age range."
+fail_hi = "आपकी बताई उम्र प्रवेश की आयु-सीमा में नहीं है।"
+source_url = "https://socialwelfare.uk.gov.in/service/widow-pension/"
+
+[[criteria]]
+field = "is_widow"
+op = "eq"
+value = true
+ask_en = "Are you a widow (your husband has died)? You can choose Don't know to skip. Do not send a certificate here."
+ask_hi = "क्या आप विधवा हैं (पति का निधन हो चुका है)? छोड़ने के लिए पता नहीं चुनें। यहाँ प्रमाणपत्र न भेजें।"
+pass_en = "You reported widow status; a death certificate is required at application."
+pass_hi = "आपने विधवा स्थिति बताई है; आवेदन में मृत्यु प्रमाणपत्र चाहिए।"
+fail_en = "This pension route is for widows."
+fail_hi = "यह पेंशन विधवाओं के लिए है।"
+source_url = "https://socialwelfare.uk.gov.in/service/widow-pension/"
+
+[[criteria]]
+field = "uk_pension_income_or_bpl"
+op = "eq"
+value = true
+ask_en = "For the state pension: is your monthly income from ALL sources ₹4,000 or less, OR do you hold a BPL card? If unsure of the income certificate requirement, choose Don't know."
+ask_hi = "राज्य पेंशन के लिए: क्या सभी स्रोतों से आपकी मासिक आय ₹4,000 या कम है, अथवा आपके पास बीपीएल कार्ड है? आय प्रमाणपत्र की शर्त स्पष्ट न हो तो पता नहीं चुनें।"
+pass_en = "You reported meeting the income-or-BPL condition; the authority checks the certificate."
+pass_hi = "आपने आय अथवा बीपीएल शर्त पूरी होना बताया है; अधिकारी प्रमाणपत्र जाँचेंगे।"
+fail_en = "The stated income-or-BPL condition is not met."
+fail_hi = "बताई गई आय अथवा बीपीएल शर्त पूरी नहीं होती।"
+source_url = "https://socialwelfare.uk.gov.in/service/widow-pension/"
+
+[[criteria]]
+field = "uk_pension_selected"
+op = "eq"
+value = true
+ask_en = "Have you already been selected for the pension through the local Gram Sabha/Gram Panchayat or councillor process? If not, the local office can explain this application step."
+ask_hi = "क्या ग्राम सभा/ग्राम पंचायत या सभासद की स्थानीय प्रक्रिया से पेंशन के लिए आपका चयन हो चुका है? नहीं हुआ तो स्थानीय कार्यालय से इस आवेदन चरण की जानकारी लें।"
+pass_en = "You reported local selection; the application needs the selection proposal."
+pass_hi = "आपने स्थानीय चयन बताया है; आवेदन में चयन प्रस्ताव चाहिए।"
+fail_en = "Local selection is still needed. Ask the Gram Panchayat/councillor about completing this step; this is not a permanent refusal."
+fail_hi = "स्थानीय चयन अभी बाकी है। यह चरण पूरा करने के लिए ग्राम पंचायत/सभासद से पूछें; यह स्थायी अस्वीकृति नहीं है।"
+source_url = "https://socialwelfare.uk.gov.in/service/widow-pension/"
+
+[paperwork]
+documents_en = ["Aadhaar card", "Bank passbook", "Income certificate or BPL card", "Family register (rural) or ration card (urban)", "Local selection proposal", "Attested photograph", "Husband's death certificate"]
+documents = ["आधार कार्ड", "बैंक पासबुक", "आय प्रमाणपत्र या बीपीएल कार्ड", "परिवार रजिस्टर (ग्रामीण) या राशन कार्ड (शहरी)", "स्थानीय चयन प्रस्ताव", "प्रमाणित फोटो", "पति का मृत्यु प्रमाणपत्र"]
+where_to_apply = "online"
+renewal_en = "Follow the department's current verification instructions; report changes in eligibility. Confirm whether any existing pension affects your application."
+renewal = "विभाग के वर्तमान सत्यापन निर्देश मानें; पात्रता बदलने की सूचना दें। पहले से मिल रही पेंशन का आवेदन पर असर विभाग से पूछें।"

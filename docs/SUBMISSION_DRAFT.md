@@ -1,6 +1,6 @@
 # Yojana Sathi — submission draft
 
-Prepared **8 September 2026**. Official source checks: **7 September 2026**.
+Prepared **8 September 2026**. Official form and rubric rechecked **8 September 2026**.
 Not submitted. Replace the explicit evidence placeholders only with observed
 facts. The AgentFoundry declaration remains blocked.
 
@@ -85,9 +85,13 @@ privately. See [VERIFICATION.md](VERIFICATION.md) and [IMPACT.md](IMPACT.md).
 The repository records AWS EC2 deployment and links
 [@YojanaSathiBot](https://t.me/YojanaSathiBot). WhatsApp code and a historical
 Meta test-number trial are documented; no public production WhatsApp number is
-established. This audit has not freshly checked the cloud host, delivered a
-live message or performed a new phone test. Offline validation is reported
-separately in [HACKATHON_READINESS.md](../HACKATHON_READINESS.md).
+established. On **8 September 2026**, a read-only SSH check confirmed that
+`sathi`, `sathi-whatsapp` and `caddy` were active; both application services
+reported running. This establishes process status, not successful message
+delivery or independent judge access. No new phone test was performed.
+`python3 check.py` also passed locally at commit
+`e4a10e7be39b85a0ac3c2b19bbcfff96788812f0`. Earlier offline validation is reported
+in [HACKATHON_READINESS.md](../HACKATHON_READINESS.md).
 
 Before submitting, fill: **[actual deployed commit, date checked, independent
 judge-access test and sanitized evidence link]**.

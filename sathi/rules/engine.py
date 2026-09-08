@@ -139,6 +139,15 @@ def evaluate(profile: Profile, scheme: Scheme) -> Result:
             value_basis=basis,
         )
 
+    return _evaluate_rules(profile, scheme, value, basis)
+
+
+def _evaluate_rules(profile: Profile, scheme: Scheme, value: int, basis: str) -> Result:
+    """Shared calculation after the live gate, also used by fixed demo fixtures.
+
+    # ! Never route a real profile here directly. evaluate() owns the live gate.
+    # ! Demo supplies only fictional profiles and zero metric value.
+    """
     reasons: list[Reason] = []
     missing: list[str] = []
     excluded = False

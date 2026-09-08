@@ -39,6 +39,7 @@ declined = "That's alright. Nothing has been saved. Send /start whenever you wan
 
 # =====================================================================
 [questions]
+is_unorganised_worker = "Do you currently do paid or income-earning work in the unorganised sector, such as work from home, self-employment or casual wage work? A job title alone does not decide this. If you are unsure whether your work qualifies, choose Don't know."
 # =====================================================================
 state = "Which state do you live in?"
 state_retry = "I could not recognise that state. Pick one below, or type the name again."
@@ -52,7 +53,7 @@ family_size = "How many people live in your household?"
 has_bank_account = "Do you have a bank account?"
 is_income_tax_payer = "Do you pay income tax?"
 is_epfo_or_esic_member = """Does your work deduct PF (EPFO) or ESIC?"""
-is_nps_member = """Are you enrolled in the National Pension System (NPS)?"""
+nps_exclusion_applies = "Which describes your National Pension System (NPS) account? Other types need confirmation at the centre because official eligibility descriptions differ."
 known_schemes = """Which of these do you already have?
 Tap the ones you already hold, then press 'Next'."""
 
@@ -93,6 +94,14 @@ above_2_hectare = "More than 2 hectares"
 
 # =====================================================================
 [field_labels]
+is_woman = "woman applicant"
+is_widow = "widow status"
+uk_pension_income_or_bpl = "pension income/BPL condition"
+uk_pension_selected = "local pension selection"
+household_has_lpg = "household LPG connection"
+pmuy_declaration_met = "Ujjwala deprivation declaration"
+
+is_unorganised_worker = "unorganised work (self-reported)"
 # =====================================================================
 state = "state"
 age = "age"
@@ -103,7 +112,7 @@ family_size = "household size"
 has_bank_account = "bank account"
 is_income_tax_payer = "income tax"
 is_epfo_or_esic_member = "PF / ESIC"
-is_nps_member = "NPS"
+nps_exclusion_applies = "NPS exclusion applies"
 known_schemes = "schemes already held"
 
 # =====================================================================
@@ -272,3 +281,12 @@ header = "This is what you told me:"
 line = "• {label}: {value}"
 not_answered = "you did not say"
 none = "none"
+
+[nps_choices]
+unresolved = "Needs confirmation"
+none = "No NPS account"
+central = "Central govt contributes"
+other = "Other NPS type"
+
+[demo]
+help = "/demo — Show fictional scheme examples (no personal screening)"

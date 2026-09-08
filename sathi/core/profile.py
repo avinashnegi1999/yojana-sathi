@@ -46,13 +46,14 @@ class Profile:
     state: str | None = None                 # ! state only, never district or village
     age: int | None = None
     occupation: str | None = None            # enum, see data/occupations.toml
+    is_unorganised_worker: bool | None = None  # self-reported, never inferred from job title
     income_band: str | None = None           # ! band, never an exact figure
     land_holding_band: str | None = None
     family_size: int | None = None
     has_bank_account: bool | None = None
     is_income_tax_payer: bool | None = None
     # ! Two fields, not one, and not three. The schemes do not agree on which
-    # ! memberships disqualify: PM-SYM bars EPFO, ESIC *and* NPS, while
+    # ! memberships disqualify: PM-SYM bars EPFO, ESIC and specified NPS, while
     # ! e-Shram's definition of an unorganised worker names only ESIC and EPFO.
     # !
     # ! These were a single `is_statutory_scheme_member` until 2026-09-03. That
@@ -65,7 +66,16 @@ class Profile:
     # ! from ESIC, and each extra field is another question a worker has to
     # ! answer on a phone. Split further only when a scheme actually needs it.
     is_epfo_or_esic_member: bool | None = None
-    is_nps_member: bool | None = None
+    # ! False = no NPS; True = reported central-government contributions.
+    # ! Other/uncertain NPS types stay None because official descriptions differ.
+    nps_exclusion_applies: bool | None = None
+    # ! Additional self-reported answers stay in memory; never document uploads.
+    is_woman: bool | None = None
+    is_widow: bool | None = None
+    uk_pension_income_or_bpl: bool | None = None
+    uk_pension_selected: bool | None = None
+    household_has_lpg: bool | None = None
+    pmuy_declaration_met: bool | None = None
     known_schemes: frozenset[str] = frozenset()  # ! drives the headline metric
 
     def age_band(self) -> str | None:
@@ -75,8 +85,7 @@ class Profile:
         for label, lo, hi in AGE_BANDS:
             if lo <= self.age <= hi:
                 return label
-        # ? Under 18. No scheme we handle covers minors, but the band still has
-        # ? to exist so the event log does not silently drop the session.
+        # * Under 18 has its own coarse band; e-Shram's source includes age 16.
         return "under-18"
 
     def is_answered(self, field_name: str) -> bool:
@@ -101,7 +110,7 @@ def _self_check() -> None:
     assert p.is_answered("known_schemes"), "empty known_schemes is a real answer"
     assert "age" in PROFILE_FIELDS and "aadhaar" not in PROFILE_FIELDS
     assert "is_epfo_or_esic_member" in PROFILE_FIELDS
-    assert "is_nps_member" in PROFILE_FIELDS
+    assert "nps_exclusion_applies" in PROFILE_FIELDS
     assert "is_statutory_scheme_member" not in PROFILE_FIELDS, \
         "the conflated field is gone; a scheme file still naming it must be fixed"
     print("profile.py OK")

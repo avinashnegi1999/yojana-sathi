@@ -1,5 +1,41 @@
 # Scheme source audit — 7 September 2026
 
+## 8 September implementation follow-up
+
+The source comparison now has corresponding code changes, still without human
+scheme approval. These entries supersede earlier statements that the conditions
+below are not represented:
+
+- **Employment:** PM-SYM and e-Shram require a separate self-reported
+  `is_unorganised_worker` answer. A job title, no-income band, or absence of
+  EPFO/ESIC alone does not establish employment. Yes/No/Don't know is asked in
+  both languages before the known-schemes screen and included in the recap.
+  The answer is kept in the in-memory profile; no event-database column was added.
+- **NPS:** intake now distinguishes no NPS, central-government-contributed NPS,
+  other NPS, and uncertainty. `nps_exclusion_applies` is false, true, unknown,
+  unknown respectively. Other NPS types are not automatically refused or
+  declared exempt. This reflects the [3 August 2026 ministry reply](https://www.pib.gov.in/PressReleasePage.aspx?PRID=2293891&lang=2&reg=48)
+  while retaining uncertainty about the conflicting broader FAQ.
+- **PMSBY:** the [DFS termination clause](https://financialservices.gov.in/pmsby)
+  is encoded alongside the existing entry-age condition. Completed age 68 is
+  below the cutoff; 69 requires nearest-birthday confirmation; 70 or older
+  fails the termination condition. This avoids collecting a date of birth.
+  A separate definite failure can still produce INELIGIBLE at age 69.
+- **Income:** PM-SYM's inclusive ceiling is unchanged; its criterion now cites
+  the recent ministry reply rather than relying solely on the contradictory FAQ.
+
+The current [e-Shram FAQ](https://eshram.gov.in/faqs) supports the explicit
+employment condition in Q3/Q27. Age discrepancies, farmer-specific scope,
+other-pension descriptions, and complete enrolment/document conditions still
+need resolution before whole-scheme approval. Self-report is not independent
+verification by the government. No reviewer signatures or dates were changed.
+
+Regression coverage includes NPS uncertainty, the new intake state and language
+switches, missing/negative worker status, nearest-birthday boundaries, malformed
+cutoffs and preservation of the unsigned-scheme gate. The independent boundary
+sweep includes all three worker-status values. Tests exercise encoded source
+interpretations; they do not establish legal correctness or pilot impact.
+
 Repository evidence: the three production TOML files, loader, rule engine and
 boundary tests. Historical context was recovered from `docs/VERIFICATION.md`
 and the Scheme Sathi memory; current sources take precedence over those notes.
@@ -12,6 +48,29 @@ scheme is approved. AMBIGUOUS and NEEDS HUMAN REVIEW must be resolved before
 signing the affected file. Network failure does not establish that a source moved.
 
 ## Official evidence checked
+
+### 8 September follow-up
+
+Automated source comparison only; reviewer signatures remain pending.
+
+- [DFS PMSBY FAQ](https://financialservices.gov.in/pmsby) was retrieved directly.
+  Its benefit and termination sections support the narrower disability wording
+  and conditional renewal text now in both languages. The original rules PDF
+  still returned an error. Entry-age precision and complete enrolment conditions
+  remain open; these wording corrections do not approve the rule set.
+- [Ministry of Labour parliamentary reply, 3 August 2026](https://www.pib.gov.in/PressReleasePage.aspx?PRID=2293891&lang=2&reg=48)
+  explicitly supports the inclusive income ceiling and describes the NPS
+  exclusion as central-government-contributed NPS. This strengthens the income
+  interpretation but requires reconciling the broader NPS question before
+  approval. It also corroborates entry ages, contribution endpoints, matching
+  contributions, pension starting at 60, and CSC enrolment. No thresholds changed.
+- [Current e-Shram FAQ](https://eshram.gov.in/faqs), Q11, explicitly describes
+  registration at 16 or above; Q27 still requires gainful unorganised employment.
+  The existing occupation menu does not establish that condition. The older
+  conflicting age description remains for reviewer resolution.
+
+Prior tables are the dated 7 September assessment. The direct retrieval and
+wording corrections above supersede their access and wording status only.
 
 | ID | Official source | Date / access evidence |
 |---|---|---|

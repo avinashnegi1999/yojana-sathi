@@ -12,6 +12,7 @@
 import sys
 import tempfile
 import threading
+from contextlib import closing
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -22,8 +23,8 @@ from sathi.metrics.events import EventLog
 
 def test_log_from_another_thread() -> None:
     """The exact shape of the bug: connection made here, used over there."""
-    with tempfile.TemporaryDirectory() as tmp:
-        log = EventLog(Path(tmp) / "events.db")
+    # * Close the connection before Windows removes the temporary database.
+    with tempfile.TemporaryDirectory() as tmp, closing(EventLog(Path(tmp) / "events.db")) as log:
         session = log.start_session("whatsapp")  # * main thread
 
         errors: list[Exception] = []
@@ -45,8 +46,7 @@ def test_log_from_another_thread() -> None:
 
 def test_concurrent_writers_all_land() -> None:
     """A lock that serialises is only useful if nothing is dropped."""
-    with tempfile.TemporaryDirectory() as tmp:
-        log = EventLog(Path(tmp) / "events.db")
+    with tempfile.TemporaryDirectory() as tmp, closing(EventLog(Path(tmp) / "events.db")) as log:
         sessions = [log.start_session("whatsapp") for _ in range(8)]
         errors: list[Exception] = []
 

@@ -55,6 +55,20 @@ summary_en       = "A registration service with no payout of its own. It gives u
 # =====================================================================
 
 [[criteria]]
+# * Source comparison 2026-09-08: worker status is a separate condition.
+# * Occupation and zero income do not establish or disprove this by themselves.
+field      = "is_unorganised_worker"
+op         = "eq"
+value      = true
+ask_hi     = "क्या आप असंगठित क्षेत्र में कमाई वाला काम करते हैं?"
+pass_hi    = "आपने बताया कि आप असंगठित क्षेत्र में काम करते हैं।"
+fail_hi    = "इस योजना के लिए असंगठित क्षेत्र में काम करना ज़रूरी है।"
+ask_en     = "Do you do income-earning work in the unorganised sector?"
+pass_en    = "You reported that you work in the unorganised sector."
+fail_en    = "This scheme requires work in the unorganised sector."
+source_url = "https://eshram.gov.in/faqs"
+
+[[criteria]]
 # "A person aged 16 years or above who is engaged in unorganised work may
 #  register on eShram, subject to the applicable eligibility conditions."
 # ! No upper bound is stated on that page, so none is encoded. The FAQ elsewhere
@@ -81,8 +95,8 @@ source_url = "https://eshram.gov.in/faqs"
 field      = "is_income_tax_payer"
 op         = "eq"
 value      = true
-reason_hi  = "आयकर (इनकम टैक्स) भरने वाले असंगठित मज़दूर की श्रेणी में नहीं आते, इसलिए ई-श्रम पंजीकरण नहीं होता"
-reason_en  = "Income tax payers are not counted as unorganised workers, so e-Shram registration is not available."
+reason_hi  = "आयकर (इनकम टैक्स) भरने वाले ई-श्रम में पंजीकरण नहीं कर सकते।"
+reason_en  = "Income tax payers cannot register on e-Shram."
 source_url = "https://eshram.gov.in/faqs"
 
 [[exclusions]]

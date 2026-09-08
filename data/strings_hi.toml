@@ -44,6 +44,7 @@ declined = "कोई बात नहीं। कुछ भी सहेजा
 
 # =====================================================================
 [questions]
+is_unorganised_worker = "क्या आप अभी असंगठित क्षेत्र में कमाई वाला काम करते हैं, जैसे घर से काम, अपना काम या दिहाड़ी मज़दूरी? केवल काम का नाम बताने से यह तय नहीं होता। अपना काम इस श्रेणी में आता है या नहीं, पता न हो तो 'पता नहीं' चुनें।"
 # =====================================================================
 # * Asked in this order. One question at a time — a worker on a slow phone
 # * should never see two questions in one message.
@@ -62,7 +63,7 @@ is_income_tax_payer = "क्या आप आयकर (इनकम टैक�
 # ! NPS; e-Shram's definition of an unorganised worker names only ESIC and EPFO.
 # ! One question for all three made e-Shram stricter than its own source.
 is_epfo_or_esic_member = """क्या आपकी नौकरी में पीएफ (EPFO) या ईएसआईसी (ESIC) कटता है?"""
-is_nps_member = """क्या आप एनपीएस (NPS) पेंशन योजना में शामिल हैं?"""
+nps_exclusion_applies = "आपके एनपीएस (NPS) खाते पर कौन सा जवाब लागू होता है? दूसरे प्रकार के खातों के लिए केंद्र से पुष्टि ज़रूरी है, क्योंकि सरकारी विवरणों में अंतर है।"
 known_schemes = """इनमें से कौन सी योजना आपके पास पहले से है?
 जो-जो पहले से हैं वे चुनें, फिर 'आगे बढ़ें' दबाएँ।"""
 
@@ -105,6 +106,14 @@ above_2_hectare = "2 हेक्टेयर से ज़्यादा"
 
 # =====================================================================
 [field_labels]
+is_woman = "महिला आवेदक"
+is_widow = "विधवा स्थिति"
+uk_pension_income_or_bpl = "पेंशन आय/बीपीएल शर्त"
+uk_pension_selected = "स्थानीय पेंशन चयन"
+household_has_lpg = "परिवार में एलपीजी कनेक्शन"
+pmuy_declaration_met = "उज्ज्वला वंचना घोषणा"
+
+is_unorganised_worker = "असंगठित काम (आपका जवाब)"
 # =====================================================================
 # * Short names for profile fields, used when telling a worker which answer was
 # * missing. Must cover every field in sathi/core/profile.py — test_render.py
@@ -118,7 +127,7 @@ family_size = "घर के लोग"
 has_bank_account = "बैंक खाता"
 is_income_tax_payer = "आयकर"
 is_epfo_or_esic_member = "पीएफ / ईएसआईसी"
-is_nps_member = "एनपीएस"
+nps_exclusion_applies = "एनपीएस की रोक लागू है"
 known_schemes = "पहले से मिली योजनाएँ"
 
 # =====================================================================
@@ -306,3 +315,12 @@ header = "आपने मुझे यह बताया:"
 line = "• {label}: {value}"
 not_answered = "आपने नहीं बताया"
 none = "कोई नहीं"
+
+[nps_choices]
+unresolved = "पुष्टि ज़रूरी है"
+none = "एनपीएस खाता नहीं"
+central = "केंद्र सरकार जमा करती है"
+other = "दूसरे प्रकार का एनपीएस"
+
+[demo]
+help = "/demo — काल्पनिक योजना उदाहरण देखें (व्यक्तिगत जाँच नहीं)"

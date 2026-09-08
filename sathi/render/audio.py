@@ -14,6 +14,7 @@
 import os
 import shlex
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -62,7 +63,16 @@ def _self_check() -> None:
         # * A command that exists everywhere, to prove the plumbing without
         # * depending on a TTS engine being installed on this machine.
         with tempfile.TemporaryDirectory() as d:
-            os.environ["TTS_CMD"] = "cp /etc/hostname {out}"
+            # * Use the running Python, not Unix cp or a host-specific file.
+            script = Path(d) / "fake_tts.py"
+            script.write_text(
+                "import pathlib, sys\n"
+                "pathlib.Path(sys.argv[1]).write_bytes(b'test audio')\n",
+                encoding="utf-8",
+            )
+            os.environ["TTS_CMD"] = shlex.join([
+                sys.executable, str(script), "{out}", "{text}",
+            ])
             got = synthesise("नमस्ते", out_dir=d)
             assert got is not None and got.exists(), "plumbing should produce a file"
 

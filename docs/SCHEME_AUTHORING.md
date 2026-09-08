@@ -1,5 +1,13 @@
 # Authoring a scheme rule file
 
+**8 September update:** the profile now also supports `is_unorganised_worker`
+and `nps_exclusion_applies`. The latter is a tri-state exclusion finding, not a
+generic claim of NPS membership. Other/uncertain NPS types remain unresolved.
+`before_nearest_birthday` is an additional age-only operator with a positive
+integer cutoff; it leaves the last whole-year interval below that cutoff UNKNOWN.
+Only use it for a source that explicitly uses nearest-birthday age. Review the
+implementation notes in [SCHEME_AUDIT.md](SCHEME_AUDIT.md) before signing data.
+
 No Python required. You are filling in a text file and citing where each number
 came from.
 

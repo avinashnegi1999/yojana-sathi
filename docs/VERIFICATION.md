@@ -1,10 +1,26 @@
 # Scheme value verification worksheet
 
+
+**Implementation update, 8 September:** read the new implementation section of
+[SCHEME_AUDIT.md](SCHEME_AUDIT.md) before the historical rows below. Worker
+status is now asked separately; NPS type is classified with unresolved types
+remaining UNKNOWN; PMSBY's nearest-birthday termination condition is encoded.
+Review these new conditions as well as the existing source values. The previous
+NPS field `is_nps_member` is replaced by `nps_exclusion_applies`; a true answer
+now specifically represents reported central-government contributions.
+No historical checkbox is automatically approved by this implementation.
+
 Every number and rule in `data/schemes/` transcribed on 2026-08-31, with the exact
 sentence it came from and a deep link. Open the link, find the clause, compare
 the file and record MATCH/MISMATCH. Read the [7 September source audit](SCHEME_AUDIT.md)
 first: missing conditions and conflicting sources must be resolved before ticking.
 This worksheet is not itself a human signature.
+
+**8 September update:** see the follow-up in [SCHEME_AUDIT.md](SCHEME_AUDIT.md).
+PMSBY disability/renewal wording has been tightened from a directly retrieved
+DFS FAQ. A 3 August 2026 ministry reply supports the inclusive PM-SYM income
+ceiling but qualifies the NPS exclusion. No human boxes have been ticked and
+no scheme is approved. Review missing conditions in A4 as well as existing rows.
 
 When all boxes are ticked:
 

@@ -35,13 +35,13 @@ STUB = "TODO"
 # ! each file and asserted by tests/test_schemes.py, so it cannot drift.
 PENDING_MARKER = "PENDING HUMAN VERIFICATION"
 
-OPERATORS = frozenset({"between", "in", "not_in", "lte", "gte", "eq", "exists"})
+OPERATORS = frozenset({"between", "in", "not_in", "lte", "gte", "eq", "exists", "before_nearest_birthday"})
 
 # ! "gateway" exists because e-Shram turned out to be a registration and a UAN,
 # ! not a benefit with a ₹ value of its own. Giving it a rupee figure would
 # ! double-count the PMSBY cover it unlocks.
 VALUE_BASES = frozenset(
-    {"annual_payout", "insurance_cover", "one_time", "subsidy", "gateway"}
+    {"annual_payout", "insurance_cover", "one_time", "subsidy", "gateway", "in_kind"}
 )
 
 APPLY_LOCATIONS = frozenset(
@@ -229,6 +229,10 @@ def _parse_criterion(raw: dict, where: str, *, exclusion: bool) -> Criterion:
     # * Shape of `value` has to match the operator, but only once it is real.
     v = raw["value"]
     if v != STUB:
+        if raw["op"] == "before_nearest_birthday" and (
+            raw["field"] != "age" or type(v) is not int or v < 1
+        ):
+            raise SchemeError(f"{where}: nearest-birthday operator needs age and a positive integer cutoff")
         if raw["op"] == "between":
             if not (isinstance(v, list) and len(v) == 2):
                 raise SchemeError(f"{where}: op 'between' needs a [low, high] pair, got {v!r}")

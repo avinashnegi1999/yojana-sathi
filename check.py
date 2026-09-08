@@ -8,6 +8,7 @@
 """
 
 import importlib
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -44,6 +45,13 @@ SELF_CHECK_MODULES = [
 
 
 def main() -> int:
+    # * Self-checks use repository-relative data; match the test subprocesses.
+    os.chdir(ROOT)
+    # * Hindi and rupee signs must survive redirected Windows consoles too.
+    os.environ["PYTHONIOENCODING"] = "utf-8"
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
     failures = []
 
     for name in SELF_CHECK_MODULES:

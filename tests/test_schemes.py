@@ -136,7 +136,7 @@ def test_rejects_bad_value_basis():
 def test_rejects_unsummable_basis_carrying_money():
     # ! A basis outside the payout/cover split is counted nowhere. Silent zero
     # ! is worse than a load failure, because nobody goes looking for it.
-    for basis in ("one_time", "subsidy", "gateway"):
+    for basis in ("one_time", "subsidy", "gateway", "in_kind"):
         _rejects(GOOD.replace('value_basis      = "annual_payout"',
                               f'value_basis      = "{basis}"'),
                  "no total sums that basis")
@@ -161,7 +161,7 @@ def test_rejects_empty_documents():
 def test_real_scheme_files_are_structurally_valid():
     root = Path(__file__).resolve().parent.parent
     schemes = load_all(root / "data" / "schemes")
-    assert set(schemes) == {"ESHRAM", "PM_SYM", "PMSBY"}, sorted(schemes)
+    assert set(schemes) == {"ESHRAM", "PM_SYM", "PMSBY", "PMJJBY", "UK_OLD_AGE", "UK_WIDOW", "PMUY"}, sorted(schemes)
     for code, s in schemes.items():
         assert s.source_path.endswith(".toml")
         assert not s.stubs, f"{code} still has unresearched values: {s.stubs}"

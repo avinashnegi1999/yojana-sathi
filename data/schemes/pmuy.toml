@@ -1,0 +1,71 @@
+# Source-researched draft, 8 September 2026. No human sign-off is claimed.
+# ! annual_value_inr=0 means no annual cash entitlement; in-kind support is described above.
+code = "PMUY"
+name_en = "Pradhan Mantri Ujjwala Yojana"
+name_hi = "प्रधानमंत्री उज्ज्वला योजना"
+authority = "Government of India"
+official_url = "https://www.pmuy.gov.in/faq.html"
+verified_on = "2026-09-08"
+verified_by = "unconfirmed — PENDING HUMAN VERIFICATION"
+
+[benefit]
+annual_value_inr = 0
+value_basis = "in_kind"
+premium_inr = 0
+summary_en = "Deposit-free LPG connection, first refill and stove for eligible poor households. This is in-kind support, not annual cash or unlimited free refills. Distributor verification and prescribed documents are required."
+summary_hi = "पात्र गरीब परिवारों के लिए बिना जमा राशि का एलपीजी कनेक्शन, पहला रिफिल और चूल्हा। यह वस्तु रूप में सहायता है, सालाना नकद या असीमित मुफ़्त रिफिल नहीं। वितरक का सत्यापन और निर्धारित दस्तावेज़ ज़रूरी हैं।"
+
+[[criteria]]
+field = "age"
+op = "gte"
+value = 18
+ask_en = "How old are you?"
+ask_hi = "आपकी उम्र कितनी है?"
+pass_en = "Your reported age meets the entry-age condition."
+pass_hi = "आपकी बताई उम्र प्रवेश की आयु-शर्त पूरी करती है।"
+fail_en = "Your reported age is outside the entry-age range."
+fail_hi = "आपकी बताई उम्र प्रवेश की आयु-सीमा में नहीं है।"
+source_url = "https://www.pmuy.gov.in/about.html"
+
+[[criteria]]
+field = "is_woman"
+op = "eq"
+value = true
+ask_en = "Are you a woman applying in your own name?"
+ask_hi = "क्या आप महिला हैं और अपने नाम से आवेदन करेंगी?"
+pass_en = "You reported that the applicant is a woman."
+pass_hi = "आपने महिला आवेदक होना बताया है।"
+fail_en = "The connection must be issued in an adult woman's name."
+fail_hi = "कनेक्शन वयस्क महिला के नाम पर होना चाहिए।"
+source_url = "https://www.pmuy.gov.in/faq.html"
+
+[[criteria]]
+field = "household_has_lpg"
+op = "eq"
+value = false
+ask_en = "Does anyone listed in your household's family-composition document already have an LPG connection?"
+ask_hi = "क्या आपके परिवार के विवरण वाले दस्तावेज़ में शामिल किसी सदस्य के नाम पहले से एलपीजी कनेक्शन है?"
+pass_en = "You reported no existing household LPG connection."
+pass_hi = "आपने परिवार में पहले से एलपीजी कनेक्शन न होना बताया है।"
+fail_en = "An existing household LPG connection prevents a new PMUY connection under this rule."
+fail_hi = "इस नियम के अनुसार परिवार में पहले से एलपीजी कनेक्शन हो तो नया पीएमयूवाई कनेक्शन नहीं मिलता।"
+source_url = "https://www.pmuy.gov.in/faq.html"
+
+[[criteria]]
+field = "pmuy_declaration_met"
+op = "eq"
+value = true
+ask_en = "Have you checked the official PMUY deprivation declaration and do you meet it? Income alone is not proof. If you have not checked, choose Don't know and ask the LPG distributor. https://www.pmuy.gov.in/faq.html"
+ask_hi = "क्या आपने पीएमयूवाई की आधिकारिक वंचना घोषणा जाँची है और उसकी शर्तें पूरी करते हैं? केवल आय प्रमाण नहीं है। नहीं जाँची तो पता नहीं चुनें और एलपीजी वितरक से पूछें। https://www.pmuy.gov.in/faq.html"
+pass_en = "You reported meeting the declaration; the distributor must verify it."
+pass_hi = "आपने घोषणा की शर्तें पूरी होना बताया है; वितरक सत्यापन करेगा।"
+fail_en = "The prescribed poor-household declaration must be satisfied."
+fail_hi = "निर्धारित गरीब-परिवार घोषणा की शर्तें पूरी होनी चाहिए।"
+source_url = "https://www.pmuy.gov.in/faq.html"
+
+[paperwork]
+documents_en = ["Application/KYC form and photograph", "Applicant and adult household members' Aadhaar (submit only to distributor)", "Family-composition document or permitted migrant declaration", "Address proof", "Bank account details", "Signed deprivation declaration"]
+documents = ["आवेदन/केवाईसी फॉर्म और फोटो", "आवेदक और वयस्क परिवार सदस्यों के आधार (केवल वितरक को दें)", "परिवार विवरण दस्तावेज़ या अनुमत प्रवासी घोषणा", "पते का प्रमाण", "बैंक खाते का विवरण", "हस्ताक्षरित वंचना घोषणा"]
+where_to_apply = "online"
+renewal_en = "Apply through pmuy.gov.in or the LPG distributor. Subsequent refill purchases and any subsidy follow current rules; the first-refill benefit is not a recurring cash entitlement."
+renewal = "pmuy.gov.in या एलपीजी वितरक से आवेदन करें। आगे के रिफिल और सब्सिडी वर्तमान नियमों के अनुसार हैं; पहले रिफिल का लाभ बार-बार मिलने वाला नकद अधिकार नहीं है।"

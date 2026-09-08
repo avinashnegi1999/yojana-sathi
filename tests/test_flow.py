@@ -133,6 +133,10 @@ def _answer_all(convo: Conversation, *, age="30", tax=DK, epfo=NO, nps=NO, known
     # ! only the first two, so one answer cannot serve both schemes.
     convo.handle(epfo)
     convo.handle(nps)
+    if convo.state is State.WORKER:
+        convo.handle(YES)
+    while convo.state is State.FOLLOWUP:
+        convo.handle(DK)
     for code in known:
         convo.handle(f"known:{code}")
     return convo.handle(NEXT)
@@ -189,8 +193,11 @@ def test_tax_yes_confirmation_and_isolated_edits():
                         confirmed = replace(confirmed, is_income_tax_payer=False if choice == NO else None)
                     assert convo.profile == confirmed
                     assert convo.state is State.EPFO_ESIC, "an edit restarted the intake or looped"
-                    for answer in (NO, NO, NEXT):
+                    for answer in (NO, NO, YES):
                         convo.handle(answer)
+                    while convo.state is State.FOLLOWUP:
+                        convo.handle(DK)
+                    convo.handle(NEXT)
                     assert convo.state is State.PACK  # * Shipped schemes remain unsigned.
                     convo.handle(NO)
                     assert convo.state is State.DONE

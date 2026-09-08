@@ -83,6 +83,18 @@ def apply(op: str, actual: object, expected: object) -> bool | None:
     if op == "gte":
         return _num(actual, "gte.actual") >= _num(expected, "gte.value")
 
+    if op == "before_nearest_birthday":
+        # ! Whole completed years cannot resolve the last half-year before an
+        # ! insurer's nearest-birthday cutoff. Do not ask for a date of birth
+        # ! or silently round: refer that boundary case for confirmation.
+        if type(actual) is not int or actual < 0 or type(expected) is not int or expected < 1:
+            raise OperatorError("nearest-birthday comparison needs whole nonnegative age and positive cutoff")
+        if actual >= expected:
+            return False
+        if actual == expected - 1:
+            return None
+        return True
+
     if op == "eq":
         # * Exact match, no coercion. A mismatched pair — "18" against 18, or
         # * True against 1 — was already rejected above as a scheme-file bug,

@@ -1,0 +1,47 @@
+# Source-researched draft, 8 September 2026. No human sign-off is claimed.
+
+code = "PMJJBY"
+name_en = "Pradhan Mantri Jeevan Jyoti Bima Yojana"
+name_hi = "प्रधानमंत्री जीवन ज्योति बीमा योजना"
+authority = "Government of India"
+official_url = "https://financialservices.gov.in/pmjjby"
+verified_on = "2026-09-08"
+verified_by = "unconfirmed — PENDING HUMAN VERIFICATION"
+
+[benefit]
+annual_value_inr = 200000
+value_basis = "insurance_cover"
+premium_inr = 436
+summary_en = "Life insurance: ₹2 lakh on death, subject to policy terms. Standard renewal premium ₹436/year. Non-accidental death is excluded for the first 30 days on joining/rejoining. Only one account per person; consent and premium payment are required."
+summary_hi = "जीवन बीमा: पॉलिसी की शर्तों के अनुसार मृत्यु पर ₹2 लाख। सामान्य नवीनीकरण प्रीमियम ₹436 प्रति वर्ष। जुड़ने या दोबारा जुड़ने के पहले 30 दिनों में गैर-दुर्घटना मृत्यु पर दावा नहीं मिलता। एक व्यक्ति का केवल एक खाता; सहमति और प्रीमियम भुगतान ज़रूरी हैं।"
+
+[[criteria]]
+field = "age"
+op = "between"
+value = [18, 50]
+ask_en = "How old are you?"
+ask_hi = "आपकी उम्र कितनी है?"
+pass_en = "Your reported age meets the entry-age condition."
+pass_hi = "आपकी बताई उम्र प्रवेश की आयु-शर्त पूरी करती है।"
+fail_en = "Your reported age is outside the entry-age range."
+fail_hi = "आपकी बताई उम्र प्रवेश की आयु-सीमा में नहीं है।"
+source_url = "https://financialservices.gov.in/pmjjby"
+
+[[criteria]]
+field = "has_bank_account"
+op = "eq"
+value = true
+ask_en = "Do you have an individual bank or post office account?"
+ask_hi = "क्या आपका व्यक्तिगत बैंक या डाकघर खाता है?"
+pass_en = "You reported an account; the branch must confirm it is suitable for enrolment."
+pass_hi = "आपने खाता बताया है; शाखा से पुष्टि कराएँ कि उससे नामांकन हो सकता है।"
+fail_en = "An eligible account is needed before enrolment; ask the branch about opening one."
+fail_hi = "नामांकन से पहले उपयुक्त खाता चाहिए; खाता खोलने के लिए शाखा में पूछें।"
+source_url = "https://financialservices.gov.in/pmjjby"
+
+[paperwork]
+documents_en = ["Aadhaar card", "Bank or post office account details", "Enrolment and auto-debit consent form"]
+documents = ["आधार कार्ड", "बैंक या डाकघर खाते का विवरण", "नामांकन एवं ऑटो-डेबिट सहमति फॉर्म"]
+where_to_apply = "bank_branch"
+renewal_en = "Cover year: 1 June–31 May. Renew annually; cover ends at 55 by nearest birthday or account closure/insufficient funds. New entry stops after 50; this screening is for new entry. First-time joining: Jun–Aug ₹436, Sep–Nov ₹342, Dec–Feb ₹228, Mar–May ₹114. Confirm with your participating branch."
+renewal = "बीमा वर्ष 1 जून–31 मई। सालाना नवीनीकरण करें; निकटतम जन्मदिन से 55 साल होने, खाता बंद होने या पैसे कम होने पर बीमा समाप्त होता है। नया प्रवेश 50 साल के बाद नहीं; यह जाँच नए प्रवेश की है। पहली बार: जून–अगस्त ₹436, सितंबर–नवंबर ₹342, दिसंबर–फरवरी ₹228, मार्च–मई ₹114। सहभागी शाखा से पुष्टि करें।"

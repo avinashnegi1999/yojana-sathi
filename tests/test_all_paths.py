@@ -28,7 +28,7 @@ from sathi.metrics.events import EventLog
 
 # ! Deepest complete session, plus headroom. Splitting the statutory-membership
 # ! question in two on 2026-09-03 added a step and tripped this at exactly 20.
-MAX_DEPTH = 24
+MAX_DEPTH = 40
 DEVANAGARI = ("ऀ", "ॿ")
 
 # * States that legitimately show no buttons: they want typed input.
@@ -206,12 +206,20 @@ def test_every_button_in_both_languages():
                 # * multi-select states alone would fan out to thousands of paths.
                 key = (
                     convo.state,
-                    tuple(sorted(convo._known)),
-                    tuple(sorted(convo._have_docs)),
+                    convo._followup_field() if convo.state is State.FOLLOWUP else None,
+                    convo._document_page,
+                    # * Cover empty, each singleton and multiple selections.
+                    # * Seven schemes and paged documents would otherwise
+                    # * enumerate millions of equivalent checkbox subsets.
+                    tuple(sorted(convo._known)) if len(convo._known) <= 1 else ("multiple",),
+                    tuple(sorted(convo._have_docs)) if len(convo._have_docs) <= 1 else ("multiple",),
                 )
                 if key in visited:
                     continue
                 visited.add(key)
+                import collections as _c
+                _hist = globals().setdefault('_HIST', _c.Counter())
+                _hist[key[0].value] += 1
 
                 for b in last.buttons:
                     frontier.append(path + [b.value])
@@ -222,6 +230,9 @@ def test_every_button_in_both_languages():
             assert {State.TAX_CONFIRM, State.TAX_INCOME} <= {key[0] for key in visited}, \
                 "the exhaustive button walk missed the tax confirmation or income edit"
             print(f"  .. {code}: {explored} paths walked, {ended} completed sessions")
+            import json as _j
+            print("HIST", _j.dumps(dict(sorted(globals().get('_HIST', {}).items()))))
+            globals()['_HIST'] = __import__('collections').Counter()
 
         # ! Whatever those hundreds of sessions wrote, it must still be coarse.
         from sathi.core.profile import INCOME_BANDS
@@ -260,7 +271,8 @@ def test_commands_at_every_state():
         # ! cover every state. NPS needs its own answer before "next" means
         # ! anything.
         walk = [LANG_EN, "consent_yes", "state:UK", "30", "occ:construction",
-                "inc:upto_5000", "land:landless", "fam:4", "yes", "no", "no", "no",
+                "inc:upto_5000", "land:landless", "fam:4", "yes", "no", "no", "no", "yes",
+                "yes", "no", "yes", "yes", "yes", "yes",
                 "next", "next", "yes"]
         reached = set()
 
@@ -319,7 +331,8 @@ def test_every_command_through_the_adapter_at_every_state():
     with tempfile.TemporaryDirectory() as d:
         schemes = _schemes(Path(d))
         walk = ["lang:en", "consent_yes", "state:UK", "30", "occ:construction",
-                "inc:upto_5000", "land:landless", "fam:4", "yes", "no", "no", "no",
+                "inc:upto_5000", "land:landless", "fam:4", "yes", "no", "no", "no", "yes",
+                "yes", "no", "yes", "yes", "yes", "yes",
                 "next", "next", "yes"]
         reached = set()
 

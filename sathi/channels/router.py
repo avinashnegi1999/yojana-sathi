@@ -25,13 +25,14 @@ COMMANDS = {
     "/start": "start", "/restart": "start",
     "/language": "language", "/lang": "language",
     "/help": "help", "/about": "about", "/privacy": "privacy",
+    "/demo": "demo",
     "/schemes": "schemes", "/cancel": "cancel", "/stop": "cancel",
     "/clear": "clear", "/clearall": "clearall", "/clear_all": "clearall",
 }
 
 # ! Informational replies leave the live question alone. Every other turn
 # ! answers, replaces or clears it, even when the state does not change.
-INFO_COMMANDS = ("help", "about", "privacy", "schemes")
+INFO_COMMANDS = ("help", "about", "privacy", "schemes", "demo")
 
 
 class Router:
@@ -102,6 +103,12 @@ class Router:
             self._active_keyboard.pop(key, None)
         if command is None:
             return self._conversation(key).handle(answer)
+
+        if command == "demo":
+            # ! No Conversation/EventLog session is created for fictional data.
+            from sathi.demo import replies as demo_replies
+            lang = self.sessions[key].lang if key in self.sessions else self._lang.get(key, DEFAULT_LANG)
+            return demo_replies(self.schemes, lang)
 
         if command == "start":
             return self._conversation(key, fresh=True).start()

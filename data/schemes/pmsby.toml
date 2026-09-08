@@ -40,12 +40,28 @@ annual_value_inr = 200000
 value_basis      = "insurance_cover"
 # "Premium: Rs. 20/- per annum per member."
 premium_inr      = 20
-summary_hi       = "दुर्घटना बीमा। दुर्घटना में मृत्यु या पूरी तरह अपंग होने पर ₹2 लाख, एक आँख या एक हाथ-पैर चले जाने पर ₹1 लाख। सालाना ₹20 आपके बैंक खाते से अपने आप कटते हैं।"
-summary_en       = "Accident insurance. ₹2 lakh for accidental death or total permanent disability, ₹1 lakh for partial. Premium ₹20 a year, auto-debited from the bank or post office account."
+# * Wording checked against https://financialservices.gov.in/pmsby on
+# * 2026-09-08. This source comparison is not human scheme approval.
+summary_hi       = "दुर्घटना बीमा। दुर्घटना में मृत्यु या योजना में बताई गई स्थायी विकलांगता पर ₹2 लाख। एक आँख की रोशनी या एक हाथ या पैर का इस्तेमाल पूरी तरह और हमेशा के लिए खोने पर ₹1 लाख। सालाना ₹20 आपकी सहमति से बैंक या डाकघर खाते से कटते हैं।"
+summary_en       = "Accident insurance. ₹2 lakh for accidental death or the permanent disabilities specified by the scheme. ₹1 lakh for permanent, complete loss of sight in one eye or use of one hand or foot. Premium ₹20 yearly, debited with your consent from your bank or post office account."
 
 # =====================================================================
 # ELIGIBILITY — ALL [[criteria]] must pass.
 # =====================================================================
+
+[[criteria]]
+# * DFS termination clause, checked 2026-09-08. Whole age 69 does not establish
+# * age by nearest birthday: the operator leaves that case UNKNOWN.
+field      = "age"
+op         = "before_nearest_birthday"
+value      = 70
+ask_hi     = "बैंक से निकटतम जन्मदिन के अनुसार अपनी बीमा आयु की पुष्टि कराएँ।"
+pass_hi    = "आपकी बताई उम्र बीमा समाप्त होने की आयु से नीचे है।"
+fail_hi    = "निकटतम जन्मदिन के अनुसार 70 साल होने पर बीमा समाप्त होता है।"
+ask_en     = "Ask the bank to confirm your insurance age by nearest birthday."
+pass_en    = "Your reported age is below the insurance termination age."
+fail_en    = "Cover ends at age 70 by nearest birthday."
+source_url = "https://financialservices.gov.in/pmsby"
 
 [[criteria]]
 # "aged between 18 years (completed) and 70 years (age nearer birthday)"
@@ -81,7 +97,8 @@ source_url = "https://jansuraksha.gov.in/Files/PMSBY/English/Rules.pdf"
 # ! any bank/post office account holder in the age band may join. The rules do
 # ! limit cover to ONE account per person and terminate cover at 70 or on
 # ! account closure, but neither is an eligibility question we can ask a worker,
-# ! so neither is encoded. Both are stated in summary_hi instead.
+# ! so neither is encoded. Termination is explained in the renewal text;
+# ! the one-account rule still needs review before signing this file.
 
 # =====================================================================
 # PAPERWORK
@@ -105,5 +122,5 @@ documents_en   = ["Aadhaar card", "Bank passbook", "Enrolment and auto-debit con
 where_to_apply = "bank_branch"
 # "one-year cover ... 1st June to 31st May ... option to join / pay by auto-debit
 #  ... required to be given by 31st May of every year"
-renewal        = "हर साल 1 जून से 31 मई तक। खाते में पैसे रहें तो ऑटो-डेबिट से अपने आप चलता रहता है।"
-renewal_en     = "Yearly, 1 June to 31 May. It renews itself by auto-debit as long as the account has the balance."
+renewal        = "हर साल 1 जून से 31 मई तक, सहमति और प्रीमियम भुगतान के अधीन। निकटतम जन्मदिन के अनुसार 70 साल होने, खाता बंद होने या पर्याप्त पैसे न होने पर बीमा समाप्त हो सकता है।"
+renewal_en     = "Yearly, 1 June to 31 May, subject to consent and premium payment. Cover can end at age 70 by nearest birthday, account closure, or insufficient balance."

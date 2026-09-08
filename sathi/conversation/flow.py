@@ -44,12 +44,16 @@ class State(Enum):
     TAX_CONFIRM = "tax_confirm"
     TAX_INCOME = "tax_income"
     EPFO_ESIC = "is_epfo_or_esic_member"
-    NPS = "is_nps_member"
+    NPS = "nps_exclusion_applies"
+    WORKER = "is_unorganised_worker"
+    FOLLOWUP = "followup"
     KNOWN_SCHEMES = "known_schemes"
     DOCUMENTS = "documents"
     PACK = "pack"
     DONE = "done"
 
+
+EXTRA_FIELDS = ('is_woman', 'is_widow', 'uk_pension_income_or_bpl', 'uk_pension_selected', 'household_has_lpg', 'pmuy_declaration_met')
 
 YES, NO, DK = "yes", "no", "dont_know"
 NEXT, OTHER, NONE = "next", "other", "none"
@@ -86,7 +90,10 @@ class Conversation:
         self._known: set[str] = set()
         self._have_docs: set[str] = set()
         self._required_docs: tuple[str, ...] = ()
+        self._document_page = 0
         self._results: tuple = ()
+        self._followup_fields: list[str] = []
+        self._followup_index = 0
 
     # * ------------------------------------------------------------- plumbing
 
@@ -178,10 +185,12 @@ class Conversation:
             State.EPFO_ESIC: lambda: Reply(
                 text=self._s("questions.is_epfo_or_esic_member"),
                 buttons=_yes_no(self.lang, with_dont_know=True)),
-            State.NPS: lambda: Reply(
-                text=self._s("questions.is_nps_member"),
-                buttons=_yes_no(self.lang, with_dont_know=True)),
+            State.NPS: self._ask_nps,
+            State.FOLLOWUP: self._ask_followup,
             State.KNOWN_SCHEMES: self._ask_known_schemes,
+            State.WORKER: lambda: Reply(
+                text=self._s("questions.is_unorganised_worker"),
+                buttons=_yes_no(self.lang, with_dont_know=True)),
             State.DOCUMENTS: self._ask_documents,
             State.PACK: lambda: Reply(text=self._s("pack.offer"), buttons=_yes_no(self.lang)),
             State.DONE: lambda: Reply(text=self._s("closing.done"), end=True),
@@ -198,7 +207,10 @@ class Conversation:
 
     def info(self, topic: str) -> list[Reply]:
         """/help, /about, /privacy — static text, no state change."""
-        return [Reply(text=self._s(f"commands.{topic}"))]
+        text = self._s(f"commands.{topic}")
+        if topic == "help":
+            text += "\n" + self._s("demo.help")
+        return [Reply(text=text)]
 
     def scheme_list(self) -> list[Reply]:
         """/schemes — every scheme, its official source, and when it was checked.
@@ -207,22 +219,25 @@ class Conversation:
         # ! open the source URL can check us; someone who cannot at least sees
         # ! that a source exists and is dated.
         """
-        lines = [self._s("commands.schemes_header")]
+        replies = [Reply(text=self._s("commands.schemes_header"))]
         for code, sc in self.schemes.items():
-            lines.append(self._s("commands.schemes_line", name=sc.name(self.lang),
+            lines = [self._s("commands.schemes_line", name=sc.name(self.lang),
                                  code=code, url=sc.official_url,
-                                 verified_on=sc.verified_on))
+                                 verified_on=sc.verified_on)]
             # ! Covers both unfinished states — a leftover TODO and a file
             # ! nobody has signed off. Gating this on `sc.stubs` alone showed a
             # ! clean provenance line for schemes served as UNKNOWN.
             if not sc.is_servable:
                 lines.append(self._s("commands.schemes_unverified"))
-        return [Reply(text="\n".join(lines))]
+            replies.append(Reply(text="\n".join(lines)))
+        return replies
 
     def cancel(self) -> list[Reply]:
         """/cancel — drop the profile now, not at the end of the session."""
         self.profile = Profile()
         self._known.clear()
+        self._followup_fields.clear()
+        self._followup_index = 0
         self._have_docs.clear()
         self._results = ()
         self.state = State.DONE
@@ -286,10 +301,19 @@ class Conversation:
         return Reply(text=self._s("questions.known_schemes"), buttons=buttons)
 
     def _ask_documents(self) -> Reply:
+        # * Eight documents leave room for page navigation and Continue in
+        # * WhatsApp's ten-row list. IDs remain absolute across pages.
+        page_count = max(1, (len(self._required_docs) + 7) // 8)
+        self._document_page %= page_count
+        start = self._document_page * 8
         buttons = tuple(
             Button(("✅ " if d in self._have_docs else "") + d, f"doc:{i}")
             for i, d in enumerate(self._required_docs)
-        ) + (Button(self._s("buttons.next"), NEXT),)
+            if start <= i < start + 8
+        )
+        if page_count > 1:
+            buttons += (Button(self._s("buttons.show_more"), "docs:more"),)
+        buttons += (Button(self._s("buttons.next"), NEXT),)
         return Reply(text=self._s("documents.ask_which"), buttons=buttons)
 
     # * -------------------------------------------------------------- turning
@@ -472,8 +496,8 @@ class Conversation:
             self.state = State.TAX
         return [self._current_question()]
 
-    # ! Two questions where there used to be one. PM-SYM excludes EPFO, ESIC and
-    # ! NPS alike; e-Shram excludes only EPFO and ESIC. Asking once and applying
+    # ! Separate membership questions. PM-SYM's NPS scope needs classification;
+    # ! e-Shram excludes only EPFO and ESIC. Asking once and applying
     # ! the answer to both made e-Shram stricter than its own source.
     def _on_is_epfo_or_esic_member(self, answer: str) -> list[Reply]:
         if answer in (YES, NO):
@@ -486,20 +510,71 @@ class Conversation:
                 Reply(text=self._s("errors.pick_from_list"), buttons=_yes_no(self.lang, with_dont_know=True))
             ]
         self.state = State.NPS
-        return [
-            Reply(text=self._s("questions.is_nps_member"),
-                  buttons=_yes_no(self.lang, with_dont_know=True))
-        ]
+        return [self._ask_nps()]
 
-    def _on_is_nps_member(self, answer: str) -> list[Reply]:
-        if answer in (YES, NO):
-            self._set("is_nps_member", answer == YES)
-        elif answer != DK:
-            return [
-                Reply(text=self._s("errors.pick_from_list"), buttons=_yes_no(self.lang, with_dont_know=True))
-            ]
-        self.state = State.KNOWN_SCHEMES
-        return [self._ask_known_schemes()]
+    def _ask_nps(self) -> Reply:
+        return Reply(text=self._s("questions.nps_exclusion_applies"), buttons=(
+            Button(self._s("nps_choices.none"), NO),
+            Button(self._s("nps_choices.central"), YES),
+            Button(self._s("nps_choices.other"), OTHER),
+            Button(self._s("buttons.dont_know"), DK),
+        ))
+
+    def _on_nps_exclusion_applies(self, answer: str) -> list[Reply]:
+        if answer not in (YES, NO, OTHER, DK):
+            return [self._ask_nps()]
+        # ! Other NPS types remain unresolved across official descriptions.
+        # ! Do not turn them into either a refusal or a confirmed exemption.
+        self._set("nps_exclusion_applies", answer == YES if answer in (YES, NO) else None)
+        # * Ask only when a loaded scheme needs this fact; a job title is not proof.
+        needs_worker = any(c.field == "is_unorganised_worker"
+                           for scheme in self.schemes.values() for c in scheme.criteria)
+        if not needs_worker:
+            return self._begin_followups()
+        self.state = State.WORKER
+        return [self._current_question()]
+
+    def _on_is_unorganised_worker(self, answer: str) -> list[Reply]:
+        if answer not in (YES, NO, DK):
+            return [self._current_question()]
+        self._set("is_unorganised_worker", None if answer == DK else answer == YES)
+        return self._begin_followups()
+
+    def _begin_followups(self) -> list[Reply]:
+        # * Only new yes/no facts used by loaded schemes. State routing avoids
+        # * asking Uttarakhand pension questions of residents of another state.
+        supported = EXTRA_FIELDS
+        self._followup_fields = []
+        self._followup_index = 0
+        for scheme in self.schemes.values():
+            if any(c.field == "state" and c.op == "eq" and
+                   self.profile.state is not None and c.value != self.profile.state
+                   for c in scheme.criteria):
+                continue
+            for c in scheme.criteria + scheme.exclusions:
+                if c.field in supported and c.field not in self._followup_fields:
+                    self._followup_fields.append(c.field)
+        self.state = State.FOLLOWUP if self._followup_fields else State.KNOWN_SCHEMES
+        return [self._current_question()]
+
+    def _followup_field(self) -> str:
+        return self._followup_fields[self._followup_index]
+
+    def _ask_followup(self) -> Reply:
+        field = self._followup_field()
+        criterion = next(c for sc in self.schemes.values() for c in sc.criteria
+                         if c.field == field)
+        return Reply(text=criterion.text("ask", self.lang),
+                     buttons=_yes_no(self.lang, with_dont_know=True))
+
+    def _on_followup(self, answer: str) -> list[Reply]:
+        if answer not in (YES, NO, DK):
+            return [self._ask_followup()]
+        self._set(self._followup_field(), None if answer == DK else answer == YES)
+        self._followup_index += 1
+        if self._followup_index == len(self._followup_fields):
+            self.state = State.KNOWN_SCHEMES
+        return [self._current_question()]
 
     def _on_known_schemes(self, answer: str) -> list[Reply]:
         if answer.startswith("known:"):
@@ -543,15 +618,18 @@ class Conversation:
             ("state", state.label(self.lang) if state else unset),
             ("age", str(p.age) if p.age is not None else unset),
             ("occupation", occ.label(self.lang) if occ else unset),
+            ("is_unorganised_worker", yn(p.is_unorganised_worker)),
             ("income_band", band("income_bands", p.income_band)),
             ("land_holding_band", band("land_bands", p.land_holding_band)),
             ("family_size", str(p.family_size) if p.family_size is not None else unset),
             ("has_bank_account", yn(p.has_bank_account)),
             ("is_income_tax_payer", yn(p.is_income_tax_payer)),
             ("is_epfo_or_esic_member", yn(p.is_epfo_or_esic_member)),
-            ("is_nps_member", yn(p.is_nps_member)),
+            ("nps_exclusion_applies", self._s("nps_choices.unresolved")
+             if p.nps_exclusion_applies is None else yn(p.nps_exclusion_applies)),
             ("known_schemes", ", ".join(held) if held else self._s("recap.none")),
         ]
+        pairs.extend((field, yn(getattr(p, field))) for field in self._followup_fields)
         # * The sheet puts the heading on the box, so it asks for the lines only.
         lines = [self._s("recap.line", label=self._s(f"field_labels.{f}"), value=v)
                  for f, v in pairs]
@@ -593,6 +671,9 @@ class Conversation:
         return replies
 
     def _on_documents(self, answer: str) -> list[Reply]:
+        if answer == "docs:more":
+            self._document_page += 1
+            return [self._ask_documents()]
         if answer.startswith("doc:"):
             index = answer.split(":", 1)[1]
             if not index.isdecimal() or len(index) > 3:
@@ -692,7 +773,7 @@ def _self_check() -> None:
     c.handle(NO)           # not in NPS either — a separate question since the split
     assert c.profile.is_income_tax_payer is None
     assert c.profile.is_epfo_or_esic_member is False
-    assert c.profile.is_nps_member is False
+    assert c.profile.nps_exclusion_applies is False
     out = c.handle(NEXT)   # knows none of them
 
     # ! The recap ships BEFORE the verdict. A tapped answer is a callback and

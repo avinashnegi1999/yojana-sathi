@@ -43,6 +43,20 @@ summary_en       = "A minimum pension of ₹3,000 a month after age 60, with 50%
 # =====================================================================
 
 [[criteria]]
+# * Source comparison 2026-09-08: worker status is a separate condition.
+# * Occupation and zero income do not establish or disprove this by themselves.
+field      = "is_unorganised_worker"
+op         = "eq"
+value      = true
+ask_hi     = "क्या आप असंगठित क्षेत्र में कमाई वाला काम करते हैं?"
+pass_hi    = "आपने बताया कि आप असंगठित क्षेत्र में काम करते हैं।"
+fail_hi    = "इस योजना के लिए असंगठित क्षेत्र में काम करना ज़रूरी है।"
+ask_en     = "Do you do income-earning work in the unorganised sector?"
+pass_en    = "You reported that you work in the unorganised sector."
+fail_en    = "This scheme requires work in the unorganised sector."
+source_url = "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2293891&lang=2&reg=48"
+
+[[criteria]]
 # "voluntary and contributory Pension Scheme for Unorganized Workers for entry
 #  age of 18 to 40 years"
 field      = "age"
@@ -58,9 +72,8 @@ source_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=79&lid=6
 
 [[criteria]]
 # "with monthly income of Rs.15000 or less" (Q1); Q2 says "less than Rs 15,000".
-# ? The two FAQ answers differ at exactly ₹15,000. Our band 10001_15000 includes
-# ? ₹15,000, i.e. the more generous reading. Anyone sitting exactly on the line
-# ? should confirm at the CSC — worth checking with an operator.
+# * The 3 August 2026 ministry reply explicitly supports ₹15,000 or less.
+# * The encoded ceiling is unchanged; the newer source is cited below.
 field      = "income_band"
 op         = "in"
 # ! "no_income" is in the list because zero is less than ₹15,000. Leaving it
@@ -74,7 +87,7 @@ fail_hi    = "यह योजना उन्हीं के लिए है 
 ask_en     = "Roughly how much do you earn in a month?"
 pass_en    = "Your monthly income is ₹15,000 or less, which this scheme requires."
 fail_en    = "This scheme is only for workers earning up to ₹15,000 a month."
-source_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=79&lid=63&page=74"
+source_url = "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2293891&lang=2&reg=48"
 
 # =====================================================================
 # EXCLUSIONS — ANY match makes the worker ineligible.
@@ -89,18 +102,19 @@ source_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=79&lid=6
 field      = "is_epfo_or_esic_member"
 op         = "eq"
 value      = true
-reason_hi  = "आप पहले से पीएफ (EPFO) या ईएसआईसी में हैं — ऐसे में यह योजना नहीं मिलती, क्योंकि वहाँ पहले से पेंशन का इंतज़ाम है"
-reason_en  = "You are already covered by EPFO or ESIC — this scheme is not available to you, because those already provide for a pension."
+reason_hi  = "आपने बताया कि आप पीएफ (EPFO) या ईएसआईसी के सदस्य हैं; ऐसे सदस्यों के लिए यह योजना उपलब्ध नहीं है।"
+reason_en  = "You reported EPFO or ESIC membership; members are excluded from this scheme."
 source_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=79&lid=63&page=74"
 
 [[exclusions]]
-# Same sentence as above; NPS is the third scheme it names.
-field      = "is_nps_member"
+# * 2026-09-08: current ministry reply specifies central-government-contributed NPS.
+# * Other NPS types are left UNKNOWN by intake pending source reconciliation.
+field      = "nps_exclusion_applies"
 op         = "eq"
 value      = true
-reason_hi  = "आप पहले से एनपीएस (NPS) में हैं — ऐसे में यह योजना नहीं मिलती, क्योंकि वहाँ पहले से पेंशन का इंतज़ाम है"
-reason_en  = "You are already covered by NPS — this scheme is not available to you, because it already provides for a pension."
-source_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=79&lid=63&page=74"
+reason_hi  = "आपके जवाब के अनुसार केंद्र सरकार आपके एनपीएस में योगदान देती है; यह पीएम-एसवाईएम में शामिल होने पर रोक है।"
+reason_en  = "You reported central-government contributions to your NPS; this excludes entry to PM-SYM."
+source_url = "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2293891&lang=2&reg=48"
 
 [[exclusions]]
 # "... and an income tax payee is not entitled to join the scheme" (Q6)

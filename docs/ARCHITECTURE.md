@@ -2,6 +2,23 @@
 
 Python 3.11+, standard library only.
 
+### Source-review changes, 8 September 2026
+
+`Profile.is_unorganised_worker` is asked explicitly when a loaded scheme needs
+it. The occupation category and income band never fill that answer implicitly.
+`nps_exclusion_applies` replaces the broader membership flag: intake maps no NPS
+to false, central-government contributions to true, and other/uncertain types
+to None. Both fields remain session-only and do not expand the event schema.
+
+`before_nearest_birthday` accepts whole completed age and a positive integer
+cutoff. At cutoff minus one it returns None because the integer spans both
+sides of the half-year boundary; at or beyond the cutoff it returns false.
+PMSBY uses it with the source's termination age alongside its entry-age rule.
+No scheme code or government threshold is hardcoded in the operator.
+
+Human approval remains a separate whole-scheme gate. See the dated update in
+[SCHEME_AUDIT.md](SCHEME_AUDIT.md) for sources and remaining ambiguities.
+
 ```
 channels/       telegram.py · whatsapp.py     thin adapters, no logic
      │
