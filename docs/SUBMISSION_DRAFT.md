@@ -1,8 +1,47 @@
 # Yojana Sathi — submission draft
 
-Prepared **8 September 2026**. Official form and rubric rechecked **8 September 2026**.
-Not submitted. Replace the explicit evidence placeholders only with observed
-facts. The AgentFoundry declaration remains blocked.
+Prepared **8 September 2026**. Official form and rubric rechecked **9 September
+2026** against codeforindia.org/hackathon and the submission issue template in
+karlmehta/code-for-a-billion. Not submitted. Replace the explicit evidence
+placeholders only with observed facts.
+
+## What the official form actually asks for — rechecked 9 September 2026
+
+Read this before writing any more of the draft below; two of these were not
+what we assumed.
+
+1. **`Built using AgentFoundry (AF), the official IDE` is a REQUIRED checkbox.**
+   Not a preference, not a tie-breaker — the submission cannot be filed without
+   ticking it. Our question about whether continued development in AF counts
+   for a project that started outside it
+   ([discussion #13](https://github.com/karlmehta/code-for-a-billion/discussions/13))
+   is still **Unanswered, 0 comments**, 24 hours after it was asked.
+   **This remains the single hard blocker, and it is not a code problem.**
+2. **Scale and severity of the problem is 50% of the score.** The form says so
+   in the field description: *"How many citizens face this problem, and what is
+   the human suffering or economic loss it causes? Use numbers/sources where you
+   can. (Judged — 50% of your score.)"* Half the marks are for the Problem
+   section of this document, with sourced numbers. That is a writing and
+   research task, not a build task, and it is currently the largest available
+   gain.
+3. **Deployment and impact data is 25%** — as previously understood — but the
+   field is marked `required: false`. *"Strongest submissions have field data."*
+   So the 5-weeks-of-real-usage plan still matters for the marks, but a missing
+   impact section does not block filing.
+4. **The track dropdown does not contain "Livelihood for the Uneducated".** The
+   options are Agriculture, Health, Education, Financial Inclusion, Governance,
+   Climate, Other. The website's ten impact areas *do* list "Livelihood for the
+   Uneducated — skill matching, informal-sector income, micro-entrepreneurship,
+   **benefits access**", which is exactly this project. **Ask the organisers
+   which value to select**, or choose Other and name the impact area in the
+   problem statement. Do not silently file under Financial Inclusion.
+5. **A working demo URL is required** — live app or video. The Telegram bot link
+   is a live app, but a judge cannot see a real screening result today because
+   no scheme is signed, so the video should show `/demo` and explain the gate.
+6. Public repo with a README containing setup steps — already satisfied.
+
+Dates confirmed on the site: build window 15 August – 15 November 2026, winners
+announced 5 December 2026.
 
 ## Problem
 
