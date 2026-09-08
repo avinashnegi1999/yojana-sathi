@@ -14,7 +14,12 @@ from sathi.conversation.flow import Conversation, State
 def test_new_scheme_boundaries():
     real = load_all(ROOT / 'data/schemes')
     assert {'PMJJBY', 'UK_OLD_AGE', 'UK_WIDOW', 'PMUY'} <= real.keys()
-    schemes = {k: replace(v, verified_by='test fixture only') for k,v in real.items()}
+    # ! stubs=() as well as a signature: this test is about boundary conditions,
+    # ! not about ₹ values, and UK_WIDOW's amount is a documented TODO (its
+    # ! source went 404). Without clearing it the file is unservable and every
+    # ! boundary below would read UNKNOWN and assert nothing.
+    schemes = {k: replace(v, verified_by='test fixture only', stubs=())
+               for k,v in real.items()}
     p = Profile(state='UK', age=30, has_bank_account=True, is_woman=True,
                 is_widow=True, uk_pension_income_or_bpl=True,
                 uk_pension_selected=True, household_has_lpg=False,
@@ -38,6 +43,41 @@ def test_new_scheme_boundaries():
     assert schemes['PMUY'].benefit['annual_value_inr']==0
     for sc in real.values():
         assert evaluate(p,sc).verdict is Verdict.UNKNOWN
+
+def test_the_two_state_pensions_are_never_counted_as_two_payments():
+    # ! A 60-year-old widow in Uttarakhand satisfies BOTH pension files. The
+    # ! state pays one pension. Before this, the result screen and the printed
+    # ! pack would both have added them and promised her twice the money —
+    # ! exactly the failure that adding an insurance cover to a pension caused.
+    from sathi.rules.engine import value_totals, exclusive_groups
+    real = load_all(ROOT / 'data/schemes')
+    groups = exclusive_groups(real)
+    assert groups.get('UK_OLD_AGE') and groups['UK_OLD_AGE'] == groups.get('UK_WIDOW'),         'both Uttarakhand pensions must sit in one exclusive group'
+
+    # Give both files a real, equal value and a signature, so the totals are
+    # exercised for the day they are signed off rather than only today.
+    signed = {}
+    for code, sc in real.items():
+        benefit = dict(sc.benefit)
+        if code in ('UK_OLD_AGE', 'UK_WIDOW'):
+            benefit['annual_value_inr'] = 18000
+        signed[code] = replace(sc, verified_by='test fixture only', stubs=(),
+                               benefit=benefit)
+    p = Profile(state='UK', age=65, has_bank_account=True, is_woman=True,
+                is_widow=True, uk_pension_income_or_bpl=True,
+                uk_pension_selected=True, household_has_lpg=False,
+                pmuy_declaration_met=True)
+    results = tuple(evaluate(p, signed[c]) for c in ('UK_OLD_AGE', 'UK_WIDOW'))
+    assert all(r.is_eligible for r in results), 'the overlap case must actually occur'
+    payout, cover = value_totals(results, signed)
+    assert payout == 18000, f'one pension, not two; got {payout}'
+    assert cover == 0
+
+    # And the worker-facing screen must show that same single figure.
+    from sathi.render import templates
+    for lang in ('hi', 'en'):
+        block = templates.eligible_block(results, signed, frozenset(), lang)
+        assert '36,000' not in block and '36000' not in block, block
 
 def test_followups_preserve_unknown_and_language():
     schemes=load_all(ROOT/'data/schemes')
@@ -108,7 +148,9 @@ def test_additional_answers_are_not_persisted_and_demo_has_no_events():
 
 def test_new_boolean_conditions_against_source_oracle():
     import itertools
-    schemes={k:replace(v,verified_by='test fixture only')
+    # stubs=() for the same reason as above: UK_WIDOW's withdrawn benefit
+    # amount is a documented TODO, and this sweep is about conditions, not ₹.
+    schemes={k:replace(v,verified_by='test fixture only',stubs=())
              for k,v in load_all(ROOT/'data/schemes').items()}
     def expected(conditions):
         if False in conditions:

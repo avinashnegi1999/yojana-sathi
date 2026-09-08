@@ -158,13 +158,41 @@ def test_rejects_empty_documents():
              "non-empty documents")
 
 
+# ! Every "TODO" still left in a real scheme file, and why. Adding a line here
+# ! is a deliberate act with a reason attached; the test above refuses any stub
+# ! that is not on this list.
+KNOWN_STUBS = (
+    # The department's widow page states no rate, the budget-speech PDF that
+    # was cited now 404s, and the governing rate GO is a scan. Withdrawn on
+    # 2026-09-09 rather than left as a number with no openable source.
+    ("UK_WIDOW", "benefit.annual_value_inr"),
+)
+
+
+def test_documented_stubs_are_actually_still_stubbed():
+    """A stub that gets researched must leave KNOWN_STUBS, or the list rots."""
+    root = Path(__file__).resolve().parent.parent
+    schemes = load_all(root / "data" / "schemes")
+    for code, path in KNOWN_STUBS:
+        assert code in schemes, f"KNOWN_STUBS names {code}, which no longer exists"
+        assert path in schemes[code].stubs, (
+            f"{code}.{path} is no longer a stub — delete its KNOWN_STUBS line"
+        )
+
+
 def test_real_scheme_files_are_structurally_valid():
     root = Path(__file__).resolve().parent.parent
     schemes = load_all(root / "data" / "schemes")
     assert set(schemes) == {"ESHRAM", "PM_SYM", "PMSBY", "PMJJBY", "UK_OLD_AGE", "UK_WIDOW", "PMUY"}, sorted(schemes)
     for code, s in schemes.items():
         assert s.source_path.endswith(".toml")
-        assert not s.stubs, f"{code} still has unresearched values: {s.stubs}"
+        # ! Not "no stubs" any more, but "no stub nobody wrote down". Every
+        # ! remaining TODO must appear in KNOWN_STUBS with a reason, so a value
+        # ! that quietly goes missing still fails this test. Withdrawing an
+        # ! unsourceable number to "TODO" is the correct move (rule 3); leaving
+        # ! it undocumented is not.
+        unrecorded = set(s.stubs) - {path for c, path in KNOWN_STUBS if c == code}
+        assert not unrecorded, f"{code} has undocumented unresearched values: {sorted(unrecorded)}"
         # ! Every value must cite a page, not a site root. This is the check that
         # ! makes "audit one rule in 30 seconds" true rather than aspirational.
         for c in s.criteria + s.exclusions:

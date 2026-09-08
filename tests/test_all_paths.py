@@ -58,12 +58,20 @@ def _schemes(directory: Path):
     # ! result screen, the document checklist, the application pack — would stop
     # ! being reachable, so this walk would silently stop covering it.
     # !
-    # ! Only the signature is faked. Every threshold, name, string and document
-    # ! list is the shipped one. tests/test_schemes.py asserts separately that
-    # ! the shipped files are still honestly marked as unsigned.
+    # ! And stubs are cleared for the same reason. A file with a documented
+    # ! "TODO" (UK_WIDOW's benefit amount, whose source went 404) is unservable
+    # ! too, so its documents would silently vanish from the checklist and the
+    # ! walk would quietly shrink — it went from 2,109 paths to 669, and 216
+    # ! document screens to 63, the first time this was missed.
+    # !
+    # ! Only the signature and the stub flag are faked. Every threshold, name,
+    # ! string and document list is the shipped one. tests/test_schemes.py
+    # ! asserts separately that the shipped files are still honestly marked as
+    # ! unsigned, and that every remaining stub is a recorded one.
     real = load_all(ROOT / "data" / "schemes")
     return {
-        code: replace(sc, verified_by="test-signature (tests/test_all_paths.py)")
+        code: replace(sc, verified_by="test-signature (tests/test_all_paths.py)",
+                      stubs=())
         for code, sc in real.items()
     }
 
@@ -217,9 +225,6 @@ def test_every_button_in_both_languages():
                 if key in visited:
                     continue
                 visited.add(key)
-                import collections as _c
-                _hist = globals().setdefault('_HIST', _c.Counter())
-                _hist[key[0].value] += 1
 
                 for b in last.buttons:
                     frontier.append(path + [b.value])
@@ -230,9 +235,13 @@ def test_every_button_in_both_languages():
             assert {State.TAX_CONFIRM, State.TAX_INCOME} <= {key[0] for key in visited}, \
                 "the exhaustive button walk missed the tax confirmation or income edit"
             print(f"  .. {code}: {explored} paths walked, {ended} completed sessions")
-            import json as _j
-            print("HIST", _j.dumps(dict(sorted(globals().get('_HIST', {}).items()))))
-            globals()['_HIST'] = __import__('collections').Counter()
+            # ! A floor, not an exact number: adding a scheme should be allowed
+            # ! to grow the walk, but never to shrink it by two thirds without
+            # ! somebody noticing. A stub in one scheme file did exactly that.
+            assert explored >= 2000, (
+                f"[{code}] the walk shrank to {explored} paths — a scheme file "
+                f"probably became unservable in the fixture; see _schemes()"
+            )
 
         # ! Whatever those hundreds of sessions wrote, it must still be coarse.
         from sathi.core.profile import INCOME_BANDS

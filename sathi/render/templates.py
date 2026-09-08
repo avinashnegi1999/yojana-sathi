@@ -12,6 +12,7 @@
 from sathi.core import content
 from sathi.core.content import s
 from sathi.core.schemes import STUB, Scheme
+from sathi.rules import engine
 from sathi.rules.engine import ReasonCode, Result, Verdict
 
 
@@ -117,11 +118,11 @@ def eligible_block(results: tuple[Result, ...], schemes: dict[str, Scheme],
                 where=where_label(sc, lang),
             )
         )
-    # ! Two different kinds of money, never added together. A pension is what
-    # ! arrives every year; a cover is what is paid only if something happens.
-    # ! One number for both would overstate a worker's position by lakhs.
-    payout = sum(r.annual_value_inr for r in hits if r.value_basis == "annual_payout")
-    cover = sum(r.annual_value_inr for r in hits if r.value_basis == "insurance_cover")
+    # ! Two different kinds of money, never added together, and alternative
+    # ! routes to one payment collapsed. Both numbers come from engine so the
+    # ! screen and the printed pack cannot drift apart — they used to sum this
+    # ! separately in two files.
+    payout, cover = engine.value_totals(tuple(hits), schemes)
     if payout:
         lines.append(s("result.value_line", lang, total=rupees(payout)))
     if cover:

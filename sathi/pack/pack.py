@@ -21,6 +21,7 @@ from sathi.core.content import s
 from sathi.core.schemes import Scheme
 from sathi.pack import checklist
 from sathi.render import templates
+from sathi.rules import engine
 from sathi.rules.engine import Result, Verdict
 
 _CSS = """
@@ -124,9 +125,9 @@ def build(
             parts.append(f"<li><b>{_e(name)}</b>{'' if not gap else ' — ' + _e(gap)}<br>{ask}</li>")
         parts.append("</ul></div>")
 
-    # ! Split, for the same reason as on screen: a cover is not annual income.
-    payout = sum(r.annual_value_inr for r in eligible if r.value_basis == "annual_payout")
-    cover = sum(r.annual_value_inr for r in eligible if r.value_basis == "insurance_cover")
+    # ! Split, for the same reason as on screen, and from the same function, so
+    # ! the sheet a worker carries always matches what she was shown.
+    payout, cover = engine.value_totals(tuple(eligible), schemes)
     if payout or cover:
         money = []
         if payout:

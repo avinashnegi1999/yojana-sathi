@@ -69,6 +69,13 @@ _PAPERWORK_OPTIONAL = frozenset({"documents_en", "renewal_en"})
 _BENEFIT_KEYS = frozenset(
     {"annual_value_inr", "value_basis", "premium_inr", "summary_hi", "summary_en"}
 )
+# ! Two schemes in the same exclusive_group are alternative routes to ONE
+# ! payment, not two payments. The Uttarakhand old-age and widow pensions are
+# ! both state social pensions and a 60-year-old widow can satisfy both files;
+# ! adding them would promise her two pensions when the state pays one.
+# ! total_value() counts the largest member of a group once. This is the same
+# ! class of bug as the insurance cover that used to be added to a pension.
+_BENEFIT_OPTIONAL = frozenset({"exclusive_group"})
 
 _CRITERION_KEYS = frozenset(
     {"field", "op", "value", "ask_hi", "pass_hi", "fail_hi", "source_url"}
@@ -178,6 +185,16 @@ class Scheme:
             return self.documents_en
         return self.documents
 
+    @property
+    def exclusive_group(self) -> str:
+        """The set of schemes this one is an ALTERNATIVE to, or "" when none.
+
+        # ! Membership changes nothing about a verdict — every scheme is still
+        # ! decided on its own rules — only how the ₹ total is added up.
+        """
+        v = self.benefit.get("exclusive_group")
+        return v if isinstance(v, str) and v != STUB else ""
+
     def annual_value_inr(self) -> int:
         """₹ figure for the impact metric. 0 while unverified — never a guess."""
         v = self.benefit.get("annual_value_inr")
@@ -284,7 +301,8 @@ def load_scheme(path: Path) -> Scheme:
               "verified_on", "verified_by"):
         _check_str(raw[k], f"{where}.{k}")
 
-    _require_keys(raw["benefit"], _BENEFIT_KEYS, _BENEFIT_KEYS, f"{where}.benefit")
+    _require_keys(raw["benefit"], _BENEFIT_KEYS | _BENEFIT_OPTIONAL,
+                  _BENEFIT_KEYS, f"{where}.benefit")
     b = raw["benefit"]
     # ! annual_value_inr stays strictly an integer: it feeds the headline metric
     # ! and a string there would silently become 0 in a total.
@@ -322,6 +340,11 @@ def load_scheme(path: Path) -> Scheme:
             f"₹{b['annual_value_inr']}, but no total sums that basis. Set the "
             f"value to 0, or extend the payout/cover split before shipping it."
         )
+    # * Optional, and a free label rather than an enum: which schemes are
+    # * alternatives is a research finding, not something this loader knows. An
+    # * empty label would silently put every scheme in one group, so refuse it.
+    if "exclusive_group" in b and b["exclusive_group"] != STUB:
+        _check_str(b["exclusive_group"], f"{where}.benefit.exclusive_group")
     _require_keys(raw["paperwork"], _PAPERWORK_KEYS | _PAPERWORK_OPTIONAL,
                   _PAPERWORK_KEYS, f"{where}.paperwork")
     pw = raw["paperwork"]

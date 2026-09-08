@@ -141,8 +141,14 @@ def _expected(code: str, p: Profile) -> Verdict:
 
 
 def _signed_schemes() -> dict:
+    # ! stubs=() as well as a signature. This sweep checks the ENCODED
+    # ! CONDITIONS against the oracle below, and a file with a documented TODO
+    # ! (UK_WIDOW's withdrawn benefit amount) is unservable, so every case in it
+    # ! would come back UNKNOWN and the sweep would silently test nothing.
+    # ! The ₹ values are not part of what this test compares.
     return {
-        code: replace(sc, verified_by="test-signature (tests/test_rule_boundaries.py)")
+        code: replace(sc, verified_by="test-signature (tests/test_rule_boundaries.py)",
+                      stubs=())
         for code, sc in load_all(ROOT / "data" / "schemes").items()
     }
 

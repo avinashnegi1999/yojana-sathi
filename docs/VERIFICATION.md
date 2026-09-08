@@ -1,5 +1,15 @@
 # Scheme value verification worksheet
 
+**9 September source review:** read
+[SOURCE_REVIEW_2026-09-09.md](SOURCE_REVIEW_2026-09-09.md) first. Every value in
+all seven files was re-fetched from its official page that day and the wording is
+quoted beside the shipped value, which should make several rows below quick to
+tick. Three repository changes came out of it: the Uttarakhand widow pension
+amount was **withdrawn to `"TODO"`** (its cited source now 404s and the
+department's page states no rate), the two Uttarakhand pensions can no longer be
+added together in a ₹ total, and both totals now come from one function. That
+review is a machine source-comparison and **still ticks no box here.**
+
 
 **Implementation update, 8 September:** read the new implementation section of
 [SCHEME_AUDIT.md](SCHEME_AUDIT.md) before the historical rows below. Worker

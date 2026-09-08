@@ -1,5 +1,19 @@
 # Source-researched draft, 8 September 2026. No human sign-off is claimed.
-# Benefit reference: https://budget.uk.gov.in/files/Budget_Speech__1.pdf paragraph 189.
+# ! BENEFIT AMOUNT WITHDRAWN ON 2026-09-09. This file previously carried
+# ! ₹1,500/month cited to https://budget.uk.gov.in/files/Budget_Speech__1.pdf
+# ! paragraph 189. That URL now returns 404, and the department's own widow
+# ! page — unlike the old-age page — states no rate at all. Re-checked on
+# ! 2026-09-09: socialwelfare.uk.gov.in/service/widow-pension/ (eligibility and
+# ! documents only, no amount), socialwelfare.uk.gov.in/files/GO_1.pdf (404),
+# ! the 21/04/2021 rate-increase GO (scanned images, no extractable text), and
+# ! myscheme.gov.in (renders only in a browser). So the number is now "TODO"
+# ! rather than a figure nobody can open a source for. Eligibility below is
+# ! still quoted from the live departmental page.
+# ! To fill it: open the 21/04/2021 GO "Regarding increase in pension rates
+# ! under the Old Age, Widow and Disability Pension Scheme" (No. 40/XVII-2/
+# ! 22-19(05) 2019-T.C) from socialwelfare.uk.gov.in/document-category/
+# ! government-orders-pension/, read the widow rate, and put the GO number in
+# ! this comment.
 # ! Pending: reconcile income scope, pension overlap and current government orders before human sign-off.
 code = "UK_WIDOW"
 name_en = "Uttarakhand widow pension"
@@ -10,11 +24,16 @@ verified_on = "2026-09-08"
 verified_by = "unconfirmed — PENDING HUMAN VERIFICATION"
 
 [benefit]
-annual_value_inr = 18000
+annual_value_inr = "TODO"   # ! see the note at the top of this file
 value_basis = "annual_payout"
+# ! One state social pension, two routes. A widow aged 60+ satisfies both
+# ! files, but Uttarakhand pays one pension, so the ₹ total counts the
+# ! larger of the two once. Confirm the department's actual rule on
+# ! holding both before either file is signed.
+exclusive_group = "uk_state_pension"
 premium_inr = 0
-summary_en = "₹1,500 monthly pension after approval. Apply through ssp.uk.gov.in or assisted services. Eligibility and documents are checked by the department. Do not add multiple pension routes together as guaranteed payments."
-summary_hi = "स्वीकृति के बाद ₹1,500 मासिक पेंशन। ssp.uk.gov.in या सहायता केंद्र से आवेदन करें। विभाग पात्रता और दस्तावेज़ जाँचता है। अलग-अलग पेंशन विकल्पों को जोड़कर निश्चित भुगतान न मानें।"
+summary_en = "A monthly pension after approval, at the rate the department currently notifies — we have not been able to confirm the current amount from a source you can open, so we are not quoting one. Apply through ssp.uk.gov.in or assisted services. Eligibility and documents are checked by the department. Do not add multiple pension routes together as guaranteed payments."
+summary_hi = "स्वीकृति के बाद मासिक पेंशन, विभाग की वर्तमान दर के अनुसार — हम अभी कोई राशि नहीं बता रहे, क्योंकि वर्तमान दर का कोई ऐसा स्रोत नहीं मिला जिसे आप स्वयं खोलकर देख सकें। ssp.uk.gov.in या सहायता केंद्र से आवेदन करें। विभाग पात्रता और दस्तावेज़ जाँचता है। अलग-अलग पेंशन विकल्पों को जोड़कर निश्चित भुगतान न मानें।"
 
 [[criteria]]
 field = "state"

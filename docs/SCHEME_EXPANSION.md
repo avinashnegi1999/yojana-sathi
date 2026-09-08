@@ -27,8 +27,20 @@ Document choices have eight items per page plus page navigation and Continue, fi
 
 ## Before signing any new file
 
-- Reconcile pension income scope, current government orders and overlap with existing pensions. Do not sum old-age and widow pensions as independently payable to the same person. The fictional examples use separate people. Future activation needs overlap handling in result totals before both routes are signed.
-- The widow pension benefit is supported by the Uttarakhand budget speech paragraph 189 (https://budget.uk.gov.in/files/Budget_Speech__1.pdf); confirm the current governing order. The current departmental old-age page independently gives its amount.
+- **Done, 9 September:** overlap handling now exists. Both pension files carry
+  `exclusive_group = "uk_state_pension"`, and `engine.total_value()` counts the
+  largest member of a group once, so the two are never added. That is a safe
+  default, **not** a researched rule — still confirm with the department whether
+  one person may hold both, and remove the group if they may.
+- Reconcile pension income scope and current government orders. Income and BPL
+  wording was re-confirmed verbatim on 9 September; the government orders were
+  not, because the governing rate GO is a scanned PDF.
+- **Changed, 9 September:** the widow pension amount has been **withdrawn to
+  `"TODO"`**. The budget-speech PDF that supported it now returns 404, the
+  department's widow page states no rate, and the governing rate GO is a scan
+  with no extractable text. The old-age page still gives its own ₹1,500
+  independently, so that file was left alone. To restore the widow figure, read
+  the 21/04/2021 rate GO and record its number in the file.
 - Confirm local selection and current rural/urban approval procedures. Missing local selection is explained as a step to complete, not a permanent bar.
 - PMJJBY: review one-account rule, new-entry/renewal distinction, age-55 termination, 30-day lien, seasonal first-time premium and consent. Insurance is not guaranteed cash.
 - PMUY: verify the current deprivation declaration, distributor e-KYC/document process and ongoing connection availability. `in_kind` with zero annual cash means goods are described without inventing a cash valuation; it does not mean the support is worthless.

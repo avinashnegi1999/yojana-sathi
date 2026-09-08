@@ -11,10 +11,17 @@ built and verified end to end against Meta's test number — a real phone, a ful
 screening, the same Hindi — but it is not yet live on a public number.
 
 > **Status — read before you use it on anyone.**
-> The software is complete and tested end to end. All three scheme files are
-> filled from official sources — the PMSBY rules PDF on `jansuraksha.gov.in`,
-> the PM-SYM FAQ and contribution chart on `maandhan.in`, the e-Shram FAQ on
-> `eshram.gov.in` — with a deep link on every single value.
+> The software is complete and tested end to end. **Seven** scheme files are
+> filled from official sources, with a deep link on every single value: PMSBY
+> (rules PDF on `jansuraksha.gov.in`), PM-SYM (`maandhan.in` and `labour.gov.in`),
+> e-Shram (`eshram.gov.in`), PMJJBY (`financialservices.gov.in`), PMUY
+> (`pmuy.gov.in`), and the Uttarakhand old-age and widow pensions
+> (`socialwelfare.uk.gov.in`).
+>
+> One value is deliberately **not** filled: the Uttarakhand widow pension's
+> monthly rate. Its cited source now returns 404 and the department's own page
+> states no amount, so the file says `"TODO"` rather than a figure nobody can
+> open a source for. See [`docs/SOURCE_REVIEW_2026-09-09.md`](docs/SOURCE_REVIEW_2026-09-09.md).
 >
 > **Those values have not yet been confirmed by a second pair of eyes.**
 > `verified_by` in each file says `unconfirmed — PENDING HUMAN VERIFICATION`,
@@ -28,6 +35,11 @@ screening, the same Hindi — but it is not yet live on a public number.
 > The practical consequence today: **every scheme answers "we could not check
 > this yet"**. Sign-off is the last gate before this is useful in the field, and
 > `tests/test_schemes.py` fails the build if that claim and the data disagree.
+>
+> So the bot is live and every conversation works end to end, but **no worker has
+> been told "yes" by it, and none will be until a named human signs a file.**
+> `/demo` shows what a signed scheme would produce, using fixed fictional people
+> and labelled as a demonstration on every reply.
 
 ---
 
@@ -246,7 +258,7 @@ Worth knowing about two of them:
 - `tests/test_privacy.py` — the reason the privacy claim above is defensible
   rather than aspirational.
 - `tests/test_all_paths.py` — presses **every button at every reachable screen**
-  in both languages (954 paths, 258 completed sessions), opens every generated
+  in both languages (4,218 paths, 866 completed sessions), opens every generated
   sheet, runs every path through a real event log, drives every command through
   the channel adapter, and fuzzes the typed questions. It asserts its own
   coverage counters, because a green test that never reached the thing it checks
@@ -254,7 +266,7 @@ Worth knowing about two of them:
 - `tests/test_rule_boundaries.py` — asks whether the **answers** are right, not
   whether the code runs. Each scheme's rules are re-encoded from the official
   source text, independently of `data/schemes/`, and compared against the engine
-  across every combination of the fields any rule touches — ~30,000 verdicts,
+  across every combination of the fields any rule touches — 214,326 verdicts,
   plus every named threshold one per line. Pressing every button cannot find a
   wrong threshold; a wrong threshold renders a perfectly well-formed screen.
 

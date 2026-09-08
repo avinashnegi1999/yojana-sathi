@@ -1,5 +1,29 @@
 # Scheme source audit — 7 September 2026
 
+## 9 September source re-check
+
+Full detail and quoted wording: [SOURCE_REVIEW_2026-09-09.md](SOURCE_REVIEW_2026-09-09.md).
+Rows this pass resolves, all against a page fetched on 2026-09-09:
+
+- **PMSBY partial disability** — NEEDS HUMAN REVIEW → **closed.** The shipped
+  summaries already say "loss of sight of one eye or loss of use of one hand or
+  foot", which is the DFS table's own wording, not a generic "partial".
+- **e-Shram age** — AMBIGUOUS → **MATCH as of today.** The current FAQ Q11 says
+  "aged 16 years or above", with no upper bound. The 16–59 figure is not on the
+  live page. Its qualifier "subject to the applicable eligibility conditions"
+  remains unexamined.
+- **e-Shram income / tax** — MATCH **confirmed** against current Q10.
+- **PM-SYM income ceiling (A1)** — AMBIGUOUS → **closed on the ministry page**,
+  which says "Rs 15,000 per month or less" twice. The FAQ's "less than" wording
+  still exists and is why this was ambiguous.
+- **PMJJBY, PMUY, Uttarakhand old-age pension** — every shipped value matched its
+  official page verbatim; no change.
+
+Still open after this pass: PM-SYM NPS scope and worker status, PMSBY at exactly
+70, PMSBY-via-e-Shram at 18–59, e-Shram farmer scope, the Uttarakhand widow
+pension **rate** (source withdrawn — see the review), and whether one person may
+hold both state pensions.
+
 ## 8 September implementation follow-up
 
 The source comparison now has corresponding code changes, still without human

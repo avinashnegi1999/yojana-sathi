@@ -217,18 +217,71 @@ def evaluate_all(profile: Profile, schemes: dict[str, Scheme]) -> tuple[Result, 
     return tuple(results)
 
 
-def total_value(results: tuple[Result, ...], only_codes: frozenset[str] | None = None) -> int:
+def total_value(
+    results: tuple[Result, ...],
+    only_codes: frozenset[str] | None = None,
+    groups: dict[str, str] | None = None,
+) -> int:
     """Annual payout ₹ only. `only_codes` narrows it to newly surfaced ones.
 
     # ! This is "annual entitlement surfaced", never "money delivered". The
     # ! label travels with the number everywhere it is shown.
+
+    # ! `groups` maps scheme_code -> exclusive_group for schemes that are
+    # ! ALTERNATIVE routes to one payment (the Uttarakhand old-age and widow
+    # ! pensions are both the state social pension; a 60-year-old widow matches
+    # ! both files but the state pays one). Each group contributes its largest
+    # ! member once. A scheme with no group entry is counted on its own, so
+    # ! passing nothing keeps the old behaviour exactly.
     """
-    return sum(
-        r.annual_value_inr
-        for r in results
+    counted = [
+        r for r in results
         if r.is_eligible and r.value_basis == "annual_payout"
         and (only_codes is None or r.scheme_code in only_codes)
+    ]
+    groups = groups or {}
+    ungrouped = 0
+    best_in_group: dict[str, int] = {}
+    for r in counted:
+        group = groups.get(r.scheme_code, "")
+        if not group:
+            ungrouped += r.annual_value_inr
+        else:
+            # * Largest, not first: a worker planning a trip should hear the
+            # * better of two routes she qualifies for, never the cheaper one.
+            best_in_group[group] = max(best_in_group.get(group, 0), r.annual_value_inr)
+    return ungrouped + sum(best_in_group.values())
+
+
+def exclusive_groups(schemes: dict[str, Scheme]) -> dict[str, str]:
+    """scheme_code -> exclusive_group, for the loaded schemes. Empty ones omitted."""
+    return {code: s.exclusive_group for code, s in schemes.items() if s.exclusive_group}
+
+
+def value_totals(results: tuple[Result, ...], schemes: dict[str, Scheme]) -> tuple[int, int]:
+    """(annual payout ₹, insurance cover ₹) for the eligible results.
+
+    # ! The ONE place either headline number is worked out. The screen and the
+    # ! printed pack both call this, so a worker cannot be shown one figure and
+    # ! handed another — they used to sum it separately, side by side.
+
+    # ! Two different kinds of money, never added together. A pension is what
+    # ! arrives every year; a cover is what is paid only if something happens.
+    # ! Alternative routes to one payment collapse to their largest member; see
+    # ! exclusive_group in sathi/core/schemes.py.
+    """
+    groups = exclusive_groups(schemes)
+    payout = total_value(results, groups=groups)
+    covers = tuple(
+        r for r in results if r.is_eligible and r.value_basis == "insurance_cover"
     )
+    ungrouped = sum(r.annual_value_inr for r in covers if not groups.get(r.scheme_code))
+    best: dict[str, int] = {}
+    for r in covers:
+        group = groups.get(r.scheme_code, "")
+        if group:
+            best[group] = max(best.get(group, 0), r.annual_value_inr)
+    return payout, ungrouped + sum(best.values())
 
 
 def newly_surfaced(results: tuple[Result, ...], known: frozenset[str]) -> tuple[str, ...]:
@@ -267,6 +320,38 @@ def _self_check() -> None:
         "an unsigned scheme must not even produce a NO"
     assert evaluate(Profile(age=30), scheme()).annual_value_inr == 12000
     assert evaluate(Profile(age=50), scheme()).annual_value_inr == 0
+
+    # ! Two alternative routes to one pension must not add up. Without the
+    # ! group this returns 36000 and tells a widow she gets two pensions.
+    def payout(code: str, value: int) -> Result:
+        return Result(code, Verdict.ELIGIBLE, (), (), False, value, "annual_payout")
+
+    pair = (payout("UK_OLD_AGE", 18000), payout("UK_WIDOW", 18000))
+    assert total_value(pair) == 36000, "ungrouped behaviour is unchanged"
+    grouped = {"UK_OLD_AGE": "uk_state_pension", "UK_WIDOW": "uk_state_pension"}
+    assert total_value(pair, groups=grouped) == 18000
+    # * The larger of the two, and other schemes still add on top.
+    mixed = pair + (payout("OTHER", 5000),)
+    assert total_value(mixed, groups=grouped) == 23000
+    assert total_value((payout("UK_OLD_AGE", 18000), payout("UK_WIDOW", 24000)),
+                       groups=grouped) == 24000
+
+    # * value_totals keeps payout and cover apart, and applies the same
+    # * collapse to each. Covers here are ungrouped, so they simply add.
+    def cover(code: str, value: int) -> Result:
+        return Result(code, Verdict.ELIGIBLE, (), (), False, value, "insurance_cover")
+
+    pension = scheme(code="UK_OLD_AGE",
+                     benefit={"annual_value_inr": 18000, "value_basis": "annual_payout",
+                              "exclusive_group": "uk_state_pension"})
+    widow = scheme(code="UK_WIDOW",
+                   benefit={"annual_value_inr": 18000, "value_basis": "annual_payout",
+                            "exclusive_group": "uk_state_pension"})
+    bima = scheme(code="PMSBY",
+                  benefit={"annual_value_inr": 200000, "value_basis": "insurance_cover"})
+    loaded = {"UK_OLD_AGE": pension, "UK_WIDOW": widow, "PMSBY": bima}
+    got = value_totals(pair + (cover("PMSBY", 200000),), loaded)
+    assert got == (18000, 200000), got
     print("engine.py OK")
 
 

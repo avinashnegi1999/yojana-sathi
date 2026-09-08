@@ -12,6 +12,11 @@ verified_by = "unconfirmed — PENDING HUMAN VERIFICATION"
 [benefit]
 annual_value_inr = 18000
 value_basis = "annual_payout"
+# ! One state social pension, two routes. A widow aged 60+ satisfies both
+# ! files, but Uttarakhand pays one pension, so the ₹ total counts the
+# ! larger of the two once. Confirm the department's actual rule on
+# ! holding both before either file is signed.
+exclusive_group = "uk_state_pension"
 premium_inr = 0
 summary_en = "₹1,500 monthly pension after approval. Apply through ssp.uk.gov.in or assisted services. Eligibility and documents are checked by the department. Do not add multiple pension routes together as guaranteed payments."
 summary_hi = "स्वीकृति के बाद ₹1,500 मासिक पेंशन। ssp.uk.gov.in या सहायता केंद्र से आवेदन करें। विभाग पात्रता और दस्तावेज़ जाँचता है। अलग-अलग पेंशन विकल्पों को जोड़कर निश्चित भुगतान न मानें।"
