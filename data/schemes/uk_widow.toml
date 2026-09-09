@@ -11,6 +11,20 @@
 # ! uk.gov.in/department92/library_file/file-04-12-2023-06-02-23.pdf — a 320 MB
 # ! scanned file that could not be read here. A human should confirm the rate
 # ! against that page or the 21/04/2021 rate GO before signing this file.
+# ! 2026-09-10, checked a third time, and the case got WORSE not better:
+# !   1. The HINDI version of the department's widow page also states no amount.
+# !   2. myScheme's own "Official Website" link for this scheme points at
+# !      socialwelfare.uk.gov.in/service/destitute-pension/ — a DIFFERENT
+# !      scheme, for a destitute unmarried woman, with its own conditions. So
+# !      the one page that gives Rs 1,500 cites the wrong source for it.
+# !   3. Nothing on the department's site mentions the "not receiving another
+# !      pension" bar that this file encodes as a refusal.
+# ! This is why this file stays unsigned while the other six are signed. It is
+# ! not a gap more reading closes — the reading has been done three times. It
+# ! needs the SSP helpline or the district social welfare office:
+# !   (a) what is the current widow pension rate?
+# !   (b) does an existing pension block a widow pension application?
+# ! Until then the worker is told we could not check it, which is true.
 # ! Pending: reconcile income scope, pension overlap and current government orders before human sign-off.
 code = "UK_WIDOW"
 name_en = "Uttarakhand widow pension"
