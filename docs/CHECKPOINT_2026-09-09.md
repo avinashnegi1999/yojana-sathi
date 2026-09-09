@@ -9,7 +9,7 @@ Supersedes `outputs/resume-checkpoint.md` in the 8 September Codex workspace.
 **Live release: `sathi-20260909T032918Z`** on EC2 `13.206.84.69`
 (instance `i-01da4c2ab1f689d8b`), activated 2026-09-09.
 
-Two releases were activated today, in this order:
+Three releases were activated today, in this order:
 
 | Release | Contents | Evidence |
 |---|---|---|
@@ -36,10 +36,10 @@ all pre-existing backup directories intact. New rollback backups created:
 `/opt/sathi-backup-20260908T152844Z`, `/opt/sathi-backup-20260909T032918Z`.
 
 **Services:** `sathi`, `sathi-whatsapp`, `caddy` — all `active (running)`,
-`NRestarts=0`. Exactly one Telegram poller (`38451`) and one WhatsApp listener
-(`38452`). No second poller was started at any point.
+`NRestarts=0`. Exactly one Telegram poller (`39851`) and one WhatsApp listener
+(`39852`). No second poller was started at any point.
 
-**Candidate integrity, checked before deploying either one:** archive SHA-256
+**Candidate integrity, checked before deploying each one:** archive SHA-256
 matched the recorded value, all 60 manifest hashes verified, and the packaged
 files were byte-identical to the working tree in `E:\project Scheme Sathi`.
 
@@ -69,9 +69,12 @@ the generated application pack are all real.
 
 Worth testing specifically, because they are new and untested by a human:
 
-- The Uttarakhand pension follow-ups (`is_widow`, income-or-BPL, local
-  selection). Pick Uttarakhand as your state to see them; pick another state and
-  they should be skipped.
+- The Uttarakhand pension follow-ups (`is_widow`, family income-or-BPL, **already
+  receiving another pension** — new today, local selection). Pick Uttarakhand as
+  your state to see them; pick another state and they should be skipped.
+- Answer "yes" to *already receiving another pension* and both pensions should
+  turn INELIGIBLE with a message telling you to ask which single pension suits
+  you, not a flat refusal.
 - The Ujjwala questions (woman applicant, household LPG, declaration).
 - "Don't know" on any follow-up — the answer must stay unknown, never default.
 - The same run in English, checking no Devanagari appears on a button.
@@ -113,6 +116,11 @@ profile matched a rule.
    it. [Discussion #13](https://github.com/karlmehta/code-for-a-billion/discussions/13)
    is still **Unanswered, 0 comments**. Escalate through another channel —
    the CFI registration contact, or the AgentFoundry sign-up itself.
+   *One useful data point found today:* AgentFoundry is a downloadable IDE with
+   BYOK support that advertises "we auto-detect your existing tools", not a
+   cloud-only sandbox. So opening this repo in it is a normal thing to do — but
+   that is an argument for your case, **not** an answer from the organisers, and
+   only they can decide whether it satisfies the checkbox.
 2. **Confirm the "not already receiving another pension" condition at the
    office.** It comes from myScheme, not from the department's own service
    pages, and it now decides verdicts for both pensions. Most consequential
@@ -132,15 +140,16 @@ profile matched a rule.
    Claude-drafted.
 7. **Partner outreach and users.** Unchanged, and entirely yours.
 
-**External blockers not resolvable here:** browser automation is still blocked
-by an administrator policy, so no live phone conversation has been driven from
-this session — hence the manual command list in section 2.
+**On browser automation:** the previous session's Chrome was blocked by an
+administrator policy. This session used the in-app browser instead, which worked
+and is how myScheme and the legacy-TLS state sites were finally read. What still
+has *not* happened is a real conversation on a real phone — hence section 2.
 
 ---
 
 ## 5. GitHub and submission status
 
-**Two commits are ready locally on `audit/readiness-2026-09-08` and are NOT
+**Four commits are ready locally on `audit/readiness-2026-09-08` and are NOT
 pushed.** `git push` hung on Git Credential Manager, which cannot prompt from a
 non-interactive session. Run this yourself:
 
@@ -151,7 +160,10 @@ git -C "E:/project Scheme Sathi" push -u origin audit/readiness-2026-09-08
 | Commit | What |
 |---|---|
 | `fd8df7c` | Add four schemes, and the questions they turned out to need — the expansion exactly as deployed |
-| `46104a3` | Stop quoting a pension rate whose source went 404 — today's corrections |
+| `46104a3` | Stop quoting a pension rate whose source went 404 — first source-review pass |
+| `3de4ca6` | Write down what the entry form actually asks for |
+| `0fb38a8` | Find the pension rule a fetcher could not see — browser pass |
+| `a8b1819` | Point the checkpoint at the release that is actually running |
 
 The split is deliberate: the first commit is byte-for-byte what was staged and
 tested on the server, so it can be reviewed against the deployed release; the
