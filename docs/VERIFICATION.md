@@ -32,16 +32,38 @@ DFS FAQ. A 3 August 2026 ministry reply supports the inclusive PM-SYM income
 ceiling but qualifies the NPS exclusion. No human boxes have been ticked and
 no scheme is approved. Review missing conditions in A4 as well as existing rows.
 
+## The quick way to do this
+
+`python3 -m sathi.review` walks every scheme, or name one: `python3 -m sathi.review PMJJBY`.
+
+For each file it prints every value the engine will actually use — thresholds,
+₹ figures, documents, where to apply — beside the URL each came from, plus the
+`# !` and `# ?` notes the author left, which is where the quoted source
+sentences and the open questions live. You open the page, compare, and either
+type the scheme code and your name or skip it.
+
+It writes only `verified_by` and `verified_on`, reloads the file to confirm it
+still validates, and rolls the write back if it does not. A refused name (an
+assistant, "auto", "TODO") writes nothing. `python3 -m sathi.review --unsign
+PMJJBY` reverses it at any time.
+
+The checklist below is still the authority on *what* to check, especially the
+ambiguities in section A. The tool does not resolve those; it shows them to you.
+
 When all boxes are ticked:
 
 1. Only for a completely approved file, replace
    `verified_by = "unconfirmed — PENDING HUMAN VERIFICATION"` with the actual
    reviewer's name and date; set `verified_on` to that review date.
-2. Update the two production-state tests in `tests/test_schemes.py`
-   (`test_filled_files_still_admit_they_are_unverified_by_a_human` and
-   `test_no_shipped_scheme_is_servable_while_sign_off_is_pending`) to reflect
-   precisely which files were approved. Keep the synthetic unsigned/stub gate
-   tests permanently; do not delete the safety invariant to obtain a green build.
+2. Update `test_todays_shipped_files_are_all_still_unsigned` in
+   `tests/test_schemes.py` to list precisely which files are now signed, and
+   update README.md, docs/CHECKPOINT_2026-09-09.md and docs/SUBMISSION_DRAFT.md
+   in the same commit — that test exists to stop the documents claiming "nobody
+   has been given a verdict" after they have. The safety invariants
+   (`test_every_shipped_signature_is_a_real_person_or_no_signature_at_all`,
+   `test_no_shipped_scheme_is_servable_while_sign_off_is_pending`, and the
+   synthetic unsigned/stub tests) are data-driven and keep passing once a file
+   is signed. Never delete one to obtain a green build.
 3. `python3 check.py` must still pass.
 
 Until then **nobody real should be screened.** A wrong threshold sends a worker on a

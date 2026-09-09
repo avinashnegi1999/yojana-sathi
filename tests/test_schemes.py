@@ -239,16 +239,56 @@ def test_every_income_band_is_accounted_for_in_every_income_rule():
                     f"{code}: an income ceiling must include workers with no income at all"
 
 
-def test_filled_files_still_admit_they_are_unverified_by_a_human():
-    # ! The values were transcribed from official pages in one pass, which is
-    # ! not the same as a person having checked them one by one. Until a
-    # ! maintainer puts their own name in verified_by, that has to be visible in
-    # ! the data itself. Delete this test the day it is signed off —
-    # ! deliberately, not by accident.
+def test_every_shipped_signature_is_a_real_person_or_no_signature_at_all():
+    """A scheme is either honestly unsigned, or signed by a nameable human.
+
+    # ! This replaced a test that asserted every file was still unsigned. That
+    # ! version was correct while nothing was signed and became a trap the
+    # ! moment anything was: signing a file would fail the build, and the
+    # ! obvious way to get a green build is to delete the test — which is
+    # ! precisely the safety net going away at the moment it starts to matter.
+    #
+    # ! What actually matters is that the two states never blur. Either the
+    # ! file admits nobody has checked it and the engine serves UNKNOWN, or a
+    # ! named person owns every value in it and the engine serves verdicts.
+    # ! `sathi/review.py` is the only supported way to move between them, and
+    # ! the name is held to the same standard that tool enforces, so nobody can
+    # ! hand-edit `verified_by = "auto"` and get real verdicts out.
+    """
+    from sathi.review import ReviewError, check_name
+
     root = Path(__file__).resolve().parent.parent
-    for code, s in load_all(root / "data" / "schemes").items():
-        assert PENDING_MARKER in s.verified_by, \
-            f"{code}: verified_by is {s.verified_by!r} — if a human checked it, remove this test"
+    for code, sc in load_all(root / "data" / "schemes").items():
+        if PENDING_MARKER in sc.verified_by:
+            assert not sc.is_human_verified, code
+            assert not sc.is_servable, f"{code}: pending, but the engine would serve it"
+            continue
+        assert sc.is_researched, \
+            f"{code} carries a signature but still has TODOs: {sc.stubs}"
+        signer = sc.verified_by.split(", checked")[0]
+        try:
+            check_name(signer)
+        except ReviewError as e:
+            raise AssertionError(f"{code}: {e}") from None
+
+
+def test_todays_shipped_files_are_all_still_unsigned():
+    """The live state, stated once so a change to it is deliberate and visible.
+
+    # ! Not a safety invariant — the test above is. This one is a tripwire on a
+    # ! fact the README, the checkpoint and the submission draft all assert:
+    # ! that no worker has yet been given a verdict. When schemes are signed,
+    # ! update the list here AND those documents in the same commit, so the
+    # ! claim and the data can never drift apart.
+    """
+    root = Path(__file__).resolve().parent.parent
+    signed = sorted(code for code, sc in load_all(root / "data" / "schemes").items()
+                    if sc.is_human_verified)
+    assert signed == [], (
+        f"{signed} are now signed off. That is a real change in what this bot "
+        f"tells people. Update README.md, docs/CHECKPOINT_2026-09-09.md and "
+        f"docs/SUBMISSION_DRAFT.md, then list them here."
+    )
 
 
 # =====================================================================
@@ -312,6 +352,8 @@ def test_no_shipped_scheme_is_servable_while_sign_off_is_pending():
     # ! a worker as UNKNOWN. Both flip together on the day someone signs off.
     root = Path(__file__).resolve().parent.parent
     for code, s in load_all(root / "data" / "schemes").items():
+        if s.is_human_verified:
+            continue  # signed on purpose; the test above vouches for the name
         assert not s.is_servable, f"{code} is servable but sign-off is pending"
         assert evaluate(Profile(age=30), s).verdict is Verdict.UNKNOWN, code
 

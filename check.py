@@ -41,6 +41,10 @@ SELF_CHECK_MODULES = [
     "sathi.channels.telegram",
     "sathi.channels.whatsapp",
     "sathi.preview",
+    # ! The sign-off tool. It is the only writer of `verified_by`, so its own
+    # ! checks — that a signature changes exactly two lines, and that an
+    # ! assistant cannot produce one — belong in the build gate.
+    "sathi.review",
 ]
 
 

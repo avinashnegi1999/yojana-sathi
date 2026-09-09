@@ -43,6 +43,14 @@ screening, the same Hindi — but it is not yet live on a public number.
 > been told "yes" by it, and none will be until a named human signs a file.**
 > `/demo` shows what a signed scheme would produce, using fixed fictional people
 > and labelled as a demonstration on every reply.
+>
+> **To sign one:** `python3 -m sathi.review PMJJBY`. It prints every value in
+> the file next to the URL it came from, you open that page, and if it all
+> matches you type the scheme code and your name. It writes exactly two lines —
+> `verified_by` and `verified_on` — and re-validates the file afterwards, so a
+> signature can never carry a data change in with it. `--unsign` puts it back.
+> Nothing in that tool checks anything for you; it just puts the values and the
+> source on one screen so you can.
 
 ---
 
