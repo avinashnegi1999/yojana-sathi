@@ -9,6 +9,9 @@
 > information page, kept here so anyone auditing `data/schemes/uk_old_age.toml`
 > can see what the source said on the day it was transcribed. Navigation
 > and accessibility furniture has been stripped; the wording is unedited.
+> **Bold** on amounts, ages and periods was added here to make the page
+> skimmable — no word is changed, added, removed or reordered, and the
+> hash above is taken with the markdown stripped so it would catch it.
 >
 > **The live page is authoritative, not this copy.** Government rules
 > change. Run `python3 -m sathi.sources` to be told when this page no
@@ -19,7 +22,7 @@
 Old Age Pension Scheme
 
 
-The scheme aims to help elderly persons meet their basic needs and improve their quality of life. Under this scheme, a monthly pension is provided to senior citizens (both husband and wife) in the state who are 60 years of age or above.
+The scheme aims to help elderly persons meet their basic needs and improve their quality of life. Under this scheme, a monthly pension is provided to senior citizens (both husband and wife) in the state who are **60 years** of age or above.
 
 
 
@@ -29,7 +32,7 @@ The scheme aims to help elderly persons meet their basic needs and improve their
 ## Benefits
 
 
-A pension of ₹1,500/- per month is provided to eligible beneficiaries.
+A pension of **₹1,500/-** per month is provided to eligible beneficiaries.
 
 
 
@@ -39,9 +42,9 @@ A pension of ₹1,500/- per month is provided to eligible beneficiaries.
 ## Eligibility
 
 
-- The age of the applicant should be 60 years or more.
+- The age of the applicant should be **60 years or more**.
 
-- The monthly income of the applicant should not exceed Rs. 4000/- from all sources or the applicant should be a BPL card holder.
+- The monthly income of the applicant should not exceed **Rs. 4000/-** from all sources or the applicant should be a BPL card holder.
 
 - The applicant should have been selected in an open meeting of the Gram Sabha.
 
@@ -65,7 +68,7 @@ Applicants can apply online through the Department’s pension portal (https://s
 
 - Family register issued by VPDO(Village Panchayat Development Officer) for applicants from rural areas or ration card for applicants from urban areas.
 
-- Income certificate of Rs. 4000/- per month from all sources issued online or BPL card.
+- Income certificate of **Rs. 4000/-** per month from all sources issued online or BPL card.
 
 - The proposal selected in the open meeting of Gram Panchayat/Councillor.
 

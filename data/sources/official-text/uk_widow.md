@@ -9,6 +9,9 @@
 > information page, kept here so anyone auditing `data/schemes/uk_widow.toml`
 > can see what the source said on the day it was transcribed. Navigation
 > and accessibility furniture has been stripped; the wording is unedited.
+> **Bold** on amounts, ages and periods was added here to make the page
+> skimmable — no word is changed, added, removed or reordered, and the
+> hash above is taken with the markdown stripped so it would catch it.
 >
 > **The live page is authoritative, not this copy.** Government rules
 > change. Run `python3 -m sathi.sources` to be told when this page no
@@ -36,9 +39,9 @@ https://ssp.uk.gov.in/OnlineRegistration/FrmWidowOnlineApplicationForm.aspx
 ## Eligibility for Widow Pension Scheme
 
 
-- The age of the applicant should not be less than 18 years.
+- The age of the applicant should not be less than **18 years**.
 
-- Monthly income should not be more than Rs. 4000/- or the applicant should be a BPL card holder.
+- Monthly income should not be more than **Rs. 4000/-** or the applicant should be a BPL card holder.
 
 - The applicant should have been selected in an open meeting of the Gram Sabha.
 
@@ -52,7 +55,7 @@ https://ssp.uk.gov.in/OnlineRegistration/FrmWidowOnlineApplicationForm.aspx
 ## Documents required for online application
 
 
-- Income certificate of Rs. 4000/- per month issued online from all sources or photocopy of BPL card.
+- Income certificate of **Rs. 4000/-** per month issued online from all sources or photocopy of BPL card.
 
 - Copy of family register issued by VPDO(Village Panchayat Development Officer) for applicants from rural areas or photocopy of ration card for applicants from urban areas.
 

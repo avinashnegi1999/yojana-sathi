@@ -3,12 +3,15 @@
 **Published by:** Ministry of Petroleum & Natural Gas, Government of India  
 **Source:** <https://www.pmuy.gov.in/faq.html>  
 **Retrieved:** 2026-09-09  
-**SHA-256 of the wording below:** `d8f9c4a7f3f734dbd60bc0baefb46da36dc4976b5d65202e882a3e80e97c1588`
+**SHA-256 of the wording below:** `ec49786ad3e936c4d1ad088d764af0f016a9d6f6b12da4578d54946462cee86b`
 
 > Verbatim snapshot of a public Government of India / State Government
 > information page, kept here so anyone auditing `data/schemes/pmuy.toml`
 > can see what the source said on the day it was transcribed. Navigation
 > and accessibility furniture has been stripped; the wording is unedited.
+> **Bold** on amounts, ages and periods was added here to make the page
+> skimmable — no word is changed, added, removed or reordered, and the
+> hash above is taken with the markdown stripped so it would catch it.
 >
 > **The live page is authoritative, not this copy.** Government rules
 > change. Run `python3 -m sathi.sources` to be told when this page no
@@ -126,7 +129,7 @@ A PMUY beneficiary does not need to pay any amount to the distributor for any of
 Applicants can apply via following methods:
 
 
-Online – Customers can apply online through the application form available at https://pmuy.gov.in or visit the nearest CSC Centre for assistance in submitting the application. There is no fee for self-submission. However, a charge of ₹20 will be applicable if the application is submitted through CSC Centres.
+Online – Customers can apply online through the application form available at https://pmuy.gov.in or visit the nearest CSC Centre for assistance in submitting the application. There is no fee for self-submission. However, a charge of **₹20** will be applicable if the application is submitted through CSC Centres.
 
 
 Offline – Customers can directly submit the application at preferably nearest LPG distributorship of OMCs.

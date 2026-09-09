@@ -3,12 +3,15 @@
 **Published by:** Department of Financial Services, Ministry of Finance, Government of India  
 **Source:** <https://financialservices.gov.in/pmsby>  
 **Retrieved:** 2026-09-09  
-**SHA-256 of the wording below:** `6ff3722bebb24f5fde56dc8d4ac4d7695927fd0375f70a6154a1f7926fae1cad`
+**SHA-256 of the wording below:** `4fa57b4978f8394a07f29da67740c8e329ea6e1dbd297c7ef61b07adb59f0e0a`
 
 > Verbatim snapshot of a public Government of India / State Government
 > information page, kept here so anyone auditing `data/schemes/pmsby.toml`
 > can see what the source said on the day it was transcribed. Navigation
 > and accessibility furniture has been stripped; the wording is unedited.
+> **Bold** on amounts, ages and periods was added here to make the page
+> skimmable — no word is changed, added, removed or reordered, and the
+> hash above is taken with the markdown stripped so it would catch it.
 >
 > **The live page is authoritative, not this copy.** Government rules
 > change. Run `python3 -m sathi.sources` to be told when this page no
@@ -86,16 +89,16 @@ The benefits payable under the scheme on death or disability due to accident are
 Table of Benefits Sum Insured
 
 
-Death Rs. 2 Lakh
+Death **Rs. 2 Lakh**
 
 
-Total and irrecoverable loss of both eyes or loss of use of both hands or feet or loss of sight of one eye and loss of use of hand or foot Rs. 2 Lakh
+Total and irrecoverable loss of both eyes or loss of use of both hands or feet or loss of sight of one eye and loss of use of hand or foot **Rs. 2 Lakh**
 
 
-Total and irrecoverable loss of sight of one eye or loss of use of one hand or foot Rs. 1 Lakh
+Total and irrecoverable loss of sight of one eye or loss of use of one hand or foot **Rs. 1 Lakh**
 
 
-Premium payable is Rs.20/- per annum per member.
+Premium payable is **Rs.20/-** per annum per member.
 
 
 
@@ -135,7 +138,7 @@ The scheme is offered / administered through the Public Sector General Insurance
 ### 6. Who will be eligible to subscribe?
 
 
-All individual (single or joint) account holders of participating banks / Post office, in the age group of 18 to 70 years are entitled to join. In case of multiple accounts held by an individual in one or different banks/ Post offices, the person is eligible to join the scheme through one bank / Post office account only.
+All individual (single or joint) account holders of participating banks / Post office, in the age group of **18 to 70 years** are entitled to join. In case of multiple accounts held by an individual in one or different banks/ Post offices, the person is eligible to join the scheme through one bank / Post office account only.
 
 
 
@@ -145,7 +148,7 @@ All individual (single or joint) account holders of participating banks / Post o
 ### 7. What is the enrolment period and modality?
 
 
-The cover shall be for one-year period stretching from 1st June to 31st May. At the time of enrolment, subscriber has to submit his option on the prescribed form, to join / pay by auto-debit from the designated individual bank / Post office account, until further instructions, an amount of Rs.20/- (Rupees Twenty only) per annum, or any amount as decided from time to time, which may be intimated immediately if and when revised, towards renewal of coverage under the scheme. Delayed enrolment / renewal subsequent to this date will be possible on payment of annual premium.
+The cover shall be for one-year period stretching from **1st June to 31st May**. At the time of enrolment, subscriber has to submit his option on the prescribed form, to join / pay by auto-debit from the designated individual bank / Post office account, until further instructions, an amount of **Rs.20/-** (Rupees Twenty only) per annum, or any amount as decided from time to time, which may be intimated immediately if and when revised, towards renewal of coverage under the scheme. Delayed enrolment / renewal subsequent to this date will be possible on payment of annual premium.
 
 
 
@@ -188,7 +191,7 @@ Participating Banks/ Post office are the Master policy holders for the scheme. A
 The accident cover of the member shall terminate / be restricted accordingly on any of the following events:
 
 
-On attaining age 70 years (age nearer birth day).
+On attaining age **70 years** (age nearer birth day).
 
 
 Closure of account with the Bank or insufficiency of balance to keep the insurance in force.
@@ -223,7 +226,7 @@ Enrolment form / Auto-debit authorization / Consent cum Declaration form in the 
 Appropriation of Premium:
 
 
-Insurance Premium payable to Insurance Company: Rs. 20/- per annum per member
+Insurance Premium payable to Insurance Company: **Rs. 20/-** per annum per member
 
 
 Commission payable to Business Correspondents, agents, etc. by the insurer: Re.1/- per member (for new enrolments only).
@@ -262,7 +265,7 @@ Natural calamities being in the nature of accidents, any death / disability (as 
 ### 16. Can all holders of a joint bank account join the scheme through the said account?
 
 
-In case of a joint account, all holders of the said account can join the scheme provided they satisfy its eligibility criteria and pay the premium at the rate of Rs.20 per person per annum through auto-debit.
+In case of a joint account, all holders of the said account can join the scheme provided they satisfy its eligibility criteria and pay the premium at the rate of **Rs.20** per person per annum through auto-debit.
 
 
 
@@ -369,13 +372,13 @@ No. The insured/ nominee shall be eligible for one claim only.
 ### 27. Are PMSBY policies being introduced and serviced in association with foreign insurance Companies?
 
 
-There are no foreign insurance Companies directly operating in India. As permitted by the Insurance Act and IRDA Regulations there are some foreign Companies in joint ventures with Indian companies, where the stake of foreign insurers is restricted to 74% only.
+There are no foreign insurance Companies directly operating in India. As permitted by the Insurance Act and IRDA Regulations there are some foreign Companies in joint ventures with Indian companies, where the stake of foreign insurers is restricted to **74%** only.
 
 
 Will the PMSBY scheme which is being promoted aggressively and sold in large numbers accrue huge profits to the foreign insurance Companies who in joint venture with Indian entities have floated general insurance companies and are operating this insurance
 
 
-Only Indian Insurance Companies as defined in the Insurance Act can operate in India. The policy holders’ funds of all such insurance companies operating in India including those with foreign partners within the 74% cap are to be invested in India as per regulations and cannot be invested abroad. The premium charged for PMSBY has been worked out based on actuarial calculations by considering all risk factors, current mortality rates and adverse selection. Thus, there is no scope for any huge profits accruing from the scheme.
+Only Indian Insurance Companies as defined in the Insurance Act can operate in India. The policy holders’ funds of all such insurance companies operating in India including those with foreign partners within the **74%** cap are to be invested in India as per regulations and cannot be invested abroad. The premium charged for PMSBY has been worked out based on actuarial calculations by considering all risk factors, current mortality rates and adverse selection. Thus, there is no scope for any huge profits accruing from the scheme.
 
 
 
@@ -388,7 +391,7 @@ Only Indian Insurance Companies as defined in the Insurance Act can operate in I
 There are 21 general insurance companies operating in India, who are licensed by IRDAI to carry on general insurance business in India. To promote competition and better pricing and service to customers, all these companies are permitted to participate.
 
 
-Moreover, they are all Indian insurance companies. Their foreign partners, if any, have only a stake in these companies within the stipulated 74% cap. However, Public Sector General Insurance Companies (PSGICs) are still the primary insurers involved in operation of the scheme.
+Moreover, they are all Indian insurance companies. Their foreign partners, if any, have only a stake in these companies within the stipulated **74%** cap. However, Public Sector General Insurance Companies (PSGICs) are still the primary insurers involved in operation of the scheme.
 
 
 
@@ -398,7 +401,7 @@ Moreover, they are all Indian insurance companies. Their foreign partners, if an
 ### 29. In case of non-settlement of claims is it possible to proceed legally against the foreign insurers in India?
 
 
-There are no foreign insurance Companies directly operating in India. As permitted by the regulations there are Companies operating as joint ventures with Indian companies, where the stake of foreign insurers is restricted to 74% only. By definition, these are Indian insurance companies. All these companies are subject to Indian laws and there is no bar against proceeding legally against them.
+There are no foreign insurance Companies directly operating in India. As permitted by the regulations there are Companies operating as joint ventures with Indian companies, where the stake of foreign insurers is restricted to **74%** only. By definition, these are Indian insurance companies. All these companies are subject to Indian laws and there is no bar against proceeding legally against them.
 
 
 

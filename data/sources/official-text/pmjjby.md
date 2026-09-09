@@ -3,12 +3,15 @@
 **Published by:** Department of Financial Services, Ministry of Finance, Government of India  
 **Source:** <https://financialservices.gov.in/pmjjby>  
 **Retrieved:** 2026-09-09  
-**SHA-256 of the wording below:** `11c67bc29c65042a9363db7f91f338e0b5b127b29f5cbd3c1dc87db88910a11b`
+**SHA-256 of the wording below:** `9e78acaf5d45719519a82a18ff3324b61aee320d97300b8a7255e67a78029dd1`
 
 > Verbatim snapshot of a public Government of India / State Government
 > information page, kept here so anyone auditing `data/schemes/pmjjby.toml`
 > can see what the source said on the day it was transcribed. Navigation
 > and accessibility furniture has been stripped; the wording is unedited.
+> **Bold** on amounts, ages and periods was added here to make the page
+> skimmable — no word is changed, added, removed or reordered, and the
+> hash above is taken with the markdown stripped so it would catch it.
 >
 > **The live page is authoritative, not this copy.** Government rules
 > change. Run `python3 -m sathi.sources` to be told when this page no
@@ -70,27 +73,27 @@ The scheme is a one-year cover term life insurance scheme, renewable from year t
 ### 2. What would be the benefits under the scheme and premium payable?
 
 
-Rs.2 lakh is payable on a subscriber’s death due to any cause.
+**Rs.2 lakh** is payable on a subscriber’s death due to any cause.
 
 
-The premium payable is Rs.436/- per annum per subscriber.
+The premium payable is **Rs.436/-** per annum per subscriber.
 
 
 For those getting enrolled under PMJJBY for the first time during the middle of the policy period, payment of pro-rata premium is allowed as under;
 
 
-- For enrolment in June, July and August – Full annual premium of Rs.436/- is payable.
+- For enrolment in June, July and August – Full annual premium of **Rs.436/-** is payable.
 
-- For enrolment in September, October, and November – pro rata premium of Rs. 342/- is payable
+- For enrolment in September, October, and November – pro rata premium of **Rs. 342/-** is payable
 
-- For enrolment in December, January and February – pro rata premium of Rs. 228/- is payable.
+- For enrolment in December, January and February – pro rata premium of **Rs. 228/-** is payable.
 
-- For enrolment in March, April and May – pro rata premium of Rs. 114/- is payable.
+- For enrolment in March, April and May – pro rata premium of **Rs. 114/-** is payable.
 
-However, full year’s premium @ Rs 436/- is payable at the time of renewal under the scheme.
+However, full year’s premium @ **Rs 436/-** is payable at the time of renewal under the scheme.
 
 
-For subscribers enrolling for the first-time, risk starts from the date of auto-debit of premium. However, insurance cover shall not be available for death (other than due to accident) occurring during the first 30 days from the date of enrolment into the scheme (lien period) and in case of death (other than due to accident) during lien period, no claim would be admissible.
+For subscribers enrolling for the first-time, risk starts from the date of auto-debit of premium. However, insurance cover shall not be available for death (other than due to accident) occurring during the first **30 days** from the date of enrolment into the scheme (lien period) and in case of death (other than due to accident) during lien period, no claim would be admissible.
 
 
 
@@ -120,7 +123,7 @@ The scheme is offered/administered through LIC and other life insurance companie
 ### 5. Who will be eligible to subscribe?
 
 
-All individual (single or joint) account holders of participating banks / Post office, in the age group of 18 to 50 years are entitled to join. In case of multiple accounts held by an individual in one or different banks / Post offices, the person is eligible to join the scheme through one bank / Post office account only.
+All individual (single or joint) account holders of participating banks / Post office, in the age group of **18 to 50 years** are entitled to join. In case of multiple accounts held by an individual in one or different banks / Post offices, the person is eligible to join the scheme through one bank / Post office account only.
 
 
 
@@ -130,7 +133,7 @@ All individual (single or joint) account holders of participating banks / Post o
 ### 6. What is the enrolment period and modality?
 
 
-The cover shall be for one-year period stretching from 1st June to 31st May. At the time of enrolment, subscriber has to submit his option on the prescribed form, to join / pay by auto-debit from the designated individual bank / Post office account, until further instructions, an amount of Rs.436/- (Rupees Four Hundred Thirty-Six only) per annum, or any amount as decided from time to time, which may be intimated immediately if and when revised, towards renewal of coverage under the scheme.
+The cover shall be for one-year period stretching from **1st June to 31st May**. At the time of enrolment, subscriber has to submit his option on the prescribed form, to join / pay by auto-debit from the designated individual bank / Post office account, until further instructions, an amount of **Rs.436/-** (Rupees Four Hundred Thirty-Six only) per annum, or any amount as decided from time to time, which may be intimated immediately if and when revised, towards renewal of coverage under the scheme.
 
 
 Delayed enrolment / renewal subsequent to this date will be possible on payment of appropriate premium as described in Q.2 above, subject to changes in terms regarding insurance coverage.
@@ -143,7 +146,7 @@ Delayed enrolment / renewal subsequent to this date will be possible on payment 
 ### 7. Can eligible individuals who fail to join the scheme in the initial year join in subsequent years?
 
 
-Yes, new eligible entrants can also join in future years on payment of premium through auto-debit. However, for such subscribers, insurance benefit shall not be available for death (due to any cause other than accident) occurring during the first 30 days from the date of enrolment into the scheme.
+Yes, new eligible entrants can also join in future years on payment of premium through auto-debit. However, for such subscribers, insurance benefit shall not be available for death (due to any cause other than accident) occurring during the first **30 days** from the date of enrolment into the scheme.
 
 
 
@@ -153,7 +156,7 @@ Yes, new eligible entrants can also join in future years on payment of premium t
 ### 8. Can individuals who leave the scheme re-join?
 
 
-Individuals who exit the scheme at any point may re-join the scheme in future years by paying the appropriate premium as described in Q.2 above. However, for such subscribers, insurance benefit shall not be available for death (due to any cause other than accident) occurring during the first 30 days from the date of enrolment into the scheme
+Individuals who exit the scheme at any point may re-join the scheme in future years by paying the appropriate premium as described in Q.2 above. However, for such subscribers, insurance benefit shall not be available for death (due to any cause other than accident) occurring during the first **30 days** from the date of enrolment into the scheme
 
 
 
@@ -176,13 +179,13 @@ Participating Banks/ Post office are the Master policy holders for the scheme. A
 The assurance on the life of the member shall terminate / be restricted accordingly on any of the following events:
 
 
-On attaining age 55 years (age near birth day), subject to annual renewal up to that date (entry, however, will not be possible beyond the age of 50 years).
+On attaining age **55 years** (age near birth day), subject to annual renewal up to that date (entry, however, will not be possible beyond the age of **50 years**).
 
 
 Closure of account with the Bank or insufficiency of balance to keep the insurance in force.
 
 
-In case a member is covered through more than one account and premium is received by LIC / insurance company inadvertently, insurance cover will be restricted to Rs. 2 Lakh and the premium paid for duplicate insurance(s) shall be liable to be forfeited.
+In case a member is covered through more than one account and premium is received by LIC / insurance company inadvertently, insurance cover will be restricted to **Rs. 2 Lakh** and the premium paid for duplicate insurance(s) shall be liable to be forfeited.
 
 
 
@@ -211,14 +214,14 @@ Enrolment form / Auto-debit authorization / Consent cum Declaration form in the 
 Appropriation of Premium:
 
 
-Appropriation of Premium where: Full Annual Premium of Rs.436/- collected Rs.342/- collected in the 2nd quarter of risk Period Rs.228/- collected in the 3rd quarter of risk period Rs.114/- is collected in the 4th quarter of risk period
+Appropriation of Premium where: Full Annual Premium of **Rs.436/-** collected **Rs.342/-** collected in the 2nd quarter of risk Period **Rs.228/-** collected in the 3rd quarter of risk period **Rs.114/-** is collected in the 4th quarter of risk period
 
 
-- Insurance Premium to LIC/ Insurance Company Rs.395/- Rs.309/- Rs.206/- Rs.103/-
+- Insurance Premium to LIC/ Insurance Company **Rs.395/-** **Rs.309/-** **Rs.206/-** **Rs.103/-**
 
-- Commission payable to Business Correspondents, agents, etc. (For new enrolments only) Rs.30/- Rs.22.50 Rs.15/- Rs.7.50
+- Commission payable to Business Correspondents, agents, etc. (For new enrolments only) **Rs.30/-** **Rs.22.50** **Rs.15/-** **Rs.7.50**
 
-- Administrative Expenses payable to participating Banks Rs.11/- Rs.10.50 Rs.7/- Rs.3.50
+- Administrative Expenses payable to participating Banks **Rs.11/-** **Rs.10.50** **Rs.7/-** **Rs.3.50**
 
 Note:
 
@@ -283,7 +286,7 @@ All these events are covered as PMJJBY covers death due to any reason.
 ### 18. Are PMJJBY policies being introduced and serviced in association with foreign insurance Companies?
 
 
-There are no foreign insurance Companies directly operating in India. As permitted by the Insurance Act and IRDAI regulations there are some foreign Companies in joint ventures with Indian companies, where the stake of foreign insurers is restricted to 74% only.
+There are no foreign insurance Companies directly operating in India. As permitted by the Insurance Act and IRDAI regulations there are some foreign Companies in joint ventures with Indian companies, where the stake of foreign insurers is restricted to **74%** only.
 
 
 Contrary to other life insurance products, benefit under PMJJBY is payable only to nominee of the insured on the death of the insured. Why is there no maturity benefit or surrender value, which is available in normal life insurance policies?
@@ -295,7 +298,7 @@ The cover under PMJJBY is for death only and hence benefit will accrue only to n
 Will the PMJJBY scheme which is being promoted aggressively and sold in large numbers accrue huge profits to the foreign insurance Companies who in joint venture with Indian entities have floated life insurance companies and are operating this insurance c
 
 
-Only Indian Insurance Companies as defined in the Insurance Act can operate in India. The policy holders’ funds of all such insurance companies operating in India including those with foreign partners within the 74% cap is to be invested in India as per regulations and cannot be invested abroad. The premium charged for PMJJBY has been worked out based on actuarial calculations considering all risk factors, current mortality rates and adverse selection. Thus, there is no scope for any huge profits accruing from the scheme.
+Only Indian Insurance Companies as defined in the Insurance Act can operate in India. The policy holders’ funds of all such insurance companies operating in India including those with foreign partners within the **74%** cap is to be invested in India as per regulations and cannot be invested abroad. The premium charged for PMJJBY has been worked out based on actuarial calculations considering all risk factors, current mortality rates and adverse selection. Thus, there is no scope for any huge profits accruing from the scheme.
 
 
 
@@ -305,7 +308,7 @@ Only Indian Insurance Companies as defined in the Insurance Act can operate in I
 ### 19. Why are foreign insurance Companies associated with PMJJBY when LIC which is a government owned corporation could have managed this scheme launched by the government?
 
 
-There are 24 Life insurance companies operating in India, who are licensed by IRDAI to carry on life insurance business in India. To promote competition and better pricing and service to customers, all these companies are permitted to participate. Moreover, they are all Indian insurance companies. Their foreign partners, if any, have only a stake in these companies within the stipulated 74% cap. However, LIC is still the primary insurer involved in operation of the scheme.
+There are 24 Life insurance companies operating in India, who are licensed by IRDAI to carry on life insurance business in India. To promote competition and better pricing and service to customers, all these companies are permitted to participate. Moreover, they are all Indian insurance companies. Their foreign partners, if any, have only a stake in these companies within the stipulated **74%** cap. However, LIC is still the primary insurer involved in operation of the scheme.
 
 
 
@@ -315,7 +318,7 @@ There are 24 Life insurance companies operating in India, who are licensed by IR
 ### 20. In case of non-settlement of claims is it possible to proceed legally against the foreign insurers in India?
 
 
-There are no foreign insurance Companies directly operating in India. As permitted by the regulations there are Companies operating as joint ventures with Indian companies, where the stake of foreign insurers is restricted to 74% only. By definition, these are Indian insurance companies. All these companies are subject to Indian laws and there is no bar against proceeding legally against them.
+There are no foreign insurance Companies directly operating in India. As permitted by the regulations there are Companies operating as joint ventures with Indian companies, where the stake of foreign insurers is restricted to **74%** only. By definition, these are Indian insurance companies. All these companies are subject to Indian laws and there is no bar against proceeding legally against them.
 
 
 Rates of premium may be increased, or the Companies may discontinue the schemes in future.

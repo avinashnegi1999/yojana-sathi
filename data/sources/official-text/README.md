@@ -38,9 +38,20 @@ Run that before trusting anything in this folder, and after any long gap.
 ## What was and was not changed
 
 Navigation menus, accessibility widgets, font-size controls, social links and
-footers were stripped. **The substance is unedited** — no rewording, no
-summarising, no reordering, nothing added. Each file records a SHA-256 of its
-own body so a later edit is detectable.
+footers were stripped. Each page was then laid out for reading: one heading per
+question, answers as separate paragraphs, the sites' `(i)`/`(ii)`/`a)` runs as
+lists, and a table of contents where there are four or more questions. **Bold**
+was added on amounts, ages, durations and cover periods, because those are what
+a person scans a scheme page for.
+
+**The substance is unedited** — no rewording, no summarising, no reordering,
+nothing added or removed. Layout and emphasis are ours; every word is theirs.
+
+Each file records a SHA-256 taken over its wording **with the markdown
+stripped**, so re-laying a page out or emphasising a figure does not disturb it,
+while an edit to what the page actually says does. The formatter asserts this on
+every run — it caught itself gluing `**Rs.15000**or less` together once, which
+is exactly the silent edit that check exists to prevent.
 
 Two consequences of automated extraction, so nobody mistakes them for the
 source's own doing: tables arrive flattened into lines, and the numbering the

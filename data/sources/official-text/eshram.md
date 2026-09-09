@@ -3,12 +3,15 @@
 **Published by:** Ministry of Labour & Employment, Government of India  
 **Source:** <https://eshram.gov.in/faqs>  
 **Retrieved:** 2026-09-09  
-**SHA-256 of the wording below:** `cae40dd295e5d23628ab3a850feaa13e8b7ca9cc33a3824cd9b3608f30c7a20c`
+**SHA-256 of the wording below:** `1bf438bc14b9cf41f0d84c14f45f581815e5e352d0d162391c49218c828ce3a1`
 
 > Verbatim snapshot of a public Government of India / State Government
 > information page, kept here so anyone auditing `data/schemes/eshram.toml`
 > can see what the source said on the day it was transcribed. Navigation
 > and accessibility furniture has been stripped; the wording is unedited.
+> **Bold** on amounts, ages and periods was added here to make the page
+> skimmable — no word is changed, added, removed or reordered, and the
+> hash above is taken with the markdown stripped so it would catch it.
 >
 > **The live page is authoritative, not this copy.** Government rules
 > change. Run `python3 -m sathi.sources` to be told when this page no
@@ -48,17 +51,17 @@
 29. [Where do I go to solve my grievance?](#29-where-do-i-go-to-solve-my-grievance)
 30. [Are there any educational qualifications prescribed for registering as an unorganised worker?](#30-are-there-any-educational-qualifications-prescribed-for-registering-as-an-unorganised-worker)
 31. [What are the documents that are to be submitted at the enrolment Centre?](#31-what-are-the-documents-that-are-to-be-submitted-at-the-enrolment-centre)
-32. [What action is required to be taken by the worker, after attaining the age of 60 years?](#32-what-action-is-required-to-be-taken-by-the-worker-after-attaining-the-age-of-60-years)
+32. [What action is required to be taken by the worker, after attaining the age of **60 years**?](#32-what-action-is-required-to-be-taken-by-the-worker-after-attaining-the-age-of-60-years)
 33. [Who will operate the helpdesk/ grievance redressal mechanism?](#33-who-will-operate-the-helpdesk-grievance-redressal-mechanism)
 34. [Is there any interactive map for finding the nearest location of the registration Centre?](#34-is-there-any-interactive-map-for-finding-the-nearest-location-of-the-registration-centre)
 35. [Can the worker update his/ her photo on e-Shram portal?](#35-can-the-worker-update-his-her-photo-on-e-shram-portal)
 36. [What is occupation?](#36-what-is-occupation)
 37. [What is primary occupation?](#37-what-is-primary-occupation)
 38. [What is secondary occupation?](#38-what-is-secondary-occupation)
-39. [I am 16 years old. Whether I am eligible for PMSBY if registered on eSHRAM?](#39-i-am-16-years-old-whether-i-am-eligible-for-pmsby-if-registered-on-eshram)
+39. [I am **16 years** old. Whether I am eligible for PMSBY if registered on eSHRAM?](#39-i-am-16-years-old-whether-i-am-eligible-for-pmsby-if-registered-on-eshram)
 40. [I have changed my registered mobile number. How can I update my mobile number? or register other mobile number on e-Shram portal?](#40-i-have-changed-my-registered-mobile-number-how-can-i-update-my-mobile-number-or-register-other-mobile-number-on-e-shram-portal)
 41. [Are farmers eligible to register on e-Shram portal?](#41-are-farmers-eligible-to-register-on-e-shram-portal)
-42. [I am 16 years old. Can I register on e-Shram portal?](#42-i-am-16-years-old-can-i-register-on-e-shram-portal)
+42. [I am **16 years** old. Can I register on e-Shram portal?](#42-i-am-16-years-old-can-i-register-on-e-shram-portal)
 43. [Whether my data will get verified from EPFO, ESIC or tax department?](#43-whether-my-data-will-get-verified-from-epfo-esic-or-tax-department)
 44. [What are the details workers can update in e-Shram?](#44-what-are-the-details-workers-can-update-in-e-shram)
 45. [What is last date of e-Shram Registration?](#45-what-is-last-date-of-e-shram-registration)
@@ -222,7 +225,7 @@ No. Bank details are being captured to ensure hassle free delivery of benefits u
 ### 12. Are there any age eligibility criteria to register on e-Shram?
 
 
-A person aged 16 years or above who is engaged in unorganised work may register on eShram, subject to the applicable eligibility conditions.
+A person aged **16 years or above** who is engaged in unorganised work may register on eShram, subject to the applicable eligibility conditions.
 
 
 
@@ -516,7 +519,7 @@ Any other activity which is a minor but significant source of income is called s
 ### 39. I am 16 years old. Whether I am eligible for PMSBY if registered on eSHRAM?
 
 
-No, the person should be between 18 – 59 years to be eligible for PMSBY through eSHRAM registration.
+No, the person should be between **18 – 59 years** to be eligible for PMSBY through eSHRAM registration.
 
 
 //-->
@@ -649,7 +652,7 @@ Claimant should file a claim along with relevant documents on the eShram portal/
 ### 52. Can individuals who leave the scheme rejoin?
 
 
-The insurance cycle works from 1st June to 31st May of the calendar year. All the workers are required to renew between 1st June to 30th June in the same calendar year to continue the insurance cover.
+The insurance cycle works from **1st June to 31st May** of the calendar year. All the workers are required to renew between **1st June to 30th June** in the same calendar year to continue the insurance cover.
 
 
 Stakeholders:

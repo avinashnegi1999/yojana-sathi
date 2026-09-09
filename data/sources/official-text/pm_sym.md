@@ -3,12 +3,15 @@
 **Published by:** Ministry of Labour & Employment, Government of India  
 **Source:** <https://maandhan.in/show_content.php?lang=1&level=1&ls_id=79&lid=63&page=74>  
 **Retrieved:** 2026-09-09  
-**SHA-256 of the wording below:** `7d85009dea22151b7c36b054f84dcdf3e4f673792a2417d0b07be51c3ba75024`
+**SHA-256 of the wording below:** `d3cb202e187049cdfb4b0d9a7ec5be9ecf0286dbec9d8ed8f0161c58cd869409`
 
 > Verbatim snapshot of a public Government of India / State Government
 > information page, kept here so anyone auditing `data/schemes/pm_sym.toml`
 > can see what the source said on the day it was transcribed. Navigation
 > and accessibility furniture has been stripped; the wording is unedited.
+> **Bold** on amounts, ages and periods was added here to make the page
+> skimmable — no word is changed, added, removed or reordered, and the
+> hash above is taken with the markdown stripped so it would catch it.
 >
 > **The live page is authoritative, not this copy.** Government rules
 > change. Run `python3 -m sathi.sources` to be told when this page no
@@ -31,7 +34,7 @@
 12. [Are there any educational qualifications prescribed for becoming a Member of Pradhan Mantri Shram Yogi Maandhan?](#12-are-there-any-educational-qualifications-prescribed-for-becoming-a-member-of-pradhan-mantri-shram-yogi-maandhan)
 13. [Whether any nomination facility (other than spouse) is available after the death of the beneficiary?](#13-whether-any-nomination-facility-other-than-spouse-is-available-after-the-death-of-the-beneficiary)
 14. [What are the documents that are to be submitted at the enrollment Centre?](#14-what-are-the-documents-that-are-to-be-submitted-at-the-enrollment-centre)
-15. [Is the beneficiary required to pay the monthly contribution till the age of 60 years?](#15-is-the-beneficiary-required-to-pay-the-monthly-contribution-till-the-age-of-60-years)
+15. [Is the beneficiary required to pay the monthly contribution till the age of **60 years**?](#15-is-the-beneficiary-required-to-pay-the-monthly-contribution-till-the-age-of-60-years)
 16. [What happens if the worker joins this Scheme as an Unorganized worker and he joins the organized sector, gets enrolled under EPFO and again comes back to the Unorganized sector, what would be the modalities for the same?](#16-what-happens-if-the-worker-joins-this-scheme-as-an-unorganized-worker-and-he-joins-the-organized-sector-gets-enrolled-under-epfo-and-again-comes-back-to-the-unorganized-sector-what-would-be-the-modalities-for-the-same)
 
 ---
@@ -110,7 +113,7 @@ Test Page
 ### 1. What is Pradhan Mantri Shram Yogi Maandhan Yojana?
 
 
-Pradhan Mantri Shram Yogi Maandhan is a voluntary and contributory Pension Scheme for Unorganized Workers for entry age of 18 to 40 years with monthly income of Rs.15000 or less.
+Pradhan Mantri Shram Yogi Maandhan is a voluntary and contributory Pension Scheme for Unorganized Workers for entry age of **18 to 40 years** with monthly income of **Rs.15000** or less.
 
 
 
@@ -120,7 +123,7 @@ Pradhan Mantri Shram Yogi Maandhan is a voluntary and contributory Pension Schem
 ### 2. Who can subscribe this Scheme?
 
 
-Any unorganized worker in the age group of 18-40 years, whose job is casual in nature , such as home based workers, street vendors, head loaders, brick kiln, cobblers, rag pickers, domestic workers, washer-men, Rickshaw Pullers, Rural landless labourers, own account workers, agricultural workers, construction workers, beedi workers, handloom workers, leather workers, etc. with monthly income less than Rs 15,000/-. The worker should not be covered under any statutory social security schemes such as National Pension Scheme (NPS), Employees’ State Insurance Corporation scheme, Employees’ Provident Fund Organization Scheme and is not an income tax payee.
+Any unorganized worker in the age group of **18-40 years**, whose job is casual in nature , such as home based workers, street vendors, head loaders, brick kiln, cobblers, rag pickers, domestic workers, washer-men, Rickshaw Pullers, Rural landless labourers, own account workers, agricultural workers, construction workers, beedi workers, handloom workers, leather workers, etc. with monthly income less than **Rs 15,000/-**. The worker should not be covered under any statutory social security schemes such as National Pension Scheme (NPS), Employees’ State Insurance Corporation scheme, Employees’ Provident Fund Organization Scheme and is not an income tax payee.
 
 
 
@@ -130,7 +133,7 @@ Any unorganized worker in the age group of 18-40 years, whose job is casual in n
 ### 3. What is the benefit of this Scheme?
 
 
-If any Unorganized worker subscribes the scheme and has paid regular contribution up to the age of 60 years, he will get a minimum monthly pension of Rs. 3000/-. After his/ her death, spouse will receive a monthly family pension which is 50 % of the pension.
+If any Unorganized worker subscribes the scheme and has paid regular contribution up to the age of **60 years**, he will get a minimum monthly pension of **Rs. 3000/-**. After his/ her death, spouse will receive a monthly family pension which is **50 %** of the pension.
 
 
 
@@ -140,7 +143,7 @@ If any Unorganized worker subscribes the scheme and has paid regular contributio
 ### 4. How many years the beneficiary will contribute?
 
 
-Once the beneficiary joins the scheme at the entry age between 18-40 years, he has to contribute till he attains the age 60 years.
+Once the beneficiary joins the scheme at the entry age between **18-40 years**, he has to contribute till he attains the age **60 years**.
 
 
 
@@ -150,7 +153,7 @@ Once the beneficiary joins the scheme at the entry age between 18-40 years, he h
 ### 5. How much pension would be received under the Scheme? At what age?
 
 
-Under the Scheme, minimum pension is of Rs. 3000/- per month shall be paid. This pension will start on attaining the age of 60 years of the Beneficiary.
+Under the Scheme, minimum pension is of **Rs. 3000/-** per month shall be paid. This pension will start on attaining the age of **60 years** of the Beneficiary.
 
 
 
@@ -210,7 +213,7 @@ Yes, under the scheme, nomination facility is available. Beneficiary can nominat
 ### 11. What happens in case of death before the start of pension?
 
 
-In such an event, if a beneficiary has given regular contribution and died due to any cause, his/her spouse will be entitled to join and continue the scheme subsequently by payment of regular contribution for the remaining period. On completion of the contribution period, the spouse will receive a monthly pension of Rs. 3000/-. Alternatively, if the spouse so desires, the amount of the member’s contribution will be returned back to his/ her nominee with an interest equivalent to saving bank rates interest.
+In such an event, if a beneficiary has given regular contribution and died due to any cause, his/her spouse will be entitled to join and continue the scheme subsequently by payment of regular contribution for the remaining period. On completion of the contribution period, the spouse will receive a monthly pension of **Rs. 3000/-**. Alternatively, if the spouse so desires, the amount of the member’s contribution will be returned back to his/ her nominee with an interest equivalent to saving bank rates interest.
 
 
 
@@ -250,7 +253,7 @@ The beneficiary has to provide Aadhar card, savings bank passbook and a Self-Cer
 ### 15. Is the beneficiary required to pay the monthly contribution till the age of 60 years?
 
 
-Yes. After joining the Scheme, the beneficiary has to pay the prescribed monthly contribution till the age of 60 years.
+Yes. After joining the Scheme, the beneficiary has to pay the prescribed monthly contribution till the age of **60 years**.
 
 
 
