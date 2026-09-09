@@ -7,13 +7,13 @@ placeholders only with observed facts.
 
 ## Sign-off status, 9 September 2026
 
-**PMJJBY and PMSBY are signed off and giving real answers.** Avinash Negi read
+**PMJJBY, PMSBY and PMUY are signed off and giving real answers.** Avinash Negi read
 both Department of Financial Services FAQs in full and confirmed every encoded
 value on 9 September 2026; each file names him in `verified_by`.
 
-The other five schemes remain unsigned and answer "I could not check this yet".
-Do not describe this project as screening workers against seven schemes. Two
-schemes screen; five collect the answers and tell the worker what to ask at the
+The other four schemes remain unsigned and answer "I could not check this yet".
+Do not describe this project as screening workers against seven schemes. Three
+schemes screen; four collect the answers and tell the worker what to ask at the
 centre. That distinction has to survive into the demo video and the problem
 statement unchanged — a judge will try it.
 

@@ -3,19 +3,21 @@
 **Published by:** Department of Financial Services, Ministry of Finance, Government of India  
 **Source:** <https://financialservices.gov.in/pmjjby>  
 **Retrieved:** 2026-09-09  
-**SHA-256 of the wording below:** `9e78acaf5d45719519a82a18ff3324b61aee320d97300b8a7255e67a78029dd1`
+**SHA-256 of the wording below:** `df34313ccc436e79448e2a2e7e8ccb9a7e147af5cb6a27b16a77cfda38191450`
 
 > Verbatim snapshot of a public Government of India / State Government
 > information page, kept here so anyone auditing `data/schemes/pmjjby.toml`
-> can see what the source said on the day it was transcribed. Navigation
-> and accessibility furniture has been stripped; the wording is unedited.
-> **Bold** on amounts, ages and periods was added here to make the page
-> skimmable — no word is changed, added, removed or reordered, and the
-> hash above is taken with the markdown stripped so it would catch it.
+> can see what the source said on the day it was transcribed. Navigation,
+> accessibility widgets and page scripts have been stripped; the wording is
+> unedited. Headings, spacing and **bold** on amounts, ages and periods were
+> added here to make the page skimmable — no word is changed, added, removed
+> or reordered, and the hash above is taken with the markdown stripped so it
+> would catch it.
 >
 > **The live page is authoritative, not this copy.** Government rules
 > change. Run `python3 -m sathi.sources` to be told when this page no
 > longer supports the values we ship.
+
 ---
 
 ## Contents
@@ -43,7 +45,202 @@
 
 ---
 
+Pradhan Mantri Jeevan Jyoti Bima Yojana (PMJJBY) | Department of Financial Services | Minsitry of Finance | Government of India
+
+
+Commercial Complex, P-2, Sector - Omega I, Greater Noida, U.P
+
+
+0120-2395152, 0120-2395157
+
+
+Eng
+
+
+Accessibility Menu
+
+
+Dark Contrast
+
+
+Text Size Increase
+
+
+Text Size Decrease
+
+
+Hide Images
+
+
+Default Cursor
+
+
+Reset All
+
+
+Ministry
+
+
+About Us
+
+
+Our Team
+
+
+Our Organisations
+
+
+Our Performance
+
+
+Directory
+
+
+Offerings
+
+
+Schemes and Services
+
+
+Vacancies
+
+
+Competitions & Awards
+
+
+International Collaboration
+
+
+Documents
+
+
+Act and Policies
+
+
+Reports
+
+
+Orders and Notices
+
+
+Press Releases
+
+
+Gazettes Notifications
+
+
+Publications
+
+
+Photos
+
+
+Videos
+
+
+Connect
+
+
+Directory
+
+
+RTI
+
+
+Grievance Redressal
+
+
+Citizen Engagement
+
+
+Parliament Questions
+
+
+Main navigation
+
+
+Ministry
+
+
+About Us
+
+
+Our Team
+
+
+Our Organisations
+
+
+Our Performance
+
+
+Directory
+
+
+Offerings
+
+
+Schemes and Services
+
+
+Vacancies
+
+
+Competitions & Awards
+
+
+International Collaboration
+
+
+Documents
+
+
+Act and Policies
+
+
+Reports
+
+
+Orders and Notices
+
+
+Press Releases
+
+
+Gazettes Notifications
+
+
+Publications
+
+
+Photos
+
+
+Videos
+
+
+Connect
+
+
+Directory
+
+
+RTI
+
+
+Grievance Redressal
+
+
+Citizen Engagement
+
+
+Parliament Questions
+
+
 Pradhan Mantri Jeevan Jyoti Bima Yojana (PMJJBY)
+
+
+By
 
 
 , 24 December 2025
@@ -77,9 +274,6 @@ The scheme is a one-year cover term life insurance scheme, renewable from year t
 
 
 The premium payable is **Rs.436/-** per annum per subscriber.
-
-
-For those getting enrolled under PMJJBY for the first time during the middle of the policy period, payment of pro-rata premium is allowed as under;
 
 
 - For enrolment in June, July and August – Full annual premium of **Rs.436/-** is payable.
@@ -325,3 +519,48 @@ Rates of premium may be increased, or the Companies may discontinue the schemes 
 
 
 Insurance is like any other product. While rates can go up in future, with 24 life insurance Companies operating in India, due to competition among them, prices are likely to remain stable. It is expected that with the design of the PMJJBY cover and it’s pricing, the scheme will be viable, and there is little chance of discontinuing. In any event, even if a particular company discontinues, banks have several other options to tie up with.
+
+
+Web Policies
+
+
+© 2026
+
+
+This website belongs to Department of Financial Services, Ministry of Finance, Government of
+
+
+India
+
+
+SUBSCRIBE FOR UPDATES
+
+
+This website uses cookies to provide a better user experience.
+
+
+By clicking accept, you agree to the policies outlined in the
+
+
+Cookie Settings
+
+
+.
+
+
+CUSTOMIZE COOKIES
+
+
+DECLINE OPTIONAL COOKIES
+
+
+ACCEPT ALL COOKIES
+
+
+Select Language
+
+
+भाषा चुनें
+
+
+हिन्दी

@@ -1,21 +1,23 @@
-# Pradhan Mantri Ujjwala Yojana — Frequently Asked Questions
+# Pradhan Mantri Ujjwala Yojana — Scheme and FAQs
 
 **Published by:** Ministry of Petroleum & Natural Gas, Government of India  
 **Source:** <https://www.pmuy.gov.in/faq.html>  
 **Retrieved:** 2026-09-09  
-**SHA-256 of the wording below:** `ec49786ad3e936c4d1ad088d764af0f016a9d6f6b12da4578d54946462cee86b`
+**SHA-256 of the wording below:** `b9d14609a7df0753761f0a77bd497b2d5f88321ba7d4013ba2b3e9059c6a63ee`
 
 > Verbatim snapshot of a public Government of India / State Government
 > information page, kept here so anyone auditing `data/schemes/pmuy.toml`
-> can see what the source said on the day it was transcribed. Navigation
-> and accessibility furniture has been stripped; the wording is unedited.
-> **Bold** on amounts, ages and periods was added here to make the page
-> skimmable — no word is changed, added, removed or reordered, and the
-> hash above is taken with the markdown stripped so it would catch it.
+> can see what the source said on the day it was transcribed. Navigation,
+> accessibility widgets and page scripts have been stripped; the wording is
+> unedited. Headings, spacing and **bold** on amounts, ages and periods were
+> added here to make the page skimmable — no word is changed, added, removed
+> or reordered, and the hash above is taken with the markdown stripped so it
+> would catch it.
 >
 > **The live page is authoritative, not this copy.** Government rules
 > change. Run `python3 -m sathi.sources` to be told when this page no
 > longer supports the values we ship.
+
 ---
 
 ## Contents
@@ -55,7 +57,6 @@
 33. [I am a PMUY connection holder. I am taking a PNG connection. Can I sell / give my Cylinder and stove to my neighbor?](#33-i-am-a-pmuy-connection-holder-i-am-taking-a-png-connection-can-i-sell-give-my-cylinder-and-stove-to-my-neighbor)
 34. [I have submitted my PMUY application but haven't received any update. What should I do?](#34-i-have-submitted-my-pmuy-application-but-haven-t-received-any-update-what-should-i-do)
 35. [I received my PMUY connection a few months back, but I am not getting the subsidy for my LPG refills (or) I have been using my PMUY connection for the past two years and was receiving subsidy earlier. However, I haven't received subsidy for the last few refills. What steps should I take?](#35-i-received-my-pmuy-connection-a-few-months-back-but-i-am-not-getting-the-subsidy-for-my-lpg-refills-or-i-have-been-using-my-pmuy-connection-for-the-past-two-years-and-was-receiving-subsidy-earlier-however-i-haven-t-received-subsidy-for-the-last-few-refills-what-steps-should-i-take)
-36. [Need More Help?](#36-need-more-help)
 
 ---
 
@@ -73,9 +74,6 @@
 
 
 Adult woman from poor household Based on submission of a Deprivation declaration (as per standard format).
-
-
-To be eligible for a PMUY connection, the household must not have an existing LPG connection registered in the name of any family member listed in the family composition document.
 
 
 
@@ -98,7 +96,7 @@ The deprivation declaration submitted by the applicant is the basic criteria to 
 A PMUY beneficiary receives Security deposit free LPG Connection with no installation charges which covers:
 
 
-14.2 Kg LPG Cylinder/5 Kg LPG Cylinder(s)
+**14.2 Kg** LPG Cylinder/**5 Kg** LPG Cylinder(s)
 
 
 Domestic Pressure Regulator
@@ -174,9 +172,6 @@ Application/KYC form in the standard format, affixed with the applicant's recent
 Copy of Aadhaar card of Applicant as Proof of identity (PoI)
 
 
-Copy of Aadhaar card of all adult family members as mentioned in Ration Card or other family composition document.
-
-
 Proof of Address (POA) – Aadhaar card can be used as PoA as well, if the current address on which the applicant requires connection is same as the address on Aadhaar. If the address is different from the Aadhaar card then applicant can submit one of the documents as per approved list of POA (as available in the KYC/application form containing their current address details
 
 
@@ -202,7 +197,7 @@ For Migrant applicants- Self declaration as per standard format for PoA and fami
 ### 8. Can I opt for a 5 Kg connection under the scheme?
 
 
-Applicant can choose between 14.2 kg single bottle cylinder, 5 kg Single bottle Cylinder or 5 Kg Double bottle cylinder connection.
+Applicant can choose between **14.2 kg** single bottle cylinder, **5 kg** Single bottle Cylinder or **5 Kg** Double bottle cylinder connection.
 
 
 
@@ -432,9 +427,6 @@ No. However, in the KYC/Application form, an option is available for the applica
 ### 31. If I do not have a Ration Card, what other document can I provide as family composition proof?
 
 
-You may submit a valid state/central government-issued family composition document showing names and ages of all family members.Additionally you will be required to submit Aadhaar number and Copy of Aadhaar card of all adult family members as mentioned in the family composition document.
-
-
 
 ---
 
@@ -508,19 +500,6 @@ Call the general helpline number: 1800 2333 555, or 1800 266 6696
 Raise a grievance through the respective OMC websites, consumer portals, or mobile applications.
 
 
-
----
-
-
-### 36. Need More Help?
-
-
-Contact the PMUY Helpline: 1800 233 3555
-
-
-Visit: https://pmuy.gov.in for more information
-
-
 Follow us on:
 
 
@@ -534,3 +513,397 @@ Follow us on:
 
 
 MOPNG E-seva
+
+
+Copyright 2021 © IOCL, © BPCL, © HPCL.
+
+
+All Rights Reserved.
+
+
+Eligibility Criteria
+
+
+Adult woman belonging to any of the following categories.
+
+
+SC Households
+
+
+ST Households
+
+
+Pradhan Mantri Awas Yojana (Gramin)
+
+
+Most Backward Classes
+
+
+Antyodaya Anna Yojana (AAY)
+
+
+Tea and Ex- Tea Garden tribes
+
+
+Forest Dwellers
+
+
+People residing in Islands and River Islands
+
+
+SECC Households (AHL TIN)
+
+
+Poor Household as per 14-point declaration
+
+
+Applicant must have attained **18 years** of age.
+
+
+There should not be any other LPG connections in the same household.
+
+
+Safety Video
+
+
+
+---
+
+
+## Documents Required
+
+
+Know Your Customer(KYC)
+
+
+Ration Card issued by the State from which application is being made/ other State Govt. document certifying family composition/ Self-Declaration as per Annexure I (for migrant applicants)
+
+
+Aadhaar of beneficiary and adult family members appearing in document at Sl. 2
+
+
+Proof of Address - Aadhaar will be taken as Proof of Identity and Proof of Address if the connection is required in the same address. In that case only Aadhaar is sufficient.
+
+
+Bank Account Number and IFSC
+
+
+Other Forms
+
+
+Mandate For Giving up LPG Subsidy (To be submitted to LPG distributor)
+
+
+Grievance Redressal Form for PAHAL (DBTL) Scheme
+
+
+Unified Form for transfer/ Regularization of LPG connection
+
+
+Declaration for the loss of Subscription/ Termination Voucher
+
+
+Declaration for new connection or connection against Termination Voucher
+
+
+Format For reactivation of LPG connection
+
+
+NPCI form for Aadhaar linking with bank (To be submitted to Bank)
+
+
+PMUY Benefits
+
+
+Cash assistance for PMUY connections is provided by Government of India - **Rs. 1600** (for a connection **14.2kg** cylinder/ **Rs. 1150** for a **5 kg** cylinder). The cash assistance covers:
+
+
+Security Deposit of Cylinder – **Rs. 1250** for **14.2 kg** cylinder/ **Rs. 800** for **5 kg** cylinder
+
+
+Pressure Regulator – **Rs. 150**
+
+
+LPG Hose – **Rs. 100**
+
+
+Domestic Gas Consumer Card – **Rs. 25**
+
+
+Inspection/ Installation/ Demonstration charges – **Rs. 75**
+
+
+Additionally, All PMUY beneficiaries will be provided with first LPG refill and Stove (hotplate) both free of cost along with their deposit free connection by the Oil Marketing Companies (OMCs).
+
+
+Offline Documents
+
+
+KYC Form
+
+
+Supplementary KYC Document
+
+
+and Undertaking
+
+
+Self Declaration for
+
+
+Migrants (Annexure I)
+
+
+Pre-Installation
+
+
+Check (Annexure II)
+
+
+*Documents to be used for offline application and submission to your nearest LPG distributor.
+
+
+Online Application
+
+
+Click here to apply
+
+
+Refill Booking
+
+
+Following are the various modes of booking and their details
+
+
+available for the OMCs
+
+
+Indane
+
+
+Bharat Gas
+
+
+HP Gas
+
+
+IVRS
+
+
+7718955555
+
+
+Missed Call
+
+
+8454955555
+
+
+WhatsApp
+
+
+7588888824
+
+
+Customer Portal: https://cx.indianoil.in
+
+
+Customer App: IndianOil ONE
+
+
+Booking facility available at Common Service Center (CSC)
+
+
+Booking with payment or payment for existing booking can be done through Bharat Bill Pay System (BBPS) enabled apps including Paytm, Amazon.
+
+
+IVRS
+
+
+7715012345
+
+
+7718012345
+
+
+Missed Call
+
+
+7710955555
+
+
+WhatsApp
+
+
+1800224344
+
+
+Customer Portal: Click here
+
+
+Customer App: Hello BPCL
+
+
+Booking facility available at Common Service Center (CSC)
+
+
+Booking with payment or payment for existing booking can be done through Paytm, Amazon, Google Pay, Phone Pe and all BBPS enabled apps
+
+
+IVRS
+
+
+Click here for state wise numbers
+
+
+Missed Call
+
+
+9493602222
+
+
+WhatsApp
+
+
+9222201122
+
+
+Customer Portal: Click here
+
+
+Customer App: HP PAY
+
+
+Booking facility available at Common Service Center (CSC)
+
+
+Booking with payment or payment for a booking can be done through HP Gas Portal, HPPAY App, Paytm, Amazon, Google Pay, Phone Pe and all BBPS enabled apps
+
+
+Refill Booking
+
+
+Following are the various modes of booking and their details
+
+
+available for the OMCs
+
+
+IVRS
+
+
+7718955555
+
+
+Missed Call
+
+
+8454955555
+
+
+WhatsApp
+
+
+7588888824
+
+
+Customer Portal: https://cx.indianoil.in
+
+
+Customer App: IndianOil ONE
+
+
+Booking facility available at Common Service Center (CSC)
+
+
+Booking with payment or payment for existing booking can be done through Bharat Bill Pay System (BBPS) enabled apps including Paytm, Amazon.
+
+
+Click here for details
+
+
+Refill Booking
+
+
+Following are the various modes of booking and their details
+
+
+available for the OMCs
+
+
+IVRS
+
+
+7715012345
+
+
+7718012345
+
+
+Missed Call
+
+
+7710955555
+
+
+WhatsApp
+
+
+1800224344
+
+
+Customer Portal: Click here
+
+
+Customer App: Hello BPCL
+
+
+Booking facility available at Common Service Center (CSC)
+
+
+Booking with payment or payment for existing booking can be done through Paytm, Amazon, Google Pay, Phone Pe and all BBPS enabled apps
+
+
+Click here for details
+
+
+Refill Booking
+
+
+Following are the various modes of booking and their details
+
+
+available for the OMCs
+
+
+IVRS
+
+
+Click here for state wise numbers
+
+
+Missed Call
+
+
+9493602222
+
+
+WhatsApp
+
+
+9222201122
+
+
+Customer Portal: Click here
+
+
+Customer App: HP PAY
+
+
+Booking facility available at Common Service Center (CSC)
+
+
+Booking with payment or payment for a booking can be done through HP Gas Portal, HPPAY App, Paytm, Amazon, Google Pay, Phone Pe and all BBPS enabled apps
+
+
+Click here for details

@@ -15,7 +15,8 @@ load, no site that might have moved.
 | `pmsby.md` | Pradhan Mantri Suraksha Bima Yojana | Dept. of Financial Services, Min. of Finance |
 | `eshram.md` | e-Shram registration | Min. of Labour & Employment |
 | `pm_sym.md` | Pradhan Mantri Shram Yogi Maandhan | Min. of Labour & Employment |
-| `pmuy.md` | Pradhan Mantri Ujjwala Yojana | Min. of Petroleum & Natural Gas |
+| `pmuy.md` | Pradhan Mantri Ujjwala Yojana — FAQs | Min. of Petroleum & Natural Gas |
+| `pmuy_about.md` | Ujjwala — scheme background and targets | Min. of Petroleum & Natural Gas |
 | `uk_old_age.md` | Uttarakhand old-age pension | Social Welfare Dept., Govt. of Uttarakhand |
 | `uk_widow.md` | Uttarakhand widow pension | Social Welfare Dept., Govt. of Uttarakhand |
 

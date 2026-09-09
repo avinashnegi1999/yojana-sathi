@@ -3,19 +3,21 @@
 **Published by:** Ministry of Labour & Employment, Government of India  
 **Source:** <https://maandhan.in/show_content.php?lang=1&level=1&ls_id=79&lid=63&page=74>  
 **Retrieved:** 2026-09-09  
-**SHA-256 of the wording below:** `d3cb202e187049cdfb4b0d9a7ec5be9ecf0286dbec9d8ed8f0161c58cd869409`
+**SHA-256 of the wording below:** `3363f049aceb5a5de39ed3f532879081fc59215a141476accb87b5e1580fad2f`
 
 > Verbatim snapshot of a public Government of India / State Government
 > information page, kept here so anyone auditing `data/schemes/pm_sym.toml`
-> can see what the source said on the day it was transcribed. Navigation
-> and accessibility furniture has been stripped; the wording is unedited.
-> **Bold** on amounts, ages and periods was added here to make the page
-> skimmable — no word is changed, added, removed or reordered, and the
-> hash above is taken with the markdown stripped so it would catch it.
+> can see what the source said on the day it was transcribed. Navigation,
+> accessibility widgets and page scripts have been stripped; the wording is
+> unedited. Headings, spacing and **bold** on amounts, ages and periods were
+> added here to make the page skimmable — no word is changed, added, removed
+> or reordered, and the hash above is taken with the markdown stripped so it
+> would catch it.
 >
 > **The live page is authoritative, not this copy.** Government rules
 > change. Run `python3 -m sathi.sources` to be told when this page no
 > longer supports the values we ship.
+
 ---
 
 ## Contents
@@ -34,7 +36,7 @@
 12. [Are there any educational qualifications prescribed for becoming a Member of Pradhan Mantri Shram Yogi Maandhan?](#12-are-there-any-educational-qualifications-prescribed-for-becoming-a-member-of-pradhan-mantri-shram-yogi-maandhan)
 13. [Whether any nomination facility (other than spouse) is available after the death of the beneficiary?](#13-whether-any-nomination-facility-other-than-spouse-is-available-after-the-death-of-the-beneficiary)
 14. [What are the documents that are to be submitted at the enrollment Centre?](#14-what-are-the-documents-that-are-to-be-submitted-at-the-enrollment-centre)
-15. [Is the beneficiary required to pay the monthly contribution till the age of **60 years**?](#15-is-the-beneficiary-required-to-pay-the-monthly-contribution-till-the-age-of-60-years)
+15. [Is the beneficiary required to pay the monthly contribution till the age of 60 years?](#15-is-the-beneficiary-required-to-pay-the-monthly-contribution-till-the-age-of-60-years)
 16. [What happens if the worker joins this Scheme as an Unorganized worker and he joins the organized sector, gets enrolled under EPFO and again comes back to the Unorganized sector, what would be the modalities for the same?](#16-what-happens-if-the-worker-joins-this-scheme-as-an-unorganized-worker-and-he-joins-the-organized-sector-gets-enrolled-under-epfo-and-again-comes-back-to-the-unorganized-sector-what-would-be-the-modalities-for-the-same)
 
 ---
@@ -48,55 +50,7 @@
 Photo
 
 
-$(document).ready(function() {
-
-
-var parts = document.URL.split("/");
-
-
-alert(parts);
-
-
-// [http:, empty, your domain, firstfolder]
-
-
-var firstFolder = parts[3];
-
-
-// alert(firstFolder);
-
-
-$("#menuzord li").attr("class", "noactive");
-
-
-// console.log('')
-
-
-$("#menuzord a[href='/" + firstFolder + "/']").parent().attr("class", "active");
-
-
-});
-
-
-$(function(){
-
-
-$('ul.sf-menu').superfish({
-
-
-delay: 50, // one second delay on mouseout
-
-
-});
-
-
--->Home
-
-
 FAQ's
-
-
-Test Page
 
 
 
@@ -269,16 +223,10 @@ In case the worker moves from the unorganized sector to the organized sector, in
 DGLW Ministry of Labour and Employment
 
 
-Helpline : 14434
-
-
 E-mail :
 
 
 Information
-
-
-About CSC
 
 
 Term & Conditions
@@ -293,10 +241,55 @@ Important Links
 Ministry of Labour & Employment
 
 
-CSC Website
-
-
 © 2022. MAANDHAN - Ministry of Agriculture & Farmers Welfare
 
 
 Accessibility Options
+
+
+|
+
+
+Copyright Policy
+
+
+|
+
+
+Disclaimer
+
+
+|
+
+
+Website Policies
+
+
+|
+
+
+Ministry of Labour & Employment | Contact for technical issues
+
+
+Website Content owned and managed by Ministry of Labour & Employment
+
+
+Designed and Developed by CSC eGovernance Services India Limited (CSC SPV)
+
+
+©2026 Ministry of Labour & Employment. All rights reserved.
+
+
+Powered By CSC
+
+
+Website Content owned and managed by Ministry of Labour & Employment
+
+
+Designed and Developed by CSC eGovernance Services India Limited (CSC SPV)
+
+
+©2026 Ministry of Labour & Employment. All rights reserved.
+
+
+26574290

@@ -5,8 +5,8 @@ name_en = "Pradhan Mantri Ujjwala Yojana"
 name_hi = "प्रधानमंत्री उज्ज्वला योजना"
 authority = "Government of India"
 official_url = "https://www.pmuy.gov.in/faq.html"
-verified_on = "2026-09-08"
-verified_by = "unconfirmed — PENDING HUMAN VERIFICATION"
+verified_on = "2026-09-09"
+verified_by = "Avinash Negi, checked 2026-09-09"
 
 [benefit]
 annual_value_inr = 0
@@ -43,12 +43,17 @@ source_url = "https://www.pmuy.gov.in/faq.html"
 field = "household_has_lpg"
 op = "eq"
 value = false
-ask_en = "Does anyone listed in your household's family-composition document already have an LPG connection?"
-ask_hi = "क्या आपके परिवार के विवरण वाले दस्तावेज़ में शामिल किसी सदस्य के नाम पहले से एलपीजी कनेक्शन है?"
-pass_en = "You reported no existing household LPG connection."
-pass_hi = "आपने परिवार में पहले से एलपीजी कनेक्शन न होना बताया है।"
-fail_en = "An existing household LPG connection prevents a new PMUY connection under this rule."
-fail_hi = "इस नियम के अनुसार परिवार में पहले से एलपीजी कनेक्शन हो तो नया पीएमयूवाई कनेक्शन नहीं मिलता।"
+# ! Q1 bars an existing LPG connection in the household. Q31 adds piped gas:
+# ! "PNG connection holders are only allowed to take Non subsidized LPG
+# ! connection. So, You can not get a PMUY connection." Both are asked in one
+# ! question rather than two, because the answer to either is the same NO and
+# ! every extra question is another thing to answer on a phone.
+ask_en = "Does anyone in your household already have an LPG gas connection, or a piped gas (PNG) connection at home?"
+ask_hi = "क्या आपके घर में किसी के नाम पहले से एलपीजी कनेक्शन है, या घर में पाइप वाली गैस (पीएनजी) है?"
+pass_en = "You reported no existing household LPG or piped-gas connection."
+pass_hi = "आपने घर में पहले से एलपीजी या पाइप वाली गैस न होना बताया है।"
+fail_en = "A household that already has an LPG connection, or piped gas at home, cannot take a PMUY connection."
+fail_hi = "जिस घर में पहले से एलपीजी कनेक्शन या पाइप वाली गैस है, उसे पीएमयूवाई कनेक्शन नहीं मिलता।"
 source_url = "https://www.pmuy.gov.in/faq.html"
 
 [[criteria]]
@@ -67,5 +72,5 @@ source_url = "https://www.pmuy.gov.in/faq.html"
 documents_en = ["Application/KYC form and photograph", "Applicant and adult household members' Aadhaar (submit only to distributor)", "Family-composition document or permitted migrant declaration", "Address proof", "Bank account details", "Signed deprivation declaration"]
 documents = ["आवेदन/केवाईसी फॉर्म और फोटो", "आवेदक और वयस्क परिवार सदस्यों के आधार (केवल वितरक को दें)", "परिवार विवरण दस्तावेज़ या अनुमत प्रवासी घोषणा", "पते का प्रमाण", "बैंक खाते का विवरण", "हस्ताक्षरित वंचना घोषणा"]
 where_to_apply = "online"
-renewal_en = "Apply through pmuy.gov.in or the LPG distributor. Subsequent refill purchases and any subsidy follow current rules; the first-refill benefit is not a recurring cash entitlement."
-renewal = "pmuy.gov.in या एलपीजी वितरक से आवेदन करें। आगे के रिफिल और सब्सिडी वर्तमान नियमों के अनुसार हैं; पहले रिफिल का लाभ बार-बार मिलने वाला नकद अधिकार नहीं है।"
+renewal_en = "Apply free at pmuy.gov.in or at an LPG distributor; a CSC charges ₹20 to submit it for you. Some states charge a stamp fee. The distributor does biometric Aadhaar e-KYC, and an inspection at your home before the connection is released. Subsequent refills and any subsidy follow current rules; the first-refill benefit is not a recurring cash entitlement."
+renewal = "pmuy.gov.in या एलपीजी वितरक से आवेदन नि:शुल्क है; सीएससी से भरवाने पर ₹20 लगते हैं। कुछ राज्यों में स्टाम्प शुल्क लग सकता है। वितरक आधार बायोमेट्रिक ई-केवाईसी करेगा, और कनेक्शन देने से पहले घर पर जाँच होगी। आगे के रिफिल और सब्सिडी वर्तमान नियमों के अनुसार हैं; पहले रिफिल का लाभ बार-बार मिलने वाला नकद अधिकार नहीं है।"

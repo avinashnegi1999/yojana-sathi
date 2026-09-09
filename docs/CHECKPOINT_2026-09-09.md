@@ -83,7 +83,7 @@ Worth testing specifically, because they are new and untested by a human:
 
 ## 3. Which schemes support real screening
 
-**Two: PMJJBY and PMSBY. The other five are demonstration-and-questions only.**
+**Three: PMJJBY, PMSBY and PMUY. The other four are demonstration-and-questions only.**
 
 Both were signed off on 9 September 2026 by Avinash Negi, after he read each
 Department of Financial Services FAQ in full and compared every encoded value.
@@ -98,7 +98,7 @@ gate is enforced in code and asserted by tests, not merely documented.
 | Scheme | Source-confirmed 9 Sep | Blocking gap |
 |---|---|---|
 | **PMJJBY** | ✅ every value verbatim | **None — SIGNED 2026-09-09, live** |
-| PMUY / Ujjwala | ✅ every value verbatim | Human sign-off |
+| **PMUY / Ujjwala** | ✅ every value verbatim; FAQ Q31 added a piped-gas exclusion we had missed | **None — SIGNED 2026-09-09, live** |
 | UK old-age pension | ✅ every value verbatim | Human sign-off |
 | **PMSBY** | ✅ every value verbatim; FAQ Q25 closes the partial-disability row outright | **None — SIGNED 2026-09-09, live** |
 | e-Shram | ✅ age and income rows now closed against the current FAQ | Human sign-off; farmer scope |
