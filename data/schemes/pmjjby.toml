@@ -12,8 +12,8 @@ verified_by = "unconfirmed — PENDING HUMAN VERIFICATION"
 annual_value_inr = 200000
 value_basis = "insurance_cover"
 premium_inr = 436
-summary_en = "Life insurance: ₹2 lakh on death, subject to policy terms. Standard renewal premium ₹436/year. Non-accidental death is excluded for the first 30 days on joining/rejoining. Only one account per person; consent and premium payment are required."
-summary_hi = "जीवन बीमा: पॉलिसी की शर्तों के अनुसार मृत्यु पर ₹2 लाख। सामान्य नवीनीकरण प्रीमियम ₹436 प्रति वर्ष। जुड़ने या दोबारा जुड़ने के पहले 30 दिनों में गैर-दुर्घटना मृत्यु पर दावा नहीं मिलता। एक व्यक्ति का केवल एक खाता; सहमति और प्रीमियम भुगतान ज़रूरी हैं।"
+summary_en = "Life insurance: ₹2 lakh on death from any cause, subject to policy terms. Standard renewal premium ₹436/year. Non-accidental death is excluded for the first 30 days on joining/rejoining. Only one account per person; consent and premium payment are required. This cover is in addition to any other life insurance you already hold."
+summary_hi = "जीवन बीमा: पॉलिसी की शर्तों के अनुसार किसी भी कारण से मृत्यु पर ₹2 लाख। सामान्य नवीनीकरण प्रीमियम ₹436 प्रति वर्ष। जुड़ने या दोबारा जुड़ने के पहले 30 दिनों में गैर-दुर्घटना मृत्यु पर दावा नहीं मिलता। एक व्यक्ति का केवल एक खाता; सहमति और प्रीमियम भुगतान ज़रूरी हैं। यह बीमा आपकी किसी भी दूसरी जीवन बीमा पॉलिसी के अतिरिक्त है।"
 
 [[criteria]]
 field = "age"
@@ -40,6 +40,11 @@ fail_hi = "नामांकन से पहले उपयुक्त ख�
 source_url = "https://financialservices.gov.in/pmjjby"
 
 [paperwork]
+# ! The DFS FAQ names only the enrolment form, the auto-debit authorisation
+# ! and the consent-cum-declaration form (Q11). Aadhaar appears nowhere on
+# ! that page - it is here because a participating branch will ask for KYC,
+# ! and arriving without it wastes the trip. It is practical advice, not a
+# ! transcribed scheme rule. Confirm with a branch before signing this file.
 documents_en = ["Aadhaar card", "Bank or post office account details", "Enrolment and auto-debit consent form"]
 documents = ["आधार कार्ड", "बैंक या डाकघर खाते का विवरण", "नामांकन एवं ऑटो-डेबिट सहमति फॉर्म"]
 where_to_apply = "bank_branch"
