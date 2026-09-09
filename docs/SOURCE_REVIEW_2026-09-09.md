@@ -259,3 +259,55 @@ Nothing in this document signs anything. In priority order:
 
 Until a named human replaces `verified_by`, every scheme is served as UNKNOWN and
 nobody real should be screened. That is unchanged by this document.
+
+---
+
+## 6. Independent re-verification, 9 September (third pass)
+
+Requested by Avinash: re-check everything rather than trust the notes above.
+Every source below was **fetched again from scratch** and each encoded value
+matched against the live page text by pattern, not by memory. Nothing was
+carried over from the earlier passes.
+
+| Scheme | Checks | Result |
+|---|---|---|
+| PMJJBY | 14 | **14/14 matched** — entry age, ₹2 lakh, ₹436, one-account rule, auto-debit consent, 30-day lien, 1 Jun–31 May, termination at 55, no entry past 50, all four pro-rata premiums, account requirement |
+| PMSBY | 8 | **8/8 matched** — 18–70, ₹2 lakh death, ₹1 lakh one eye/limb, ₹20, cover year, termination at 70 (nearer birthday), account requirement, one-account rule |
+| PMUY | 6 | **6/6 matched** — adult woman from poor household, deprivation declaration, declaration is the criterion, no existing household LPG, free stove + first refill, deposit-free |
+| e-Shram | 4 | **3/3 matched** (16+, no income criteria, not an income-tax payee). The fourth check was deliberately inverted: the string "16–59" is **confirmed absent** from the current FAQ, which is what closed that ambiguity |
+| PM-SYM | 5 | **5/5 matched** — entry 18–40, "₹15000 or less", exclusion wording "any statutory Social Security Scheme such as NPS, ESIC, EPFO", income-tax exclusion. **The contradictory "less than Rs 15,000" phrasing is confirmed still present on the same page** — the ambiguity is real and is in the source, not in our reading of it |
+| UK old-age | 6 | **5/5 matched** — 60+, ≤₹4,000 from all sources or BPL, Gram Sabha selection, **₹1,500/month present on the department's own page**, ssp portal. Sixth check inverted: the page says nothing about other pensions |
+| UK widow | 6 | **4/4 eligibility matched** — 18+, ≤₹4,000 or BPL, Gram Sabha, death certificate. Two inverted checks confirmed again: **no rupee amount appears anywhere on that page**, and it says nothing about other pensions |
+
+An error in the second pass was found and corrected by this one: the earlier
+run reported the old-age page as not stating ₹1,500. It does. The pattern had
+been written for `Rs` and the page uses the `₹` character — a fault in the
+check, not in the data. The value was never wrong and nothing shipped from it.
+
+**Re-confirmed in the browser**, because these two facts carry the most weight
+and appear on no departmental page:
+
+> "A pension of ₹1,500/- per month is provided to eligible beneficiaries."
+> "The widow must not be receiving any other pension benefits."
+> — <https://www.myscheme.gov.in/schemes/uwps>
+
+> "A pension of ₹1,500/- per month is provided to eligible beneficiaries."
+> "The applicant must not be receiving any other pension."
+> — <https://www.myscheme.gov.in/schemes/oap>
+
+Both myScheme pages also say **family** monthly income where both departmental
+pages say the applicant's. The conflict recorded in section 2 row 2b is real
+and unchanged.
+
+### What this pass does and does not establish
+
+It establishes that the shipped files are a faithful transcription of the
+official pages as they read today. Three machine passes now agree, and the one
+disagreement between them was a bug in a check rather than a wrong value.
+
+It does **not** substitute for the signature. Everything above was still done
+by a machine reading a page, which is the exact failure mode `verified_by`
+exists to catch — and this same session had already got one value wrong on the
+first pass. A person still has to look. What has changed is how long that
+takes: the values and their sources are now on one screen, per scheme, via
+`python3 -m sathi.review`.
