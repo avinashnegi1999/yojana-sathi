@@ -53,15 +53,21 @@ def _why(result: Result, scheme: Scheme, lang: str = "hi", limit: int = 2) -> st
     """The authored 'you qualify because…' lines, joined. Never generated.
 
     # * The Result carries the Hindi it was decided with; the English twin lives
-    # * on the Criterion. Matched by field name, which is unique per criterion in
-    # * every file we have. Falls back to the Hindi text if no English exists.
+    # * on the Criterion. Matched by field name.
+    #
+    # ! A field is NOT unique per criterion — PMSBY has two on `age`, one for the
+    # ! 18-70 band and one for termination at 70 by nearest birthday — so this
+    # ! dict keeps the last of them and both reasons resolve to the same
+    # ! sentence. That is why the lines are de-duplicated: without it a signed
+    # ! PMSBY told a worker "You are between 18 and 70, which this scheme
+    # ! requires. You are between 18 and 70, which this scheme requires."
     """
     by_field = {c.field: c for c in scheme.criteria}
     lines = []
     for r in result.reasons_with(ReasonCode.CRITERION_PASS):
         c = by_field.get(r.field)
         text = c.text("pass", lang) if c else r.text_hi
-        if text:
+        if text and text not in lines:
             lines.append(text)
     joiner = " " if lang == "en" else "। "
     return joiner.join(lines[:limit])

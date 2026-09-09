@@ -98,6 +98,36 @@ def test_the_two_state_pensions_are_never_counted_as_two_payments():
         block = templates.eligible_block(results, signed, frozenset(), lang)
         assert '36,000' not in block and '36000' not in block, block
 
+def test_no_reason_is_said_to_a_worker_twice():
+    """Two criteria on one field must not repeat the same sentence.
+
+    # ! Caught in the pre-deploy audit of the signed schemes: PMSBY has an age
+    # ! band and an age termination rule, both on `age`, so the result screen
+    # ! read "You are between 18 and 70, which this scheme requires." twice.
+    """
+    from sathi.render import templates
+    real = load_all(ROOT / 'data/schemes')
+    signed = {c: replace(v, verified_by='test fixture only', stubs=())
+              for c, v in real.items()}
+    p = Profile(state='UK', age=30, occupation='construction', income_band='upto_5000',
+                land_holding_band='landless', family_size=4, has_bank_account=True,
+                is_income_tax_payer=False, is_epfo_or_esic_member=False,
+                nps_exclusion_applies=False, is_unorganised_worker=True,
+                is_woman=True, is_widow=False, household_has_lpg=False,
+                pmuy_declaration_met=True, uk_pension_income_or_bpl=True,
+                receives_other_pension=False, uk_pension_selected=True)
+    from sathi.rules.engine import evaluate_all
+    results = evaluate_all(p, signed)
+    assert any(r.is_eligible for r in results), 'nothing eligible, so nothing checked'
+    for lang in ('hi', 'en'):
+        for r in results:
+            if not r.is_eligible:
+                continue
+            why = templates._why(r, signed[r.scheme_code], lang, limit=10)
+            parts = [x.strip() for x in why.split('।' if lang == 'hi' else '. ') if x.strip()]
+            assert len(parts) == len(set(parts)), f'{r.scheme_code} [{lang}] repeats: {why}'
+
+
 def test_all_unknown_never_tells_a_worker_they_failed():
     """Nothing checked is not the same as not qualifying, and must not read like it.
 
