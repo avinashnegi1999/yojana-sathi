@@ -1,5 +1,9 @@
 # Scheme source audit — 7 September 2026
 
+> **Historical snapshot, kept as evidence of what was checked and when.**
+> It is not the current production status — that lives in
+> [`README.md`](../README.md). Do not read a scheme count here as today's.
+
 ## 9 September source re-check
 
 Full detail and quoted wording: [SOURCE_REVIEW_2026-09-09.md](SOURCE_REVIEW_2026-09-09.md).

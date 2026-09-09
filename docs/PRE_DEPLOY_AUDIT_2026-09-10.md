@@ -1,5 +1,9 @@
 # Pre-deploy audit — the four signed schemes
 
+> **Historical snapshot, kept as evidence of what was checked and when.**
+> It is not the current production status — that lives in
+> [`README.md`](../README.md). Do not read a scheme count here as today's.
+
 Signed: PMJJBY, PMSBY, PMUY, UK_OLD_AGE
 
 

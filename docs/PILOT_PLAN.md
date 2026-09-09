@@ -11,10 +11,17 @@ use a source-checked next-step sheet without being misled about benefit approval
 
 Priorities:
 
-1. Finish [scheme verification](VERIFICATION.md) and the safety-critical parts
-   of [Hindi review](HUMAN_REVIEW_CHECKLIST.md). Until then, use only fictional
-   profiles for facilitator usability rehearsals; do not send workers to apply
-   on the basis of unsigned scheme data.
+1. ~~Finish [scheme verification](VERIFICATION.md)~~ — **done 9–10 September
+   2026.** All seven schemes are signed off against their official pages and the
+   bot returns real verdicts. This gate is cleared.
+
+   **The remaining gate is [Hindi review](HUMAN_REVIEW_CHECKLIST.md), and it is
+   not cleared.** Every Hindi string in this bot was drafted by a language model
+   and has never been read by a native speaker. A worker acting on a mistranslated
+   eligibility line loses a day's wages exactly as surely as she would on a wrong
+   threshold, and the signature process that protects the numbers protects none
+   of the words. Read the safety-critical strings aloud before the first real
+   participant, not after.
 2. Find one willing CSC/community organization that can explain the purpose
    without promising government endorsement. Recruit approximately 20–50 adults
    from construction, domestic work, vending, transport and other informal work.

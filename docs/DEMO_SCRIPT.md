@@ -1,7 +1,8 @@
 # Demo script — honest 2–3 minute walkthrough
 
 Prepared **8 September 2026**. This script is not a recorded demo or proof of
-live availability. It uses shipped unsigned scheme data and fictional answers.
+live availability. It uses the shipped, human-signed scheme data and fictional
+answers.
 Keep **“OFFLINE ENGINEERING PREVIEW — NOT A REAL WORKER”** visible throughout.
 
 ## Golden path, tested locally
@@ -36,9 +37,12 @@ typed text. The path was exercised in both languages and both channels.
 | Sheet offer | `1` | Accept |
 | Exit | blank line | End preview |
 
-Expected: an answer recap, three **UNKNOWN** scheme results explaining pending
+Expected: an answer recap, then real verdicts — eligible schemes with their ₹
+figures and where to apply, ineligible ones with the authored reason. Any answer
+left as "don't know" still produces **UNKNOWN** for the schemes that need it,
+which is the behaviour worth showing deliberately. Older wording here described
 human confirmation, a sheet offer, simulated document send and closing message.
-There must be no eligible verdict or entitlement amount for these unsigned
+the pre-sign-off state, when there could be no eligible verdict for these
 schemes. Income in the answer recap is the fictional input, not a benefit.
 If the menu changes, follow the stated meaning and rerun before recording.
 
@@ -48,8 +52,8 @@ If the menu changes, follow the stated meaning and rerun before recording.
 |---|---|---|
 | Problem, about 20 seconds | README problem citation | “India's unorganised sector had an estimated 43.99 crore workers in 2019–20. Yojana Sathi is testing a simpler way to understand scheme eligibility and next steps. That national estimate is the population context, not our user count.” |
 | Worker interaction, about 45 seconds | Hindi golden path; speed up repetitive intake transparently | “The worker chooses Hindi or English, gives consent, and answers short questions. Buttons work without a language model. We ask EPFO/ESIC and NPS separately because government schemes treat them differently. The recap shows what was recorded.” |
-| Safety, about 30 seconds | UNKNOWN result, then `data/schemes/` verification marker | “Compute first, narrate second. Python rules decide. Missing answers and unverified scheme data remain unknown. Our current production files still need human sign-off, so this screen refuses to tell this fictional worker they qualify.” |
-| Sources and application help, about 30 seconds | One official link from a scheme TOML; `docs/SCHEME_AUDIT.md`; checklist test | “Every reviewed value is traced to an official source. The current unsigned sheet gives questions to ask, not an approved application. A separate synthetic test demonstrates the eligible document-checklist path; that fixture is not a real government scheme or a human verification.” |
+| Safety, about 30 seconds | A "don't know" answer producing UNKNOWN, then `verified_by` in `data/schemes/` | “Compute first, narrate second. Python rules decide, never the model. A missing answer stays unknown rather than becoming a guess. Every file names the human who checked it against the official page, and until it does the engine refuses to say yes at all.” |
+| Sources and application help, about 30 seconds | One official link from a scheme TOML; `data/sources/official-text/`; `python3 -m sathi.sources` | “Every value traces to an official page, and the page itself is in the repository so you can audit a rule without leaving it. This command re-reads the live pages and tells us the day a ministry changes a number we have already promised. The sheet is an application aid, not an approved application.” |
 | Channels and privacy, about 25 seconds | English WhatsApp preview list, architecture diagram | “Both adapters invoke the same conversation and rule engine. Preview sends nothing and records no events. Live metrics use coarse categories and random session IDs; the platforms still handle account identifiers and messages. This is not an end-to-end anonymity claim.” |
 | Honest close, about 15 seconds | Readiness human gates | “Software checks and a deployment record are not worker impact. The remaining gates are human scheme and Hindi review, a voluntary worker pilot, an accessible recorded demo and AgentFoundry eligibility confirmation.” |
 
@@ -77,7 +81,8 @@ gate for filming.
 ## Recording checklist
 
 - [ ] Run `python3 check.py` on the commit being filmed; retain actual output.
-- [ ] Rehearse the path with `--no-db` and verify UNKNOWN remains visible.
+- [ ] Rehearse the path with `--no-db` and verify a "don't know" answer still
+      produces a visible UNKNOWN.
 - [ ] Prepare English preview at the same state so the language comparison is
       short; explain if recordings are cut together.
 - [ ] Open the official source before filming; hide personal browser tabs.

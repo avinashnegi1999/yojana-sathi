@@ -1,5 +1,9 @@
 # Source review packet — 9 September 2026
 
+> **Historical snapshot, kept as evidence of what was checked and when.**
+> It is not the current production status — that lives in
+> [`README.md`](../README.md). Do not read a scheme count here as today's.
+
 Everything below was re-fetched from the official page on **9 September 2026**
 and compared line by line against the shipped file. This is a machine
 source-comparison. **It is not a human signature and does not approve any

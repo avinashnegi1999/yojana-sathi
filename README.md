@@ -152,11 +152,19 @@ matching, and this project does not try to replace them. Scheme Sathi is
      ! this page. -->
 
 _Running since 3 September 2026 on a single small cloud instance, restarted
-under systemd and verified to survive a reboot. **No numbers yet, and the
-reason is deliberate:** no scheme has been signed off by a human, so the engine
-answers `UNKNOWN` to every worker and the event log contains no eligible
-result to report. This section stays empty until that changes — it will be
-filled from `python3 -m sathi.metrics.report`, not from an estimate._
+under systemd and verified to survive a reboot. All seven schemes were signed
+off on 9–10 September 2026, so the engine now returns real verdicts and the
+event log can record eligible results._
+
+**There are still no impact numbers here, and that is the honest state.** The
+gate that produced zero results has been lifted; the field pilot that would
+produce real ones has not run. Nobody has been screened yet except the
+maintainer testing his own bot. This section stays empty until a real pilot
+happens, and it will be filled from `python3 -m sathi.metrics.report` — not
+from an estimate, a projection, or a "potential reach" figure.
+
+The plan for that pilot, including consent and what will be measured, is in
+[`docs/PILOT_PLAN.md`](docs/PILOT_PLAN.md).
 
 Two ₹ figures are reported, never one. An annual pension (PM-SYM, ₹36,000/year)
 and an accident cover (PMSBY, ₹2,00,000 paid only on a claim) are different

@@ -1,5 +1,9 @@
 # Checkpoint — 9 September 2026
 
+> **Historical snapshot, kept as evidence of what was checked and when.**
+> It is not the current production status — that lives in
+> [`README.md`](../README.md). Do not read a scheme count here as today's.
+
 Supersedes `outputs/resume-checkpoint.md` in the 8 September Codex workspace.
 
 ---
