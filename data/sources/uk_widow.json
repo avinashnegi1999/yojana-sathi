@@ -1,0 +1,31 @@
+{
+  "code": "UK_WIDOW",
+  "url": "https://socialwelfare.uk.gov.in/service/widow-pension/",
+  "read_on": "2026-09-09",
+  "sha256": "bea8d3ab3c91ada45e1a6518c695d25a72b4b4f8cc56b431290f1f53e413abb1",
+  "chars": 2085,
+  "claims": [
+    {
+      "name": "age not less than 18",
+      "pattern": "age of the applicant should not be less than 18 years"
+    },
+    {
+      "name": "income 4000 or BPL",
+      "pattern": "Monthly income should not be more than Rs\\.? ?4000"
+    },
+    {
+      "name": "selected in open Gram Sabha meeting",
+      "pattern": "selected in an open meeting of the Gram Sabha"
+    },
+    {
+      "name": "husband's death certificate",
+      "pattern": "death certificate"
+    }
+  ],
+  "absent": [
+    {
+      "name": "a rupee rate appeared on the department page",
+      "pattern": "1,?500"
+    }
+  ]
+}

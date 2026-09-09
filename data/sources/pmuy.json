@@ -1,0 +1,30 @@
+{
+  "code": "PMUY",
+  "url": "https://www.pmuy.gov.in/faq.html",
+  "read_on": "2026-09-09",
+  "sha256": "68f5972b211465db0779f77051c96525a7f275762af19483210513fe3e595589",
+  "chars": 18755,
+  "claims": [
+    {
+      "name": "adult woman from poor household",
+      "pattern": "Adult woman from poor household"
+    },
+    {
+      "name": "deprivation declaration is the criterion",
+      "pattern": "deprivation declaration submitted by the applicant is the basic criteria"
+    },
+    {
+      "name": "no existing household LPG connection",
+      "pattern": "must not have an existing LPG connection registered in the name of any family member"
+    },
+    {
+      "name": "free stove and first refill",
+      "pattern": "providing LPG stove and First Refill at free of Cost"
+    },
+    {
+      "name": "security deposit free connection",
+      "pattern": "Security deposit free LPG Connection"
+    }
+  ],
+  "absent": []
+}

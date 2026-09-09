@@ -45,6 +45,10 @@ SELF_CHECK_MODULES = [
     # ! checks — that a signature changes exactly two lines, and that an
     # ! assistant cannot produce one — belong in the build gate.
     "sathi.review",
+    # ! Source drift. Its self-check is offline on purpose — the build gate
+    # ! must not depend on a ministry's uptime. `python3 -m sathi.sources`
+    # ! is the online part, run by a maintainer.
+    "sathi.sources",
 ]
 
 

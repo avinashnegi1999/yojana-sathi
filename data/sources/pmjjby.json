@@ -1,0 +1,70 @@
+{
+  "code": "PMJJBY",
+  "url": "https://financialservices.gov.in/pmjjby",
+  "read_on": "2026-09-09",
+  "sha256": "99b3db4f1a2f85b53d7fede9a4ad00195072c7982ec03b45a33d05ce29377697",
+  "chars": 13171,
+  "claims": [
+    {
+      "name": "entry age 18-50",
+      "pattern": "age group of\\s*18\\s*to\\s*50\\s*years"
+    },
+    {
+      "name": "sum assured Rs 2 lakh",
+      "pattern": "Rs\\.?\\s*2\\s*lakh is payable"
+    },
+    {
+      "name": "premium Rs 436 per year",
+      "pattern": "premium payable is\\s*Rs\\.?\\s*436"
+    },
+    {
+      "name": "one account per person",
+      "pattern": "through one bank\\s*/\\s*Post office account only"
+    },
+    {
+      "name": "auto-debit on consent",
+      "pattern": "auto\\s*debit.{0,140}consent given by the subscriber"
+    },
+    {
+      "name": "30-day lien, non-accidental death",
+      "pattern": "not be available for death \\(other than due to accident\\).{0,90}first 30 days"
+    },
+    {
+      "name": "cover year 1 Jun to 31 May",
+      "pattern": "1st June to 31st May"
+    },
+    {
+      "name": "terminates at 55",
+      "pattern": "attaining age 55 years"
+    },
+    {
+      "name": "no entry beyond 50",
+      "pattern": "will not be possible beyond the age of 50"
+    },
+    {
+      "name": "pro-rata 436 Jun-Aug",
+      "pattern": "June, July and August.{0,40}Rs\\.?\\s*436"
+    },
+    {
+      "name": "pro-rata 342 Sep-Nov",
+      "pattern": "September, October,? and November.{0,40}Rs\\.?\\s*342"
+    },
+    {
+      "name": "pro-rata 228 Dec-Feb",
+      "pattern": "December, January and February.{0,40}Rs\\.?\\s*228"
+    },
+    {
+      "name": "pro-rata 114 Mar-May",
+      "pattern": "March, April and May.{0,40}Rs\\.?\\s*114"
+    },
+    {
+      "name": "bank or post office account",
+      "pattern": "account holders of participating banks\\s*/\\s*Post office"
+    },
+    {
+      "name": "in addition to other cover",
+      "pattern": "in addition to cover under any other insurance"
+    }
+  ],
+  "absent": []
+}

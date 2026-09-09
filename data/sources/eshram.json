@@ -1,0 +1,27 @@
+{
+  "code": "ESHRAM",
+  "url": "https://eshram.gov.in/faqs",
+  "read_on": "2026-09-09",
+  "sha256": "9fd090c88730907e28100eb706bc93a06147a590c2b96b609e61c5ed30f4c364",
+  "chars": 16090,
+  "claims": [
+    {
+      "name": "age 16 or above",
+      "pattern": "aged 16 years or above who is engaged in unorganised work"
+    },
+    {
+      "name": "no income criteria",
+      "pattern": "no income criteria for registering on e-?Shram"
+    },
+    {
+      "name": "not an income tax payee",
+      "pattern": "should not be an income tax pay"
+    }
+  ],
+  "absent": [
+    {
+      "name": "upper age limit 16-59 reappeared",
+      "pattern": "16\\s*(?:-|to|–)\\s*59"
+    }
+  ]
+}

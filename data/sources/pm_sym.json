@@ -1,0 +1,26 @@
+{
+  "code": "PM_SYM",
+  "url": "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=79&lid=63&page=74",
+  "read_on": "2026-09-09",
+  "sha256": "1fa3581f3cb1ab1ef853f54184a85ad1cd9f3528c01d1d033ef69176fc474bed",
+  "chars": 7697,
+  "claims": [
+    {
+      "name": "entry age 18-40",
+      "pattern": "entry age of\\s*18\\s*to\\s*40\\s*years"
+    },
+    {
+      "name": "monthly income Rs 15000 or less",
+      "pattern": "monthly income of Rs\\.?\\s*15000 or less"
+    },
+    {
+      "name": "excludes NPS, ESIC, EPFO",
+      "pattern": "covered under any statutory Social Security Scheme such as NPS, ESIC, EPFO"
+    },
+    {
+      "name": "excludes income tax payee",
+      "pattern": "income tax pay"
+    }
+  ],
+  "absent": []
+}

@@ -1,0 +1,42 @@
+{
+  "code": "PMSBY",
+  "url": "https://financialservices.gov.in/pmsby",
+  "read_on": "2026-09-09",
+  "sha256": "37ed96ee12d14af4a6409518f62824df2a6d2be5fd83a54bdfb58836e91274a3",
+  "chars": 13277,
+  "claims": [
+    {
+      "name": "entry age 18-70",
+      "pattern": "age group of\\s*18\\s*to\\s*70\\s*years"
+    },
+    {
+      "name": "death cover Rs 2 lakh",
+      "pattern": "Death\\s*Rs\\.?\\s*2\\s*Lakh"
+    },
+    {
+      "name": "Rs 1 lakh one eye or one limb",
+      "pattern": "loss of sight of one eye or loss of use of one hand or foot\\s*Rs\\.?\\s*1\\s*Lakh"
+    },
+    {
+      "name": "premium Rs 20 per year",
+      "pattern": "Premium payable is\\s*Rs\\.?\\s*20"
+    },
+    {
+      "name": "cover year 1 Jun to 31 May",
+      "pattern": "1st June to 31st May"
+    },
+    {
+      "name": "terminates at 70 nearer birthday",
+      "pattern": "attaining age 70 years \\(age nearer birth day\\)"
+    },
+    {
+      "name": "bank or post office account",
+      "pattern": "account holders of participating banks"
+    },
+    {
+      "name": "one account per person",
+      "pattern": "through one bank\\s*/\\s*Post office account only"
+    }
+  ],
+  "absent": []
+}

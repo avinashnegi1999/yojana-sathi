@@ -1,0 +1,30 @@
+{
+  "code": "UK_OLD_AGE",
+  "url": "https://socialwelfare.uk.gov.in/service/old-age-pension/",
+  "read_on": "2026-09-09",
+  "sha256": "2b419fc35f797b76637b019e5836192464bc1d98078fbec261c4816e89e28f5c",
+  "chars": 2333,
+  "claims": [
+    {
+      "name": "age 60 or more",
+      "pattern": "age of the applicant should be 60 years or more"
+    },
+    {
+      "name": "income 4000 from all sources or BPL",
+      "pattern": "should not exceed Rs\\.? ?4000/?-? from all sources or the applicant should be a BPL card holder"
+    },
+    {
+      "name": "selected in open Gram Sabha meeting",
+      "pattern": "selected in an open meeting of the Gram Sabha"
+    },
+    {
+      "name": "pension Rs 1,500 per month",
+      "pattern": "pension of ₹?1,?500/?-? per month"
+    },
+    {
+      "name": "apply via ssp.uk.gov.in",
+      "pattern": "ssp\\.uk\\.gov\\.in"
+    }
+  ],
+  "absent": []
+}
