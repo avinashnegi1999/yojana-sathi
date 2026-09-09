@@ -83,7 +83,12 @@ Worth testing specifically, because they are new and untested by a human:
 
 ## 3. Which schemes support real screening
 
-**None. All seven are demonstration-and-questions only.**
+**One: PMJJBY. The other six are demonstration-and-questions only.**
+
+PMJJBY was signed off on 9 September 2026 by Avinash Negi, after he read the
+Department of Financial Services FAQ himself and compared all eleven encoded
+values. That file now produces real ELIGIBLE / INELIGIBLE verdicts and a real
+₹2,00,000 cover figure for anyone who talks to the bot.
 
 Every file still carries `verified_by = "unconfirmed — PENDING HUMAN
 VERIFICATION"`, so the engine returns `UNKNOWN` for every scheme to every
@@ -92,7 +97,7 @@ gate is enforced in code and asserted by tests, not merely documented.
 
 | Scheme | Source-confirmed 9 Sep | Blocking gap |
 |---|---|---|
-| PMJJBY | ✅ every value verbatim | Human sign-off |
+| **PMJJBY** | ✅ every value verbatim | **None — SIGNED 2026-09-09, live** |
 | PMUY / Ujjwala | ✅ every value verbatim | Human sign-off |
 | UK old-age pension | ✅ every value verbatim | Human sign-off |
 | PMSBY | ✅ (partial-disability wording row now closed) | Human sign-off; entry-at-exactly-70 conflict |

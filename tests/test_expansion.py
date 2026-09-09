@@ -48,8 +48,13 @@ def test_new_scheme_boundaries():
     assert evaluate(replace(p,pmuy_declaration_met=None),schemes['PMUY']).verdict is Verdict.UNKNOWN
     assert schemes['PMUY'].benefit['value_basis']=='in_kind'
     assert schemes['PMUY'].benefit['annual_value_inr']==0
-    for sc in real.values():
-        assert evaluate(p,sc).verdict is Verdict.UNKNOWN
+    # ! Unsigned schemes stay UNKNOWN on the real files. Signed ones are meant
+    # ! to answer, so skip those rather than making every future sign-off fail
+    # ! a boundary test that is not about sign-off at all.
+    for code, sc in real.items():
+        if sc.is_human_verified:
+            continue
+        assert evaluate(p,sc).verdict is Verdict.UNKNOWN, code
 
 def test_the_two_state_pensions_are_never_counted_as_two_payments():
     # ! A 60-year-old widow in Uttarakhand satisfies BOTH pension files. The
@@ -101,7 +106,12 @@ def test_all_unknown_never_tells_a_worker_they_failed():
     """
     from sathi.render import templates
     from sathi.core.content import s as _s
-    schemes = load_all(ROOT / 'data/schemes')
+    # ! Build the all-unknown case explicitly instead of relying on today's
+    # ! data. This test is about what the RESULT SCREEN says when nothing could
+    # ! be checked; it broke the day PMJJBY was signed, which had nothing to do
+    # ! with the message it exists to pin.
+    schemes = {c: replace(v, verified_by='unconfirmed — PENDING HUMAN VERIFICATION')
+               for c, v in load_all(ROOT / 'data/schemes').items()}
     # The profile from that screening: answers given, nothing signed off.
     p = Profile(state='UK', age=30, occupation='construction',
                 income_band='upto_5000', land_holding_band='landless',

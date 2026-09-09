@@ -70,9 +70,14 @@ def test_other_nps_does_not_cause_a_definite_refusal():
     c.handle(YES)
     signed = replace(schemes["PM_SYM"], verified_by="test-review-only")
     assert evaluate(c.profile, signed).verdict is Verdict.UNKNOWN
-    # The production human-verification gate is retained for every answer.
-    for sc in schemes.values():
-        assert evaluate(c.profile, sc).verdict is Verdict.UNKNOWN
+    # ! The production gate is retained for every scheme nobody has signed.
+    # ! Once a scheme IS signed it is supposed to answer, so asserting UNKNOWN
+    # ! across the board would turn every future sign-off into a build failure
+    # ! and train someone to delete this.
+    for code, sc in schemes.items():
+        if sc.is_human_verified:
+            continue
+        assert evaluate(c.profile, sc).verdict is Verdict.UNKNOWN, code
 
 
 def test_nearest_birthday_uses_only_known_age_precision():

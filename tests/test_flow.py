@@ -198,7 +198,15 @@ def test_tax_yes_confirmation_and_isolated_edits():
                     while convo.state is State.FOLLOWUP:
                         convo.handle(DK)
                     convo.handle(NEXT)
-                    assert convo.state is State.PACK  # * Shipped schemes remain unsigned.
+                    # ! Where this lands depends on whether any signed scheme
+                    # ! came out ELIGIBLE: eligible schemes have documents to
+                    # ! collect, so the flow stops at DOCUMENTS first. Both are
+                    # ! correct, and pinning one made signing PMJJBY fail a test
+                    # ! about tax-answer edits, which is not what it checks.
+                    if convo.state is State.DOCUMENTS:
+                        while convo.state is State.DOCUMENTS:
+                            convo.handle(NEXT)
+                    assert convo.state is State.PACK, convo.state
                     convo.handle(NO)
                     assert convo.state is State.DONE
         # ! No and Don't know proceed normally; neither asks for confirmation.

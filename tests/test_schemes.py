@@ -272,22 +272,28 @@ def test_every_shipped_signature_is_a_real_person_or_no_signature_at_all():
             raise AssertionError(f"{code}: {e}") from None
 
 
-def test_todays_shipped_files_are_all_still_unsigned():
+# ! Which schemes a named human has signed off, and therefore which ones give
+# ! real verdicts to real people. Adding a line here is a claim the README, the
+# ! checkpoint and the submission draft all repeat, so they change together.
+SIGNED_OFF = ("PMJJBY",)  # Avinash Negi, 2026-09-09, against financialservices.gov.in/pmjjby
+
+
+def test_the_signed_list_matches_the_files():
     """The live state, stated once so a change to it is deliberate and visible.
 
     # ! Not a safety invariant — the test above is. This one is a tripwire on a
-    # ! fact the README, the checkpoint and the submission draft all assert:
-    # ! that no worker has yet been given a verdict. When schemes are signed,
-    # ! update the list here AND those documents in the same commit, so the
-    # ! claim and the data can never drift apart.
+    # ! fact three documents assert: exactly who has been given a verdict and
+    # ! on what. It fires in both directions, so an unnoticed signature and an
+    # ! unnoticed un-signing are both build failures.
     """
     root = Path(__file__).resolve().parent.parent
-    signed = sorted(code for code, sc in load_all(root / "data" / "schemes").items()
-                    if sc.is_human_verified)
-    assert signed == [], (
-        f"{signed} are now signed off. That is a real change in what this bot "
-        f"tells people. Update README.md, docs/CHECKPOINT_2026-09-09.md and "
-        f"docs/SUBMISSION_DRAFT.md, then list them here."
+    signed = tuple(sorted(code for code, sc in load_all(root / "data" / "schemes").items()
+                          if sc.is_human_verified))
+    assert signed == tuple(sorted(SIGNED_OFF)), (
+        f"signed schemes are {signed}, this list says {tuple(sorted(SIGNED_OFF))}. "
+        f"That is a real change in what this bot tells people. Update README.md, "
+        f"docs/CHECKPOINT_2026-09-09.md and docs/SUBMISSION_DRAFT.md, then fix "
+        f"this list."
     )
 
 
