@@ -6,7 +6,7 @@ Supersedes `outputs/resume-checkpoint.md` in the 8 September Codex workspace.
 
 ## 1. What is deployed
 
-**Live release: `sathi-20260908T214843Z`** on EC2 `13.206.84.69`
+**Live release: `sathi-20260909T032918Z`** on EC2 `13.206.84.69`
 (instance `i-01da4c2ab1f689d8b`), activated 2026-09-09.
 
 Two releases were activated today, in this order:
@@ -14,7 +14,8 @@ Two releases were activated today, in this order:
 | Release | Contents | Evidence |
 |---|---|---|
 | `sathi-20260908T152844Z` | The seven-scheme expansion, as staged by the previous session | Staged suite rerun with an explicit status record: `/tmp/sathi-recheck-20260908T152844Z.log`, ends `all checks passed` + `EXIT_STATUS=0` |
-| `sathi-20260908T214843Z` | **Current.** The above plus today's source-review corrections | Staged suite: `/tmp/sathi-check-20260908T214843Z.log`, `all checks passed` + `EXIT_STATUS=0`, 2,109 paths per language |
+| `sathi-20260908T214843Z` | The above plus the first source-review pass | Staged suite: `/tmp/sathi-check-20260908T214843Z.log`, `all checks passed` + `EXIT_STATUS=0`, 2,109 paths per language |
+| `sathi-20260909T032918Z` | **Current.** Adds the browser-pass findings: the widow rate restored from myScheme, and the no-other-pension eligibility bar on both pensions | Staged suite: `/tmp/sathi-check-20260909T032918Z.log`, `all checks passed` + `EXIT_STATUS=0` |
 
 The first was activated because the previous session had staged and
 checksum-verified it but never confirmed the test run finished. Its log ended
@@ -32,7 +33,7 @@ before anything touched production, per the standing instruction.
 (sha256 compared before and after by the activation script itself),
 `/var/lib/sathi/sathi.db` unchanged at 151,552 bytes and its original mtime,
 all pre-existing backup directories intact. New rollback backups created:
-`/opt/sathi-backup-20260908T152844Z`, `/opt/sathi-backup-20260908T214843Z`.
+`/opt/sathi-backup-20260908T152844Z`, `/opt/sathi-backup-20260909T032918Z`.
 
 **Services:** `sathi`, `sathi-whatsapp`, `caddy` — all `active (running)`,
 `NRestarts=0`. Exactly one Telegram poller (`38451`) and one WhatsApp listener
@@ -94,7 +95,7 @@ gate is enforced in code and asserted by tests, not merely documented.
 | PMSBY | ✅ (partial-disability wording row now closed) | Human sign-off; entry-at-exactly-70 conflict |
 | e-Shram | ✅ age and income rows now closed against the current FAQ | Human sign-off; farmer scope |
 | PM-SYM | ✅ inclusive ₹15,000 ceiling closed on the ministry page | Human sign-off; NPS scope, worker status |
-| **UK widow pension** | Eligibility ✅ — **benefit amount withdrawn to `"TODO"`** | The rate itself. See below. |
+| UK widow pension | ✅ rate and eligibility, via myScheme | Human sign-off; the no-other-pension bar is not on the department's page |
 
 `/demo` output is fictional throughout and is never written to the impact
 database. Nothing in this project claims a benefit was delivered because a
@@ -112,15 +113,17 @@ profile matched a rule.
    it. [Discussion #13](https://github.com/karlmehta/code-for-a-billion/discussions/13)
    is still **Unanswered, 0 comments**. Escalate through another channel —
    the CFI registration contact, or the AgentFoundry sign-up itself.
-2. **Read the Uttarakhand widow pension rate off the 21/04/2021 government
-   order.** It is a scanned PDF; a person has to open it. Linked from
-   <https://socialwelfare.uk.gov.in/document-category/government-orders-pension/>,
-   titled "Regarding increase in pension rates under the Old Age, Widow and
-   Disability Pension Scheme", No. 40/XVII-2/22-19(05) 2019-T.C. This is the
-   single blocking fact for `uk_widow.toml`.
-3. **Ask whether one person may hold both state pensions.** Gram Panchayat,
-   district social welfare office, or the SSP helpline. The code currently
-   assumes not; if they may, remove `exclusive_group` from both files.
+2. **Confirm the "not already receiving another pension" condition at the
+   office.** It comes from myScheme, not from the department's own service
+   pages, and it now decides verdicts for both pensions. Most consequential
+   unconfirmed fact in the repo.
+3. **Settle whose income the ₹4,000 line means** — the department page says the
+   applicant's, myScheme says the family's. The code asks the stricter family
+   reading and tells the worker the sources differ.
+3b. **Confirm the widow rate.** myScheme states ₹1,500/month, which is enough to
+   ship as unsigned data but not to sign. Its own citation is the state
+   guidelines page 16 (a 320 MB scan), or use the 21/04/2021 rate GO
+   No. 40/XVII-2/22-19(05) 2019-T.C.
 4. **Decide PM-SYM's NPS scope** — plain NPS, or government-funded NPS only. The
    current broader exclusion can wrongly turn away someone eligible.
 5. **Sign the schemes** — `docs/VERIFICATION.md`, helped by the quoted wording
@@ -194,9 +197,10 @@ docs/SUBMISSION_DRAFT.md        what the official form actually requires
 docs/CHECKPOINT_2026-09-09.md   NEW — this file
 ```
 
-**Local suite:** `py -3 check.py` → 18 module self-checks, 15 test files, 4,218
-walked paths, 432 packs, 214,326 rule comparisons, 1,080 new-condition
-combinations. Exit 0.
+**Local suite:** `py -3 check.py` → 18 module self-checks, 15 test files, 1,344
+walked paths, 214,326 rule comparisons, 3,024 pension/PMUY condition
+combinations, plus a direct check that two eligible profiles between them are
+offered every document of every scheme in both languages. Exit 0.
 
 **Server:**
 
@@ -212,7 +216,7 @@ ssh ... 'sudo python3 /tmp/sathi-verify-live.py'
 # rollback to the previous release
 ssh ... 'sudo systemctl stop sathi sathi-whatsapp && \
   sudo mv /opt/sathi /opt/sathi-rolledback-$(date -u +%Y%m%dT%H%M%SZ) && \
-  sudo mv /opt/sathi-backup-20260908T214843Z /opt/sathi && \
+  sudo mv /opt/sathi-backup-20260909T032918Z /opt/sathi && \
   sudo systemctl start sathi sathi-whatsapp'
 ```
 
@@ -222,8 +226,8 @@ ssh ... 'sudo systemctl stop sathi sathi-whatsapp && \
 
 1. Push the two commits (section 5).
 2. Chase the AgentFoundry answer. Nothing else unblocks the submission.
-3. Open the 21/04/2021 GO, read the widow rate, restore it, delete the
-   `UK_WIDOW` line from `KNOWN_STUBS` in `tests/test_schemes.py`.
+3. Confirm the no-other-pension bar and the income scope at the office — both
+   now change verdicts.
 4. Test `/demo` and a full screening on your own phone, in both languages.
 5. Write the Problem section with sourced numbers — 50% of the score.
 6. Work through `docs/VERIFICATION.md` using the quoted wording in
