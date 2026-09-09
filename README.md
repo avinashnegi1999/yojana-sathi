@@ -11,59 +11,48 @@ built and verified end to end against Meta's test number — a real phone, a ful
 screening, the same Hindi — but it is not yet live on a public number.
 
 > **Status — read before you use it on anyone.**
-> The software is complete and tested end to end. **Seven** scheme files are
-> filled from official sources, with a deep link on every single value: PMSBY
-> (rules PDF on `jansuraksha.gov.in`), PM-SYM (`maandhan.in` and `labour.gov.in`),
-> e-Shram (`eshram.gov.in`), PMJJBY (`financialservices.gov.in`), PMUY
-> (`pmuy.gov.in`), and the Uttarakhand old-age and widow pensions
-> (`socialwelfare.uk.gov.in`).
+> The software is complete, tested end to end, and **live**. All seven scheme
+> files are filled from official sources with a deep link on every single value:
+> PMJJBY and PMSBY (`financialservices.gov.in`), PM-SYM (`maandhan.in` and
+> `labour.gov.in`), e-Shram (`eshram.gov.in`), PMUY (`pmuy.gov.in`), and the
+> Uttarakhand old-age and widow pensions (`socialwelfare.uk.gov.in`).
 >
-> Every value was re-fetched from its official page on 9 September 2026 and the
-> wording is quoted next to the shipped value in
-> [`docs/SOURCE_REVIEW_2026-09-09.md`](docs/SOURCE_REVIEW_2026-09-09.md). One
-> value was withdrawn to `"TODO"` that morning when its citation turned out to
-> 404, then restored the same day from a source that could be opened. Both
-> Uttarakhand pensions also gained a condition nobody had encoded — the
-> applicant must not already be drawing another pension.
+> **All seven are signed off.** Avinash Negi read each official page in full on
+> 9–10 September 2026 and confirmed every encoded value against it; `verified_by`
+> in each file names him. The bot gives real verdicts, real ₹ figures and a place
+> to walk to.
 >
-> **Those values have not yet been confirmed by a second pair of eyes.**
-> `verified_by` in each file says `unconfirmed — PENDING HUMAN VERIFICATION`,
-> and the app enforces that rather than merely admitting it: until a named
-> maintainer signs a file off, the rule engine returns `UNKNOWN` for that
-> scheme to every worker, contributes ₹0 to every number on the dashboard, and
-> says so at startup. A wrong threshold sends someone on a day-long trip that
-> costs them a day's wages, so nothing here will tell a worker "yes" on data
-> nobody has checked twice.
+> That signature is enforced, not merely recorded. Until a named human signs a
+> file, the rule engine returns `UNKNOWN` for that scheme to every worker,
+> contributes ₹0 to every number on the dashboard, and says so at startup — and
+> `tests/test_schemes.py` fails the build if this README and the data ever
+> disagree about which schemes are signed. A wrong threshold sends someone on a
+> day-long trip that costs them a day's wages.
 >
-> The practical consequence today: **every scheme answers "we could not check
-> this yet"**. Sign-off is the last gate before this is useful in the field, and
-> `tests/test_schemes.py` fails the build if that claim and the data disagree.
+> **One file is thinner than the others, and the repository says so.** The
+> Uttarakhand widow pension's department page states no amount at all. The
+> ₹1,500 comes from myScheme — whose own "Official Website" link for that scheme
+> points at a *different* scheme. It is signed on the maintainer's judgement, and
+> `data/schemes/uk_widow.toml` records exactly that in its header. Two questions
+> to the SSP helpline would settle it.
 >
-> **All seven schemes are now signed off** by Avinash Negi, who read each
-> official page in full on 9-10 September 2026 and confirmed every encoded value. Avinash Negi read both
-> Department of Financial Services FAQs in full on 9 September 2026 and confirmed
-> every encoded value; `verified_by` in each file names him. They produce real
-> verdicts and real benefit figures for workers.
+> Where a source refuses people without saying so anywhere official, this project
+> declines to. Both Uttarakhand pensions collect "are you already drawing another
+> pension?" and **tell the worker to ask at the office** rather than refusing her
+> on it, because only myScheme states that bar and a wrong NO is a pension nobody
+> claims.
 >
-> **The Uttarakhand widow pension is the thin one.** Its department page states
-> no amount at all; the ₹1,500 comes from myScheme, whose own "Official Website"
-> link for that scheme points at a *different* scheme. It is signed on the
-> maintainer's judgement and the file records exactly that. Two questions to the
-> SSP helpline would settle it.
+> The full source comparison, including what could *not* be resolved, is in
+> [`docs/SOURCE_REVIEW_2026-09-09.md`](docs/SOURCE_REVIEW_2026-09-09.md); the
+> edge-case audit run before any of this reached a real person is in
+> [`docs/PRE_DEPLOY_AUDIT_2026-09-10.md`](docs/PRE_DEPLOY_AUDIT_2026-09-10.md).
 >
-> So the bot is live and every conversation works end to end, but for one of the
-> seven schemes **no worker has been told "yes" by it, and none will be until a
-> named human signs those files too.**
-> `/demo` shows what a signed scheme would produce, using fixed fictional people
-> and labelled as a demonstration on every reply.
->
-> **To sign one:** `python3 -m sathi.review PMJJBY`. It prints every value in
-> the file next to the URL it came from, you open that page, and if it all
-> matches you type the scheme code and your name. It writes exactly two lines —
-> `verified_by` and `verified_on` — and re-validates the file afterwards, so a
-> signature can never carry a data change in with it. `--unsign` puts it back.
-> Nothing in that tool checks anything for you; it just puts the values and the
-> source on one screen so you can.
+> **To sign or unsign a scheme:** `python3 -m sathi.review PMJJBY`. It prints
+> every value in the file next to the URL it came from, you open that page, and
+> if it all matches you type the scheme code and your name. It writes exactly two
+> lines and re-validates the file afterwards, so a signature can never carry a
+> data change in with it. `--unsign` puts it back. Nothing in that tool checks
+> anything for you; it puts the values and the source on one screen so you can.
 
 ---
 
@@ -269,6 +258,7 @@ Optional, all off by default and all tested in the off state:
 | `/clear` | Delete this conversation's messages |
 | `/clearall` | Delete everything reachable from the last 48 hours |
 | `/cancel` | Drop the profile now and end |
+| `/demo` | Fixed fictional people run through the real rules — labelled a demonstration on every reply, opens no session, logs nothing |
 
 ## Tests
 
@@ -276,8 +266,8 @@ Optional, all off by default and all tested in the off state:
 python3 check.py
 ```
 
-15 module self-checks and 6 test files, no framework and nothing to install.
-Worth knowing about two of them:
+20 module self-checks and 15 test files, no framework and nothing to install.
+Worth knowing about three of them:
 
 - `tests/test_privacy.py` — the reason the privacy claim above is defensible
   rather than aspirational.
@@ -293,6 +283,33 @@ Worth knowing about two of them:
   across every combination of the fields any rule touches — 214,326 verdicts,
   plus every named threshold one per line. Pressing every button cannot find a
   wrong threshold; a wrong threshold renders a perfectly well-formed screen.
+
+## Keeping the rules honest after they are written
+
+Two tools, both stdlib, neither of which the bot itself runs.
+
+```bash
+python3 -m sathi.review PMJJBY     # sign a scheme off
+python3 -m sathi.sources           # has a ministry changed a number?
+```
+
+`sathi/review.py` is the only supported way a name reaches `verified_by`. It
+prints every value the engine will use beside the URL it came from, one scheme
+per screen, then writes **exactly two lines** — a self-check signs a real copy
+and asserts precisely two lines differ, so a signature can never carry a changed
+threshold in with it. It refuses to run without a terminal, and refuses a name
+that looks automated. `--unsign` reverses it.
+
+`sathi/sources.py` answers the question a signature cannot: a person checked
+this in September, but is it still true? [`data/sources/`](data/sources/) holds a
+fingerprint of each official page plus **43 named claims** — one per value we
+rely on — and re-reads the live pages on demand. It also watches for things that
+must *not* reappear, like the "16–59" age limit e-Shram no longer states.
+
+[`data/sources/official-text/`](data/sources/official-text/) keeps the pages
+themselves, so a rule can be audited without leaving the repository. That turned
+out to matter: one URL cited in the morning had 404'd by the afternoon, two of
+these hosts refuse an ordinary fetcher, and one official source is a 320 MB scan.
 
 ## How this was built
 
