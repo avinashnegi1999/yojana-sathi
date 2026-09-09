@@ -39,10 +39,13 @@ def test_new_scheme_boundaries():
     assert evaluate(replace(p,uk_pension_income_or_bpl=False),schemes['UK_WIDOW']).verdict is Verdict.INELIGIBLE
     # ! Already drawing a pension bars BOTH state pensions. myScheme states it
     # ! on each scheme page; the department's own service page omits it.
-    for code in ('UK_OLD_AGE','UK_WIDOW'):
-        q=replace(p,age=65,receives_other_pension=True)
-        assert evaluate(q,schemes[code]).verdict is Verdict.INELIGIBLE
-        assert evaluate(replace(q,receives_other_pension=None),schemes[code]).verdict is Verdict.UNKNOWN
+    # ! Widow only: the old-age file follows its own department page, which does
+    # ! not carry this condition. See the note in uk_old_age.toml.
+    q=replace(p,age=65,receives_other_pension=True)
+    assert evaluate(q,schemes['UK_WIDOW']).verdict is Verdict.INELIGIBLE
+    assert evaluate(replace(q,receives_other_pension=None),schemes['UK_WIDOW']).verdict is Verdict.UNKNOWN
+    assert evaluate(q,schemes['UK_OLD_AGE']).is_eligible, \
+        'an existing pension must not silently refuse the old-age route'
     assert evaluate(p,schemes['PMUY']).is_eligible
     assert evaluate(replace(p,household_has_lpg=True),schemes['PMUY']).verdict is Verdict.INELIGIBLE
     assert evaluate(replace(p,pmuy_declaration_met=None),schemes['PMUY']).verdict is Verdict.UNKNOWN
@@ -230,9 +233,10 @@ def test_new_boolean_conditions_against_source_oracle():
                   uk_pension_selected=selected,is_widow=widow)
         for code,limit in (('UK_OLD_AGE',60),('UK_WIDOW',18)):
             conditions=[None if state is None else state=='UK',
-                        None if age is None else age>=limit,income,
-                        None if other is None else not other,selected]
-            if code=='UK_WIDOW': conditions.append(widow)
+                        None if age is None else age>=limit,income,selected]
+            if code=='UK_WIDOW':
+                conditions.append(widow)
+                conditions.append(None if other is None else not other)
             assert evaluate(p,schemes[code]).verdict is expected(conditions)
             checked+=1
     for age,woman,lpg,poor in itertools.product(

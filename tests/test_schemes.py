@@ -275,7 +275,7 @@ def test_every_shipped_signature_is_a_real_person_or_no_signature_at_all():
 # ! Which schemes a named human has signed off, and therefore which ones give
 # ! real verdicts to real people. Adding a line here is a claim the README, the
 # ! checkpoint and the submission draft all repeat, so they change together.
-SIGNED_OFF = ("PMJJBY", "PMSBY", "PMUY")  # Avinash Negi, 2026-09-09
+SIGNED_OFF = ("PMJJBY", "PMSBY", "PMUY", "UK_OLD_AGE")  # Avinash Negi, 2026-09-09
 
 
 def test_the_signed_list_matches_the_files():

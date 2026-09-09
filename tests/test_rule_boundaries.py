@@ -115,13 +115,16 @@ def _oracle(code: str, p: Profile) -> bool | None:
         criterion(None if p.state is None else p.state == "UK")
         criterion(None if age is None else age >= (60 if code == "UK_OLD_AGE" else 18))
         criterion(p.uk_pension_income_or_bpl)
-        # myScheme states this as an eligibility bar on both scheme pages:
-        # "The applicant must not be receiving any other pension."
-        criterion(None if p.receives_other_pension is None
-                  else not p.receives_other_pension)
         criterion(p.uk_pension_selected)
         if code == "UK_WIDOW":
             criterion(p.is_widow)
+            # ! Widow only. myScheme states "must not be receiving any other
+            # ! pension benefits" on both pages, but the department's own
+            # ! old-age page does not, and Avinash chose to follow the
+            # ! department for the scheme he signed. It stays encoded for the
+            # ! widow file, which is still unsigned and still open on this.
+            criterion(None if p.receives_other_pension is None
+                      else not p.receives_other_pension)
     elif code == "PMUY":
         criterion(None if age is None else age >= 18)
         criterion(p.is_woman)
