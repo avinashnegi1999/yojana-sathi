@@ -6,7 +6,7 @@ Supersedes `outputs/resume-checkpoint.md` in the 8 September Codex workspace.
 
 ## 1. What is deployed
 
-**Live release: `sathi-20260909T032918Z`** on EC2 `13.206.84.69`
+**Live release: `sathi-20260909T191248Z`** on EC2 `13.206.84.69`
 (instance `i-01da4c2ab1f689d8b`), activated 2026-09-09.
 
 Three releases were activated today, in this order:
@@ -16,6 +16,11 @@ Three releases were activated today, in this order:
 | `sathi-20260908T152844Z` | The seven-scheme expansion, as staged by the previous session | Staged suite rerun with an explicit status record: `/tmp/sathi-recheck-20260908T152844Z.log`, ends `all checks passed` + `EXIT_STATUS=0` |
 | `sathi-20260908T214843Z` | The above plus the first source-review pass | Staged suite: `/tmp/sathi-check-20260908T214843Z.log`, `all checks passed` + `EXIT_STATUS=0`, 2,109 paths per language |
 | `sathi-20260909T032918Z` | **Current.** Adds the browser-pass findings: the widow rate restored from myScheme, and the no-other-pension eligibility bar on both pensions | Staged suite: `/tmp/sathi-check-20260909T032918Z.log`, `all checks passed` + `EXIT_STATUS=0` |
+
+`sathi-20260909T191248Z` (10 September) is the release that first gave real
+verdicts to real people: PMJJBY, PMSBY, PMUY and the Uttarakhand old-age
+pension, signed by Avinash Negi, staged suite `EXIT_STATUS=0`, live checks
+clean, database and secrets untouched.
 
 The first was activated because the previous session had staged and
 checksum-verified it but never confirmed the test run finished. Its log ended
@@ -62,8 +67,9 @@ switches. WhatsApp webhook host: <https://13.206.84.69.nip.io/>.
 | `/clearall` | Wider delete; distinguishes "already deleted" from "too old" |
 | `/cancel` | Drops the profile immediately |
 
-**Expected result of a full real screening today: every scheme answers "we could
-not check this yet."** That is correct, not a fault — see section 3. Walk the
+**Expected result of a full real screening: real verdicts from PMJJBY, PMSBY,
+PMUY and the Uttarakhand old-age pension, and "we could not check this yet"
+from the other three.** The mixed answer is correct, not a fault — see section 3. Walk the
 whole intake anyway; the questions, the read-backs, the document checklist and
 the generated application pack are all real.
 
@@ -86,15 +92,17 @@ Worth testing specifically, because they are new and untested by a human:
 **Four: PMJJBY, PMSBY, PMUY and the Uttarakhand old-age pension. The other three
 are demonstration-and-questions only.**
 
-Both were signed off on 9 September 2026 by Avinash Negi, after he read each
-Department of Financial Services FAQ in full and compared every encoded value.
-They now produce real ELIGIBLE / INELIGIBLE verdicts and real cover figures for
-anyone who talks to the bot.
+All four were signed off on 9 September 2026 by Avinash Negi, after he read
+each official page in full and compared every encoded value. They now produce
+real ELIGIBLE / INELIGIBLE verdicts and real benefit figures for anyone who
+talks to the bot.
 
-Every file still carries `verified_by = "unconfirmed — PENDING HUMAN
-VERIFICATION"`, so the engine returns `UNKNOWN` for every scheme to every
-worker, contributes ₹0 to every dashboard number, and says so at startup. That
-gate is enforced in code and asserted by tests, not merely documented.
+The remaining three still carry `verified_by = "unconfirmed — PENDING HUMAN
+VERIFICATION"`, so the engine returns `UNKNOWN` for those to every worker and
+contributes ₹0 to every dashboard number for them. That gate is enforced in
+code and asserted by tests, not merely documented — and
+`tests/test_schemes.py::test_the_signed_list_matches_the_files` fails the build
+if this document and the data ever disagree about which is which.
 
 | Scheme | Source-confirmed 9 Sep | Blocking gap |
 |---|---|---|
@@ -131,9 +139,10 @@ profile matched a rule.
    office.** It comes from myScheme, not from the department's own service
    pages, and it now decides verdicts for both pensions. Most consequential
    unconfirmed fact in the repo.
-3. **Settle whose income the ₹4,000 line means** — the department page says the
-   applicant's, myScheme says the family's. The code asks the stricter family
-   reading and tells the worker the sources differ.
+3. **Settle whose income the ₹4,000 line means.** Resolved for now in favour of
+   the department's own page (the applicant's income), because the family
+   reading is stricter and would refuse someone who qualifies. myScheme still
+   says family. Worth one question at the office.
 3b. **Confirm the widow rate.** myScheme states ₹1,500/month, which is enough to
    ship as unsigned data but not to sign. Its own citation is the state
    guidelines page 16 (a 320 MB scan), or use the 21/04/2021 rate GO
