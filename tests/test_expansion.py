@@ -97,6 +97,48 @@ def test_the_two_state_pensions_are_never_counted_as_two_payments():
         block = templates.eligible_block(results, signed, frozenset(), lang)
         assert '36,000' not in block and '36000' not in block, block
 
+def test_the_sheet_a_worker_carries_is_readable_on_a_phone():
+    """The WhatsApp sheet must declare UTF-8, and not repeat or mis-punctuate.
+
+    # ! All three of these were photographed off a real phone. A .txt carries no
+    # ! declared encoding, so Android's viewer guessed Windows-1252 and every
+    # ! rupee sign arrived as "â‚¹2 lakh" — the Hindi sheet would have been
+    # ! unreadable end to end. The sheet also opened with its own name twice,
+    # ! and Hindi reasons ended "पूरी करती है।।" because the joiner added a
+    # ! danda to a sentence that already had one.
+    """
+    from sathi.channels.whatsapp import pack_as_text
+    from sathi.pack import pack
+    from sathi.rules.engine import evaluate_all
+    real = load_all(ROOT / 'data/schemes')
+    signed = {c: replace(v, verified_by='test fixture only', stubs=())
+              for c, v in real.items()}
+    p = Profile(state='UK', age=30, occupation='construction', income_band='upto_5000',
+                land_holding_band='landless', family_size=4, has_bank_account=True,
+                is_income_tax_payer=False, is_epfo_or_esic_member=False,
+                nps_exclusion_applies=False, is_unorganised_worker=True,
+                is_woman=True, is_widow=False, household_has_lpg=False,
+                pmuy_declaration_met=True, uk_pension_income_or_bpl=True,
+                receives_other_pension=False, uk_pension_selected=True)
+    results = evaluate_all(p, signed)
+    assert any(r.is_eligible for r in results), 'an empty sheet checks nothing'
+
+    for lang in ('hi', 'en'):
+        name, blob = pack.build(results, signed, frozenset(), frozenset(), None, lang)
+        filename, data = pack_as_text(name, blob)
+        assert filename.endswith('.txt'), filename
+        text = data.decode('utf-8')
+        assert text[0] == '﻿', f'[{lang}] no BOM: a viewer will guess the encoding'
+        body = text[1:]
+        assert '₹' in body, f'[{lang}] the rupee sign did not survive'
+        assert 'â' not in body and 'Ã' not in body, f'[{lang}] mojibake in the sheet'
+        assert '।।' not in body, f'[{lang}] doubled danda'
+        seen = [l for l in body.splitlines() if l.strip()]
+        assert seen[0] != seen[1], f'[{lang}] the sheet opens with its own name twice'
+        if lang == 'hi':
+            assert 'योजना' in body, 'Devanagari did not survive the conversion'
+
+
 def test_no_reason_is_said_to_a_worker_twice():
     """Two criteria on one field must not repeat the same sentence.
 

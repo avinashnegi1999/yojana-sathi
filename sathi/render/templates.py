@@ -69,8 +69,14 @@ def _why(result: Result, scheme: Scheme, lang: str = "hi", limit: int = 2) -> st
         text = c.text("pass", lang) if c else r.text_hi
         if text and text not in lines:
             lines.append(text)
-    joiner = " " if lang == "en" else "। "
-    return joiner.join(lines[:limit])
+    # ! Hindi sentences already end in a danda, so joining with "। " produced
+    # ! "पूरी करती है।।" on a real worker's sheet. Join with a space and let the
+    # ! authored punctuation stand; add a danda only where one is missing.
+    if lang == "en":
+        return " ".join(lines[:limit])
+    parts = [t if t.rstrip().endswith(("।", "?", "!")) else t.rstrip() + "।"
+             for t in lines[:limit]]
+    return " ".join(parts)
 
 
 def _blocking_text(result: Result, scheme: Scheme, lang: str = "hi") -> str:

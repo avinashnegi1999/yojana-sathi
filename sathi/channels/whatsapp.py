@@ -290,9 +290,65 @@ class _PackText(html.parser.HTMLParser):
         kept: list[str] = []
         for line in lines:
             # * Collapse the runs of blank lines the block tags leave behind.
-            if line or (kept and kept[-1]):
-                kept.append(line)
-        return "\n".join(kept).strip() + "\n"
+            if not (line or (kept and kept[-1])):
+                continue
+            # * The pack's <h1> and the page <title> carry the same words, so
+            # * the sheet used to open with its own name twice, with a blank
+            # * line between - which is why comparing to kept[-1] alone missed
+            # * it. Compare to the last line that had anything on it.
+            if line:
+                previous = next((x for x in reversed(kept) if x), "")
+                if line == previous:
+                    continue
+            kept.append(line)
+        return _lay_out("\n".join(kept).strip())
+
+
+# ! A phone screen is about 40 characters wide in a monospaced document viewer,
+# ! and this sheet is read on one, by someone who may be reading slowly. Runs of
+# ! bullets are pulled tight, headings get a rule above them, and nothing is
+# ! wrapped by us — the viewer wraps, and guessing its width would produce
+# ! ragged text on every screen that is not the one we guessed.
+_RULE = "─" * 34
+
+
+def _lay_out(text: str) -> str:
+    """Give the flat conversion the shape of a handout."""
+    out: list[str] = []
+    for line in text.splitlines():
+        if not line:
+            continue
+        bullet = line.startswith("•")
+        numbered = len(line) > 2 and line[0].isdigit() and line[1] in ".)"
+        if numbered:
+            # A scheme heading: rule above it, so the eye finds the next one.
+            if out:
+                out += ["", _RULE, ""]
+            out.append(line)
+            out.append("")
+        elif bullet:
+            # Bullets belong together; a blank line between each made the
+            # document three times longer than the words in it.
+            out.append(line)
+        else:
+            if out and out[-1].startswith("•"):
+                out.append("")
+            out.append(line)
+            out.append("")
+    while out and not out[-1]:
+        out.pop()
+    return "\n".join(out) + "\n"
+
+
+# ! A plain .txt carries no declared encoding, so the reader guesses. Android's
+# ! document viewer guessed Windows-1252 and every rupee sign in a real worker's
+# ! sheet arrived as "â‚¹2 lakh". The Hindi sheet would have been unreadable from
+# ! end to end — the sheet a worker carries to a bank, in the language she chose.
+# !
+# ! A BOM is how a text file says "I am UTF-8" to a viewer that has no other way
+# ! to know. It is three bytes and it fixes ₹, the dashes, the emoji and every
+# ! Devanagari character at once.
+_BOM = "\ufeff"
 
 
 def pack_as_text(filename: str, blob: bytes) -> tuple[str, bytes]:
@@ -302,7 +358,7 @@ def pack_as_text(filename: str, blob: bytes) -> tuple[str, bytes]:
     parser = _PackText()
     parser.feed(blob.decode("utf-8", "replace"))
     parser.close()
-    return filename.rsplit(".", 1)[0] + ".txt", parser.text().encode("utf-8")
+    return filename.rsplit(".", 1)[0] + ".txt", (_BOM + parser.text()).encode("utf-8")
 
 
 def _tag(key: str) -> str:
