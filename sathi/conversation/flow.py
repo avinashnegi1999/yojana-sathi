@@ -53,7 +53,7 @@ class State(Enum):
     DONE = "done"
 
 
-EXTRA_FIELDS = ('is_woman', 'is_widow', 'uk_pension_income_or_bpl', 'uk_pension_selected', 'household_has_lpg', 'pmuy_declaration_met')
+EXTRA_FIELDS = ('is_woman', 'is_widow', 'uk_pension_income_or_bpl', 'receives_other_pension', 'uk_pension_selected', 'household_has_lpg', 'pmuy_declaration_met')
 
 YES, NO, DK = "yes", "no", "dont_know"
 NEXT, OTHER, NONE = "next", "other", "none"

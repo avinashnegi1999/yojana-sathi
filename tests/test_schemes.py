@@ -161,12 +161,7 @@ def test_rejects_empty_documents():
 # ! Every "TODO" still left in a real scheme file, and why. Adding a line here
 # ! is a deliberate act with a reason attached; the test above refuses any stub
 # ! that is not on this list.
-KNOWN_STUBS = (
-    # The department's widow page states no rate, the budget-speech PDF that
-    # was cited now 404s, and the governing rate GO is a scan. Withdrawn on
-    # 2026-09-09 rather than left as a number with no openable source.
-    ("UK_WIDOW", "benefit.annual_value_inr"),
-)
+KNOWN_STUBS = ()  # ! nothing outstanding; add a line here with its reason, never a bare TODO
 
 
 def test_documented_stubs_are_actually_still_stubbed():

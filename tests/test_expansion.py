@@ -22,6 +22,7 @@ def test_new_scheme_boundaries():
                for k,v in real.items()}
     p = Profile(state='UK', age=30, has_bank_account=True, is_woman=True,
                 is_widow=True, uk_pension_income_or_bpl=True,
+                receives_other_pension=False,
                 uk_pension_selected=True, household_has_lpg=False,
                 pmuy_declaration_met=True)
     for age, expected in ((17,False),(18,True),(50,True),(51,False)):
@@ -36,6 +37,12 @@ def test_new_scheme_boundaries():
         q=replace(p,income_band=band,uk_pension_income_or_bpl=None)
         assert evaluate(q,schemes['UK_WIDOW']).verdict is Verdict.UNKNOWN
     assert evaluate(replace(p,uk_pension_income_or_bpl=False),schemes['UK_WIDOW']).verdict is Verdict.INELIGIBLE
+    # ! Already drawing a pension bars BOTH state pensions. myScheme states it
+    # ! on each scheme page; the department's own service page omits it.
+    for code in ('UK_OLD_AGE','UK_WIDOW'):
+        q=replace(p,age=65,receives_other_pension=True)
+        assert evaluate(q,schemes[code]).verdict is Verdict.INELIGIBLE
+        assert evaluate(replace(q,receives_other_pension=None),schemes[code]).verdict is Verdict.UNKNOWN
     assert evaluate(p,schemes['PMUY']).is_eligible
     assert evaluate(replace(p,household_has_lpg=True),schemes['PMUY']).verdict is Verdict.INELIGIBLE
     assert evaluate(replace(p,pmuy_declaration_met=None),schemes['PMUY']).verdict is Verdict.UNKNOWN
@@ -63,8 +70,12 @@ def test_the_two_state_pensions_are_never_counted_as_two_payments():
             benefit['annual_value_inr'] = 18000
         signed[code] = replace(sc, verified_by='test fixture only', stubs=(),
                                benefit=benefit)
+    # ! "No other pension" is about a pension already being RECEIVED. Someone
+    # ! receiving none still qualifies for both routes on paper, which is
+    # ! exactly the case that used to be added up.
     p = Profile(state='UK', age=65, has_bank_account=True, is_woman=True,
                 is_widow=True, uk_pension_income_or_bpl=True,
+                receives_other_pension=False,
                 uk_pension_selected=True, household_has_lpg=False,
                 pmuy_declaration_met=True)
     results = tuple(evaluate(p, signed[c]) for c in ('UK_OLD_AGE', 'UK_WIDOW'))
@@ -157,14 +168,16 @@ def test_new_boolean_conditions_against_source_oracle():
             return Verdict.INELIGIBLE
         return Verdict.UNKNOWN if None in conditions else Verdict.ELIGIBLE
     checked=0
-    for state,age,income,selected,widow in itertools.product(
+    for state,age,income,other,selected,widow in itertools.product(
             (None,'UK','UP'),(None,17,18,59,60,75),
-            (None,False,True),(None,False,True),(None,False,True)):
+            (None,False,True),(None,False,True),(None,False,True),(None,False,True)):
         p=Profile(state=state,age=age,uk_pension_income_or_bpl=income,
+                  receives_other_pension=other,
                   uk_pension_selected=selected,is_widow=widow)
         for code,limit in (('UK_OLD_AGE',60),('UK_WIDOW',18)):
             conditions=[None if state is None else state=='UK',
-                        None if age is None else age>=limit,income,selected]
+                        None if age is None else age>=limit,income,
+                        None if other is None else not other,selected]
             if code=='UK_WIDOW': conditions.append(widow)
             assert evaluate(p,schemes[code]).verdict is expected(conditions)
             checked+=1
@@ -174,7 +187,7 @@ def test_new_boolean_conditions_against_source_oracle():
         assert evaluate(p,schemes['PMUY']).verdict is expected(
             [None if age is None else age>=18,woman,None if lpg is None else not lpg,poor])
         checked+=1
-    assert checked==1080
+    assert checked==3024
 
 def test_demo_is_fictional_and_has_no_session_or_signature_mutation():
     from sathi.channels.router import Router

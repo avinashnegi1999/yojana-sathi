@@ -8,8 +8,12 @@ scheme.** Nothing here ticks a box in [VERIFICATION.md](VERIFICATION.md).
 Read this with [SCHEME_AUDIT.md](SCHEME_AUDIT.md) (7–8 September) and
 [SCHEME_EXPANSION.md](SCHEME_EXPANSION.md) (the four new files).
 
-**What changed in the repository as a result of this pass:** three things, all
-in section 4. Two are corrections to shipped data. Nothing else was touched.
+**This document covers two passes on the same day.** The first used a plain
+fetcher and could not read three official sources — a single-page app and two
+hosts with legacy TLS. The second used a browser and got into them, which
+**reversed one of the first pass's conclusions and answered two open questions**.
+Where they differ the second pass wins, and the first is left visible rather than
+deleted, because the reasoning is the point.
 
 ---
 
@@ -102,9 +106,10 @@ them and no default was substituted.
 
 | # | Question | Why the code cannot settle it |
 |---|---|---|
-| 1 | **Uttarakhand widow pension: what is the rate?** | The department's widow page states no amount. See 4.1. |
-| 2 | **Can one person draw both the old-age and the widow pension?** | Neither page says. Handled conservatively in code (4.2), but the *rule* is still unknown. |
-| 3 | **PM-SYM NPS scope** | The ministry page says "NPS" plainly; a 3 Aug 2026 reply qualifies it as government-funded NPS. Excluding too broadly wrongly turns a worker away. |
+| ~~1~~ | ~~Uttarakhand widow pension: what is the rate?~~ | **ANSWERED in the second pass** — ₹1,500/month, stated on myScheme. See 4.1. |
+| ~~2~~ | ~~Can one person draw both the old-age and the widow pension?~~ | **ANSWERED** — myScheme states on *both* scheme pages that the applicant must not already be receiving another pension. Now encoded as a criterion, not just a totals rule. See 4.2. |
+| 2b | **Whose income counts for the ₹4,000 line?** | New conflict found in the second pass: the department page says the **applicant's**, myScheme says the **family's**. The question now asks the stricter family reading and the fail text says the sources differ. |
+| 3 | **PM-SYM NPS scope** | Still open, but better characterised. The maandhan FAQ Q2 and Q6 both frame it as "covered under any statutory Social Security Scheme such as NPS, ESIC, EPFO" — NPS named plainly, no qualifier. A 3 Aug 2026 ministry reply says government-funded NPS. The code excludes only central-government NPS and leaves other NPS answers UNKNOWN, which is the right treatment of a conflict: it neither invents a NO nor quietly admits someone. **No change made.** |
 | 4 | **PM-SYM worker status** | A non-worker can satisfy the numeric rules. The occupation answer is collected but not evaluated. |
 | 5 | **PMSBY at exactly 70** | "18 to 70 years are entitled to join" versus "terminates on attaining age 70 (nearer birthday)". The source genuinely conflicts. |
 | 6 | **PMSBY via e-Shram at 18–59** | Only ever seen in a commented-out block on the e-Shram FAQ. Not encoded. Worth one CSC question. |
@@ -121,7 +126,9 @@ Recorded so nobody repeats the attempt and concludes something is missing.
 
 | Source | Result on 2026-09-09 |
 |---|---|
-| `budget.uk.gov.in/files/Budget_Speech__1.pdf` | **HTTP 404.** This was the citation for the widow pension amount. |
+| `budget.uk.gov.in/files/Budget_Speech__1.pdf` | **HTTP 404.** This was the original citation for the widow pension amount. |
+| `myscheme.gov.in/schemes/uwps` and `/oap` | **Read successfully in the second pass, with a browser.** Source of the widow rate and the no-other-pension rule. |
+| `uk.gov.in/.../file-04-12-2023-06-02-23.pdf` — the state guidelines page 16 that myScheme itself cites | Legacy TLS; downloaded from the Linux host using `OP_LEGACY_SERVER_CONNECT`. It is **320 MB** and almost certainly a scan. Not read. A human should check page 16. |
 | `socialwelfare.uk.gov.in/files/GO_1.pdf` | HTTP 404 |
 | Rate-increase GO 40/XVII-2/22-19(05) 2019-T.C, 21/04/2021 | Retrieved, but a **scanned image PDF** — no extractable text. Needs a human to open and read. |
 | `ssp.uk.gov.in` | TLS handshake refused (unsafe legacy renegotiation). Reachable from an ordinary browser. |
@@ -132,52 +139,64 @@ Recorded so nobody repeats the attempt and concludes something is missing.
 
 ## 4. What was changed in the repository today
 
-### 4.1 The widow pension amount was withdrawn to `"TODO"`
+### 4.1 The widow pension amount: withdrawn, then restored from a better source
 
 **File:** `data/schemes/uk_widow.toml`.
-**Was:** `annual_value_inr = 18000`, with both summaries promising "₹1,500
-monthly pension", cited to budget speech paragraph 189.
-**Now:** `annual_value_inr = "TODO"`, and neither summary quotes a figure.
 
-**Why.** The citation URL is now a 404, the department's widow page states no
-rate, the governing rate GO is a scan, and every other official route is
-browser-only. A ₹ figure whose source nobody can open is exactly what
-`"TODO"` exists for — rule 3 in `CLAUDE.md`. The old-age page *does* state
-₹1,500 on its own, which is why that file was left alone.
+**First pass.** The shipped ₹1,500/month was cited to budget speech paragraph
+189. That URL now returns **404**, and the department's widow page — unlike the
+old-age page — states no rate at all. So the value was withdrawn to `"TODO"`,
+which is what rule 3 in `CLAUDE.md` is for.
 
-This is a **withdrawal, not a discovery that the number is wrong.** ₹1,500 may
-well be correct. To restore it: open the 21/04/2021 GO from
-<https://socialwelfare.uk.gov.in/document-category/government-orders-pension/>,
-read the widow rate, put the GO number in the file's header comment, and delete
-the `UK_WIDOW` line from `KNOWN_STUBS` in `tests/test_schemes.py`.
+**Second pass.** The reason the earlier attempts failed was tooling, not
+absence: myScheme is a single-page app that returns nothing to a fetcher.
+Opened in a browser, <https://www.myscheme.gov.in/schemes/uwps> says plainly:
 
-Practical effect today: none for a worker — the scheme was already served as
-UNKNOWN because it is unsigned. The effect is on *you*: the startup report and
-`/schemes` now say the file is unfinished, instead of showing a researched-looking
-number.
+> "A pension of ₹1,500/- per month is provided to eligible beneficiaries."
 
-### 4.2 The two Uttarakhand pensions can no longer be added together
+myScheme is the Government of India scheme portal, run by Digital India
+Corporation under MeitY, and it cites the state's own guidelines. **So the value
+is restored as `18000`, now with a citation anyone can open**, and the file's
+header records the whole story — including that myScheme's underlying citation
+(state guidelines page 16) is a 320 MB scan nobody has read.
 
-**Files:** `uk_old_age.toml`, `uk_widow.toml` (new `exclusive_group =
-"uk_state_pension"` in `[benefit]`), `sathi/core/schemes.py`,
-`sathi/rules/engine.py`.
+`KNOWN_STUBS` in `tests/test_schemes.py` is empty again.
 
-A 62-year-old widow satisfies **both** pension files. Before this change, the
-result screen and the printed pack would each have added ₹18,000 + ₹18,000 and
-told her ₹36,000 a year. The state pays one pension.
+### 4.2 "Not already receiving another pension" is a rule, not just arithmetic
 
-`engine.total_value()` now collapses each exclusive group to its largest member,
-counted once. Schemes with no group are unaffected, so nothing else changed.
+**Files:** both pension TOMLs, `sathi/core/profile.py`, `sathi/conversation/flow.py`,
+both string files.
 
-This is the same class of bug as the insurance cover that used to be added to a
-pension, and it is now covered by
-`tests/test_expansion.py::test_the_two_state_pensions_are_never_counted_as_two_payments`,
-which drives a real 65-year-old widow profile through the engine and asserts the
-worker-facing screen never contains "36,000" in either language.
+The first pass reasoned that a 62-year-old widow satisfies both pension files,
+that the state surely pays one pension, and added `exclusive_group` so the two
+could never be **added together** in a ₹ total. That fixed the arithmetic on an
+assumption.
 
-**The grouping is a safe default, not a researched rule.** It assumes at most one
-pension. If the department in fact pays both, the group must be removed — that is
-open question 2 in section 2.
+The second pass found the actual rule, stated on **both** myScheme scheme pages:
+
+> "The applicant must not be receiving any other pension." (old-age)
+> "The widow must not be receiving any other pension benefits." (widow)
+
+That is an **eligibility bar**, which is stronger and more useful than a totals
+adjustment: someone already drawing a pension should be told so before they
+travel, not quietly counted once. It is now a real criterion on both files,
+backed by a new session-only profile field `receives_other_pension` and one
+extra follow-up question in both languages.
+
+`exclusive_group` stays as well. The criterion stops an already-pensioned person
+being told yes; the group stops the totals double-counting someone who currently
+draws neither and qualifies for both routes. They cover different cases.
+
+**Note what the department's own pages do NOT say.** Neither
+`socialwelfare.uk.gov.in` service page mentions this condition. It is recorded
+here from the national portal and should be confirmed at the office before
+sign-off — which is why both files remain unsigned.
+
+**Also found, and unresolved:** myScheme says the ₹4,000 line is on the
+**family's** monthly income; the department page says the **applicant's**. The
+question now asks the stricter family reading, and the failure message says in
+both languages that the sources differ and to ask at the office if you are near
+the line.
 
 ### 4.3 Both totals now come from one function
 
@@ -186,7 +205,7 @@ cover figures with their own copy of the same two lines. Both now call
 `engine.value_totals()`. A worker cannot be shown one number on screen and
 handed a different one on paper.
 
-### 4.4 Test-fixture consequence, and a coverage floor
+### 4.4 Test-fixture consequence, and two coverage guards
 
 Four suites sign the real scheme files so the eligible half of the conversation
 is reachable. A file with a `"TODO"` is unservable for the same reason an
@@ -195,8 +214,23 @@ unsigned one is, so those fixtures now clear stubs as well as the signature.
 This was caught the hard way. The first green run after 4.1 had quietly dropped
 from **2,109 walked paths to 669**, and from 216 document screens to 63, because
 `UK_WIDOW`'s seven documents fell out of the checklist. The suite still passed.
-`tests/test_all_paths.py` now asserts a floor of 2,000 paths per language, so a
-data change cannot silently shrink the walk again.
+`tests/test_all_paths.py` now asserts a path floor, so a data change cannot
+silently shrink the walk unnoticed.
+
+The floor then fired a **second** time, for an honest reason, and that is worth
+recording. The button walk keys on the screen, so every answer to a follow-up
+question collapses to one key and only one set of answers is ever carried
+through to the document checklist — whichever the search reaches first. Adding
+the new pension question moved that branch to one where both pensions are
+INELIGIBLE, so their documents legitimately vanished and the count fell to 672.
+
+A path count was the wrong thing to assert. The real guarantee is now stated
+directly, in `test_every_document_of_every_scheme_is_reachable`: it drives two
+deliberately-answered eligible profiles — a 30-year-old and a 65-year-old,
+because no single worker can qualify for all seven (PM-SYM stops at 40, PMJJBY
+at 50, the old-age pension starts at 60) — and asserts their combined document
+checklists contain every document of every scheme, in both languages. The loose
+path floor stays as a coarse tripwire.
 
 `tests/test_schemes.py` no longer asserts "no scheme file has any stub". It
 asserts "no scheme file has a stub that is not on `KNOWN_STUBS`, with a written
@@ -209,15 +243,17 @@ the list cannot rot. The gate was not removed.
 
 Nothing in this document signs anything. In priority order:
 
-1. **Open the 21/04/2021 rate GO and read the widow pension rate.** It is a
-   scanned PDF; a person has to look at it. This is the single blocking fact for
-   `uk_widow.toml`.
-2. **Ask whether one person can hold both state pensions** — Gram Panchayat, the
-   district social welfare office, or the SSP helpline. Answer decides whether
-   `exclusive_group` stays.
-3. **Decide PM-SYM's NPS scope** (section 2, row 3). Currently the broader
-   exclusion; a wrong exclusion turns away someone eligible.
-4. Then work through [VERIFICATION.md](VERIFICATION.md) scheme by scheme. The
+1. **Confirm the no-other-pension bar at the office.** It comes from myScheme,
+   not from the department's own service pages, and it now decides verdicts for
+   both pensions. This is the most consequential unconfirmed thing in the repo.
+2. **Settle whose income the ₹4,000 line means** — applicant or family. The two
+   official sources disagree and the code currently uses the stricter reading.
+3. **Confirm the widow rate** against the state guidelines page 16 or the
+   21/04/2021 rate GO. Both are scans; a person has to look. myScheme's ₹1,500
+   is good enough to ship as unsigned data, not to sign.
+4. **Decide PM-SYM's NPS scope** (section 2, row 3). The code's current handling
+   is defensible; a decision would remove an UNKNOWN.
+5. Then work through [VERIFICATION.md](VERIFICATION.md) scheme by scheme. The
    confirmations in section 1 above should make PMJJBY, PMUY and the old-age
    pension quick, because the wording is quoted next to the shipped value.
 

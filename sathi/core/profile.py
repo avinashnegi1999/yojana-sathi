@@ -74,6 +74,11 @@ class Profile:
     is_widow: bool | None = None
     uk_pension_income_or_bpl: bool | None = None
     uk_pension_selected: bool | None = None
+    # ! Both Uttarakhand pensions require that the applicant is NOT already
+    # ! drawing another pension — myScheme states it as an eligibility bar on
+    # ! each scheme page, not merely as an arithmetic problem in a total. Asked
+    # ! once and used by both files, because the condition is the same one.
+    receives_other_pension: bool | None = None
     household_has_lpg: bool | None = None
     pmuy_declaration_met: bool | None = None
     known_schemes: frozenset[str] = frozenset()  # ! drives the headline metric
@@ -111,6 +116,7 @@ def _self_check() -> None:
     assert "age" in PROFILE_FIELDS and "aadhaar" not in PROFILE_FIELDS
     assert "is_epfo_or_esic_member" in PROFILE_FIELDS
     assert "nps_exclusion_applies" in PROFILE_FIELDS
+    assert "receives_other_pension" in PROFILE_FIELDS
     assert "is_statutory_scheme_member" not in PROFILE_FIELDS, \
         "the conflated field is gone; a scheme file still naming it must be fixed"
     print("profile.py OK")

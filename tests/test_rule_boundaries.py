@@ -115,6 +115,10 @@ def _oracle(code: str, p: Profile) -> bool | None:
         criterion(None if p.state is None else p.state == "UK")
         criterion(None if age is None else age >= (60 if code == "UK_OLD_AGE" else 18))
         criterion(p.uk_pension_income_or_bpl)
+        # myScheme states this as an eligibility bar on both scheme pages:
+        # "The applicant must not be receiving any other pension."
+        criterion(None if p.receives_other_pension is None
+                  else not p.receives_other_pension)
         criterion(p.uk_pension_selected)
         if code == "UK_WIDOW":
             criterion(p.is_widow)

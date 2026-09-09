@@ -235,10 +235,21 @@ def test_every_button_in_both_languages():
             assert {State.TAX_CONFIRM, State.TAX_INCOME} <= {key[0] for key in visited}, \
                 "the exhaustive button walk missed the tax confirmation or income edit"
             print(f"  .. {code}: {explored} paths walked, {ended} completed sessions")
-            # ! A floor, not an exact number: adding a scheme should be allowed
-            # ! to grow the walk, but never to shrink it by two thirds without
-            # ! somebody noticing. A stub in one scheme file did exactly that.
-            assert explored >= 2000, (
+            # ! A floor, not an exact number. It caught a stub silently making
+            # ! a scheme unservable and cutting the walk from 2,109 paths to
+            # ! 669. It is deliberately loose, because the count also moves for
+            # ! an honest reason: this BFS keys on the screen, so all answers to
+            # ! a follow-up question collapse to one key, and whichever branch
+            # ! reaches the document screen first decides how many documents
+            # ! exist there. Adding the "already receiving another pension"
+            # ! question moved that branch to one where both pensions are
+            # ! INELIGIBLE, so their documents are legitimately absent.
+            # !
+            # ! That is why the real guarantee — a fully eligible worker still
+            # ! gets every scheme's documents — is asserted directly in
+            # ! test_every_document_of_every_scheme_is_reachable() below, not
+            # ! inferred from this number.
+            assert explored >= 600, (
                 f"[{code}] the walk shrank to {explored} paths — a scheme file "
                 f"probably became unservable in the fixture; see _schemes()"
             )
@@ -270,6 +281,60 @@ def test_every_button_in_both_languages():
     assert not problems, "\n".join(f"  - {p}" for p in sorted(set(problems))[:25])
 
 
+def test_every_document_of_every_scheme_is_reachable():
+    """Between them, two eligible workers are shown every scheme's documents.
+
+    # ! The button walk cannot promise this. It keys on the screen, so only ONE
+    # ! set of follow-up answers is ever carried through to the document page,
+    # ! and which set that is depends on the search order — adding a follow-up
+    # ! question silently changed it once already.
+
+    # ! Two workers, because no single one can qualify for all seven: PM-SYM
+    # ! stops taking entries at 40, PMJJBY at 50, and the old-age pension does
+    # ! not start until 60. That is a fact about the schemes, not a gap here.
+    """
+    keep = {"is_woman": "yes", "is_widow": "yes", "household_has_lpg": "no",
+            "pmuy_declaration_met": "yes", "uk_pension_income_or_bpl": "yes",
+            "receives_other_pension": "no", "uk_pension_selected": "yes"}
+
+    def run(schemes, lang: str, age: str):
+        convo = Conversation(schemes, None)
+        convo.start()
+        for step in (LANG_EN if lang == "en" else LANG_HI, "consent_yes",
+                     "state:UK", age, "occ:construction", "inc:upto_5000",
+                     "land:landless", "fam:4", "yes", "no", "no", "no", "yes"):
+            convo.handle(step)
+        while convo.state is State.FOLLOWUP:
+            field = convo._followup_field()
+            assert field in keep, f"new follow-up {field} — decide its eligible answer"
+            convo.handle(keep[field])
+        assert convo.state is State.KNOWN_SCHEMES, convo.state
+        convo.handle("next")
+        assert convo.state is State.DOCUMENTS, convo.state
+        eligible = {r.scheme_code for r in convo._results if r.is_eligible}
+        offered: set[str] = set()
+        for _ in range(10):
+            reply = convo._ask_documents()
+            assert len(reply.buttons) <= 10, "WhatsApp allows ten rows"
+            offered |= {b.label for b in reply.buttons if b.value.startswith("doc:")}
+            if not any(b.value == "docs:more" for b in reply.buttons):
+                break
+            convo.handle("docs:more")
+        return eligible, offered
+
+    with tempfile.TemporaryDirectory() as d:
+        schemes = _schemes(Path(d))
+        for lang in ("hi", "en"):
+            young_codes, young_docs = run(schemes, lang, "30")
+            old_codes, old_docs = run(schemes, lang, "65")
+            assert young_codes | old_codes == set(schemes), (
+                f"[{lang}] no eligible path to {sorted(set(schemes) - young_codes - old_codes)}"
+            )
+            expected = {doc for sc in schemes.values() for doc in sc.docs(lang)}
+            missing = expected - (young_docs | old_docs)
+            assert not missing, f"[{lang}] documents never offered: {sorted(missing)}"
+
+
 def test_commands_at_every_state():
     """/help and friends must answer anywhere without derailing the conversation."""
     problems: list[str] = []
@@ -281,7 +346,14 @@ def test_commands_at_every_state():
         # ! anything.
         walk = [LANG_EN, "consent_yes", "state:UK", "30", "occ:construction",
                 "inc:upto_5000", "land:landless", "fam:4", "yes", "no", "no", "no", "yes",
-                "yes", "no", "yes", "yes", "yes", "yes",
+                # ! The seven follow-ups, in the order they are asked:
+                # ! is_woman, household_has_lpg, pmuy_declaration_met,
+                # ! uk_pension_income_or_bpl, receives_other_pension,
+                # ! uk_pension_selected, is_widow. The fifth must be "no" —
+                # ! answering that a pension is already being drawn makes both
+                # ! state pensions INELIGIBLE, and this walk needs the eligible
+                # ! half of the conversation to stay reachable.
+                "yes", "no", "yes", "yes", "no", "yes", "yes",
                 "next", "next", "yes"]
         reached = set()
 
@@ -341,7 +413,9 @@ def test_every_command_through_the_adapter_at_every_state():
         schemes = _schemes(Path(d))
         walk = ["lang:en", "consent_yes", "state:UK", "30", "occ:construction",
                 "inc:upto_5000", "land:landless", "fam:4", "yes", "no", "no", "no", "yes",
-                "yes", "no", "yes", "yes", "yes", "yes",
+                # ! Same seven follow-ups as the walk above, same reason for the
+                # ! "no" in fifth place: receives_other_pension.
+                "yes", "no", "yes", "yes", "no", "yes", "yes",
                 "next", "next", "yes"]
         reached = set()
 

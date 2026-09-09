@@ -27,20 +27,23 @@ Document choices have eight items per page plus page navigation and Continue, fi
 
 ## Before signing any new file
 
-- **Done, 9 September:** overlap handling now exists. Both pension files carry
-  `exclusive_group = "uk_state_pension"`, and `engine.total_value()` counts the
-  largest member of a group once, so the two are never added. That is a safe
-  default, **not** a researched rule — still confirm with the department whether
-  one person may hold both, and remove the group if they may.
+- **Answered, 9 September.** The overlap is not merely arithmetic: myScheme
+  states on **both** scheme pages that the applicant must not already be
+  receiving another pension. That is now a criterion on both files, backed by a
+  `receives_other_pension` follow-up question. `exclusive_group` stays too — the
+  criterion stops an already-pensioned person being told yes, the group stops
+  the ₹ total double-counting someone who draws neither and qualifies for both.
+  The department's own pages do not state this condition, so confirm it at the
+  office before signing.
 - Reconcile pension income scope and current government orders. Income and BPL
   wording was re-confirmed verbatim on 9 September; the government orders were
   not, because the governing rate GO is a scanned PDF.
-- **Changed, 9 September:** the widow pension amount has been **withdrawn to
-  `"TODO"`**. The budget-speech PDF that supported it now returns 404, the
-  department's widow page states no rate, and the governing rate GO is a scan
-  with no extractable text. The old-age page still gives its own ₹1,500
-  independently, so that file was left alone. To restore the widow figure, read
-  the 21/04/2021 rate GO and record its number in the file.
+- **Resolved, 9 September:** the widow pension amount was withdrawn to `"TODO"`
+  when its budget-speech citation turned out to 404, then **restored** the same
+  day from myScheme (`myscheme.gov.in/schemes/uwps`), the Government of India
+  scheme portal, which states ₹1,500/month outright. myScheme's own citation —
+  the state guidelines, page 16 — is a 320 MB scan that has not been read, so
+  confirm the rate there before signing.
 - Confirm local selection and current rural/urban approval procedures. Missing local selection is explained as a step to complete, not a permanent bar.
 - PMJJBY: review one-account rule, new-entry/renewal distinction, age-55 termination, 30-day lien, seasonal first-time premium and consent. Insurance is not guaranteed cash.
 - PMUY: verify the current deprivation declaration, distributor e-KYC/document process and ongoing connection availability. `in_kind` with zero annual cash means goods are described without inventing a cash valuation; it does not mean the support is worthless.

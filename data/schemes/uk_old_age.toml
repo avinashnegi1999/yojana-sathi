@@ -1,6 +1,13 @@
 # Source-researched draft, 8 September 2026. No human sign-off is claimed.
 # Benefit reference: https://budget.uk.gov.in/files/Budget_Speech__1.pdf paragraph 189.
-# ! Pending: reconcile income scope, pension overlap and current government orders before human sign-off.
+# ! 2026-09-09: myScheme (https://www.myscheme.gov.in/schemes/oap) independently
+# ! states the same Rs 1,500/month and adds "The applicant must not be receiving
+# ! any other pension", which the department's own page omits. That condition is
+# ! now encoded below. myScheme also says FAMILY monthly income where the
+# ! department page says the APPLICANT's; the question asks the stricter family
+# ! reading and the fail text says the sources differ.
+# ! Pending: confirm the income scope and the no-other-pension bar at the office,
+# ! and check the current government orders, before human sign-off.
 code = "UK_OLD_AGE"
 name_en = "Uttarakhand old-age pension"
 name_hi = "उत्तराखंड वृद्धावस्था पेंशन"
@@ -49,13 +56,31 @@ source_url = "https://socialwelfare.uk.gov.in/service/old-age-pension/"
 field = "uk_pension_income_or_bpl"
 op = "eq"
 value = true
-ask_en = "For the state pension: is your monthly income from ALL sources ₹4,000 or less, OR do you hold a BPL card? If unsure of the income certificate requirement, choose Don't know."
-ask_hi = "राज्य पेंशन के लिए: क्या सभी स्रोतों से आपकी मासिक आय ₹4,000 या कम है, अथवा आपके पास बीपीएल कार्ड है? आय प्रमाणपत्र की शर्त स्पष्ट न हो तो पता नहीं चुनें।"
+ask_en = "For the state pension: is your FAMILY's monthly income from all sources ₹4,000 or less, OR do you hold a BPL card? If unsure, choose Don't know."
+ask_hi = "राज्य पेंशन के लिए: क्या सभी स्रोतों से आपके परिवार की मासिक आय ₹4,000 या कम है, अथवा आपके पास बीपीएल कार्ड है? पक्का न हो तो पता नहीं चुनें।"
 pass_en = "You reported meeting the income-or-BPL condition; the authority checks the certificate."
 pass_hi = "आपने आय अथवा बीपीएल शर्त पूरी होना बताया है; अधिकारी प्रमाणपत्र जाँचेंगे।"
-fail_en = "The stated income-or-BPL condition is not met."
-fail_hi = "बताई गई आय अथवा बीपीएल शर्त पूरी नहीं होती।"
+fail_en = "The stated income-or-BPL condition is not met. Note the sources differ on whose income counts — the department page says the applicant's, the national portal says the family's — so ask at the office if you are near the line."
+fail_hi = "बताई गई आय अथवा बीपीएल शर्त पूरी नहीं होती। ध्यान दें: किसकी आय गिनी जाए, इस पर स्रोत अलग-अलग हैं — विभाग का पृष्ठ आवेदक की आय कहता है, राष्ट्रीय पोर्टल परिवार की। सीमा के आसपास हों तो कार्यालय में पूछें।"
 source_url = "https://socialwelfare.uk.gov.in/service/old-age-pension/"
+
+[[criteria]]
+# ! "The applicant must not be receiving any other pension." / "The widow must
+# ! not be receiving any other pension benefits." — myScheme scheme pages,
+# ! read 2026-09-09. The department's own service page does not state this, so
+# ! it is recorded here from the national portal and still needs confirming at
+# ! the office. It is an ELIGIBILITY bar, not only a totals problem: someone
+# ! already drawing a pension should not be sent to apply for a second one.
+field = "receives_other_pension"
+op = "eq"
+value = false
+ask_en = "Are you already receiving any other pension (state, central or a family pension)? Choose Don't know if you are not sure."
+ask_hi = "क्या आपको पहले से कोई और पेंशन मिल रही है (राज्य, केंद्र या पारिवारिक पेंशन)? पक्का न हो तो पता नहीं चुनें।"
+pass_en = "You reported no other pension, which this scheme requires."
+pass_hi = "आपने कोई और पेंशन न मिलना बताया है, जो इस योजना के लिए ज़रूरी है।"
+fail_en = "This pension is for people not already drawing another one. Ask at the office which single pension suits you best before applying."
+fail_hi = "यह पेंशन उनके लिए है जिन्हें पहले से कोई और पेंशन नहीं मिल रही। आवेदन से पहले कार्यालय में पूछें कि आपके लिए कौन-सी एक पेंशन सही रहेगी।"
+source_url = "https://www.myscheme.gov.in/schemes/oap"
 
 [[criteria]]
 field = "uk_pension_selected"

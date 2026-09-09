@@ -18,10 +18,13 @@ screening, the same Hindi — but it is not yet live on a public number.
 > (`pmuy.gov.in`), and the Uttarakhand old-age and widow pensions
 > (`socialwelfare.uk.gov.in`).
 >
-> One value is deliberately **not** filled: the Uttarakhand widow pension's
-> monthly rate. Its cited source now returns 404 and the department's own page
-> states no amount, so the file says `"TODO"` rather than a figure nobody can
-> open a source for. See [`docs/SOURCE_REVIEW_2026-09-09.md`](docs/SOURCE_REVIEW_2026-09-09.md).
+> Every value was re-fetched from its official page on 9 September 2026 and the
+> wording is quoted next to the shipped value in
+> [`docs/SOURCE_REVIEW_2026-09-09.md`](docs/SOURCE_REVIEW_2026-09-09.md). One
+> value was withdrawn to `"TODO"` that morning when its citation turned out to
+> 404, then restored the same day from a source that could be opened. Both
+> Uttarakhand pensions also gained a condition nobody had encoded — the
+> applicant must not already be drawing another pension.
 >
 > **Those values have not yet been confirmed by a second pair of eyes.**
 > `verified_by` in each file says `unconfirmed — PENDING HUMAN VERIFICATION`,
