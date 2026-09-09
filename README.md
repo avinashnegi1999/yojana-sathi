@@ -39,13 +39,13 @@ screening, the same Hindi — but it is not yet live on a public number.
 > this yet"**. Sign-off is the last gate before this is useful in the field, and
 > `tests/test_schemes.py` fails the build if that claim and the data disagree.
 >
-> **One scheme is now signed off: PMJJBY.** Avinash Negi checked the eleven
-> encoded values against the Department of Financial Services FAQ on 9 September
-> 2026, and `verified_by` in that file names him. It produces real verdicts and
-> real ₹ figures for workers. The other six do not, and still answer "I could
-> not check this yet" to everybody.
+> **Two schemes are now signed off: PMJJBY and PMSBY.** Avinash Negi read both
+> Department of Financial Services FAQs in full on 9 September 2026 and confirmed
+> every encoded value; `verified_by` in each file names him. They produce real
+> verdicts and real ₹ figures for workers. The other five do not, and still
+> answer "I could not check this yet" to everybody.
 >
-> So the bot is live and every conversation works end to end, but for six of the
+> So the bot is live and every conversation works end to end, but for five of the
 > seven schemes **no worker has been told "yes" by it, and none will be until a
 > named human signs those files too.**
 > `/demo` shows what a signed scheme would produce, using fixed fictional people

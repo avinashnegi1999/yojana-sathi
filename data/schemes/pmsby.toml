@@ -30,8 +30,8 @@ name_en      = "Pradhan Mantri Suraksha Bima Yojana"
 name_hi      = "प्रधानमंत्री सुरक्षा बीमा योजना"
 authority    = "Department of Financial Services, Ministry of Finance"
 official_url = "https://jansuraksha.gov.in/Files/PMSBY/English/Rules.pdf"
-verified_on  = "2026-08-31"
-verified_by  = "unconfirmed — PENDING HUMAN VERIFICATION"
+verified_on  = "2026-09-09"
+verified_by  = "Avinash Negi, checked 2026-09-09"
 
 # * WHAT THE WORKER GETS
 [benefit]
@@ -41,9 +41,17 @@ value_basis      = "insurance_cover"
 # "Premium: Rs. 20/- per annum per member."
 premium_inr      = 20
 # * Wording checked against https://financialservices.gov.in/pmsby on
-# * 2026-09-08. This source comparison is not human scheme approval.
-summary_hi       = "दुर्घटना बीमा। दुर्घटना में मृत्यु या योजना में बताई गई स्थायी विकलांगता पर ₹2 लाख। एक आँख की रोशनी या एक हाथ या पैर का इस्तेमाल पूरी तरह और हमेशा के लिए खोने पर ₹1 लाख। सालाना ₹20 आपकी सहमति से बैंक या डाकघर खाते से कटते हैं।"
-summary_en       = "Accident insurance. ₹2 lakh for accidental death or the permanent disabilities specified by the scheme. ₹1 lakh for permanent, complete loss of sight in one eye or use of one hand or foot. Premium ₹20 yearly, debited with your consent from your bank or post office account."
+# * 2026-09-08, and again on 2026-09-09 against the full FAQ.
+# ! Q25 settles what the 7 September audit flagged: "What benefit will be
+# ! payable if a person suffers partial disability WITHOUT irrecoverable
+# ! loss of sight of one eye or loss of use of one hand or foot? No benefit
+# ! will be payable." Said plainly below, because "accident insurance"
+# ! sounds like it pays for any injury and it does not.
+# ! Q19: no reimbursement of hospitalisation expenses. This is not health
+# ! cover, and a worker who thinks it is will not buy the cover they need.
+# ! Q14: the cover is in addition to any other insurance held.
+summary_hi       = "दुर्घटना बीमा। दुर्घटना में मृत्यु या योजना में बताई गई स्थायी विकलांगता पर ₹2 लाख। एक आँख की रोशनी या एक हाथ या पैर का इस्तेमाल पूरी तरह और हमेशा के लिए खोने पर ₹1 लाख। इसके अलावा किसी आंशिक विकलांगता पर कुछ नहीं मिलता, और अस्पताल का खर्च वापस नहीं मिलता — यह स्वास्थ्य बीमा नहीं है। आत्महत्या से मृत्यु पर दावा नहीं मिलता। यह आपके किसी भी दूसरे बीमा के अतिरिक्त है। सालाना ₹20 आपकी सहमति से बैंक या डाकघर खाते से कटते हैं।"
+summary_en       = "Accident insurance. ₹2 lakh for accidental death or the permanent disabilities specified by the scheme. ₹1 lakh for permanent, complete loss of sight in one eye or use of one hand or foot. Any other partial disability pays nothing, and hospital bills are not reimbursed — this is not health cover. Death by suicide is not covered. It is in addition to any other insurance you already hold. Premium ₹20 yearly, debited with your consent from your bank or post office account."
 
 # =====================================================================
 # ELIGIBILITY — ALL [[criteria]] must pass.

@@ -83,12 +83,12 @@ Worth testing specifically, because they are new and untested by a human:
 
 ## 3. Which schemes support real screening
 
-**One: PMJJBY. The other six are demonstration-and-questions only.**
+**Two: PMJJBY and PMSBY. The other five are demonstration-and-questions only.**
 
-PMJJBY was signed off on 9 September 2026 by Avinash Negi, after he read the
-Department of Financial Services FAQ himself and compared all eleven encoded
-values. That file now produces real ELIGIBLE / INELIGIBLE verdicts and a real
-₹2,00,000 cover figure for anyone who talks to the bot.
+Both were signed off on 9 September 2026 by Avinash Negi, after he read each
+Department of Financial Services FAQ in full and compared every encoded value.
+They now produce real ELIGIBLE / INELIGIBLE verdicts and real cover figures for
+anyone who talks to the bot.
 
 Every file still carries `verified_by = "unconfirmed — PENDING HUMAN
 VERIFICATION"`, so the engine returns `UNKNOWN` for every scheme to every
@@ -100,7 +100,7 @@ gate is enforced in code and asserted by tests, not merely documented.
 | **PMJJBY** | ✅ every value verbatim | **None — SIGNED 2026-09-09, live** |
 | PMUY / Ujjwala | ✅ every value verbatim | Human sign-off |
 | UK old-age pension | ✅ every value verbatim | Human sign-off |
-| PMSBY | ✅ (partial-disability wording row now closed) | Human sign-off; entry-at-exactly-70 conflict |
+| **PMSBY** | ✅ every value verbatim; FAQ Q25 closes the partial-disability row outright | **None — SIGNED 2026-09-09, live** |
 | e-Shram | ✅ age and income rows now closed against the current FAQ | Human sign-off; farmer scope |
 | PM-SYM | ✅ inclusive ₹15,000 ceiling closed on the ministry page | Human sign-off; NPS scope, worker status |
 | UK widow pension | ✅ rate and eligibility, via myScheme | Human sign-off; the no-other-pension bar is not on the department's page |
