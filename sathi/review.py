@@ -311,6 +311,12 @@ def _self_check() -> None:
         tmp = Path(d) / "schemes"
         shutil.copytree(SCHEMES_DIR, tmp)
         code = sorted(c for c, s in schemes.items() if not s.stubs)[0]
+        # ! Unsign it first. This used to pick whichever scheme sorted first and
+        # ! assert it was unsigned, which was true only while nothing was signed
+        # ! — the day e-Shram was signed off, the build broke on a test that has
+        # ! nothing to do with signing. The round trip below is what is being
+        # ! tested, so it must set up its own starting state.
+        unsign(code, schemes_dir=tmp)
         path = Path(load_all(tmp)[code].source_path)
         before = path.read_text(encoding="utf-8")
 

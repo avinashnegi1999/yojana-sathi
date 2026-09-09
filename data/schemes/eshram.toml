@@ -32,8 +32,8 @@ name_en      = "e-Shram registration"
 name_hi      = "ई-श्रम पंजीकरण"
 authority    = "Ministry of Labour & Employment, Government of India"
 official_url = "https://eshram.gov.in/faqs"
-verified_on  = "2026-08-31"
-verified_by  = "unconfirmed — PENDING HUMAN VERIFICATION"
+verified_on  = "2026-09-10"
+verified_by  = "Avinash Negi, checked 2026-09-10"
 
 # * WHAT THE WORKER GETS
 [benefit]
@@ -47,8 +47,20 @@ value_basis      = "gateway"
 premium_inr      = 0
 # ! Rechecked 2026-09-07: visible FAQ Q13/Q42 describes registration and benefit
 # ! facilitation, not a current promise of automatic insurance or free premium.
-summary_hi       = "यह पैसा देने वाली योजना नहीं है — यह मज़दूरों का सरकारी पहचान पत्र (UAN) है, जिससे योजनाओं तक पहुँचने में मदद मिलती है। कार्ड कभी ख़त्म नहीं होता और पंजीकरण मुफ़्त है। हर जुड़ी योजना की पात्रता और आवेदन की शर्तें अलग हैं।"
-summary_en       = "A registration service with no payout of its own. It gives unorganised workers a UAN card to help access schemes. Registration is free and the card does not expire. Linked schemes have separate eligibility and application requirements."
+summary_hi       = "यह पैसा देने वाली योजना नहीं है — अभी e-Shram से केवल पंजीकरण होता है। यह मज़दूरों का सरकारी पहचान पत्र (UAN) है, जिससे योजनाओं तक पहुँचने में मदद मिलती है। खेत मज़दूर और भूमिहीन किसान भी पंजीकरण करा सकते हैं। पंजीकरण मुफ़्त है, कार्ड कभी ख़त्म नहीं होता, और 60 साल के होने पर कुछ नहीं बदलता। हर जुड़ी योजना की पात्रता और आवेदन की शर्तें अलग हैं।"
+# ! Q42, in the ministry's own words: "Right now, only registration is being
+# ! done through e-Shram." That is why this file carries no rupee value and
+# ! why the summary leads with what it is NOT.
+# ! Q37 settles a row the 7 September audit left open: "Agriculture labours
+# ! and landless farmers are eligible for registration in the e-Shram
+# ! portal." Said plainly below, because agricultural workers are a large
+# ! part of who this bot is for and many assume it is not for them.
+# ? Farmers who OWN land are still not addressed either way by the FAQ.
+# ? Nothing is encoded about landholding, because "landless farmers are
+# ? eligible" is not the same sentence as "landowning farmers are not".
+# ! Q29: turning 60 needs no action and the UAN stays valid, which is the
+# ! current source for having no upper age limit here.
+summary_en       = "A registration service with no payout of its own — right now, only registration happens through e-Shram. It gives unorganised workers a UAN card to help access schemes. Agricultural labourers and landless farmers can register. Registration is free, the card does not expire, and turning 60 changes nothing. Linked schemes have separate eligibility and application requirements."
 
 # =====================================================================
 # ELIGIBILITY — ALL [[criteria]] must pass.
