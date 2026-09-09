@@ -7,14 +7,14 @@ placeholders only with observed facts.
 
 ## Sign-off status, 9 September 2026
 
-**PMJJBY, PMSBY, PMUY, e-Shram and the Uttarakhand old-age pension are signed
-off and giving real answers.** Avinash Negi read
+**Six schemes are signed off and giving real answers:** PMJJBY, PMSBY, PMUY,
+PM-SYM, e-Shram and the Uttarakhand old-age pension. Avinash Negi read
 both Department of Financial Services FAQs in full and confirmed every encoded
 value on 9 September 2026; each file names him in `verified_by`.
 
-The other two schemes remain unsigned and answer "I could not check this yet".
-Do not describe this project as screening workers against seven schemes. Five
-schemes screen; two collect the answers and tell the worker what to ask at the
+The Uttarakhand widow pension remains unsigned and answers "I could not check
+this yet", because its department page states no amount at all. Six schemes
+screen; one collects the answers and tell the worker what to ask at the
 centre. That distinction has to survive into the demo video and the problem
 statement unchanged — a judge will try it.
 

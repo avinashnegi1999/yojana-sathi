@@ -19,8 +19,8 @@ name_en      = "Pradhan Mantri Shram Yogi Maandhan"
 name_hi      = "प्रधानमंत्री श्रम योगी मानधन"
 authority    = "Ministry of Labour & Employment, Government of India"
 official_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=79&lid=63&page=74"
-verified_on  = "2026-08-31"
-verified_by  = "unconfirmed — PENDING HUMAN VERIFICATION"
+verified_on  = "2026-09-10"
+verified_by  = "Avinash Negi, checked 2026-09-10"
 
 # * WHAT THE WORKER GETS
 [benefit]
@@ -35,8 +35,20 @@ value_basis      = "annual_payout"
 # ! the Central Government matches it 1:1. A single number would be wrong for
 # ! almost every worker, so this field carries the range instead.
 premium_inr      = "₹55 से ₹200 प्रति माह — प्रवेश आयु पर निर्भर (18 साल = ₹55, 40 साल = ₹200)। सरकार उतनी ही राशि अपनी ओर से जमा करती है।"
-summary_hi       = "60 साल की उम्र के बाद हर महीने ₹3,000 पेंशन। आपकी मृत्यु के बाद पति/पत्नी को आधी पेंशन मिलती रहेगी। जितना आप जमा करेंगे, सरकार उतना ही अपनी ओर से जमा करेगी।"
-summary_en       = "A minimum pension of ₹3,000 a month after age 60, with 50% family pension to the spouse. The Government matches the worker's contribution 1:1."
+summary_hi       = "60 साल की उम्र के बाद हर महीने ₹3,000 पेंशन। आपकी मृत्यु के बाद पति/पत्नी को आधी पेंशन मिलती रहेगी। जितना आप जमा करेंगे, सरकार उतना ही अपनी ओर से जमा करेगी। सरकार बराबर की राशि जमा करती है और कोई प्रशासनिक शुल्क नहीं है। उम्र या आय का अलग प्रमाण नहीं चाहिए — आधार के साथ स्वयं-घोषणा काफ़ी है, पर ग़लत घोषणा पर जुर्माना हो सकता है।"
+# ! Q7: "No separate proof of age or the income has to be given. Self
+# ! Certification and providing of the Aadhaar number will be the basis for
+# ! enrollment. However in case of any false declaration, may attract
+# ! appropriate penalty." Worth saying: not having an income certificate is
+# ! the reason a lot of workers never start, and it is not a barrier here.
+# ! The penalty half is said too, because a promise without its condition is
+# ! how someone gets into trouble later.
+# ! Q9: no administrative cost to the beneficiary.
+# ? Q2 says "monthly income less than Rs 15,000" while Q1 on the same page,
+# ? and labour.gov.in twice, say "Rs.15000 or less". Encoded as inclusive,
+# ? two sources to one. In practice the intake asks a band, so it cannot
+# ? separate 14,999 from 15,000 either way.
+summary_en       = "A minimum pension of ₹3,000 a month after age 60, with 50% family pension to the spouse. The Government matches the worker's contribution 1:1, and there is no administrative charge. You do not need proof of age or income — self-certification with Aadhaar is enough, though a false declaration can be penalised."
 
 # =====================================================================
 # ELIGIBILITY — ALL [[criteria]] must pass.
