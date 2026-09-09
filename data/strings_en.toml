@@ -161,12 +161,19 @@ unknown_reason_profile = "you did not tell me: {fields}"
 # ! said once. Repeating a 27-word sentence per scheme buries the one thing
 # ! the worker has to act on — the question to ask at the centre.
 unknown_shared = "For all of them: {gap}."
+unknown_ask_all = "At the centre, ask about each one by name — “Am I eligible for this?”"
+unknown_name_only = "• {name_hi}"
+# ! Still used when the schemes are unsure for DIFFERENT reasons.
 unknown_line_bare = "• {name_hi} — ask: “Am I eligible for {name_hi}?”"
 
 ineligible_header = "These schemes will not be available to you right now:"
 ineligible_line = "• {name_hi} — {reason}"
 
+# ! Only for a real no. When every scheme came back UNKNOWN the worker did
+# ! not fail anything - we did not check - so the next line is used instead.
 no_match_header = """You did not fully qualify for any scheme right now. That is not the end of it."""
+nothing_checked_header = """I could not check any scheme for you yet. That is about my information, not about you.
+Your answers are saved, and I can still make you a sheet to take to the centre."""
 near_miss = "Closest: {name_hi} — {reason}"
 no_match_footer = """Still, talk to your nearest centre once. States run their own schemes too, and those are not in my list."""
 

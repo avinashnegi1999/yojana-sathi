@@ -165,7 +165,12 @@ def unknown_block(results: tuple[Result, ...], schemes: dict[str, Scheme],
     head = [s("result.unknown_header", lang, count=len(items))]
     if shared:
         head.append(s("result.unknown_shared", lang, gap=shared))
-        bullets = [s("result.unknown_line_bare", lang, name_hi=n) for n, _ in items]
+        # ! One instruction, then the names. This used to repeat "ask: Am I
+        # ! eligible for X?" once per scheme — the same sentence seven times,
+        # ! with the scheme name in it twice, which pushed everything else off
+        # ! a phone screen.
+        head.append(s("result.unknown_ask_all", lang))
+        bullets = [s("result.unknown_name_only", lang, name_hi=n) for n, _ in items]
         return "\n\n".join(head) + "\n" + "\n".join(bullets)
     return "\n\n".join(
         head + [s("result.unknown_line", lang, name_hi=n, gap=g) for n, g in items]
@@ -223,6 +228,13 @@ def result_message(results: tuple[Result, ...], schemes: dict[str, Scheme],
     eligible = eligible_block(results, schemes, known, lang)
     if eligible:
         blocks.append(eligible)
+    elif all(r.verdict is Verdict.UNKNOWN for r in results):
+        # ! Nothing was decided either way, so do not open with "you did not
+        # ! qualify". That sentence blames the worker for our own gap. Today
+        # ! every scheme is UNKNOWN because nobody has signed the files off,
+        # ! and a worker reading "you did not fully qualify for any scheme"
+        # ! has been told something about themselves that is not true.
+        blocks.append(s("result.nothing_checked_header", lang))
     else:
         blocks.append(no_match_block(results, schemes, lang))
     for block in (unknown_block(results, schemes, lang),

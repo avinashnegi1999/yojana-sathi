@@ -90,6 +90,50 @@ def test_the_two_state_pensions_are_never_counted_as_two_payments():
         block = templates.eligible_block(results, signed, frozenset(), lang)
         assert '36,000' not in block and '36000' not in block, block
 
+def test_all_unknown_never_tells_a_worker_they_failed():
+    """Nothing checked is not the same as not qualifying, and must not read like it.
+
+    # ! Found on the first real phone screening, 9 September. Every scheme is
+    # ! UNKNOWN today because nobody has signed the files off, and the result
+    # ! screen still opened with "You did not fully qualify for any scheme" -
+    # ! a statement about the worker, caused entirely by a gap of ours. The
+    # ! message now says whose gap it is.
+    """
+    from sathi.render import templates
+    from sathi.core.content import s as _s
+    schemes = load_all(ROOT / 'data/schemes')
+    # The profile from that screening: answers given, nothing signed off.
+    p = Profile(state='UK', age=30, occupation='construction',
+                income_band='upto_5000', land_holding_band='landless',
+                family_size=4, has_bank_account=True, is_income_tax_payer=True,
+                is_epfo_or_esic_member=False, is_unorganised_worker=False,
+                is_woman=False, is_widow=False, household_has_lpg=False,
+                pmuy_declaration_met=False, uk_pension_income_or_bpl=False,
+                receives_other_pension=False, uk_pension_selected=False)
+    from sathi.rules.engine import evaluate_all
+    results = evaluate_all(p, schemes)
+    assert all(r.verdict is Verdict.UNKNOWN for r in results), \
+        'this test is meaningless unless every scheme really is UNKNOWN'
+
+    for lang in ('hi', 'en'):
+        msg = templates.result_message(results, schemes, frozenset(), lang)
+        assert _s('result.nothing_checked_header', lang).split('\n')[0] in msg
+        blame = _s('result.no_match_header', lang)
+        assert blame not in msg, f'[{lang}] blamed the worker for our own gap'
+        # ! The seven "ask: Am I eligible for X?" lines are one line now.
+        assert msg.count(_s('result.unknown_ask_all', lang)) == 1
+        for code, sc in schemes.items():
+            assert sc.name(lang) in msg, f'[{lang}] {code} missing from the list'
+
+    # ! A real INELIGIBLE must still get the honest "you did not qualify" line.
+    signed = {c: replace(v, verified_by='test fixture only', stubs=())
+              for c, v in schemes.items()}
+    hard_no = evaluate_all(replace(p, age=5), signed)
+    assert any(r.verdict is Verdict.INELIGIBLE for r in hard_no)
+    msg = templates.result_message(hard_no, signed, frozenset(), 'en')
+    assert _s('result.no_match_header', 'en') in msg
+
+
 def test_followups_preserve_unknown_and_language():
     schemes=load_all(ROOT/'data/schemes')
     for lang in ('en','hi'):
