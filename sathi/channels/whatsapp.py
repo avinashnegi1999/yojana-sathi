@@ -312,6 +312,28 @@ class _PackText(html.parser.HTMLParser):
 _RULE = "─" * 34
 
 
+def _sentences(line: str) -> list[str]:
+    """Split a long paragraph after each sentence, in either language.
+
+    # * A danda ends a Hindi sentence and a full stop an English one. Decimals
+    # * and "Rs.436" must not be split on, so a break needs whitespace after it
+    # * and a non-digit next.
+    """
+    out, start = [], 0
+    for i, ch in enumerate(line):
+        if ch not in ".।":
+            continue
+        rest = line[i + 1:]
+        if not rest.startswith(" ") or not rest[1:2] or rest[1:2].isdigit():
+            continue
+        out.append(line[start:i + 1].strip())
+        start = i + 2
+    tail = line[start:].strip()
+    if tail:
+        out.append(tail)
+    return out or [line]
+
+
 def _lay_out(text: str) -> str:
     """Give the flat conversion the shape of a handout."""
     out: list[str] = []
@@ -333,7 +355,11 @@ def _lay_out(text: str) -> str:
         else:
             if out and out[-1].startswith("•"):
                 out.append("")
-            out.append(line)
+            # ! One sentence per line. This is read on a phone, where a
+            # ! 400-character benefit summary is a ten-line wall of text and a
+            # ! worker loses her place in it. The viewer still wraps each
+            # ! sentence; the gaps give her somewhere to stop.
+            out.extend(_sentences(line) if len(line) > 150 else [line])
             out.append("")
     while out and not out[-1]:
         out.pop()

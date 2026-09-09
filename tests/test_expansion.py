@@ -137,6 +137,18 @@ def test_the_sheet_a_worker_carries_is_readable_on_a_phone():
         assert seen[0] != seen[1], f'[{lang}] the sheet opens with its own name twice'
         if lang == 'hi':
             assert 'योजना' in body, 'Devanagari did not survive the conversion'
+        # ! Read on a phone, so nothing may be a wall. The longest line is a
+        # ! benefit summary split one sentence per line; 150 characters still
+        # ! wraps to about four lines on a 40-column screen, which is a
+        # ! paragraph rather than a page.
+        longest = max((len(l) for l in body.splitlines()), default=0)
+        assert longest <= 210, f'[{lang}] a {longest}-character line will be a wall'
+        # ! And the plan has to come before the reasoning: where to walk must
+        # ! appear before the first long explanation.
+        from sathi.core.content import s as _str
+        glance = _str('pack.at_a_glance', lang)
+        assert glance in body, f'[{lang}] no at-a-glance block'
+        assert body.index(glance) < body.index('1.'),             f'[{lang}] the explanations come before the plan'
 
 
 def test_no_reason_is_said_to_a_worker_twice():

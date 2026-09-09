@@ -76,6 +76,20 @@ def build(
                      f"<ul>" + "".join(f"<li>{_e(l.lstrip('• '))}</li>"
                                        for l in recap.splitlines()) + "</ul></div>")
 
+    # ! The whole plan on the first screen. A worker opening this on a phone
+    # ! used to read three dense insurance paragraphs before finding out where
+    # ! to walk; the part she can act on was below the part she cannot. Names
+    # ! and places first, the reasoning underneath.
+    if eligible:
+        parts.append(f"<div class='note'><b>{_e(s('pack.at_a_glance', lang))}</b><ul>")
+        parts += [
+            "<li>" + _e(s("pack.at_a_glance_line", lang,
+                          name_hi=schemes[r.scheme_code].name(lang),
+                          where=templates.where_label(schemes[r.scheme_code], lang))) + "</li>"
+            for r in eligible
+        ]
+        parts.append("</ul></div>")
+
     for i, r in enumerate(eligible, start=1):
         sc = schemes[r.scheme_code]
         badge = s("result.new_badge", lang) if r.scheme_code not in known else ""

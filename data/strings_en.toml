@@ -200,6 +200,8 @@ unknown = "ask at your nearest Common Service Centre (CSC)"
 
 # =====================================================================
 [pack]
+at_a_glance = "Where to go — the short version"
+at_a_glance_line = "{name_hi} → {where}"
 # =====================================================================
 offer = "Shall I make you a sheet you can show at the centre?"
 # ! Offered even when nothing qualified. That worker is the one walking in
