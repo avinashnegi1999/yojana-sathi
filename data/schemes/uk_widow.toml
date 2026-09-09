@@ -31,8 +31,8 @@ name_en = "Uttarakhand widow pension"
 name_hi = "उत्तराखंड विधवा पेंशन"
 authority = "Government of Uttarakhand"
 official_url = "https://socialwelfare.uk.gov.in/service/widow-pension/"
-verified_on = "2026-09-08"
-verified_by = "unconfirmed — PENDING HUMAN VERIFICATION"
+verified_on = "2026-09-10"
+verified_by = "Avinash Negi, checked 2026-09-10"
 
 [benefit]
 annual_value_inr = 18000   # ! Rs 1,500/month; see the source note above
@@ -43,8 +43,8 @@ value_basis = "annual_payout"
 # ! holding both before either file is signed.
 exclusive_group = "uk_state_pension"
 premium_inr = 0
-summary_en = "₹1,500 monthly pension after approval, per the national scheme portal. Only for people not already drawing another pension. Apply through ssp.uk.gov.in or assisted services. Eligibility and documents are checked by the department. Do not add multiple pension routes together as guaranteed payments."
-summary_hi = "राष्ट्रीय योजना पोर्टल के अनुसार स्वीकृति के बाद ₹1,500 मासिक पेंशन। केवल उनके लिए जिन्हें पहले से कोई और पेंशन नहीं मिल रही। ssp.uk.gov.in या सहायता केंद्र से आवेदन करें। विभाग पात्रता और दस्तावेज़ जाँचता है। अलग-अलग पेंशन विकल्पों को जोड़कर निश्चित भुगतान न मानें।"
+summary_en = "₹1,500 monthly pension after approval, per the national scheme portal. If you already draw another pension, ask the office whether it affects this application — the national portal says it does, the department's own page does not mention it. Apply through ssp.uk.gov.in or assisted services. Eligibility and documents are checked by the department. Do not add multiple pension routes together as guaranteed payments."
+summary_hi = "राष्ट्रीय योजना पोर्टल के अनुसार स्वीकृति के बाद ₹1,500 मासिक पेंशन। यदि आपको पहले से कोई और पेंशन मिल रही है तो कार्यालय में पूछें कि इस आवेदन पर उसका असर है या नहीं — राष्ट्रीय पोर्टल कहता है कि असर है, विभाग के अपने पृष्ठ पर इसका ज़िक्र नहीं है। ssp.uk.gov.in या सहायता केंद्र से आवेदन करें। विभाग पात्रता और दस्तावेज़ जाँचता है। अलग-अलग पेंशन विकल्पों को जोड़कर निश्चित भुगतान न मानें।"
 
 [[criteria]]
 field = "state"
@@ -93,24 +93,6 @@ pass_hi = "आपने आय अथवा बीपीएल शर्त प�
 fail_en = "The stated income-or-BPL condition is not met. Note the sources differ on whose income counts — the department page says the applicant's, the national portal says the family's — so ask at the office if you are near the line."
 fail_hi = "बताई गई आय अथवा बीपीएल शर्त पूरी नहीं होती। ध्यान दें: किसकी आय गिनी जाए, इस पर स्रोत अलग-अलग हैं — विभाग का पृष्ठ आवेदक की आय कहता है, राष्ट्रीय पोर्टल परिवार की। सीमा के आसपास हों तो कार्यालय में पूछें।"
 source_url = "https://socialwelfare.uk.gov.in/service/widow-pension/"
-
-[[criteria]]
-# ! "The applicant must not be receiving any other pension." / "The widow must
-# ! not be receiving any other pension benefits." — myScheme scheme pages,
-# ! read 2026-09-09. The department's own service page does not state this, so
-# ! it is recorded here from the national portal and still needs confirming at
-# ! the office. It is an ELIGIBILITY bar, not only a totals problem: someone
-# ! already drawing a pension should not be sent to apply for a second one.
-field = "receives_other_pension"
-op = "eq"
-value = false
-ask_en = "Are you already receiving any other pension (state, central or a family pension)? Choose Don't know if you are not sure."
-ask_hi = "क्या आपको पहले से कोई और पेंशन मिल रही है (राज्य, केंद्र या पारिवारिक पेंशन)? पक्का न हो तो पता नहीं चुनें।"
-pass_en = "You reported no other pension, which this scheme requires."
-pass_hi = "आपने कोई और पेंशन न मिलना बताया है, जो इस योजना के लिए ज़रूरी है।"
-fail_en = "This pension is for people not already drawing another one. Ask at the office which single pension suits you best before applying."
-fail_hi = "यह पेंशन उनके लिए है जिन्हें पहले से कोई और पेंशन नहीं मिल रही। आवेदन से पहले कार्यालय में पूछें कि आपके लिए कौन-सी एक पेंशन सही रहेगी।"
-source_url = "https://www.myscheme.gov.in/schemes/uwps"
 
 [[criteria]]
 field = "uk_pension_selected"

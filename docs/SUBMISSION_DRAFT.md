@@ -12,10 +12,10 @@ PM-SYM, e-Shram and the Uttarakhand old-age pension. Avinash Negi read
 both Department of Financial Services FAQs in full and confirmed every encoded
 value on 9 September 2026; each file names him in `verified_by`.
 
-The Uttarakhand widow pension remains unsigned and answers "I could not check
-this yet", because its department page states no amount at all. Six schemes
-screen; one collects the answers and tell the worker what to ask at the
-centre. That distinction has to survive into the demo video and the problem
+All seven now screen. Say so plainly, and say that the widow pension's rate
+rests on a single aggregator page rather than the department's own. A judge who
+checks will find that, and finding it in your own documentation is very
+different from finding it themselves. That distinction has to survive into the demo video and the problem
 statement unchanged — a judge will try it.
 
 ## What the official form actually asks for — rechecked 9 September 2026

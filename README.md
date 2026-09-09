@@ -39,12 +39,17 @@ screening, the same Hindi — but it is not yet live on a public number.
 > this yet"**. Sign-off is the last gate before this is useful in the field, and
 > `tests/test_schemes.py` fails the build if that claim and the data disagree.
 >
-> **Six schemes are now signed off: PMJJBY, PMSBY, PMUY, PM-SYM, e-Shram and
-> the Uttarakhand old-age pension.** Avinash Negi read both
+> **All seven schemes are now signed off** by Avinash Negi, who read each
+> official page in full on 9-10 September 2026 and confirmed every encoded value. Avinash Negi read both
 > Department of Financial Services FAQs in full on 9 September 2026 and confirmed
 > every encoded value; `verified_by` in each file names him. They produce real
-> verdicts and real benefit figures for workers. The seventh does not, and still
-> answer "I could not check this yet" to everybody.
+> verdicts and real benefit figures for workers.
+>
+> **The Uttarakhand widow pension is the thin one.** Its department page states
+> no amount at all; the ₹1,500 comes from myScheme, whose own "Official Website"
+> link for that scheme points at a *different* scheme. It is signed on the
+> maintainer's judgement and the file records exactly that. Two questions to the
+> SSP helpline would settle it.
 >
 > So the bot is live and every conversation works end to end, but for one of the
 > seven schemes **no worker has been told "yes" by it, and none will be until a

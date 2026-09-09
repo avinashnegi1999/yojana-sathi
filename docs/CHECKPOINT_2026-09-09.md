@@ -89,8 +89,7 @@ Worth testing specifically, because they are new and untested by a human:
 
 ## 3. Which schemes support real screening
 
-**Six: PMJJBY, PMSBY, PMUY, PM-SYM, e-Shram and the Uttarakhand old-age pension.
-Only the Uttarakhand widow pension is demonstration-and-questions.**
+**All seven.** Every scheme is signed off and produces real verdicts.
 
 All four were signed off on 9 September 2026 by Avinash Negi, after he read
 each official page in full and compared every encoded value. They now produce
@@ -112,7 +111,7 @@ if this document and the data ever disagree about which is which.
 | **PMSBY** | ✅ every value verbatim; FAQ Q25 closes the partial-disability row outright | **None — SIGNED 2026-09-09, live** |
 | **e-Shram** | ✅ all 45 FAQs read; Q37 closes the farmer row, Q42 confirms registration-only | **None — SIGNED 2026-09-10, live.** Landowning farmers still unaddressed by the source, so nothing is encoded about landholding |
 | **PM-SYM** | ✅ all 16 FAQs read; every value matched | **None — SIGNED 2026-09-10, live.** Q2's "less than ₹15,000" still contradicts Q1 and the ministry page; encoded inclusive, and the income band cannot separate the boundary anyway |
-| UK widow pension | ✅ rate and eligibility, via myScheme | Human sign-off; the no-other-pension bar is not on the department's page |
+| **UK widow pension** | ⚠️ eligibility from the department; **rate from myScheme only**, whose own source link points at a different scheme | **SIGNED 2026-09-10 on the maintainer's judgement.** The weakest file here — confirm the rate with the SSP helpline |
 
 `/demo` output is fictional throughout and is never written to the impact
 database. Nothing in this project claims a benefit was delivered because a

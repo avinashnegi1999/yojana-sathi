@@ -118,13 +118,11 @@ def _oracle(code: str, p: Profile) -> bool | None:
         criterion(p.uk_pension_selected)
         if code == "UK_WIDOW":
             criterion(p.is_widow)
-            # ! Widow only. myScheme states "must not be receiving any other
-            # ! pension benefits" on both pages, but the department's own
-            # ! old-age page does not, and Avinash chose to follow the
-            # ! department for the scheme he signed. It stays encoded for the
-            # ! widow file, which is still unsigned and still open on this.
-            criterion(None if p.receives_other_pension is None
-                      else not p.receives_other_pension)
+            # ! No other-pension criterion on either file. myScheme states it,
+            # ! the department's own pages do not, and it REFUSES people — so
+            # ! both schemes tell the worker to ask instead of turning her away
+            # ! on an aggregator's unsourced line. The answer is still collected
+            # ! and still shown; it just does not decide a verdict.
     elif code == "PMUY":
         criterion(None if age is None else age >= 18)
         criterion(p.is_woman)
