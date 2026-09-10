@@ -1,0 +1,37 @@
+# ! GitHub Pages only offers two built-in sources: the repo root, or /docs.
+# ! The site lives in /livesite because docs/ is 21 markdown files written for
+# ! humans reading the repo, not a web root. Publishing a third folder needs
+# ! this workflow — it uploads livesite/ verbatim, no build step, no Jekyll.
+name: Publish livesite to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths: ['livesite/**', '.github/workflows/pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# * One deploy at a time. A queued run should replace the waiting one, not
+# * cancel the deploy that is already halfway through.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: livesite
+      - id: deployment
+        uses: actions/deploy-pages@v4

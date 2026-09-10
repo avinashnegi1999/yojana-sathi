@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Yojana Sathi — Know before you go</title>
+<meta name="description" content="A Hindi and English welfare-scheme screener for unorganised workers. Deterministic rules, cited sources, and an answer that is allowed to be UNKNOWN.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23c5b0f4'/%3E%3Ctext x='16' y='22' font-family='Inter,Arial,sans-serif' font-weight='700' font-size='15' fill='%23000' text-anchor='middle'%3EYS%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Yojana Sathi — Know before you go">
+<meta property="og:description" content="A welfare-scheme screener for unorganised workers. Deterministic rules, cited sources, and an answer that is allowed to be UNKNOWN.">
+<meta property="og:image" content="assets/system-map.svg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+/* Tokens from DESIGN.md (figma). Weight carries hierarchy — there is no grey body text. */
+:root{
+  --primary:#000;--on-primary:#fff;--ink:#000;--canvas:#fff;
+  --inverse-canvas:#000;--inverse-ink:#fff;
+  --hairline:#e6e6e6;--hairline-soft:#f1f1f1;--surface-soft:#f7f7f5;
+  --lime:#dceeb1;--lilac:#c5b0f4;--cream:#f4ecd6;--pink:#efd4d4;
+  --mint:#c8e6cd;--coral:#f3c9b6;--navy:#1f1d3d;
+  --magenta:#ff3d8b;--success:#1ea64a;
+  --sans:Inter,system-ui,-apple-system,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --xxs:4px;--xs:8px;--sm:12px;--md:16px;--lg:24px;--xl:32px;--xxl:48px;--section:96px;
+  --r-xs:2px;--r-sm:6px;--r-md:8px;--r-lg:24px;--r-xl:32px;--pill:50px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--canvas);color:var(--ink);font:320 18px/1.43 var(--sans);letter-spacing:-.26px;font-feature-settings:"kern";-webkit-font-smoothing:antialiased}
+.wrap{width:min(1200px,calc(100% - 40px));margin:auto}
+h1,h2,h3{margin:0;font-family:var(--sans)}
+a{color:var(--ink)}
+:focus-visible{outline:3px solid var(--magenta);outline-offset:3px;border-radius:var(--r-sm)}
+
+.d-xl{font-weight:340;font-size:clamp(42px,7.2vw,86px);line-height:.98;letter-spacing:-.02em}
+.d-lg{font-weight:340;font-size:clamp(34px,5.2vw,64px);line-height:1.08;letter-spacing:-.015em}
+.headline{font-weight:540;font-size:clamp(22px,2.4vw,26px);line-height:1.33;letter-spacing:-.26px}
+.subhead{font-weight:340;font-size:clamp(20px,2.2vw,26px);line-height:1.33;letter-spacing:-.26px}
+.card-title{font-weight:700;font-size:24px;line-height:1.43;letter-spacing:0}
+.body-lg{font-weight:330;font-size:20px;line-height:1.38;letter-spacing:-.14px}
+.body-sm{font-weight:330;font-size:16px;line-height:1.43;letter-spacing:-.14px}
+/* mono is a taxonomy tool: eyebrows and captions only, always uppercase */
+.eyebrow{margin:0;font:400 clamp(14px,1.5vw,18px)/1.28 var(--mono);letter-spacing:.54px;text-transform:uppercase}
+.caption{font:400 12px/1 var(--mono);letter-spacing:.6px;text-transform:uppercase}
+
+.btn{display:inline-flex;align-items:center;min-height:48px;padding:var(--sm) var(--lg);border:1px solid var(--ink);border-radius:var(--pill);font:480 20px/1.4 var(--sans);letter-spacing:-.1px;text-decoration:none;transition:transform .18s ease,background .18s ease,color .18s ease}
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{background:var(--primary);color:var(--on-primary)}
+.btn-primary:hover{background:var(--magenta);border-color:var(--magenta)}
+.btn-secondary{background:var(--canvas);color:var(--ink)}
+.btn-secondary:hover{background:var(--ink);color:var(--on-primary)}
+
+/* nav */
+.nav{border-bottom:1px solid var(--hairline);position:sticky;top:0;z-index:20;background:var(--canvas)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;gap:var(--lg);padding:var(--sm) 0}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;letter-spacing:-.4px;text-decoration:none}
+.logo i{display:grid;place-items:center;width:34px;height:34px;border-radius:var(--r-md);background:var(--lilac);font-style:normal;font-size:14px}
+.nav-links{display:flex;gap:var(--lg)}
+.nav-links a{font-weight:480;font-size:16px;text-decoration:none}
+.nav-links a:hover{color:var(--magenta)}
+.nav-cta{display:flex;gap:var(--xs)}
+
+section{padding:var(--section) 0}
+.hero{padding:calc(var(--section) * .85) 0 var(--xxl)}
+.hero h1{max-width:14ch;margin:var(--lg) 0}
+.hero .subhead{max-width:52ch}
+.cta{display:flex;flex-wrap:wrap;gap:var(--sm);margin-top:var(--xl)}
+.hero-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:var(--xxl);align-items:end}
+
+/* the device is the one place a shadow is allowed to appear */
+.device{border:1px solid var(--ink);border-radius:var(--r-lg);overflow:hidden;background:var(--canvas)}
+.device-top{display:flex;align-items:center;gap:var(--xs);padding:var(--sm) var(--md);border-bottom:1px solid var(--hairline)}
+.dot{width:9px;height:9px;border-radius:var(--pill);background:var(--hairline)}
+.device-top span{margin-left:auto;font:400 12px/1 var(--mono);letter-spacing:.6px;text-transform:uppercase}
+.chat{padding:var(--md)}
+.msg{margin:0 0 var(--xs);padding:var(--sm) var(--md);border-radius:var(--r-lg);background:var(--surface-soft);font-size:16px;font-weight:330;line-height:1.42}
+.msg.out{background:var(--lime)}
+.msg:last-child{margin-bottom:0}
+
+/* ── colour block: one per story section, white canvas returns between every two ── */
+.block{border-radius:var(--r-lg);padding:var(--xxl)}
+.b-lime{background:var(--lime)}
+.b-lilac{background:var(--lilac)}
+.b-cream{background:var(--cream)}
+.b-navy{background:var(--navy);color:var(--inverse-ink)}
+.block .head{max-width:34ch;margin-bottom:var(--xl)}
+.block .head h2{margin:var(--md) 0}
+
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--lg)}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--lg)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--lg)}
+.stat{border-top:2px solid currentColor;padding-top:var(--md)}
+.stat b{display:block;font-weight:340;font-size:clamp(32px,3.8vw,52px);line-height:1;letter-spacing:-.02em}
+.stat span{display:block;margin-top:var(--sm);font-weight:330;font-size:16px;line-height:1.4}
+sup a{font:400 11px var(--mono);text-decoration:none}
+
+.tile{background:var(--canvas);border:1px solid var(--ink);border-radius:var(--r-lg);padding:var(--lg);transition:transform .2s ease}
+.tile:hover{transform:translateY(-4px)}
+.tile .n{font:400 12px/1 var(--mono);letter-spacing:.6px;text-transform:uppercase}
+.tile h3{margin:var(--md) 0 var(--xs);font-weight:700;font-size:22px;line-height:1.3}
+.tile p{margin:0;font-weight:330;font-size:16px;line-height:1.43}
+
+.verdicts{display:flex;flex-wrap:wrap;gap:var(--xs);margin-top:var(--lg)}
+.verdicts b{padding:10px 18px;border:1px solid currentColor;border-radius:var(--pill);font-weight:480;font-size:16px}
+.verdicts b:last-child{background:var(--ink);color:var(--canvas);border-color:var(--ink)}
+.b-navy .verdicts b:last-child{background:var(--magenta);border-color:var(--magenta);color:var(--on-primary)}
+
+.checks{margin:0;padding:0;list-style:none}
+.checks li{padding:var(--md) 0;border-bottom:1px solid var(--hairline);font-weight:330;font-size:17px;line-height:1.45}
+.checks li:last-child{border-bottom:0}
+.checks b{font-weight:700}
+
+figure{margin:0}
+figure img{display:block;width:100%;height:auto;border:1px solid var(--ink);border-radius:var(--r-md)}
+figcaption{margin-top:var(--sm);font:400 12px/1.5 var(--mono);letter-spacing:.6px;text-transform:uppercase}
+.plates{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--lg);margin-top:var(--lg)}
+
+/* ── image slots ─────────────────────────────────────────────
+   Drop a real file into the <img src>, then delete the sibling
+   .ph placeholder div. Sizes are set by aspect-ratio so the
+   layout never jumps between placeholder and real image.      */
+.shot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--lg);margin-top:var(--xl)}
+.shot-frame{border:1px solid var(--ink);border-radius:var(--r-lg);overflow:hidden;background:var(--canvas)}
+.shot-frame img{display:block;width:100%;height:auto}
+.shot-frame figcaption{margin:0;padding:var(--sm) var(--md);border-top:1px solid var(--hairline)}
+/* the handoff: one phone beside the claim it evidences */
+.handoff{display:grid;grid-template-columns:340px 1fr;gap:var(--xxl);align-items:center;margin-top:var(--xl)}
+.handoff .shot-frame{background:var(--canvas)}
+
+/* intro video — never preloaded, it is 15 MB and this page is read on 4G */
+.film{border:1px solid var(--ink);border-radius:var(--r-lg);overflow:hidden;background:#000}
+.film video{display:block;width:100%;height:auto;max-height:70vh;background:#000}
+.film figcaption{margin:0;padding:var(--sm) var(--md);border-top:1px solid var(--ink);background:var(--canvas)}
+
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:var(--sm) var(--md);border-bottom:2px solid var(--ink);font:400 12px/1.2 var(--mono);letter-spacing:.6px;text-transform:uppercase}
+td{padding:var(--md);border-bottom:1px solid var(--hairline);font-weight:330;font-size:17px;line-height:1.4}
+td.name{font-weight:700}
+tbody tr{transition:background .18s}
+tbody tr:hover{background:var(--surface-soft)}
+.tags{display:flex;flex-wrap:wrap;gap:var(--xs);margin-top:var(--lg)}
+.tags span{padding:8px 14px;border:1px solid var(--ink);border-radius:var(--pill);font:400 12px/1.2 var(--mono);letter-spacing:.6px;text-transform:uppercase}
+
+.limit{border-top:2px solid currentColor;padding-top:var(--md)}
+.limit h3{margin:0 0 var(--xs);font-weight:700;font-size:20px;line-height:1.3}
+.limit p{margin:0;font-weight:330;font-size:16px;line-height:1.45}
+
+.notes ol{margin:0;padding-left:var(--lg);max-width:92ch}
+.notes li{margin:var(--sm) 0;font-weight:330;font-size:16px;line-height:1.5}
+.notes a,.prose a{color:var(--magenta)}
+footer{border-top:1px solid var(--hairline);padding:var(--section) 0 var(--xxl)}
+.colophon{display:grid;grid-template-columns:1.5fr .55fr .55fr;gap:var(--xxl);padding-bottom:var(--xxl)}
+.foot-links{display:flex;flex-direction:column;gap:var(--sm);align-items:flex-start}
+.foot-links .eyebrow{margin-bottom:var(--xs)}
+.foot-links a{font-weight:480;font-size:18px;text-decoration:none;border-bottom:1px solid var(--hairline)}
+.foot-links a:hover{color:var(--magenta);border-color:var(--magenta)}
+.colophon .caption a{color:var(--magenta);text-decoration:none}
+.colophon .caption a:hover{text-decoration:underline}
+.foot-base{display:flex;justify-content:space-between;gap:var(--lg);flex-wrap:wrap;padding-top:var(--lg);border-top:1px solid var(--hairline)}
+
+.rise{animation:rise .6s cubic-bezier(.2,.7,.3,1) backwards}
+.rise:nth-child(2){animation-delay:.08s}
+@keyframes rise{from{opacity:0;transform:translateY(20px)}}
+
+@media(max-width:1023px){
+  .hero-grid,.grid-2,.colophon{grid-template-columns:1fr}
+  .grid-4{grid-template-columns:repeat(2,1fr)}
+  .plates,.grid-3,.shot-grid,.handoff{grid-template-columns:1fr}
+  .handoff .shot-frame{max-width:340px}
+  .nav-links{display:none}
+}
+@media(max-width:767px){
+  .wrap{width:calc(100% - 28px)}
+  :root{--section:64px;--xxl:28px}
+  .grid-4{grid-template-columns:1fr}
+  th,td{padding:var(--sm) var(--xs);font-size:15px}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .rise{animation:none}
+  .btn,.tile,tbody tr{transition:none}
+  .btn:hover,.tile:hover{transform:none}
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="logo" href="#top"><i>YS</i> Yojana Sathi</a>
+    <nav class="nav-links"><a href="#how">How it works</a><a href="#build">Architecture</a><a href="#schemes">Schemes</a><a href="#limits">Limitations</a></nav>
+    <div class="nav-cta">
+      <a class="btn btn-secondary" href="https://github.com/avinashnegi1999/yojana-sathi">Source</a>
+      <a class="btn btn-primary" href="https://t.me/YojanaSathiBot">Open the bot</a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow rise">Code for a Billion 2026 · Livelihood</p>
+      <h1 class="d-xl rise">Know before you go.</h1>
+      <p class="subhead rise">A Hindi and English chat that tells an unorganised worker which welfare schemes fit, what to carry, and where to begin — before a day's wage is spent finding out at a counter.</p>
+      <div class="cta rise">
+        <a class="btn btn-primary" href="https://t.me/YojanaSathiBot">Try it on Telegram</a>
+        <a class="btn btn-secondary" href="#how">See how it decides</a>
+      </div>
+    </div>
+    <div class="device">
+      <div class="device-top"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span>Telegram · हिन्दी</span></div>
+      <div class="chat">
+        <p class="msg">आपके लिए 3 योजना मिलीं। सबसे ऊपर वह है जिसमें सबसे ज़्यादा फ़ायदा है।</p>
+        <p class="msg out">प्रधानमंत्री श्रम योगी मानधन<br><br>क्या मिलेगा: 60 साल के बाद कम से कम ₹3,000 महीना पेंशन।<br><br>कहाँ से शुरू करें: नज़दीकी जन सेवा केंद्र (CSC)</p>
+        <p class="msg">यह रकम मिलने की गारंटी नहीं है। आवेदन और अधिकारी की जाँच बाकी है।</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="wrap">
+    <figure class="film">
+      <video controls preload="none" playsinline style="aspect-ratio:16/9">
+        <source src="assets/intro.mp4" type="video/mp4">
+        Your browser cannot play this video. <a href="assets/intro.mp4">Download it instead</a>.
+      </video>
+      <figcaption class="caption">Two minutes — what the project is and how a screening runs</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- BLOCK 1 · lime -->
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="block b-lime">
+      <div class="head"><p class="eyebrow">The problem</p><h2 class="d-lg">One wrong answer costs a day's wage.</h2><p class="body-lg">Schemes are not hidden — they are published and announced. What a worker cannot tell from the outside is whether a scheme will actually accept them.</p></div>
+      <div class="grid-4">
+        <div class="stat"><b>43.99 cr</b><span>people working in India's unorganised sector, 2019–20<sup><a href="#s1">1</a></sup></span></div>
+        <div class="stat"><b>31.48 cr</b><span>already on e-Shram, with fourteen central schemes mapped to it<sup><a href="#s2">2</a></sup></span></div>
+        <div class="stat"><b>₹455</b><span>average daily earnings, male casual labourer, 2025<sup><a href="#s3">3</a></sup></span></div>
+        <div class="stat"><b>₹315</b><span>average daily earnings, female casual labourer, 2025<sup><a href="#s3">3</a></sup></span></div>
+      </div>
+      <p class="caption" style="margin-top:var(--lg)">Registration is not receipt of a benefit — none of these figures measures this project</p>
+    </div>
+  </div>
+</section>
+
+<!-- white canvas returns -->
+<section id="how" style="padding-top:var(--xxl)">
+  <div class="wrap">
+    <div class="head" style="max-width:44ch;margin-bottom:var(--xl)"><p class="eyebrow">How it decides</p><h2 class="d-lg" style="margin:var(--md) 0">A verdict ledger, not a black box.</h2><p class="body-lg">Every answer moves through the same four stages, producing the same result each time it runs.</p></div>
+    <div class="grid-4">
+      <div class="tile"><span class="n">01 — Input</span><h3>Worker answers</h3><p>Buttons before typing. "Don't know" is offered on every question and survives to the verdict.</p></div>
+      <div class="tile"><span class="n">02 — Evidence</span><h3>Cited rules</h3><p>One readable TOML file per scheme, each condition beside its official source and review date.</p></div>
+      <div class="tile"><span class="n">03 — Decide</span><h3>Pure rule engine</h3><p>Same answers, same verdict. No network call in the path, no language-model import in the module.</p></div>
+      <div class="tile"><span class="n">04 — Explain</span><h3>Next step</h3><p>The reason behind the result, the documents to carry, and the kind of counter to start at.</p></div>
+    </div>
+    <div class="grid-2" style="margin-top:var(--xl)">
+      <div><h3 class="card-title">Built to refuse guessing</h3><ul class="checks">
+        <li>A missing answer becomes <b>UNKNOWN</b>, never a default value.</li>
+        <li>An unsigned or unfinished rule becomes <b>UNKNOWN</b>, never a real verdict.</li>
+        <li>Insurance cover and annual pension are never summed into one flattering number.</li>
+      </ul></div>
+      <div><h3 class="card-title">Built to be checked</h3><ul class="checks">
+        <li>Rules are <b>plain text files</b> in the public repository, not hidden prompts.</li>
+        <li>Every value records its government source and the date a person read it.</li>
+        <li>Boundary tests compare the engine against source interpretations encoded separately, by hand.</li>
+      </ul></div>
+    </div>
+
+    <!-- Real conversations, not mockups. WhatsApp first, then Telegram. -->
+    <div class="shot-grid">
+      <figure class="shot-frame">
+        <img src="assets/shot-consent.jpg" alt="The WhatsApp bot offering Hindi and English as tappable buttons, then stating it will not ask for a name, phone number or Aadhaar number, and that only counts are kept." loading="lazy" width="720" height="1600">
+        <figcaption>Fig. 1 — Buttons before typing, and the privacy promise made up front</figcaption>
+      </figure>
+      <figure class="shot-frame">
+        <img src="assets/shot-verdict.jpg" alt="A Telegram result listing two schemes, each with what you get, why you qualify, and where to go — including the premium and what the cover excludes." loading="lazy" width="720" height="1600">
+        <figcaption>Fig. 2 — Every verdict carries what you get, why, and what it excludes</figcaption>
+      </figure>
+      <figure class="shot-frame">
+        <img src="assets/shot-unknown.jpg" alt="The answer recap showing unanswered facts written as 'you did not say' and 'needs confirmation' rather than being filled in with a default." loading="lazy" width="720" height="1600">
+        <figcaption>Fig. 3 — “You did not say” survives all the way to the verdict</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- BLOCK 2 · lilac -->
+<section style="padding-top:var(--xxl)">
+  <div class="wrap">
+    <div class="block b-lilac">
+      <div class="head" style="max-width:26ch;margin-bottom:var(--lg)"><p class="eyebrow">The design</p><h2 class="d-lg">UNKNOWN is an answer.</h2></div>
+      <p class="subhead" style="max-width:56ch">Most screeners have two outcomes and quietly default the third. If a worker has not answered a question, or a rule has not been checked by a person, this one says so — and names the missing fact instead of implying the worker failed a test.</p>
+      <div class="verdicts"><b>ELIGIBLE</b><b>INELIGIBLE</b><b>UNKNOWN</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- white canvas returns -->
+<section id="build" style="padding-top:var(--xxl)">
+  <div class="wrap">
+    <div class="head" style="max-width:44ch;margin-bottom:var(--xl)"><p class="eyebrow">Architecture</p><h2 class="d-lg" style="margin:var(--md) 0">The whole system, on one screen.</h2><p class="body-lg">The optional language model sits outside the decision path. It may propose an occupation label for the worker to confirm — and nothing else.</p></div>
+    <figure><img src="assets/system-map.svg" alt="Channels — worker, Telegram bot, WhatsApp bot, terminal preview — feed a conversation that builds an in-memory profile. That profile and source-cited TOML scheme rules enter a deterministic rule engine returning eligible, ineligible or unknown, with no language model in the verdict path. Outputs are an explained verdict, a document checklist, a one-page application pack, and where to begin. Separately, a consented coarse event log feeds a duplicate-safe reach counter and an impact report." loading="lazy"><figcaption>Fig. 4 — Channels, decision core, outputs, and the measurement it is allowed to keep</figcaption></figure>
+    <div class="plates">
+      <figure><img src="assets/backend-verdict.svg" alt="A profile and a source-cited scheme file enter the deterministic rule engine and result in eligible, ineligible, or unknown." loading="lazy"><figcaption>Fig. 5 — No model, no network call, no hidden scoring step</figcaption></figure>
+      <figure><img src="assets/backend-intake.svg" alt="Worker answers move through the conversation flow into a session profile, while consent controls coarse event logging." loading="lazy"><figcaption>Fig. 6 — Never infers identity, never turns a missing fact into a no</figcaption></figure>
+      <figure><img src="assets/backend-privacy.svg" alt="A session profile is discarded while coarse consented events can reach the impact report." loading="lazy"><figcaption>Fig. 7 — Coarse bands and a random session id, never a name or number</figcaption></figure>
+    </div>
+
+    <div class="block b-lime handoff">
+      <figure class="shot-frame">
+        <img src="assets/shot-sheet.jpg" alt="The WhatsApp bot offering to make a sheet, then delivering it as a file, saying it has no name and no Aadhaar on it — only what to ask for and what to carry." loading="lazy" width="720" height="1600">
+        <figcaption>Fig. 8 — The sheet, offered and never forced</figcaption>
+      </figure>
+      <div>
+        <p class="eyebrow">The handoff</p>
+        <h3 class="d-lg" style="margin:var(--md) 0">What the worker walks away holding.</h3>
+        <ul class="checks">
+          <li>A sheet built <b>in memory</b> — no copy is kept on the server.</li>
+          <li>Papers they said they do <b>not</b> have, turned into questions to ask at the counter.</li>
+          <li><b>No name, no Aadhaar</b> on it — only what to ask for and what to carry.</li>
+          <li>The last question is optional, and says so: <b>“you can skip it.”</b></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BLOCK 3 · cream -->
+<section id="schemes" style="padding-top:var(--xxl)">
+  <div class="wrap">
+    <div class="block b-cream">
+      <div class="head" style="max-width:38ch"><p class="eyebrow">Coverage</p><h2 class="d-lg">Seven schemes. Narrow on purpose.</h2><p class="body-lg">A short list of answers that hold up beats a long directory of approximate ones. The two Uttarakhand pensions are alternative routes to one state payment and are never added together.</p></div>
+      <table>
+        <thead><tr><th>Scheme</th><th>Stated benefit</th><th>Where an application begins</th></tr></thead>
+        <tbody>
+          <tr><td class="name">PM Shram Yogi Maandhan</td><td>₹36,000 per year from age 60</td><td>Common Service Centre</td></tr>
+          <tr><td class="name">Uttarakhand old-age pension</td><td>₹18,000 per year</td><td>State portal</td></tr>
+          <tr><td class="name">Uttarakhand widow pension</td><td>₹18,000 per year</td><td>State portal</td></tr>
+          <tr><td class="name">PM Jeevan Jyoti Bima Yojana</td><td>₹2,00,000 life cover</td><td>Bank branch</td></tr>
+          <tr><td class="name">PM Suraksha Bima Yojana</td><td>₹2,00,000 accident cover</td><td>Bank branch</td></tr>
+          <tr><td class="name">PM Ujjwala Yojana</td><td>In-kind LPG support</td><td>Online or an LPG distributor</td></tr>
+          <tr><td class="name">e-Shram registration</td><td>Gateway — no payout of its own</td><td>e-Shram portal or a CSC</td></tr>
+        </tbody>
+      </table>
+      <div class="tags"><span>Python stdlib</span><span>TOML rules</span><span>SQLite</span><span>Telegram Bot API</span><span>WhatsApp Cloud API</span><span>Docker</span><span>Ubuntu + systemd</span><span>One small server</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- white canvas returns, then BLOCK 4 · navy -->
+<section id="limits" style="padding-top:var(--xxl)">
+  <div class="wrap">
+    <div class="head" style="max-width:40ch;margin-bottom:var(--xl)"><p class="eyebrow">The honest section</p><h2 class="d-lg" style="margin:var(--md) 0">What this page will not claim.</h2><p class="body-lg">Naming what has not been shown yet is part of the product, not a disclaimer buried at the bottom.</p></div>
+    <div class="block b-navy">
+      <div class="grid-3">
+        <article class="limit"><h3>No field impact yet</h3><p>No worker has used this outside maintainer testing. No claim about applications filed, benefits received, or people reached.</p></article>
+        <article class="limit"><h3>Amounts are entitlements</h3><p>Every rupee figure is what a scheme states it pays — not money anyone has been shown to have received through this tool.</p></article>
+        <article class="limit"><h3>No government endorsement</h3><p>An independent open-source project. Where a rule here conflicts with a department, the department is right.</p></article>
+        <article class="limit"><h3>One rate needs confirming</h3><p>The Uttarakhand widow-pension amount comes from myScheme because the department page does not state it.</p></article>
+        <article class="limit"><h3>Language needs field review</h3><p>Both flows are tested by the maintainer. Comprehension has not been checked with non-technical workers.</p></article>
+        <article class="limit"><h3>WhatsApp is not general</h3><p>Telegram is live. WhatsApp runs on Meta's test tier until business verification completes.</p></article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="notes prose" style="padding-top:var(--xxl)">
+  <div class="wrap">
+    <p class="eyebrow" style="margin-bottom:var(--md)">Sources</p>
+    <ol>
+      <li id="s1">Ministry of Labour &amp; Employment, Lok Sabha reply, 24 July 2023: <a href="https://www.pib.gov.in/PressReleasePage.aspx?PRID=1942079">43.99 crore workers in the unorganised sector</a>.</li>
+      <li id="s2">Ministry of Labour &amp; Employment, 2 February 2026, on registrations as at 26 January 2026: <a href="https://www.pib.gov.in/PressReleasePage.aspx?PRID=2222263">31.48 crore workers on e-Shram, fourteen central schemes integrated</a>.</li>
+      <li id="s3">National Statistical Office / MoSPI, <a href="https://www.mospi.gov.in/uploads/latestReleases/latest_release_1774607827733_3e8964a9-268b-4cc9-ad65-cfc8a9e32f08_Press_note_AR_PLFS_2025_23032025_V2.1_26032026_final.pdf">PLFS Annual Report 2025 press note</a>: daily casual-labour earnings.</li>
+      <li>Scheme-by-scheme evidence, source snapshots, review records and tests: <a href="https://github.com/avinashnegi1999/yojana-sathi">the public repository</a>.</li>
+    </ol>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="colophon">
+      <div>
+        <p class="eyebrow">Built by</p>
+        <h2 class="d-lg" style="margin:var(--sm) 0 var(--md)">Avinash Negi</h2>
+        <p class="body-lg" style="max-width:44ch">I designed, wrote and deployed Yojana Sathi on my own — the rule engine, the scheme files, the Hindi copy and the server it runs on.</p>
+        <p class="body-lg" style="max-width:44ch;margin-top:var(--md)">If you spot a wrong threshold, a stale amount, or a scheme worth adding, I want to hear it. Corrections are the most useful thing anyone can send me.</p>
+        <p style="margin-top:var(--lg)"><a class="btn btn-primary" href="mailto:avinashnegi1999work@gmail.com?subject=Yojana%20Sathi%20—%20suggestion">Email a suggestion</a></p>
+        <p class="caption" style="margin-top:var(--md)"><a href="mailto:avinashnegi1999work@gmail.com">avinashnegi1999work@gmail.com</a></p>
+      </div>
+      <div class="foot-links">
+        <p class="eyebrow">The project</p>
+        <a href="https://t.me/YojanaSathiBot">Telegram bot</a>
+        <a href="https://github.com/avinashnegi1999/yojana-sathi">Source code</a>
+        <a href="#schemes">Supported schemes</a>
+        <a href="#limits">What it does not claim</a>
+      </div>
+      <div class="foot-links">
+        <p class="eyebrow">Elsewhere</p>
+        <a href="https://github.com/AvinashNegi1999" rel="me">GitHub</a>
+        <a href="https://www.linkedin.com/in/avinashnegi1999/" rel="me">LinkedIn</a>
+        <a href="https://x.com/avinashnegi1999" rel="me">X / Twitter</a>
+        <a href="https://hashnode.com/@avinashnegi1999" rel="me">Hashnode</a>
+      </div>
+    </div>
+    <div class="foot-base">
+      <span class="caption">Yojana Sathi — open-source welfare-scheme screening</span>
+      <span class="caption">Independent project · Not a government service</span>
+    </div>
+  </div>
+</footer>
+</body></html>

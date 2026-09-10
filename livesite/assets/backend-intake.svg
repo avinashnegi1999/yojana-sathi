@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" role="img" aria-labelledby="title desc">
+  <title id="title">How a worker answer becomes a profile</title>
+  <desc id="desc">A worker answers button-based questions. Consent gates the event log. Answers stay in a session-only profile before reaching the rules.</desc>
+  <style>
+    .bg{fill:#fffdf7}.edge{fill:none;stroke:#657066;stroke-width:4}.dash{fill:none;stroke:#657066;stroke-width:4;stroke-dasharray:12 10}.card{fill:#fffdf7;stroke:#14221c;stroke-width:3}.dark{fill:#173f32}.lime{fill:#d6f05c}.t{font:700 28px Georgia,serif;fill:#14221c}.sub{font:500 20px Arial,sans-serif;fill:#5c675d}.white{fill:#fffdf7}.mint{fill:#d7e5dc}.tag{font:800 17px Arial,sans-serif;letter-spacing:2px;fill:#e77833}.arrow{fill:#657066}
+  </style>
+  <rect class="bg" width="1200" height="560" rx="32"/>
+  <text x="65" y="72" class="tag">01 / INTAKE</text>
+  <text x="65" y="118" class="t">Answers are collected, not inferred.</text>
+  <rect class="card" x="65" y="198" width="260" height="180" rx="22"/>
+  <text x="195" y="260" text-anchor="middle" class="t">Worker</text>
+  <text x="195" y="300" text-anchor="middle" class="sub">buttons · typed age</text>
+  <text x="195" y="330" text-anchor="middle" class="sub">“don’t know” allowed</text>
+  <path class="edge" d="M325 288H410"/><path class="arrow" d="M410 288l-20-12v24z"/>
+  <rect class="dark" x="430" y="178" width="310" height="220" rx="22"/>
+  <text x="585" y="245" text-anchor="middle" class="t white">Conversation flow</text>
+  <text x="585" y="290" text-anchor="middle" class="sub mint">asks only what loaded</text>
+  <text x="585" y="320" text-anchor="middle" class="sub mint">schemes need</text>
+  <text x="585" y="358" text-anchor="middle" class="sub mint">LLM may suggest an occupation</text>
+  <path class="edge" d="M740 288H815"/><path class="arrow" d="M815 288l-20-12v24z"/>
+  <rect class="card" x="835" y="198" width="300" height="180" rx="22"/>
+  <text x="985" y="260" text-anchor="middle" class="t">Session profile</text>
+  <text x="985" y="300" text-anchor="middle" class="sub">age · state · income band</text>
+  <text x="985" y="330" text-anchor="middle" class="sub">no name · phone · Aadhaar</text>
+  <path class="dash" d="M585 398V470H985V390"/>
+  <rect class="lime" x="445" y="448" width="280" height="78" rx="14"/>
+  <text x="585" y="480" text-anchor="middle" class="t">Consent opens logging</text>
+  <text x="585" y="510" text-anchor="middle" class="sub">coarse bands only</text>
+</svg>

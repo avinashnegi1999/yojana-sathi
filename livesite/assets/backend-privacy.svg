@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" role="img" aria-labelledby="title desc">
+  <title id="title">How privacy safe impact measurement works</title>
+  <desc id="desc">A session profile is discarded after the screening. Consented events keep only coarse bands and a random session id for aggregate reporting.</desc>
+  <style>
+    .bg{fill:#fffdf7}.edge{fill:none;stroke:#657066;stroke-width:4}.dash{fill:none;stroke:#e77833;stroke-width:4;stroke-dasharray:12 10}.card{fill:#fffdf7;stroke:#14221c;stroke-width:3}.dark{fill:#173f32}.lime{fill:#d6f05c}.t{font:700 28px Georgia,serif;fill:#14221c}.sub{font:500 20px Arial,sans-serif;fill:#5c675d}.white{fill:#fffdf7}.mint{fill:#d7e5dc}.tag{font:800 17px Arial,sans-serif;letter-spacing:2px;fill:#e77833}.arrow{fill:#657066}
+  </style>
+  <rect class="bg" width="1200" height="560" rx="32"/>
+  <text x="65" y="72" class="tag">03 / MEASURE</text>
+  <text x="65" y="118" class="t">Impact counts events, not identities.</text>
+  <rect class="dark" x="65" y="196" width="275" height="175" rx="22"/>
+  <text x="202" y="258" text-anchor="middle" class="t white">Session profile</text>
+  <text x="202" y="300" text-anchor="middle" class="sub mint">exact answers stay here</text>
+  <text x="202" y="332" text-anchor="middle" class="sub mint">then leave memory</text>
+  <path class="edge" d="M340 282H430"/><path class="arrow" d="M430 282l-20-12v24z"/>
+  <rect class="card" x="450" y="175" width="305" height="215" rx="22"/>
+  <text x="602" y="235" text-anchor="middle" class="t">Consent-gated events</text>
+  <text x="602" y="278" text-anchor="middle" class="sub">random session id</text>
+  <text x="602" y="312" text-anchor="middle" class="sub">state · age band · occupation</text>
+  <text x="602" y="346" text-anchor="middle" class="sub">income band · no raw answers</text>
+  <path class="edge" d="M755 282H840"/><path class="arrow" d="M840 282l-20-12v24z"/>
+  <rect class="lime" x="860" y="196" width="275" height="175" rx="22"/>
+  <text x="997" y="258" text-anchor="middle" class="t">Impact report</text>
+  <text x="997" y="300" text-anchor="middle" class="sub">screenings · matches</text>
+  <text x="997" y="332" text-anchor="middle" class="sub">packs · coarse aggregates</text>
+  <path class="dash" d="M202 371V465H602V390"/>
+  <text x="402" y="508" text-anchor="middle" class="sub">names · phones · Aadhaar · exact income never enter the log</text>
+</svg>
