@@ -73,6 +73,51 @@ def _run_a_full_session(db: Path) -> EventLog:
     return log
 
 
+def test_the_unique_people_table_cannot_say_who_did_what():
+    """Counting people must not become identifying them.
+
+    # ! `reach` is the one table keyed on a channel id, so it is the one place
+    # ! the privacy story could quietly collapse. Three guarantees, asserted
+    # ! rather than promised: the raw id never lands, there is no session_id to
+    # ! join back to the impact log, and no profile answer sits beside it.
+    """
+    import tempfile, os, sqlite3
+    from sathi.metrics.events import EventLog
+    with tempfile.TemporaryDirectory() as d:
+        path = os.path.join(d, "reach.db")
+        log = EventLog(path)
+        try:
+            chat = "919812345678"
+            assert log.record_reach(chat, "telegram", "reddit") is True
+            assert log.record_reach(chat, "telegram", "reddit") is False,                 "the same person was counted twice"
+            log.set_purpose(chat, "family")
+            assert log.reach_counts()["unique_people"] == 1
+        finally:
+            log.close()
+
+        raw = Path(path).read_bytes()
+        assert chat.encode() not in raw, "the raw channel id reached the disk"
+        assert b"9812345678" not in raw, "part of the phone number reached the disk"
+
+        conn = sqlite3.connect(path)
+        cols = {r[1] for r in conn.execute("PRAGMA table_info(reach)")}
+        assert "session_id" not in cols, "reach is joinable to events"
+        forbidden = {"name", "phone", "aadhaar", "age", "income_band", "occupation",
+                     "state", "scheme_code", "value_inr"}
+        assert not (cols & forbidden), f"profile data beside a stable id: {cols & forbidden}"
+        # ! Two people must not collide into one, and one must not split into two.
+        conn.close()
+
+    with tempfile.TemporaryDirectory() as d:
+        log = EventLog(os.path.join(d, "b.db"))
+        try:
+            for i in range(50):
+                log.record_reach(f"user{i}", "telegram")
+            assert log.reach_counts()["unique_people"] == 50
+        finally:
+            log.close()
+
+
 def test_schema_has_only_coarse_columns():
     with tempfile.TemporaryDirectory() as d:
         log = EventLog(Path(d) / "t.db")

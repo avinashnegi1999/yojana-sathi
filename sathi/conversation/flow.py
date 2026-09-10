@@ -92,6 +92,9 @@ class Conversation:
         self._required_docs: tuple[str, ...] = ()
         self._document_page = 0
         self._results: tuple = ()
+        # * Set once the worker agrees to anonymous metrics. The adapter uses
+        # * it to count one unique person, in a table that has no session id.
+        self.consent_granted = False
         self._followup_fields: list[str] = []
         self._followup_index = 0
 
@@ -334,6 +337,10 @@ class Conversation:
             return [consent.declined(self.lang)]
         if answer != consent.YES and answer != YES:
             return [consent.ask(self.lang)]
+        # ! Read by the channel adapter, which is the only layer that knows who
+        # ! it is talking to. The Conversation itself never learns the channel
+        # ! id — that separation is the whole reason sessions are unlinkable.
+        self.consent_granted = True
         if self.log and self.session:
             self.log.grant_consent(self.session)
         self.state = State.STATE

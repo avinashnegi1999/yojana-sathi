@@ -251,6 +251,20 @@ def _table(rows: list[tuple[str, int, bool]], head: str) -> str:
     return "".join(out) + "</table>"
 
 
+def _reach(conn: sqlite3.Connection) -> dict:
+    """Unique people and where they came from. Never a per-person row."""
+    q = conn.execute
+    return {
+        "unique_people": int(q("SELECT COUNT(*) FROM reach").fetchone()[0]),
+        "by_source": [(str(a), int(b)) for a, b in q(
+            "SELECT COALESCE(source, 'direct'), COUNT(*) FROM reach"
+            " GROUP BY 1 ORDER BY 2 DESC, 1").fetchall()],
+        "by_purpose": [(str(a), int(b)) for a, b in q(
+            "SELECT COALESCE(purpose, 'not asked'), COUNT(*) FROM reach"
+            " GROUP BY 1 ORDER BY 2 DESC, 1").fetchall()],
+    }
+
+
 def render(conn: sqlite3.Connection, since: str = "",
            schemes_dir: str | Path = "data/schemes", today: date | None = None) -> str:
     n = numbers(conn, since)
@@ -258,11 +272,20 @@ def render(conn: sqlite3.Connection, since: str = "",
     prov = provenance(schemes_dir, today)
     unverified = [p for p in prov if not p["servable"]]
     split = value_split(conn, schemes_dir, since)
+    # ! Sessions are not people. Every conversation gets a fresh unlinkable id
+    # ! on purpose, so "182 sessions" could be 182 workers or one patient
+    # ! tester. `reach` answers the other question, from a table with no
+    # ! session id and therefore no way to say who did what.
+    try:
+        reach = _reach(conn)
+    except sqlite3.Error:
+        reach = {"unique_people": 0, "by_source": [], "by_purpose": []}
 
     cards = [
         ("hero", f"{n['surfaced']}", "schemes newly surfaced to a worker"),
         ("hero", f"₹{split['payout']:,}", "annual entitlement surfaced (not delivered)"),
         ("", f"₹{split['cover']:,}", "accident cover surfaced (pays only on a claim)"),
+        ("", f"{reach['unique_people']}", "different people, counted once each"),
         ("", f"{n['screened']}", "screening sessions evaluated"),
         ("", f"{n['per_worker']}", "schemes matched per screening"),
         ("", f"{n['packs']}", "application packs generated"),
@@ -340,12 +363,30 @@ def render(conn: sqlite3.Connection, since: str = "",
         )
     parts.append("</section>")
 
+    if reach["unique_people"]:
+        parts.append("<h2>Where people came from</h2>")
+        parts.append("<p class='sub'>Counted once per person, from a table with no "
+                     "session id — so it can say how many people, and never which "
+                     "person answered what. Only people who agreed to be counted "
+                     "appear here.</p>")
+        parts.append(_table([(a, b, False) for a, b in reach["by_source"]], "source"))
+        if any(a != "not asked" for a, _ in reach["by_purpose"]):
+            parts.append("<h2>Who they were using it for</h2>")
+            parts.append("<p class='sub'>Self-reported and optional. A link shared "
+                         "where developers read brings testers as well as workers; "
+                         "this separates the two instead of counting them together."
+                         "</p>")
+            parts.append(_table([(a, b, False) for a, b in reach["by_purpose"]],
+                                "using it for"))
+
     parts.append("<footer><b>Methodology.</b><ul>")
     parts += [f"<li>{_e(label)}: <code>{_e(sql)}</code></li>" for label, sql in _METHOD]
     parts.append(
         "</ul><p>The event log holds no name, phone number, Aadhaar, district or exact "
         "income. Session ids are random per conversation and are not derived from any "
-        "channel id, so two visits by the same worker are not linkable here.</p>"
+        "channel id, so two visits by the same worker are not linkable here. The unique-"
+        "people count lives in a separate table keyed by a hash of the channel id, "
+        "with no session id beside it, so it can be counted and not identified.</p>"
         "</footer></main></body></html>"
     )
     return "\n".join(parts)

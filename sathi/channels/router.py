@@ -55,6 +55,13 @@ class Router:
         # ! reference is whatever the platform uses to identify the message the
         # ! worker tapped: a Telegram message_id, a WhatsApp wamid.
         self._active_keyboard: dict[str, str | int] = {}
+        # ! Where this person arrived from, remembered from "/start reddit"
+        # ! until they consent — because the count is of people who agreed to
+        # ! be counted, and that answer comes several questions later.
+        self._source: dict[str, str] = {}
+        # * Counted once per process; the database's primary key is the real
+        # * guard, this only saves a hash on every message.
+        self._counted: set[str] = set()
 
     # * ---------------------------------------------------------- the wire
 
@@ -94,6 +101,36 @@ class Router:
             self.sessions[key] = convo
         return self.sessions[key]
 
+    # ! Where a person arrived from, e.g. "/start reddit" behind
+    # ! t.me/YojanaSathiBot?start=reddit. A short slug from a fixed set, so a
+    # ! link cannot smuggle free text into the database.
+    SOURCES = frozenset({"reddit", "discord", "github", "youtube", "twitter",
+                         "whatsapp", "poster", "csc", "direct"})
+
+    def _remember_source(self, key: str, answer: str) -> None:
+        payload = answer.strip().split()[1:2]
+        slug = payload[0].strip().lower()[:20] if payload else ""
+        if slug in self.SOURCES:
+            self._source[key] = slug
+
+    def _count_person(self, key: str, convo: Conversation) -> None:
+        """One person, counted once, after they agreed to be counted.
+
+        # ! Recorded here and not in Conversation because this is the only
+        # ! layer that knows the channel id, and Conversation must never learn
+        # ! it. The row it writes carries no session id, so the count can say
+        # ! how many people and never which person answered what.
+        """
+        if self.log is None or not getattr(convo, "consent_granted", False):
+            return
+        if key in self._counted:
+            return
+        self._counted.add(key)
+        try:
+            self.log.record_reach(key, self.channel, self._source.get(key, ""))
+        except Exception:  # noqa: BLE001 — counting must never break a screening
+            pass
+
     def dispatch(self, key: str, answer: str,
                  message_ref: str | int | None = None) -> list[Reply]:
         """Slash command, or an answer to the question we asked."""
@@ -102,7 +139,10 @@ class Router:
         if command not in INFO_COMMANDS:
             self._active_keyboard.pop(key, None)
         if command is None:
-            return self._conversation(key).handle(answer)
+            convo = self._conversation(key)
+            replies = convo.handle(answer)
+            self._count_person(key, convo)
+            return replies
 
         if command == "demo":
             # ! No Conversation/EventLog session is created for fictional data.
@@ -111,6 +151,7 @@ class Router:
             return demo_replies(self.schemes, lang)
 
         if command == "start":
+            self._remember_source(key, answer)
             return self._conversation(key, fresh=True).start()
 
         convo = self._conversation(key)

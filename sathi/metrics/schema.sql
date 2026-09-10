@@ -56,3 +56,39 @@ CREATE TABLE IF NOT EXISTS followups (
 );
 
 CREATE INDEX IF NOT EXISTS idx_followups_due ON followups(due_ts);
+
+-- =====================================================================
+-- Reach — how many DIFFERENT people, and where they came from
+-- =====================================================================
+-- ? `events` deliberately gives every conversation a fresh unlinkable session
+-- ? id, which is right for privacy and means the log can say "50 screenings"
+-- ? but never "50 people". That is the wrong number to put in front of a judge
+-- ? and the wrong number for deciding whether a channel is working.
+--
+-- ! Same mitigations as `followups`, for the same reason: the id is a keyed
+-- ! hash of the channel id, the key never leaves this database, and there is
+-- ! NO session_id column — so "how many people" can be answered and "what did
+-- ! person a82f qualify for" cannot. Never add a join key here.
+--
+-- ! Written only after consent is granted, so the count is of people who
+-- ! agreed to be counted. The dashboard says so.
+
+CREATE TABLE IF NOT EXISTS reach (
+    anon_id     TEXT PRIMARY KEY,   -- keyed hash of the channel id
+    channel     TEXT NOT NULL,      -- 'telegram' | 'whatsapp' | 'cli'
+    source      TEXT,               -- 'reddit' | 'discord' | 'direct' | ...
+    purpose     TEXT,               -- 'self' | 'family' | 'helping' | 'testing'
+    first_seen  TEXT NOT NULL       -- ISO 8601 UTC, to the day only
+);
+
+CREATE INDEX IF NOT EXISTS idx_reach_source ON reach(source);
+
+-- ! The hashing key. Generated once, on first use, and never leaves this file.
+-- ! It is here rather than in the environment so unique counting works without
+-- ! configuration - an opt-in that needs a deployment step is an opt-in nobody
+-- ! turns on. Deleting this row makes every existing anon_id permanently
+-- ! un-recomputable, which is the intended emergency behaviour.
+CREATE TABLE IF NOT EXISTS meta (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);

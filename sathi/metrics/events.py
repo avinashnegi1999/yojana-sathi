@@ -11,7 +11,9 @@
 """
 
 import hashlib
+import hmac
 import os
+import secrets
 import sqlite3
 import threading
 import uuid
@@ -220,6 +222,71 @@ class EventLog:
             self.log(session, "no_match", profile=profile)
 
     # * ------------------------------------------------------------ follow-up
+
+    # ! Kept deliberately narrow: four categories, chosen from buttons, never
+    # ! free text. "Who is this for?" is the difference between "214 people used
+    # ! it" and "96 used it for themselves or someone they were helping, and 118
+    # ! were testing the software" - which is the honest sentence when a link
+    # ! has been posted somewhere developers read.
+    PURPOSES = frozenset({"self", "family", "helping", "testing"})
+
+    def _reach_key(self) -> bytes:
+        """The hashing key, generated once and kept only in this database."""
+        row = self._conn.execute(
+            "SELECT value FROM meta WHERE key = 'reach_key'").fetchone()
+        if row is None:
+            key = secrets.token_hex(32)
+            self._conn.execute(
+                "INSERT OR IGNORE INTO meta (key, value) VALUES ('reach_key', ?)", (key,))
+            self._conn.commit()
+            row = self._conn.execute(
+                "SELECT value FROM meta WHERE key = 'reach_key'").fetchone()
+        return str(row[0]).encode("utf-8")
+
+    def record_reach(self, channel_id: str, channel: str,
+                     source: str = "", purpose: str = "") -> bool:
+        """Count one person once. Returns True the first time only.
+
+        # ! INSERT OR IGNORE against a hashed primary key, never a counter that
+        # ! is read and incremented - a number you increment drifts, and there
+        # ! is no way afterwards to tell a drifted count from a real one.
+        # ! Someone pressing /start fifty times stays one person.
+        """
+        anon = hmac.new(self._reach_key(), channel_id.encode("utf-8"),
+                        hashlib.sha256).hexdigest()
+        if purpose and purpose not in self.PURPOSES:
+            raise ValueError(f"unknown purpose {purpose!r}")
+        # * Day precision. An exact timestamp beside a stable id is a pattern
+        # * of life; the date is all any dashboard here needs.
+        day = datetime.now(timezone.utc).date().isoformat()
+        cur = self._conn.execute(
+            "INSERT OR IGNORE INTO reach (anon_id, channel, source, purpose, first_seen)"
+            " VALUES (?, ?, ?, ?, ?)",
+            (anon, channel, source or None, purpose or None, day))
+        self._conn.commit()
+        return cur.rowcount == 1
+
+    def set_purpose(self, channel_id: str, purpose: str) -> None:
+        """Record what someone said they were using it for, if they said."""
+        if purpose not in self.PURPOSES:
+            raise ValueError(f"unknown purpose {purpose!r}")
+        anon = hmac.new(self._reach_key(), channel_id.encode("utf-8"),
+                        hashlib.sha256).hexdigest()
+        self._conn.execute("UPDATE reach SET purpose = ? WHERE anon_id = ?",
+                           (purpose, anon))
+        self._conn.commit()
+
+    def reach_counts(self) -> dict:
+        """Unique people, and where they came from. Never per-person rows."""
+        q = self._conn.execute
+        total = q("SELECT COUNT(*) FROM reach").fetchone()[0]
+        by_source = q("SELECT COALESCE(source, 'direct'), COUNT(*) FROM reach"
+                      " GROUP BY 1 ORDER BY 2 DESC").fetchall()
+        by_purpose = q("SELECT COALESCE(purpose, 'not asked'), COUNT(*) FROM reach"
+                       " GROUP BY 1 ORDER BY 2 DESC").fetchall()
+        return {"unique_people": total,
+                "by_source": [(str(a), int(b)) for a, b in by_source],
+                "by_purpose": [(str(a), int(b)) for a, b in by_purpose]}
 
     def schedule_followup(self, channel_id: str, channel: str, days: int = 14) -> str | None:
         """Opt-in. Returns None unless FOLLOWUP_SALT is set.
