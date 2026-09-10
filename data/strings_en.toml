@@ -300,3 +300,16 @@ other = "Other NPS type"
 
 [demo]
 help = "/demo — Show fictional scheme examples (no personal screening)"
+
+# =====================================================================
+[feedback]
+# =====================================================================
+# ! Asked once, at the very end, after the sheet is already in her hands - so
+# ! skipping it costs her nothing and she knows it. Both are optional and say so.
+ask_rating = """One last thing, and you can skip it.
+How useful was this, from 1 to 10? Just send the number."""
+ask_suggestion = """Thank you. Is there anything I should improve, or any question that was confusing?
+Send it in a few words, or skip."""
+thanks = "Thank you — that helps me make this better for the next person."
+skip = "Skip"
+bad_rating = "Please send a number from 1 to 10, or skip."

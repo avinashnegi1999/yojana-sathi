@@ -13,6 +13,7 @@
 import hashlib
 import hmac
 import os
+import re
 import secrets
 import sqlite3
 import threading
@@ -287,6 +288,42 @@ class EventLog:
         return {"unique_people": total,
                 "by_source": [(str(a), int(b)) for a, b in by_source],
                 "by_purpose": [(str(a), int(b)) for a, b in by_purpose]}
+
+    # ! The only free text this database accepts, so it is the only way a phone
+    # ! number could get into a welfare log by accident - someone types "call me
+    # ! on 98..." into a suggestion box without thinking. Runs of four or more
+    # ! digits are replaced before the row is written. Not clever, and it does
+    # ! not need to be: the point is that the obvious mistake cannot land.
+    _DIGIT_RUN = re.compile(r"\d(?:[\d\s\-]*\d){3,}")
+
+    def record_feedback(self, rating: int | None, suggestion: str = "",
+                        channel: str = "cli") -> None:
+        """One rating and/or one suggestion, attached to nobody."""
+        if rating is not None and not (1 <= int(rating) <= 10):
+            raise ValueError(f"rating {rating!r} is outside 1-10")
+        text = self._DIGIT_RUN.sub("[number removed]", suggestion or "").strip()[:500]
+        if rating is None and not text:
+            return
+        self._conn.execute(
+            "INSERT INTO feedback (ts, channel, rating, suggestion) VALUES (?, ?, ?, ?)",
+            (datetime.now(timezone.utc).date().isoformat(), channel,
+             int(rating) if rating is not None else None, text or None))
+        self._conn.commit()
+
+    def feedback_summary(self, limit: int = 25) -> dict:
+        """Average rating, the spread, and the most recent suggestions."""
+        q = self._conn.execute
+        row = q("SELECT COUNT(rating), AVG(rating) FROM feedback"
+                " WHERE rating IS NOT NULL").fetchone()
+        spread = [(int(a), int(b)) for a, b in q(
+            "SELECT rating, COUNT(*) FROM feedback WHERE rating IS NOT NULL"
+            " GROUP BY rating ORDER BY rating").fetchall()]
+        notes = [str(r[0]) for r in q(
+            "SELECT suggestion FROM feedback WHERE suggestion IS NOT NULL"
+            " ORDER BY ts DESC LIMIT ?", (limit,)).fetchall()]
+        return {"count": int(row[0] or 0),
+                "average": round(float(row[1]), 1) if row[1] is not None else None,
+                "spread": spread, "suggestions": notes}
 
     def schedule_followup(self, channel_id: str, channel: str, days: int = 14) -> str | None:
         """Opt-in. Returns None unless FOLLOWUP_SALT is set.

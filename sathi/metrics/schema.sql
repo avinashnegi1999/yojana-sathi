@@ -92,3 +92,22 @@ CREATE TABLE IF NOT EXISTS meta (
     key   TEXT PRIMARY KEY,
     value TEXT NOT NULL
 );
+
+-- =====================================================================
+-- Feedback — what people thought, with nothing attached to who they are
+-- =====================================================================
+-- ! No id of any kind. Not a session id, not a channel hash, nothing. A rating
+-- ! is only useful in aggregate, and a rating that can be traced to the person
+-- ! who gave it is a reason not to give an honest one.
+--
+-- ! `suggestion` is the only free text anywhere in this database, so it is the
+-- ! only place a worker could type a phone number into a welfare log by
+-- ! accident. Digit runs are stripped before the row is written - see
+-- ! events.record_feedback.
+
+CREATE TABLE IF NOT EXISTS feedback (
+    ts          TEXT NOT NULL,      -- ISO 8601 UTC, day precision
+    channel     TEXT NOT NULL,
+    rating      INTEGER,            -- 1-10, or NULL if skipped
+    suggestion  TEXT                -- scrubbed free text, or NULL if skipped
+);

@@ -893,8 +893,18 @@ def _self_check() -> None:
         assert guarded.sessions["88"].state.value == "pack"
         pack_keyboard = delivered[-1][0]
         _tap("no", pack_keyboard)
+        # ! The pack answer no longer ends the conversation - two optional
+        # ! questions follow it - so the session is still live here. The point
+        # ! of the test is the retired keyboard, and a second tap on it must
+        # ! still do nothing.
+        assert guarded.sessions["88"].state.value == "rating"
+        before = guarded.sessions["88"].state
         _tap("no", pack_keyboard)
-        assert "88" not in guarded.sessions, "a stale tap recreated a completed session"
+        assert guarded.sessions["88"].state is before, "a stale tap moved the session on"
+        skip_keyboard = delivered[-1][0]
+        _tap("skip", skip_keyboard)
+        _tap("skip", delivered[-1][0])
+        assert "88" not in guarded.sessions, "a completed session was not dropped"
     finally:
         mod._call, mod._upload = real_call, real_upload
     # ! A busy Telegram must not cost a worker their answers. 429 and the 5xx

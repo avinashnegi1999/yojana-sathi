@@ -50,6 +50,8 @@ class State(Enum):
     KNOWN_SCHEMES = "known_schemes"
     DOCUMENTS = "documents"
     PACK = "pack"
+    RATING = "rating"
+    SUGGESTION = "suggestion"
     DONE = "done"
 
 
@@ -57,6 +59,7 @@ EXTRA_FIELDS = ('is_woman', 'is_widow', 'uk_pension_income_or_bpl', 'receives_ot
 
 YES, NO, DK = "yes", "no", "dont_know"
 NEXT, OTHER, NONE = "next", "other", "none"
+SKIP = "skip"
 LANG_HI, LANG_EN = "lang:hi", "lang:en"
 
 
@@ -81,6 +84,7 @@ class Conversation:
     ) -> None:
         self.schemes = schemes
         self.log = log
+        self.channel = channel
         self.session = log.start_session(channel) if log else None
         self.profile = Profile()
         self.lang = content.DEFAULT_LANG
@@ -95,6 +99,7 @@ class Conversation:
         # * Set once the worker agrees to anonymous metrics. The adapter uses
         # * it to count one unique person, in a table that has no session id.
         self.consent_granted = False
+        self._rating: int | None = None
         self._followup_fields: list[str] = []
         self._followup_index = 0
 
@@ -196,6 +201,10 @@ class Conversation:
                 buttons=_yes_no(self.lang, with_dont_know=True)),
             State.DOCUMENTS: self._ask_documents,
             State.PACK: lambda: Reply(text=self._s("pack.offer"), buttons=_yes_no(self.lang)),
+            State.RATING: lambda: Reply(text=self._s("feedback.ask_rating"),
+                                        buttons=(Button(self._s("feedback.skip"), SKIP),)),
+            State.SUGGESTION: lambda: Reply(text=self._s("feedback.ask_suggestion"),
+                                            buttons=(Button(self._s("feedback.skip"), SKIP),)),
             State.DONE: lambda: Reply(text=self._s("closing.done"), end=True),
         }[self.state]
         # * OCCUPATION_CONFIRM re-asks the menu rather than the confirmation: the
@@ -727,10 +736,39 @@ class Conversation:
         elif answer != NO:
             return [Reply(text=self._s("pack.offer"), buttons=_yes_no(self.lang))]
 
-        self.state = State.DONE
-        replies.append(Reply(text=self._s("closing.done"), end=True))
+        # ! The screening is finished and logged here, not after the rating.
+        # ! Someone who ignores the last two questions must still count as a
+        # ! completed session - tying completion to answering an optional
+        # ! question would quietly understate the thing that matters.
         if self.log and self.session:
             self.log.log(self.session, "session_complete", profile=self.profile)
+        self._rating = None
+        self.state = State.RATING
+        replies.append(self._current_question())
+        return replies
+
+    def _on_rating(self, answer: str) -> list[Reply]:
+        if answer != SKIP:
+            digits = answer.strip()
+            if not (digits.isdigit() and 1 <= int(digits) <= 10):
+                return [Reply(text=self._s("feedback.bad_rating"),
+                              buttons=(Button(self._s("feedback.skip"), SKIP),))]
+            self._rating = int(digits)
+        self.state = State.SUGGESTION
+        return [self._current_question()]
+
+    def _on_suggestion(self, answer: str) -> list[Reply]:
+        note = "" if answer == SKIP else answer.strip()
+        if self.log and (self._rating is not None or note):
+            # ! Attached to nobody: the feedback table holds no session id and
+            # ! no channel id, so a rating cannot be traced back to the person
+            # ! who gave it. An honest 3 is worth more than a traceable 9.
+            self.log.record_feedback(self._rating, note, self.channel)
+        self.state = State.DONE
+        replies = []
+        if self._rating is not None or note:
+            replies.append(Reply(text=self._s("feedback.thanks")))
+        replies.append(Reply(text=self._s("closing.done"), end=True))
         return replies
 
     def _on_done(self, answer: str) -> list[Reply]:
@@ -797,8 +835,24 @@ def _self_check() -> None:
     out = c.handle(NEXT)
     assert s("documents.have_all") in out[0].text
     out = c.handle(YES)
-    assert out[0].document is not None and out[-1].end
-    assert c.state is State.DONE
+    # ! The sheet arrives, then two optional questions. The screening is
+    # ! already complete and logged at this point; skipping them changes
+    # ! nothing except that no feedback row is written.
+    assert out[0].document is not None and c.state is State.RATING
+    assert not out[-1].end, "the session ended before the optional questions"
+    c.handle(SKIP)
+    assert c.state is State.SUGGESTION
+    out = c.handle(SKIP)
+    assert out[-1].end and c.state is State.DONE
+    assert len(out) == 1, "a skipped rating must not be thanked"
+
+    # * And the answered path, including a rating outside 1-10.
+    c_fb = Conversation(schemes)
+    c_fb.state, c_fb._rating = State.RATING, None
+    assert c_fb.handle("11")[0].text == s("feedback.bad_rating")
+    assert c_fb.state is State.RATING, "a bad rating must re-ask, not advance"
+    c_fb.handle("9")
+    assert c_fb.state is State.SUGGESTION and c_fb._rating == 9
 
     # * Free-text occupation with no LLM: keyword guess, then confirmation.
     c2 = Conversation(schemes)

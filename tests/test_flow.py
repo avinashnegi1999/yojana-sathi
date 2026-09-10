@@ -21,6 +21,7 @@ sys.path.insert(0, str(ROOT))
 
 from sathi.conversation import consent
 from sathi.conversation.flow import (
+    SKIP,
     DK, LANG_EN, LANG_HI, NEXT, NO, YES, Conversation, State,
 )
 from sathi.core.content import s
@@ -208,6 +209,9 @@ def test_tax_yes_confirmation_and_isolated_edits():
                             convo.handle(NEXT)
                     assert convo.state is State.PACK, convo.state
                     convo.handle(NO)
+                    # The two optional feedback questions follow the pack.
+                    convo.handle(SKIP)
+                    convo.handle(SKIP)
                     assert convo.state is State.DONE
         # ! No and Don't know proceed normally; neither asks for confirmation.
         for answer, value in ((NO, False), (DK, None)):
@@ -301,6 +305,11 @@ def test_full_session_with_no_llm_key_reaches_a_pack():
         out = convo.handle(YES)  # yes, build the pack
         filename, blob = out[0].document
         assert filename.endswith(".html") and b"12,000" in blob
+        # ! The sheet is delivered and the screening is already logged complete;
+        # ! the two optional feedback questions come after it and can be skipped.
+        assert convo.state is State.RATING and not out[-1].end
+        convo.handle(SKIP)
+        out = convo.handle(SKIP)
         assert out[-1].end and convo.state is State.DONE
         log.close()
 
@@ -357,7 +366,9 @@ def test_ineligible_worker_gets_a_reason_and_never_a_dead_end():
         page = blob.decode("utf-8")
         assert s("pack.your_answers") in page, "the sheet must carry the answers given"
         assert "65" in page, "an answer the worker gave is missing from the sheet"
-        assert out[-1].end and convo.state is State.DONE
+        assert convo.state is State.RATING
+        convo.handle(SKIP)
+        assert convo.handle(SKIP)[-1].end and convo.state is State.DONE
 
 
 def test_exclusion_is_explained_in_the_workers_own_result():

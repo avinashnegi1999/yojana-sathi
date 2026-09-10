@@ -354,7 +354,10 @@ def test_commands_at_every_state():
                 # ! state pensions INELIGIBLE, and this walk needs the eligible
                 # ! half of the conversation to stay reachable.
                 "yes", "no", "yes", "yes", "no", "yes", "yes",
-                "next", "next", "yes"]
+                # ! The sheet, then the two optional questions after it. Both
+                # ! skipped here: the point of this walk is that a command works
+                # ! at every state, not that anyone rates the bot.
+                "next", "next", "yes", "skip", "skip"]
         reached = set()
 
         for stop in range(len(walk) + 1):
@@ -416,7 +419,7 @@ def test_every_command_through_the_adapter_at_every_state():
                 # ! Same seven follow-ups as the walk above, same reason for the
                 # ! "no" in fifth place: receives_other_pension.
                 "yes", "no", "yes", "yes", "no", "yes", "yes",
-                "next", "next", "yes"]
+                "next", "next", "yes", "skip", "skip"]
         reached = set()
 
         sent: list[tuple[str, dict]] = []
