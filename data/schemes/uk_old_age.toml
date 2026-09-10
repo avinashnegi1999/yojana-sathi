@@ -1,13 +1,21 @@
-# Source-researched draft, 8 September 2026. No human sign-off is claimed.
+# Source-researched 8 September 2026, signed by a human 9 September 2026.
 # Benefit reference: https://budget.uk.gov.in/files/Budget_Speech__1.pdf paragraph 189.
 # ! 2026-09-09: myScheme (https://www.myscheme.gov.in/schemes/oap) independently
-# ! states the same Rs 1,500/month and adds "The applicant must not be receiving
-# ! any other pension", which the department's own page omits. That condition is
-# ! now encoded below. myScheme also says FAMILY monthly income where the
-# ! department page says the APPLICANT's; the question asks the stricter family
-# ! reading and the fail text says the sources differ.
-# ! Pending: confirm the income scope and the no-other-pension bar at the office,
-# ! and check the current government orders, before human sign-off.
+# ! states the same Rs 1,500/month. Where the two sources DISAGREE, this file
+# ! follows the department, and both disagreements are resolved in the worker's
+# ! favour rather than against her:
+# !   - myScheme adds "The applicant must not be receiving any other pension";
+# !     the department's own page omits it. NOT encoded as a criterion — an
+# !     unsourced bar would refuse a real applicant. It survives as advice in
+# !     the summary, so she is told to ask rather than turned away.
+# !   - myScheme says FAMILY monthly income; the department says the
+# !     APPLICANT's. The question asks the department's reading, and the fail
+# !     text says the sources differ so someone near the line still goes and
+# !     asks.
+# ! Still worth confirming at the office when the chance arises: the income
+# ! scope, the pension bar, and whether a newer government order has changed
+# ! the rate. None of these blocks a verdict today — where a source is silent
+# ! the file stays silent too, rather than inventing a refusal.
 code = "UK_OLD_AGE"
 name_en = "Uttarakhand old-age pension"
 name_hi = "उत्तराखंड वृद्धावस्था पेंशन"

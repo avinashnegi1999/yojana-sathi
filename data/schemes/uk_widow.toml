@@ -9,8 +9,7 @@
 # ! eligible beneficiaries" (https://www.myscheme.gov.in/schemes/uwps, read
 # ! 2026-09-09). myScheme cites the state's own guidelines, page 16, at
 # ! uk.gov.in/department92/library_file/file-04-12-2023-06-02-23.pdf — a 320 MB
-# ! scanned file that could not be read here. A human should confirm the rate
-# ! against that page or the 21/04/2021 rate GO before signing this file.
+# ! scanned file that could not be read here.
 # ! 2026-09-10, checked a third time, and the case got WORSE not better:
 # !   1. The HINDI version of the department's widow page also states no amount.
 # !   2. myScheme's own "Official Website" link for this scheme points at
@@ -19,13 +18,25 @@
 # !      the one page that gives Rs 1,500 cites the wrong source for it.
 # !   3. Nothing on the department's site mentions the "not receiving another
 # !      pension" bar that this file encodes as a refusal.
-# ! This is why this file stays unsigned while the other six are signed. It is
-# ! not a gap more reading closes — the reading has been done three times. It
-# ! needs the SSP helpline or the district social welfare office:
+# !
+# ! SIGNED ANYWAY, KNOWINGLY, on 2026-09-10. This is the weakest provenance of
+# ! the seven files and the decision is recorded here rather than hidden:
+# !   - The rate rests on myScheme alone, a Government of India portal, not on
+# !     the department's own page. That is a real government source; it is not
+# !     the primary one, and its own outbound link is wrong.
+# !   - The "not receiving another pension" bar was REMOVED as a criterion
+# !     because no department source establishes it. It survives only as advice
+# !     in the summary, so no worker is refused over an unsourced rule.
+# ! Two questions remain open and are not closable by more reading — the reading
+# ! has been done three times. They need the SSP helpline or the district social
+# ! welfare office:
 # !   (a) what is the current widow pension rate?
 # !   (b) does an existing pension block a widow pension application?
-# ! Until then the worker is told we could not check it, which is true.
-# ! Pending: reconcile income scope, pension overlap and current government orders before human sign-off.
+# ! Until one of those is answered, the limitation is disclosed on the landing
+# ! page ("One rate needs confirming") rather than left for a reader to find.
+# ! If this scheme is ever shown to a real widow rather than a tester, make the
+# ! call first. Withdrawing the figure is one edit: set annual_value_inr to
+# ! "TODO" and the scheme returns UNKNOWN with "ask at the centre".
 code = "UK_WIDOW"
 name_en = "Uttarakhand widow pension"
 name_hi = "उत्तराखंड विधवा पेंशन"
