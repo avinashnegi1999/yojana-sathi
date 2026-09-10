@@ -22,6 +22,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from sathi.core.schemes import load_all
+from sathi.rules import engine
 
 # ! Any aggregate cell counting fewer than this many workers is suppressed.
 # ! State x occupation in a small district can otherwise identify one person.
@@ -98,26 +99,55 @@ def value_split(conn, schemes_dir: str | Path = "data/schemes", since: str = "")
     # * The split is derived by joining scheme_code back to the scheme files, so
     # * the event log needs no extra column and no schema migration.
     """
+    schemes = load_all(schemes_dir)
     basis = {
         code: (sc.benefit.get("value_basis") if isinstance(sc.benefit.get("value_basis"), str) else "")
-        for code, sc in load_all(schemes_dir).items()
+        for code, sc in schemes.items()
     }
+    # ! The worker-facing result collapses alternative routes to one payment: a
+    # ! 65-year-old widow qualifies for the Uttarakhand old-age pension AND the
+    # ! widow pension, but the state pays ONE of them, so engine.value_totals
+    # ! counts ₹18,000 rather than ₹36,000.
+    # !
+    # ! This function used to SUM(value_inr) GROUP BY scheme_code across the
+    # ! whole log, so the dashboard counted both — the exact double count
+    # ! exclusive_group exists to prevent, reappearing one layer up. The worker
+    # ! was told the truth while the impact number was inflated, which is the
+    # ! worse way round: it is the number a judge attacks.
+    # !
+    # ! Group per session, take the largest member of each exclusive group
+    # ! within that session, then sum. Sessions are unlinkable by design, so two
+    # ! visits by the same person still count twice — a separate and disclosed
+    # ! limitation, not this bug.
+    groups = engine.exclusive_groups(schemes)
     where = " AND ts >= ?" if since else ""
     p: tuple = (since,) if since else ()
     out = {"payout": 0, "cover": 0, "unclassified": 0}
+
+    best: dict[str, dict[str, dict[str, int]]] = {}
     for row in conn.execute(
-        f"SELECT scheme_code, COALESCE(SUM(value_inr),0) v FROM events"
-        f" WHERE event_type='scheme_newly_surfaced'{where} GROUP BY scheme_code", p,
+        f"SELECT session_id, scheme_code, COALESCE(SUM(value_inr),0) v FROM events"
+        f" WHERE event_type='scheme_newly_surfaced'{where}"
+        f" GROUP BY session_id, scheme_code", p,
     ):
         kind = basis.get(row["scheme_code"])
-        if kind == "insurance_cover":
-            out["cover"] += row["v"]
-        elif kind == "annual_payout":
-            out["payout"] += row["v"]
-        else:
-            # * A scheme code in the log that no longer has a file. Counted
-            # * separately rather than silently folded into either number.
-            out["unclassified"] += row["v"]
+        bucket = ("cover" if kind == "insurance_cover"
+                  else "payout" if kind == "annual_payout"
+                  # * A scheme code in the log that no longer has a file.
+                  # * Counted separately, never folded into either number.
+                  else "unclassified")
+        group = groups.get(row["scheme_code"], "")
+        if not group:
+            out[bucket] += row["v"]
+            continue
+        # ! Keyed by bucket as well as group, so a group that ever mixed a
+        # ! cover with a payout cannot have one silently swallow the other.
+        per_session = best.setdefault(row["session_id"], {}).setdefault(bucket, {})
+        per_session[group] = max(per_session.get(group, 0), row["v"])
+
+    for buckets in best.values():
+        for bucket, by_group in buckets.items():
+            out[bucket] += sum(by_group.values())
     return out
 
 
@@ -285,7 +315,12 @@ def render(conn: sqlite3.Connection, since: str = "",
         ("hero", f"{n['surfaced']}", "schemes newly surfaced to a worker"),
         ("hero", f"₹{split['payout']:,}", "annual entitlement surfaced (not delivered)"),
         ("", f"₹{split['cover']:,}", "accident cover surfaced (pays only on a claim)"),
-        ("", f"{reach['unique_people']}", "different people, counted once each"),
+        # ! Not "people". One human with a Telegram account AND a WhatsApp
+        # ! number is two rows here, because the two identifiers hash
+        # ! differently and nothing links them — which is the same design that
+        # ! stops us knowing who anyone is. Say what is actually counted.
+        ("", f"{reach['unique_people']}",
+         "messaging accounts reached, counted once each"),
         ("", f"{n['screened']}", "screening sessions evaluated"),
         ("", f"{n['per_worker']}", "schemes matched per screening"),
         ("", f"{n['packs']}", "application packs generated"),
@@ -483,6 +518,53 @@ def _self_check() -> None:
         assert "never verified" in stub_page
         assert "still carry unresearched values" in stub_page
         conn.close()
+
+    # ! THE DOUBLE COUNT. A 65-year-old widow qualifies for both Uttarakhand
+    # ! pensions, but the state pays one — they share the exclusive_group
+    # ! "uk_state_pension". The worker-facing result always collapsed them; the
+    # ! dashboard used to sum both and report ₹36,000 of annual entitlement
+    # ! surfaced where ₹18,000 was surfaced. Telling the worker the truth while
+    # ! inflating the impact number is the worse way round to get this wrong.
+    with tempfile.TemporaryDirectory() as d:
+        root0 = Path(__file__).resolve().parents[2]
+        widow = Profile(state="UK", age=65, occupation="agriculture",
+                        income_band="no_income")
+        db = Path(d) / "widow.db"
+
+        log = EventLog(db)
+        first = log.start_session("cli")
+        log.grant_consent(first)
+        log.log(first, "eligibility_evaluated", profile=widow)
+        for code in ("UK_OLD_AGE", "UK_WIDOW"):
+            log.log(first, "scheme_newly_surfaced", profile=widow,
+                    scheme_code=code, value_inr=18000)
+        log.log(first, "scheme_newly_surfaced", profile=widow,
+                scheme_code="PM_SYM", value_inr=36000)
+        log.close()
+
+        conn = _connect(str(db))
+        split = value_split(conn, root0 / "data" / "schemes")
+        conn.close()
+        assert split["payout"] == 54000, (
+            f"exclusive pensions double counted: payout={split['payout']}, wanted 54000")
+
+        # ! Collapsing is per session, NOT deduplication. Two different people
+        # ! who each qualify for both pensions are still two entitlements.
+        log = EventLog(db)
+        second = log.start_session("cli")
+        log.grant_consent(second)
+        log.log(second, "eligibility_evaluated", profile=widow)
+        for code in ("UK_OLD_AGE", "UK_WIDOW"):
+            log.log(second, "scheme_newly_surfaced", profile=widow,
+                    scheme_code=code, value_inr=18000)
+        log.close()
+
+        conn = _connect(str(db))
+        split = value_split(conn, root0 / "data" / "schemes")
+        conn.close()
+        assert split["payout"] == 72000, (
+            f"a second session's pension was swallowed: payout={split['payout']}, wanted 72000")
+
     print("report.py OK")
 
 

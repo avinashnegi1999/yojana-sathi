@@ -129,8 +129,13 @@ class Router:
         # ! source of truth.
         try:
             self.log.record_reach(key, self.channel, self._source.get(key, ""))
-        except Exception:  # noqa: BLE001 — counting must never break a screening
-            pass
+        except Exception as e:  # noqa: BLE001 — counting must never break a screening
+            # ! Say so. A screening must not fail because the counter did, but a
+            # ! counter that dies silently is worse than one that crashes: the
+            # ! bot looks healthy, every worker is served, and the dashboard
+            # ! quietly under-reports until the number reaches a judge.
+            # ! Type name only — the message could carry a channel id.
+            print(f"[metrics] reach write failed: {type(e).__name__}")
 
     def dispatch(self, key: str, answer: str,
                  message_ref: str | int | None = None) -> list[Reply]:
