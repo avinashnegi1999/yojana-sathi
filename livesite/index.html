@@ -63,7 +63,9 @@ a{color:var(--ink)}
 .nav-links a:hover{color:var(--magenta)}
 .nav-cta{display:flex;gap:var(--xs)}
 
-section{padding:var(--section) 0}
+/* the nav is sticky, so an anchor jump must stop short of it or the heading
+   it was aiming at ends up underneath the bar */
+section{padding:var(--section) 0;scroll-margin-top:76px}
 .hero{padding:calc(var(--section) * .85) 0 var(--xxl)}
 .hero h1{max-width:14ch;margin:var(--lg) 0}
 .hero .subhead{max-width:52ch}
