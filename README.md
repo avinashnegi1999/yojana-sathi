@@ -1,4 +1,63 @@
-# Scheme Sathi (योजना साथी)
+<h1 align="center">
+  <strong>
+    YOJANA SATHI<br>योजना साथी
+  </strong>
+</h1>
+
+<p align="center"><i>Know before you go — which schemes you qualify for, in your own language</i></p>
+
+<p align="center">
+  <img src="https://img.shields.io/github/last-commit/avinashnegi1999/yojana-sathi?style=for-the-badge&color=2d5016&logo=github" />
+  <img src="https://img.shields.io/badge/python-100.0%25-2d5016?style=for-the-badge&logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/dependencies-0-2d5016?style=for-the-badge&logo=python&logoColor=white" />
+</p>
+
+---
+
+<div align="center">
+  <img src="https://img.shields.io/badge/Status-Live%20on%20Telegram-brightgreen" alt="Status">
+  <img src="https://img.shields.io/badge/Schemes-7%20signed%20off-blue" alt="Schemes">
+  <img src="https://img.shields.io/badge/Field%20pilot-not%20yet-lightgrey" alt="Field pilot">
+  <img src="https://img.shields.io/badge/Licence-Apache--2.0-blue" alt="Licence">
+</div>
+
+<p align="center"><em>Code for a Billion 2026 · Livelihood for the Uneducated</em></p>
+
+---
+
+<br/>
+
+<h3 align="center">
+  🌐 &nbsp;<a href="https://avinashnegi.com/yojana-sathi/"><strong>See it working →&nbsp; avinashnegi.com/yojana-sathi</strong></a>
+</h3>
+
+<p align="center">
+  A walkthrough video, real screenshots of both channels, the architecture,<br>
+  live numbers from the running bot, and what this does <em>not</em> claim.
+</p>
+
+<p align="center">
+  <a href="https://t.me/YojanaSathiBot"><img src="https://img.shields.io/badge/Try%20it%20on%20Telegram-@YojanaSathiBot-229ED9?style=for-the-badge&logo=telegram&logoColor=white" /></a>
+</p>
+
+<br/>
+
+---
+
+<br/>
+
+<p align="center"><i>Built with the tools and technologies:</i></p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python%203.11-3776AB?style=for-the-badge&logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" />
+  <img src="https://img.shields.io/badge/TOML-9C4121?style=for-the-badge&logo=toml&logoColor=white" />
+  <img src="https://img.shields.io/badge/Caddy-1F88C0?style=for-the-badge&logo=caddy&logoColor=white" />
+  <img src="https://img.shields.io/badge/AWS%20EC2-FF9900?style=for-the-badge&logo=amazonec2&logoColor=white" />
+  <img src="https://img.shields.io/badge/Telegram%20Bot%20API-229ED9?style=for-the-badge&logo=telegram&logoColor=white" />
+</p>
+
+<br/>
 
 **A conversation, in Hindi or English, that tells an unorganised worker which
 government schemes they are entitled to, what each is worth in ₹, and where to
@@ -10,9 +69,7 @@ WhatsApp speaks the same conversation from the same rule engine. The channel is
 built and verified end to end against Meta's test number — a real phone, a full
 screening, the same Hindi — but it is not yet live on a public number.
 
-**[yojana-sathi on the web](https://avinashnegi.com/yojana-sathi/)** — a walkthrough
-video, real screenshots of both channels, the architecture, and what this does not claim, on one
-page. Source in [`livesite/`](livesite/), published by
+Site source in [`livesite/`](livesite/), published by
 [`.github/workflows/pages.yml`](.github/workflows/pages.yml).
 
 > **Status — read before you use it on anyone.**
