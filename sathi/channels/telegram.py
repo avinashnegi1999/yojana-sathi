@@ -61,6 +61,11 @@ _MAX_TRACKED = 400
 # ! chat — a real complaint on the first day of use.
 _CLEAR_SCAN_BACK = 1000
 _DELETE_BATCH = 100
+# ! Bounds on the fallback path, so one /clearall cannot cost a thousand
+# ! requests and leave the bot flood-limited for minutes afterwards. Both count
+# ! FUTILE work only — deleting messages that are really there is the job.
+_WASTED_DELETE_BUDGET = 25     # consecutive deletes that found nothing
+_EMPTY_CHUNKS_BEFORE_STOP = 2  # consecutive fruitless chunks before giving up
 # * Past the 48-hour edge Telegram refuses every delete, so a run of REFUSALS
 # * means we have walked off the end and can stop instead of burning 400 calls.
 # ! A gap of already-deleted ids is not a refusal and must not stop the walk.
@@ -305,18 +310,53 @@ class TelegramBot(Router):
             candidates = [m for m in range(int(from_message_id), floor - 1, -1)
                           if m not in tried]
             tried.update(candidates)
-            batches = 0
+            batches, singles, empty_runs, wasted = 0, 0, 0, 0
             for start in range(0, len(candidates), _DELETE_BATCH):
                 chunk = candidates[start:start + _DELETE_BATCH]
                 batches += 1
-                if not self._delete_batch(chat_id, chunk):
-                    # * Older Bot API, or a chunk it refused wholesale. Fall back
-                    # * to one-at-a-time for this chunk only, so a single bad
-                    # * batch does not lose the rest of the window.
-                    for message_id in chunk:
-                        deleted += self._delete(chat_id, message_id) == "deleted"
+                if self._delete_batch(chat_id, chunk):
+                    empty_runs = 0
+                    continue
+
+                # ! A refused batch used to fall back to one call per id — a
+                # ! hundred of them, for every failed chunk, up to a thousand
+                # ! requests for one /clearall. All of it on the polling thread,
+                # ! so the worker's next answer waited behind it, and each 429
+                # ! slept on that thread too. Telegram then flood-limits the bot
+                # ! for minutes afterwards, which is why the whole conversation
+                # ! stayed slow long after the command finished.
+                # !
+                # ! Probe with a few ids instead of retrying the chunk. Almost
+                # ! always the batch failed because those ids are older than 48
+                # ! hours or never existed, and no amount of retrying changes
+                # ! that.
+                # ! The budget counts FAILED deletes, not deletes. An old Bot
+                # ! API with no deleteMessages has nothing but this path, and
+                # ! capping successful work there would quietly stop clearing
+                # ! the window. What has to be bounded is futile work: ids that
+                # ! are gone, or older than 48 hours, hammered one at a time.
+                hit = False
+                for message_id in chunk:
+                    if wasted >= _WASTED_DELETE_BUDGET:
+                        break
+                    singles += 1
+                    if self._delete(chat_id, message_id) == "deleted":
+                        deleted += 1
+                        hit = True
+                        wasted = 0
+                    else:
+                        wasted += 1
+
+                # ! Ids run backwards from the command, so once two chunks in a
+                # ! row yield nothing we are past the window and everything
+                # ! older is unreachable. Walking the remaining hundreds costs
+                # ! requests and deletes nothing. The docstring always claimed
+                # ! this stopped; the batched path never did.
+                empty_runs = 0 if hit else empty_runs + 1
+                if empty_runs >= _EMPTY_CHUNKS_BEFORE_STOP or wasted >= _WASTED_DELETE_BUDGET:
+                    break
             print(f"[telegram] /clearall scanned={len(candidates)} "
-                  f"batches={batches}")
+                  f"batches={batches} singles={singles}")
 
         self._sent[chat_id] = []
         if deep:
@@ -525,11 +565,50 @@ def _self_check() -> None:
 
         # ! /clearall reaches ids this process never tracked — the messages from
         # ! before the last restart, which is what tracking alone always misses.
+        # !
+        # ! It must also stay BOUNDED. This fake refuses every batch, which is
+        # ! the worst case, and the old code answered that by trying all 1000
+        # ! ids one at a time — on the polling thread, so the worker's next
+        # ! answer queued behind a thousand requests, and Telegram flood-limited
+        # ! the bot for minutes afterwards. Reported from a real chat: /clearall
+        # ! at 6:37, the reply to the next /start at 6:39.
         deletes.clear()
         bot._sent["42"] = []
         bot.handle_update({"message": {"chat": {"id": 42}, "message_id": 900, "text": "/clearall"}})
-        assert len(deletes) > 50, f"/clearall did not walk back ({len(deletes)})"
+        assert deletes, "/clearall deleted nothing at all"
+        walked = len(deletes)
+        assert walked > 50, f"/clearall did not walk back ({walked})"
+        # * A ceiling, not exact accounting: the tracked-message pass deletes a
+        # * few before the walk begins. What matters is the order of magnitude —
+        # * tens, not the thousand this used to issue.
         assert max(deletes) == 900 and min(deletes) < 900
+
+        # ! The flood case, and the reason this bug was reported: every id is
+        # ! refused because it is older than the 48-hour window. The old code
+        # ! answered that by trying all 1000 one at a time, on the polling
+        # ! thread, and Telegram then throttled the bot for minutes - /clearall
+        # ! at 6:37, the reply to the next /start at 6:39. It must give up.
+        refused = []
+
+        def _all_refused(token, method, payload):
+            if method == "deleteMessages":
+                raise TelegramError("deleteMessages failed: 400 Bad Request")
+            if method == "deleteMessage":
+                refused.append(payload["message_id"])
+                raise TelegramError("message can't be deleted", status=400)
+            return prev_call(token, method, payload)
+
+        prev_call = mod._call
+        mod._call = _all_refused
+        try:
+            bot._sent["42"] = []
+            bot.clear_chat("42", "en", from_message_id=5000, deep=True)
+        finally:
+            mod._call = prev_call
+        assert len(refused) < 100, (
+            f"/clearall issued {len(refused)} futile deletes against a chat with "
+            f"nothing deletable. The budget is {_WASTED_DELETE_BUDGET} consecutive "
+            f"misses; hundreds means the flood-limit bug is back.")
 
         # ! The clear receipt may be the last message standing in the chat, so
         # ! it carries both languages.

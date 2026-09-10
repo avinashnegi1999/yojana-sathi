@@ -73,6 +73,45 @@ def _run_a_full_session(db: Path) -> EventLog:
     return log
 
 
+def test_a_cleared_table_starts_counting_again():
+    """The count must come from the database, never from process memory.
+
+    # ! Found on a real phone. A `_counted` set in the router skipped the write
+    # ! for anyone it had already seen, so after the table was cleared the row
+    # ! was gone, the process still believed that person was counted, and they
+    # ! were never recorded again while it stayed up. Two sources of truth, one
+    # ! of them silently wrong.
+    """
+    import tempfile, os
+    from sathi.core.schemes import load_all
+    from sathi.metrics.events import EventLog
+    from sathi.channels.router import Router
+
+    class _Bot(Router):
+        channel = "telegram"
+        def send(self, key, reply): pass
+
+    root = Path(__file__).resolve().parent.parent
+    with tempfile.TemporaryDirectory() as d:
+        log = EventLog(os.path.join(d, "r.db"))
+        try:
+            bot = _Bot(load_all(root / "data" / "schemes"), log)
+            def consent():
+                for step in ("/start", "lang:en", "consent_yes"):
+                    bot.dispatch("worker", step)
+            consent()
+            assert log.reach_counts()["unique_people"] == 1
+            consent()
+            assert log.reach_counts()["unique_people"] == 1, "counted twice"
+
+            log._conn.execute("DELETE FROM reach")
+            log._conn.commit()
+            consent()
+            assert log.reach_counts()["unique_people"] == 1,                 "a cleared table never started counting again"
+        finally:
+            log.close()
+
+
 def test_the_unique_people_table_cannot_say_who_did_what():
     """Counting people must not become identifying them.
 

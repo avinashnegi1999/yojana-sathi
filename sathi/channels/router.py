@@ -59,9 +59,6 @@ class Router:
         # ! until they consent — because the count is of people who agreed to
         # ! be counted, and that answer comes several questions later.
         self._source: dict[str, str] = {}
-        # * Counted once per process; the database's primary key is the real
-        # * guard, this only saves a hash on every message.
-        self._counted: set[str] = set()
 
     # * ---------------------------------------------------------- the wire
 
@@ -123,9 +120,13 @@ class Router:
         """
         if self.log is None or not getattr(convo, "consent_granted", False):
             return
-        if key in self._counted:
-            return
-        self._counted.add(key)
+        # ! No in-memory "already counted" cache here. There was one, and it
+        # ! silently diverged from the database the first time the table was
+        # ! cleared: the row was gone, the process still believed the person was
+        # ! counted, and they were never recorded again for the life of that
+        # ! process. INSERT OR IGNORE on a primary key is the real guard and it
+        # ! cannot drift; the hash it costs per message is not worth a second
+        # ! source of truth.
         try:
             self.log.record_reach(key, self.channel, self._source.get(key, ""))
         except Exception:  # noqa: BLE001 — counting must never break a screening
