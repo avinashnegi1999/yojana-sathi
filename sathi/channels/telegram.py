@@ -26,6 +26,7 @@ from sathi.channels.router import Router
 from sathi.core.content import DEFAULT_LANG, s
 from sathi.core.schemes import Scheme
 from sathi.metrics.events import EventLog
+from sathi.pack import links
 
 class TelegramError(Exception):
     def __init__(self, message: str, status: int | None = None) -> None:
@@ -183,6 +184,10 @@ class TelegramBot(Router):
         # ! chat_id -> [(message_id, sent_at)] so /clear has something to delete.
         # ! In memory only: it dies with the process, like the profiles do.
         self._sent: dict[str, list[tuple[int, float]]] = {}
+        # ! chat_id -> pack tokens handed to that chat. /clear deletes the
+        # ! messages; without this it would leave the LINK readable, which is
+        # ! the one part of the conversation that outlives the chat.
+        self._tokens: dict[str, list[str]] = {}
         self._offset = 0
 
     # * ------------------------------------------------------------- sending
@@ -217,6 +222,31 @@ class TelegramBot(Router):
             # ! The pack carries the answer recap. An untracked pack survives
             # ! /clear, which is the one thing /clear exists to prevent.
             self._track(chat_id, (up.get("result") or {}).get("message_id"))
+            # ! The file is sent FIRST and always. The link is an addition, not
+            # ! a replacement: it dies in an hour and dies on restart, while a
+            # ! saved file survives both. Betting the whole delivery on a link
+            # ! nobody has field-tested is how a worker ends up with nothing.
+            self._send_pack_link(chat_id, blob)
+
+    def _send_pack_link(self, chat_id: str, blob: bytes) -> None:
+        """Offer the same sheet as a link. Silent no-op when links are off."""
+        if not links.base_url():
+            return
+        lang = self._lang.get(chat_id, DEFAULT_LANG)
+        try:
+            token = links.publish(blob)
+            sent = _call(self.token, "sendMessage", {
+                "chat_id": chat_id,
+                "text": s("link.ready", lang, url=links.url_for(token)),
+                # ! Telegram fetches a link to build a preview card, which would
+                # ! open the worker's sheet on Telegram's servers before she
+                # ! touches it — and paste a piece of it into the chat.
+                "link_preview_options": {"is_disabled": True},
+            })
+            self._tokens.setdefault(chat_id, []).append(token)
+            self._track(chat_id, (sent.get("result") or {}).get("message_id"))
+        except Exception as e:  # noqa: BLE001 — the file already went; a link is a bonus
+            print(f"[telegram] pack link failed: {type(e).__name__}")
 
     # * -------------------------------------------------------------- /clear
 
@@ -359,6 +389,10 @@ class TelegramBot(Router):
                   f"batches={batches} singles={singles}")
 
         self._sent[chat_id] = []
+        # ! Revoke before replying. A worker who reads "cleared" and then opens
+        # ! an older link would have been told something untrue.
+        for token in self._tokens.pop(chat_id, []):
+            links.revoke(token)
         if deep:
             # ! No count: deleteMessages does not report which ids it removed,
             # ! and a number we did not measure is exactly the kind of claim
@@ -501,6 +535,7 @@ def _self_check() -> None:
     # * Patch THIS module object. Running as __main__ makes a second copy of the
     # * module, so patching the imported name would patch the wrong one.
     mod = sys.modules[__name__]
+    _original_call, _original_upload = mod._call, mod._upload
 
     kb = keyboard((Button("क", "a"), Button("ख", "b"), Button("ग", "c")))
     assert len(kb["inline_keyboard"]) == 2 and len(kb["inline_keyboard"][0]) == 2
@@ -857,6 +892,52 @@ def _self_check() -> None:
         # * A malformed upload response must not raise — _track ignores no id.
         mod._upload = lambda *a, **k: {}
         bot.send("77", Reply(text="pack", document=("pack.html", b"x")))
+
+        # ! The pack link. Three things have gone wrong here before in spirit:
+        # ! the link replacing the file instead of joining it, Telegram opening
+        # ! the sheet itself to build a preview card, and /clear wiping the chat
+        # ! while leaving the link readable.
+        from sathi.pack import links as _links
+
+        os.environ["PACK_BASE_URL"] = "https://links.test"
+        try:
+            _links.clear()
+            link_calls, uploads = [], []
+            mod._upload = lambda *a, **k: uploads.append(a[2]) or {"result": {"message_id": 5001}}
+            mod._call = lambda token, method, payload: (
+                link_calls.append((method, payload)) or {"result": {"message_id": 5002}})
+            bot._sent.pop("78", None)
+            bot._tokens.pop("78", None)
+            bot.send("78", Reply(text="pack", document=("pack.html", b"<html>sheet</html>")))
+
+            assert uploads == ["pack.html"], "the file must still be sent, not replaced"
+            link_msg = [p for m, p in link_calls if m == "sendMessage"][-1]
+            assert link_msg["link_preview_options"] == {"is_disabled": True},                 "Telegram would fetch the sheet to build a preview card"
+            token = bot._tokens["78"][-1]
+            assert token in link_msg["text"], "the link message must carry the token"
+            assert _links.fetch(token) == b"<html>sheet</html>"
+
+            # /clear must take the link back, not just the messages.
+            mod._call = lambda token, method, payload: {"result": True}
+            bot.clear_chat("78", "en", None, deep=False)
+            assert _links.fetch(token) is None, "/clear left the pack link readable"
+
+            # ! A failed link must not lose the pack — the file already went.
+            def _link_explodes(token, method, payload):
+                # * Only the link message fails; the ordinary text still goes,
+                # * which is what makes this test about the link and not send().
+                if "link_preview_options" in payload:
+                    raise TelegramError("injected sendMessage failure")
+                return {"result": {"message_id": 5003}}
+
+            mod._call = _link_explodes
+            bot.send("79", Reply(text="pack", document=("pack.html", b"y")))
+            assert 5001 in [mid for mid, _ in bot._sent.get("79", [])],                 "a failed link must not stop the file from being tracked"
+        finally:
+            del os.environ["PACK_BASE_URL"]
+            _links.clear()
+            mod._call = _original_call
+            mod._upload = _original_upload
 
         # ! Use the keyboard IDs actually returned by the wire stub. Fabricated
         # ! callbacks cannot prove which question the worker is answering.

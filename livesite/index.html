@@ -357,6 +357,51 @@ footer{border-top:1px solid var(--hairline);padding:var(--section) 0 var(--xxl)}
   </div>
 </section>
 
+<!-- ! Live counters, fed by the running bot. HIDDEN by default and revealed
+     ! only if the fetch succeeds AND something has actually run: a strip
+     ! reading 0, or a skeleton that never fills, is worse than the honest
+     ! sentence in the Limitations block right below. If the server is down,
+     ! this section does not exist as far as a reader is concerned. -->
+<section id="live" hidden style="padding-top:var(--xxl)">
+  <div class="wrap">
+    <div class="block b-cream">
+      <div class="head"><p class="eyebrow">Live from the bot</p><h2 class="d-lg">What has actually run.</h2><p class="body-lg">Read from the deployed bot's own event log, cached for a minute. Conversations and sheets — not people helped. The section below says what that does and does not mean.</p></div>
+      <div class="grid-4">
+        <div class="stat"><b id="live-screened">&mdash;</b><span>screenings completed</span></div>
+        <div class="stat"><b id="live-packs">&mdash;</b><span>application sheets generated</span></div>
+        <div class="stat"><b id="live-people">&mdash;</b><span>distinct chats, counted by a one-way hash</span></div>
+        <div class="stat"><b id="live-schemes">&mdash;</b><span>schemes signed off and screened against</span></div>
+      </div>
+      <p class="caption" style="margin-top:var(--lg)">Updated <span id="live-updated">&mdash;</span> &middot; still maintainer testing, not a field pilot</p>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ! One fetch, no library, no analytics, no cookie. The endpoint returns only
+   ! aggregate counts — never a source, a purpose, or anything per session.
+   ! Failure is silent on purpose: the section stays hidden and the page reads
+   ! exactly as it does with the server switched off. */
+(function () {
+  fetch('https://yojanasathi.avinashnegi.com/stats.json', { mode: 'cors' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) {
+      /* ! Zero would claim less than the honest sentence already on the page.
+         ! Show nothing until something has actually run. */
+      if (!d || !d.screened) return;
+      var set = function (id, v) { document.getElementById(id).textContent = v; };
+      set('live-screened', d.screened);
+      set('live-packs', d.packs);
+      set('live-people', d.unique_people);
+      set('live-schemes', d.schemes);
+      set('live-updated', new Date(d.updated).toLocaleString('en-IN',
+          { dateStyle: 'medium', timeStyle: 'short' }));
+      document.getElementById('live').hidden = false;
+    })
+    .catch(function () { /* server down: the page is complete without this */ });
+})();
+</script>
+
 <!-- white canvas returns, then BLOCK 4 · navy -->
 <section id="limits" style="padding-top:var(--xxl)">
   <div class="wrap">

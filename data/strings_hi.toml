@@ -345,3 +345,22 @@ ask_suggestion = """धन्यवाद। कुछ सुधारने ल
 thanks = "धन्यवाद — इससे अगले व्यक्ति के लिए यह बेहतर बनेगा।"
 skip = "छोड़ दें"
 bad_rating = "कृपया 1 से 10 के बीच अंक भेजें, या छोड़ दें।"
+
+# =====================================================================
+[link]
+# =====================================================================
+# ! The sheet, as a link she can open in her phone's browser. The hour is
+# ! stated because it is real — the link stops working, and a worker who was
+# ! not told would think the sheet was taken away from her.
+ready = """आपका पर्चा इस लिंक पर खुलेगा — 1 घंटे तक:
+{url}
+
+खोलकर "प्रिंट" दबाएँ तो फ़ोन में PDF सेव हो जाएगा।"""
+# * Shown by the server itself when a link has expired, so it must stand alone
+# * with no chat around it, and in both languages — we do not know which one
+# * she chose an hour ago.
+expired_title = "यह लिंक अब नहीं खुलेगा"
+expired_body = """यह पर्चा एक घंटे बाद अपने आप हट जाता है। आपकी कोई जानकारी हमारे पास नहीं रखी जाती।
+
+नया पर्चा लेने के लिए बॉट पर फिर से शुरू करें।"""
+expired_cta = "बॉट पर वापस जाएँ"

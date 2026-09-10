@@ -105,7 +105,56 @@ config and it renews on its own:
 
 `nip.io` resolves `<ip>.nip.io` to that IP, which is how this gets a real
 certificate without buying a domain — Let's Encrypt will not issue one for a bare
-IP address. A real domain is better and is the only change needed later.
+IP address.
+
+**Done, 10 Sep 2026.** `yojanasathi.avinashnegi.com` (A record at Spaceship, the
+registrar for `avinashnegi.com`) now serves the same adapter, with its own
+Let's Encrypt certificate. The Caddyfile lists both names on one site block:
+
+    13.206.84.69.nip.io, yojanasathi.avinashnegi.com {
+        log
+        reverse_proxy 127.0.0.1:8080
+    }
+
+`nip.io` stays because Meta's webhook callback URL points at it, and changing
+that URL means re-verifying in the Meta dashboard. The new name is for the
+result links a worker taps.
+
+### The pack link route
+
+`/p/*` is served by the **Telegram** process, not the WhatsApp one. That is not
+arbitrary: the pack store is a dict in memory, so only the process that
+published a pack can serve it. Two copies would answer `410` for half the links.
+
+    yojanasathi.avinashnegi.com {
+        log
+        handle /p/* {
+            reverse_proxy 127.0.0.1:8081
+        }
+        handle {
+            reverse_proxy 127.0.0.1:8080
+        }
+    }
+
+`sathi.service` needs two variables in `/etc/sathi/sathi.env`:
+
+    PACK_BASE_URL=https://yojanasathi.avinashnegi.com
+    BOT_URL=https://t.me/YojanaSathiBot
+
+`PACK_BASE_URL` unset means links are off and the bot sends only the file —
+which is what a laptop should do, since a laptop has no reachable host.
+
+Two things this exposed, both worth knowing:
+
+- The SSH host key had to be verified before any of this, and the instance's
+  boot log no longer carried the fingerprint block — it had been rebooted. The
+  fingerprint came from **EC2 Instance Connect** instead (`ssh-keygen -lf
+  /etc/ssh/ssh_host_ed25519_key.pub`), which is still AWS's own channel:
+  `SHA256:YcS3AZL/KS6+aZ+PY8BAdCdP7fvWpjSidak+8FiqBZk`.
+- A crawler hit the new hostname **five seconds** after the certificate was
+  issued. Certificate Transparency publishes every hostname in every
+  certificate, publicly, immediately. Nothing here is secret, but do not ever
+  assume a subdomain is unlisted because you have not shared it.
 
 Then open 443, which the security group currently does not:
 

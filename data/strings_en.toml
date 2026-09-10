@@ -313,3 +313,16 @@ Send it in a few words, or skip."""
 thanks = "Thank you — that helps me make this better for the next person."
 skip = "Skip"
 bad_rating = "Please send a number from 1 to 10, or skip."
+
+# =====================================================================
+[link]
+# =====================================================================
+ready = """Your sheet opens at this link — for 1 hour:
+{url}
+
+Open it and press "Print" to save it as a PDF on your phone."""
+expired_title = "This link no longer works"
+expired_body = """The sheet is removed automatically after one hour. Nothing about you is kept.
+
+Start the bot again to get a new sheet."""
+expired_cta = "Back to the bot"
