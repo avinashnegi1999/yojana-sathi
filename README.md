@@ -10,7 +10,7 @@ WhatsApp speaks the same conversation from the same rule engine. The channel is
 built and verified end to end against Meta's test number — a real phone, a full
 screening, the same Hindi — but it is not yet live on a public number.
 
-**[yojana-sathi on the web](https://avinashnegi1999.github.io/yojana-sathi)** — a walkthrough
+**[yojana-sathi on the web](https://avinashnegi.com/yojana-sathi/)** — a walkthrough
 video, real screenshots of both channels, the architecture, and what this does not claim, on one
 page. Source in [`livesite/`](livesite/), published by
 [`.github/workflows/pages.yml`](.github/workflows/pages.yml).
