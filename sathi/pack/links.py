@@ -164,6 +164,24 @@ _stats_cache: tuple[float, bytes] = (0.0, b"")
 # ! who used it, and this endpoint answers strangers.
 STATS_KEYS = ("screened", "packs", "unique_people", "schemes", "updated")
 
+# ! The page has two addresses and both are real: the github.io one, and the
+# ! custom domain, which GitHub applies to every project page at once. A single
+# ! Access-Control-Allow-Origin header cannot name two origins, so we echo back
+# ! whichever one asked, and only if it is on this list. Never "*" — this
+# ! endpoint answers strangers and only the landing page has a reason to read it.
+STATS_ORIGINS = (
+    "https://avinashnegi.com",
+    "https://www.avinashnegi.com",
+    "https://avinashnegi1999.github.io",
+)
+
+
+def allowed_origin(asked: str) -> str:
+    """The origin to echo back, or the primary one when the caller is unknown."""
+    extra = [o for o in os.environ.get("STATS_ORIGIN", "").split(",") if o.strip()]
+    allowed = tuple(o.strip() for o in extra) + STATS_ORIGINS
+    return asked if asked in allowed else allowed[0]
+
 
 def stats_json(db_path: str = "", schemes: int = 0) -> bytes:
     """The whitelisted aggregates, cached. Empty JSON object on any failure."""
@@ -246,8 +264,11 @@ def handler_class() -> type[BaseHTTPRequestHandler]:
                               extra={
                                   # ! Named origin, not "*". The landing page is
                                   # ! the only thing meant to read this.
-                                  "access-control-allow-origin": os.environ.get(
-                                      "STATS_ORIGIN", "https://avinashnegi1999.github.io"),
+                                  "access-control-allow-origin": allowed_origin(
+                                      self.headers.get("origin", "")),
+                                  # ! Caches key on the origin, or one visitor's
+                                  # ! allowed response gets replayed to another.
+                                  "vary": "Origin",
                                   "cache-control": f"public, max-age={_STATS_TTL}",
                               })
                 return
@@ -365,6 +386,13 @@ def _self_check() -> None:
         server.shutdown()
         server.server_close()
         del os.environ["PACK_BASE_URL"]
+
+    # ! Two addresses for one page, and an unknown caller must not be handed
+    # ! its own origin back — that is "*" wearing a disguise.
+    assert allowed_origin("https://avinashnegi.com") == "https://avinashnegi.com"
+    assert allowed_origin("https://avinashnegi1999.github.io") ==         "https://avinashnegi1999.github.io"
+    assert allowed_origin("https://evil.test") == STATS_ORIGINS[0]
+    assert allowed_origin("") == STATS_ORIGINS[0]
 
     # ---- /stats.json: the whitelist is the whole safety story here
     clear()
