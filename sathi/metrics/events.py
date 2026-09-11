@@ -299,16 +299,53 @@ class EventLog:
 
         if existing and not existing.endswith("\n"):
             existing += "\n"
-        env_path.write_text(existing + f"REACH_HMAC_KEY={row[0]}\n", encoding="utf-8")
+
+        # ! Create the file 0600 BEFORE the key is in it. write_text() creates
+        # ! at 0666 & ~umask - usually 0644 - and a later chmod leaves a window,
+        # ! however short, where the key is world-readable on a multi-user box.
+        # ! os.open with the mode argument closes that window: the permission
+        # ! is set by the syscall that creates the file, so there is no instant
+        # ! at which the key exists at wider permissions.
+        fd = os.open(env_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(existing + f"REACH_HMAC_KEY={row[0]}\n")
+
+        # * os.open respects an existing file's mode, so a file that was
+        # * already 0644 stays 0644. Tighten it, and report honestly if the
+        # * platform will not allow it rather than claiming a mode we did not
+        # * verify.
+        secured = True
         try:
             env_path.chmod(0o600)
+            secured = (env_path.stat().st_mode & 0o777) == 0o600
         except OSError:
-            pass  # * Windows and some mounts do not support it; not fatal.
+            secured = False  # * Windows and some mounts do not support it.
 
         self._conn.execute("DELETE FROM meta WHERE key = 'reach_key'")
         self._conn.commit()
-        return (f"moved: the key is now only in {env_path} (mode 0600) and no "
-                "longer in the database. Restart the service so it is read.")
+
+        # ! DELETE does not erase. SQLite moves the page to the freelist and
+        # ! leaves the bytes there until something overwrites them, so the key
+        # ! stays readable with `strings` on a backup of this file. VACUUM
+        # ! rewrites the database without the free pages, which is the whole
+        # ! point of running it here rather than as housekeeping.
+        purged = True
+        try:
+            self._conn.execute("VACUUM")
+            self._conn.commit()
+        except sqlite3.Error:
+            # * VACUUM fails inside a transaction or when the disk is short of
+            # * room for a second copy. Say so; do not imply it ran.
+            purged = False
+
+        where = f"{env_path}" + ("" if secured else " (COULD NOT SET MODE 0600 - "
+                                                    "check it by hand)")
+        note = "" if purged else (" NOTE: VACUUM failed, so the old key may "
+                                  "still be recoverable from free pages in the "
+                                  "database file. Run VACUUM before trusting "
+                                  "any backup taken after this.")
+        return (f"moved: the key is now in {where} and the row is deleted from "
+                f"the database.{note} Restart the service so it is read.")
 
     def record_reach(self, channel_id: str, channel: str,
                      source: str = "", purpose: str = "") -> bool:
@@ -511,6 +548,22 @@ def _self_check() -> None:
             assert log._conn.execute("SELECT COUNT(*) FROM reach").fetchone()[0] == 1
             after = log._conn.execute("SELECT anon_id FROM reach").fetchone()[0]
             assert after == before, "anon_id changed across the migration"
+
+            # ! The key must never exist at wider permissions, not even for an
+            # ! instant. write_text() creates at 0644 and chmods afterwards;
+            # ! os.open sets the mode in the syscall that creates the file.
+            if os.name != "nt":  # * Windows does not model these bits.
+                mode = envf.stat().st_mode & 0o777
+                assert mode == 0o600, f"env file is {oct(mode)}, not 0600"
+
+            # ! DELETE does not erase in SQLite. The page goes on the freelist
+            # ! and the bytes stay until something overwrites them, so the key
+            # ! would survive in any backup taken afterwards. VACUUM rewrites
+            # ! the file without free pages; this asserts it actually happened.
+            key_text = [line.split("=", 1)[1] for line in body.splitlines()
+                        if line.startswith("REACH_HMAC_KEY=")][0]
+            assert key_text.encode() not in Path(db).read_bytes(), \
+                "the old key is still recoverable from the database file"
 
             # Safe to rerun: there is nothing left in the database to move, and
             # it says so rather than touching the env file again.
