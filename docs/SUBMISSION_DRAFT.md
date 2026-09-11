@@ -48,9 +48,12 @@ what we assumed.
    **benefits access**", which is exactly this project. **Ask the organisers
    which value to select**, or choose Other and name the impact area in the
    problem statement. Do not silently file under Financial Inclusion.
-5. **A working demo URL is required** — live app or video. The Telegram bot link
-   is a live app, but a judge cannot see a real screening result today because
-   no scheme is signed, so the video should show `/demo` and explain the gate.
+5. **A working demo URL is required** — live app or video. Satisfied twice over:
+   the Telegram bot gives real verdicts (all seven scheme files were signed on
+   9-10 September 2026), and https://avinashnegi.com/yojana-sathi carries a
+   walkthrough, real screenshots of both channels, and counters read live from
+   the running bot. The video should still show the UNKNOWN path, because a
+   scheme refusing to answer is the thing worth demonstrating.
 6. Public repo with a README containing setup steps — already satisfied.
 
 Dates confirmed on the site: build window 15 August – 15 November 2026, winners
@@ -91,9 +94,16 @@ worker is uneducated or unable to use government services.
 
 Yojana Sathi asks a small set of questions, reads the answers back, evaluates
 source-backed Python rules, and explains what can and cannot be concluded.
-Where a human-verified scheme supports a result, it can provide a document
-checklist and application directions. Current scheme files remain unsigned,
-so they return UNKNOWN and provide questions to ask instead of a false promise.
+Where a human-verified scheme supports a result, it provides a document
+checklist and application directions. **All seven scheme files were signed on
+9-10 September 2026** — Avinash Negi read each official page in full and
+confirmed every encoded value against it, and `verified_by` in each file names
+him. The bot gives real verdicts, real rupee figures, and a place to walk to.
+
+The gate that produced the earlier unsigned state is still there and still
+enforced: an unresearched value or an unsigned file yields UNKNOWN, never a
+verdict in either direction. A wrong NO is a missed entitlement and fails
+exactly as badly as a wrong YES.
 
 ## Why conversational
 

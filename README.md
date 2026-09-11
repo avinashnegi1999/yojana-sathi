@@ -336,7 +336,7 @@ Optional, all off by default and all tested in the off state:
 python3 check.py
 ```
 
-20 module self-checks and 15 test files, no framework and nothing to install.
+21 module self-checks and 15 test files, no framework and nothing to install.
 Worth knowing about three of them:
 
 - `tests/test_privacy.py` — the reason the privacy claim above is defensible

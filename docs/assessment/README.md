@@ -1,3 +1,12 @@
+> **HISTORICAL SNAPSHOT — superseded.** This describes the project as it stood
+> in early September 2026: three schemes, no WhatsApp adapter, and no human
+> sign-off on any scheme file. All of that has changed. It is kept because an
+> audit trail showing what was wrong and when is worth more than a tidy
+> repository, but do not read it as current state.
+>
+> For current state: [`README.md`](../../README.md) at the repository root, and
+> [`ARCHITECTURE.md`](../ARCHITECTURE.md).
+
 # Assessment
 
 A scored breakdown of where this project actually stands, with the evidence for

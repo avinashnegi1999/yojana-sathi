@@ -126,7 +126,7 @@ plausible default.
 
 ## Verification
 
-`python3 check.py` runs 15 module self-checks and 6 test files, with no
+`python3 check.py` runs 21 module self-checks and 15 test files, with no
 framework and nothing to install.
 
 - `tests/test_schemes.py` — the loader accepts good files and rejects the

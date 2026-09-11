@@ -35,6 +35,12 @@ SELF_CHECK_MODULES = [
     "sathi.render.audio",
     "sathi.pack.checklist",
     "sathi.pack.pack",
+    # ! Added 2026-09-12, after this list was audited against the modules that
+    # ! actually define _self_check(). links.py had been shipping for a day with
+    # ! its checks passing only because I ran them by hand — the token store,
+    # ! the 410 path and the /stats.json key whitelist were all outside the
+    # ! build gate. Same failure as sathi.core.schemes above, one year older.
+    "sathi.pack.links",
     "sathi.conversation.consent",
     "sathi.conversation.flow",
     "sathi.channels.router",

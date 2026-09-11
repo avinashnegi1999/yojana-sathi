@@ -9,6 +9,7 @@
 # ! this file fails. That is its entire job.
 """
 
+import re
 import sys
 import tempfile
 from pathlib import Path
@@ -317,6 +318,45 @@ def test_the_pack_carries_no_personal_detail():
     # * session and must not reach the sheet they carry to a public office.
     for leak in ("37", "above_2_hectare", "UK"):
         assert leak not in text, f"pack leaked {leak}"
+
+
+def test_every_module_with_a_self_check_is_in_the_build_gate():
+    """A self-check nobody runs is not a check, it is a comment.
+
+    # ! This has now happened twice. sathi.core.schemes - the module that
+    # ! decides whether a rule is trustworthy at all - was missing from the
+    # ! list for weeks. Then sathi.pack.links shipped with the pack-token
+    # ! store, the 410 path and the /stats.json key whitelist outside the gate
+    # ! for a day, green only because I happened to run it by hand.
+    #
+    # ! A hand-maintained list rots the moment someone adds a file. Derive the
+    # ! expected set from the source instead, so forgetting is a failure rather
+    # ! than a silence.
+    """
+    root = Path(__file__).resolve().parents[1]
+
+    defines = set()
+    for path in (root / "sathi").rglob("*.py"):
+        if "def _self_check(" in path.read_text(encoding="utf-8"):
+            defines.add(".".join(path.relative_to(root).with_suffix("").parts))
+
+    listed = set(re.findall(r'"(sathi\.[a-z_.]+)"',
+                            (root / "check.py").read_text(encoding="utf-8")))
+
+    missing = defines - listed
+    assert not missing, (
+        "these modules define _self_check() but check.py never runs them: "
+        + ", ".join(sorted(missing)))
+
+    # ! The reverse is a different bug worth catching in the same pass: a list
+    # ! entry pointing at a module that no longer has a check. Only flag one
+    # ! whose file still exists, since a deleted module is a separate failure
+    # ! the import itself already reports.
+    stale = {m for m in listed - defines
+             if (root / Path(*m.split("."))).with_suffix(".py").exists()}
+    assert not stale, (
+        "check.py lists modules that no longer define _self_check(): "
+        + ", ".join(sorted(stale)))
 
 
 def run() -> None:
