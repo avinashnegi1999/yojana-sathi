@@ -15,6 +15,7 @@ import hmac
 import os
 import re
 import secrets
+import sys
 import sqlite3
 import threading
 import uuid
@@ -232,7 +233,26 @@ class EventLog:
     PURPOSES = frozenset({"self", "family", "helping", "testing"})
 
     def _reach_key(self) -> bytes:
-        """The hashing key, generated once and kept only in this database."""
+        """The key that hashes a channel id into an anonymous reach row.
+
+        # ! WHY THE ENVIRONMENT COMES FIRST. The reach table holds
+        # ! HMAC(key, channel_id). A WhatsApp channel id is a phone number, and
+        # ! the space of Indian mobile numbers is about 10^9 - small enough to
+        # ! enumerate. So the hash protects an identity only while the key is
+        # ! secret. Keeping the key in the same SQLite file as the hashes hands
+        # ! both halves to anyone who obtains one backup, and this project
+        # ! claims privacy as a feature rather than an aspiration.
+        #
+        # ! Order: REACH_HMAC_KEY, then the legacy row in `meta`, then generate.
+        # ! The legacy path stays because deleting it would change every hash
+        # ! on an existing install, and every person already counted would be
+        # ! counted a second time. Migration moves the VALUE out rather than
+        # ! replacing it - see migrate_reach_key().
+        """
+        from_env = os.environ.get("REACH_HMAC_KEY", "").strip()
+        if from_env:
+            return from_env.encode("utf-8")
+
         row = self._conn.execute(
             "SELECT value FROM meta WHERE key = 'reach_key'").fetchone()
         if row is None:
@@ -242,7 +262,53 @@ class EventLog:
             self._conn.commit()
             row = self._conn.execute(
                 "SELECT value FROM meta WHERE key = 'reach_key'").fetchone()
+            # * A laptop has nowhere better to put it, and a developer running
+            # * this locally should not be blocked by key management. Say it
+            # * once, so a real deployment is not left on the weak path
+            # * silently.
+            print("[metrics] reach key generated in the database. For a real "
+                  "deployment move it out: python3 -m sathi.metrics.events "
+                  "--migrate-reach-key <env-file>")
         return str(row[0]).encode("utf-8")
+
+    def migrate_reach_key(self, env_path: str | Path) -> str:
+        """Move the key from the database into an env file. Never prints it.
+
+        # ! Moves the VALUE. Generating a fresh key would leave every existing
+        # ! reach row unmatchable, so the next message from someone already
+        # ! counted would insert a second row and the unique-people number
+        # ! would silently inflate. The whole point of this table is a count
+        # ! that cannot drift.
+        #
+        # ! The key is written straight to the file at 0600 and never returned,
+        # ! logged or printed. Returns a status string only.
+        """
+        env_path = Path(env_path)
+        row = self._conn.execute(
+            "SELECT value FROM meta WHERE key = 'reach_key'").fetchone()
+        if row is None:
+            return "nothing to move: no reach key in the database"
+
+        existing = env_path.read_text(encoding="utf-8") if env_path.exists() else ""
+        if "REACH_HMAC_KEY=" in existing:
+            # ! Refuse rather than overwrite. A different key already in the
+            # ! file would orphan every existing hash, and appending a second
+            # ! line leaves which one wins up to the shell.
+            return (f"refusing: {env_path} already sets REACH_HMAC_KEY. "
+                    "Remove it by hand if you are certain, then rerun.")
+
+        if existing and not existing.endswith("\n"):
+            existing += "\n"
+        env_path.write_text(existing + f"REACH_HMAC_KEY={row[0]}\n", encoding="utf-8")
+        try:
+            env_path.chmod(0o600)
+        except OSError:
+            pass  # * Windows and some mounts do not support it; not fatal.
+
+        self._conn.execute("DELETE FROM meta WHERE key = 'reach_key'")
+        self._conn.commit()
+        return (f"moved: the key is now only in {env_path} (mode 0600) and no "
+                "longer in the database. Restart the service so it is read.")
 
     def record_reach(self, channel_id: str, channel: str,
                      source: str = "", purpose: str = "") -> bool:
@@ -403,8 +469,110 @@ def _self_check() -> None:
         again = EventLog(Path(d) / "t.db")
         assert len(again.query("SELECT * FROM events")) == 3
         again.close()
+    # ! THE MIGRATION MUST NOT CHANGE A HASH. Moving the key out is only safe
+    # ! if it moves the value; a fresh key would orphan every existing reach
+    # ! row, so the next message from someone already counted would insert a
+    # ! second row and the unique-people figure would quietly inflate. That is
+    # ! the one number this table exists to keep honest.
+    # * ignore_cleanup_errors: Windows keeps the sqlite handle until the
+    # * connection object is collected, and a cleanup failure here would fail a
+    # * test that has already passed.
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d:
+        db = Path(d) / "reach.db"
+        envf = Path(d) / "sathi.env"
+        envf.write_text("EXISTING=1\n", encoding="utf-8")
+
+        saved = os.environ.pop("REACH_HMAC_KEY", None)
+        try:
+            log = EventLog(db)
+            assert log.record_reach("telegram-user-42", "telegram") is True
+            assert log.record_reach("telegram-user-42", "telegram") is False
+            before = log._conn.execute("SELECT anon_id FROM reach").fetchone()[0]
+
+            status = log.migrate_reach_key(envf)
+            assert status.startswith("moved:"), status
+            log.close()
+
+            body = envf.read_text(encoding="utf-8")
+            assert "EXISTING=1" in body, "migration clobbered the rest of the env file"
+            assert body.count("REACH_HMAC_KEY=") == 1
+
+            # The key is gone from the database...
+            log = EventLog(db)
+            assert log._conn.execute(
+                "SELECT value FROM meta WHERE key = 'reach_key'").fetchone() is None
+
+            # ...and the same person still hashes to the same row.
+            os.environ["REACH_HMAC_KEY"] = [
+                line.split("=", 1)[1] for line in body.splitlines()
+                if line.startswith("REACH_HMAC_KEY=")][0]
+            assert log.record_reach("telegram-user-42", "telegram") is False, \
+                "the migration changed the hash and would double count this person"
+            assert log._conn.execute("SELECT COUNT(*) FROM reach").fetchone()[0] == 1
+            after = log._conn.execute("SELECT anon_id FROM reach").fetchone()[0]
+            assert after == before, "anon_id changed across the migration"
+
+            # Safe to rerun: there is nothing left in the database to move, and
+            # it says so rather than touching the env file again.
+            again = log.migrate_reach_key(envf)
+            assert again.startswith("nothing to move:"), again
+            assert envf.read_text(encoding="utf-8").count("REACH_HMAC_KEY=") == 1
+            log.close()
+
+            # ! The refusal path, which is the dangerous one: a DIFFERENT
+            # ! database still holding its own key, pointed at an env file that
+            # ! already sets one. Appending would leave two lines and let the
+            # ! shell decide; overwriting would orphan every hash in whichever
+            # ! database loses. It must refuse and change nothing.
+            # * With REACH_HMAC_KEY set, no database ever writes a key of its
+            # * own - the env always wins. So this second database has to be
+            # * created with it unset, exactly as a pre-migration install was.
+            migrated = os.environ.pop("REACH_HMAC_KEY")
+            other = EventLog(Path(d) / "other.db")
+            assert other.record_reach("someone-else", "whatsapp") is True
+            before_env = envf.read_text(encoding="utf-8")
+            refused = other.migrate_reach_key(envf)
+            assert refused.startswith("refusing:"), refused
+            assert envf.read_text(encoding="utf-8") == before_env,                 "a refused migration still wrote to the env file"
+            assert other._conn.execute(
+                "SELECT value FROM meta WHERE key = 'reach_key'").fetchone() is not None,                 "a refused migration deleted the key it could not move"
+            other.close()
+            os.environ["REACH_HMAC_KEY"] = migrated
+
+            # A different key really would produce a different row - which is
+            # why the migration moves the value instead of regenerating.
+            os.environ["REACH_HMAC_KEY"] = "a-completely-different-key"
+            log = EventLog(db)
+            assert log.record_reach("telegram-user-42", "telegram") is True, \
+                "a changed key must produce a new hash, or this test proves nothing"
+            log.close()
+        finally:
+            os.environ.pop("REACH_HMAC_KEY", None)
+            if saved is not None:
+                os.environ["REACH_HMAC_KEY"] = saved
+
     print("events.py OK")
 
 
 if __name__ == "__main__":
+    # ! `--migrate-reach-key <env-file>` moves the HMAC key out of the database
+    # ! and into an env file at 0600. It prints a status line and never the key
+    # ! itself, so the value cannot end up in a terminal scrollback, a shell
+    # ! history, or a transcript.
+    if "--migrate-reach-key" in sys.argv:
+        i = sys.argv.index("--migrate-reach-key")
+        if i + 1 >= len(sys.argv):
+            print("usage: python3 -m sathi.metrics.events "
+                  "--migrate-reach-key /etc/sathi/sathi.env "
+                  "[--db /var/lib/sathi/sathi.db]", file=sys.stderr)
+            raise SystemExit(2)
+        env_file = sys.argv[i + 1]
+        db = (sys.argv[sys.argv.index("--db") + 1]
+              if "--db" in sys.argv else os.environ.get("DB_PATH", "./sathi.db"))
+        log = EventLog(db)
+        try:
+            print(log.migrate_reach_key(env_file))
+        finally:
+            log.close()
+        raise SystemExit(0)
     _self_check()

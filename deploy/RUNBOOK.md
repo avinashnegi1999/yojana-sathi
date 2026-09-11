@@ -144,6 +144,30 @@ published a pack can serve it. Two copies would answer `410` for half the links.
 `PACK_BASE_URL` unset means links are off and the bot sends only the file —
 which is what a laptop should do, since a laptop has no reachable host.
 
+### The reach HMAC key
+
+The `reach` table stores `HMAC(key, channel_id)` — never the id itself. That
+hash protects an identity only while the key is secret, and a WhatsApp channel
+id is a phone number: the space of Indian mobile numbers is around 10^9, small
+enough to enumerate. **A key stored in the same SQLite file as the hashes hands
+both halves to anyone who obtains one backup.**
+
+Move it out once, per host:
+
+    sudo -u sathi python3 -m sathi.metrics.events         --migrate-reach-key /etc/sathi/sathi.env         --db /var/lib/sathi/sathi.db
+    sudo systemctl restart sathi
+
+It moves the **existing value** rather than generating a new one, on purpose: a
+fresh key would orphan every reach row, so the next message from someone already
+counted would insert a second row and the unique-people number would silently
+inflate. It prints a status line and never the key, so the value cannot reach a
+terminal scrollback or a shell history. It refuses if the env file already sets
+`REACH_HMAC_KEY`, and refuses without deleting anything.
+
+Back up `/etc/sathi/sathi.env` from now on. Losing the key does not lose the
+event log, but every future hash stops matching the old rows, so the unique
+count restarts.
+
 Two things this exposed, both worth knowing:
 
 - The SSH host key had to be verified before any of this, and the instance's
