@@ -1,0 +1,75 @@
+# Source-researched draft, 12 September 2026. NO HUMAN SIGN-OFF IS CLAIMED.
+# Primary source: the Union Cabinet decision, PIB, quoted below verbatim.
+# https://www.pib.gov.in/Pressreleaseshare.aspx?PRID=2053883
+#
+# ! WHY THIS FILE EXISTS SEPARATELY FROM PM-JAY.
+# ! Ordinary PM-JAY eligibility is membership of the SECC-2011 deprivation list
+# ! (plus state substitutes). No sequence of questions establishes that — a
+# ! worker either appears on a list or does not, and only the beneficiary portal
+# ! knows. Asking "are you on the SECC list?" would spend a question to produce
+# ! UNKNOWN, because almost nobody knows the answer. That half of PM-JAY belongs
+# ! as a gateway, not a rule.
+# !
+# ! This half is different, and it is the reason the file is worth writing: the
+# ! Cabinet decision covers "all senior citizens of the age 70 years and above
+# ! IRRESPECTIVE OF INCOME". One question the bot already asks, and the largest
+# ! health cover in the country. No income test, no list, no deprivation test.
+#
+# ! THE ₹ FIGURE IS COVER, NOT A PAYOUT. value_basis = "insurance_cover" so it
+# ! can never be added to a pension in any total. ₹5,00,000 is what the scheme
+# ! will pay a hospital if she is admitted; it is not money she receives, and
+# ! nothing here should ever let those two numbers meet.
+#
+# ! WHAT THE SOURCE SAYS ABOUT OVERLAPS, because it is unusually generous and a
+# ! reader would not guess it:
+# !   - Already in a PM-JAY family? A 70+ member gets an ADDITIONAL top-up of up
+# !     to ₹5 lakh for themselves, not shared with under-70 family members.
+# !   - On a private health policy, or ESI? Still eligible. Stated explicitly.
+# !   - On CGHS, ECHS or Ayushman CAPF? Must CHOOSE one or the other.
+# ! Only the last is an exclusion, and it is a choice rather than a bar — so it
+# ! is written into the summary rather than encoded as a refusal. Encoding a
+# ! choice as an exclusion would tell a retired serviceman "no" when the source
+# ! tells him "either".
+#
+# ? Open question for sign-off: does a 70-year-old in an existing PM-JAY family
+# ? need a fresh card, or does the existing family card carry the top-up? The
+# ? release says "a new distinct card" for eligible senior citizens without
+# ? saying whether that includes the already-covered. Ask at a CSC or hospital
+# ? Ayushman Mitra desk before signing.
+code = "PMJAY_70"
+name_en = "Ayushman Bharat PM-JAY — cover for age 70 and above"
+name_hi = "आयुष्मान भारत PM-JAY — 70 वर्ष और उससे अधिक उम्र के लिए"
+authority = "National Health Authority, Ministry of Health and Family Welfare"
+official_url = "https://nha.gov.in/PM-JAY"
+verified_on = "2026-09-12"
+verified_by = "claude — AUTO-RESEARCHED, PENDING HUMAN VERIFICATION"
+
+[benefit]
+annual_value_inr = 500000
+value_basis = "insurance_cover"
+premium_inr = 0
+summary_en = "Free hospital treatment worth up to ₹5 lakh a year. Everyone aged 70 and above qualifies, whatever their income — there is no poverty test and no list to be on. If your family already has an Ayushman card, this is an extra ₹5 lakh for you alone, not shared with younger members. Being on a private health policy or on ESI does not stop you. If you are on CGHS, ECHS or Ayushman CAPF you must choose one scheme or this one. This is not money paid to you: it pays the hospital when you are admitted. Get the card made before you need it — at a Common Service Centre, or at the Ayushman desk in a listed hospital."
+summary_hi = "साल में ₹5 लाख तक का मुफ़्त अस्पताल इलाज। 70 साल या उससे ज़्यादा उम्र के हर व्यक्ति को मिलता है, आमदनी चाहे जो हो — कोई ग़रीबी की जाँच नहीं, किसी सूची में नाम होना ज़रूरी नहीं। अगर आपके परिवार के पास पहले से आयुष्मान कार्ड है, तो यह सिर्फ़ आपके लिए अलग से ₹5 लाख है, बाक़ी सदस्यों के साथ बँटता नहीं। निजी बीमा या ESI होने से यह नहीं रुकता। अगर आप CGHS, ECHS या आयुष्मान CAPF में हैं तो दोनों में से एक चुनना होगा। यह रकम आपके हाथ में नहीं आती: भर्ती होने पर अस्पताल को मिलती है। ज़रूरत पड़ने से पहले कार्ड बनवा लें — जन सेवा केंद्र पर, या सूचीबद्ध अस्पताल के आयुष्मान काउंटर पर।"
+
+# ! "all the senior citizens aged 70 years and above irrespective of income".
+# ! One criterion, and deliberately only one. There is no income test, no
+# ! occupation test and no state test to add — adding any would refuse someone
+# ! the Cabinet decision covers.
+[[criteria]]
+field = "age"
+op = "gte"
+value = 70
+ask_en = "How old are you?"
+ask_hi = "आपकी उम्र कितनी है?"
+pass_en = "You reported being 70 or above, which is the only condition for this cover."
+pass_hi = "आपने 70 या उससे अधिक उम्र बताई — इस कवर के लिए यही एक शर्त है।"
+fail_en = "This particular cover starts at age 70. Your family may still qualify for Ayushman Bharat the usual way; ask at a Common Service Centre whether your family is on the list."
+fail_hi = "यह वाला कवर 70 साल की उम्र से शुरू होता है। आपका परिवार सामान्य तरीक़े से आयुष्मान भारत में आ सकता है; जन सेवा केंद्र पर पूछें कि आपके परिवार का नाम सूची में है या नहीं।"
+source_url = "https://www.pib.gov.in/Pressreleaseshare.aspx?PRID=2053883"
+
+[paperwork]
+documents_en = ["Aadhaar card", "Ration card or family identity document", "Mobile number linked to Aadhaar"]
+documents = ["आधार कार्ड", "राशन कार्ड या परिवार पहचान दस्तावेज़", "आधार से जुड़ा मोबाइल नंबर"]
+where_to_apply = "csc"
+renewal_en = "The card does not expire, but the cover is per year — up to ₹5 lakh in each policy year. Carry the card to a listed hospital; treatment is cashless there and nowhere else. Check the hospital is listed before admission if it is not an emergency."
+renewal = "कार्ड की कोई समय-सीमा नहीं है, पर कवर हर साल का है — हर वर्ष ₹5 लाख तक। कार्ड सूचीबद्ध अस्पताल ले जाएँ; इलाज वहीं बिना पैसे के होता है, और कहीं नहीं। आपात स्थिति न हो तो भर्ती से पहले जाँच लें कि अस्पताल सूची में है।"

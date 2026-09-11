@@ -134,3 +134,79 @@ including the largest health scheme in the country for everyone over 70.
    substitute?
 3. **PM-JAY 70+ enrolment.** Does a 70-year-old need a fresh Ayushman card, or
    does an existing family card cover them?
+
+---
+
+# State pensions for the six pilot states — research, 12 September 2026
+
+`data/states.toml` marks six states `common = true`, which is where the pilot
+runs and the only place state schemes are worth the research: **Uttarakhand,
+Uttar Pradesh, Delhi, Haryana, Himachal Pradesh, Bihar.** Uttarakhand's two are
+already live.
+
+## What a state pension costs to add, which is more than a file
+
+Every national scheme drafted tonight (APY, PMJAY_70) reuses questions the
+intake already asks, so the file is the whole change. **State pensions do not.**
+Each state sets its own income ceiling in rupees per year, and the intake holds
+a monthly *band*, not a figure — `upto_5000` cannot establish "₹46,080 a year or
+less". Uttarakhand solved this with a dedicated `uk_pension_income_or_bpl`
+field, asked only of Uttarakhand residents.
+
+So each state costs: a profile field, an intake question, state-gated skip
+logic so nobody is asked about a pension in a state they do not live in, and
+test coverage for both. That is code, not data, and it is the reason this is
+queued rather than drafted at the same time as the national files.
+
+**One generic `is_bpl` question would unlock several at once** — IGNOAPS,
+IGNWPS, and any state pension that tests BPL status rather than a rupee figure.
+That is the cheapest next step, and it should be designed once rather than five
+times.
+
+## Uttar Pradesh — researched, ready to draft
+
+From the Department of Social Welfare's own page (not an aggregator), read
+12 September 2026:
+
+| Value | As stated |
+|---|---|
+| Pension | **₹1,000 per month**, paid quarterly |
+| Age | **60 or above** |
+| Income ceiling, rural | **₹46,080 per year** |
+| Income ceiling, urban | **₹56,460 per year** |
+| Apply | online, `sspy-up.gov.in` — application to disbursement |
+
+Source: `samajkalyan.up.gov.in/en/article/old-age-pension-scheme`
+(page last updated 4 September 2025).
+
+**The rural/urban split is the problem, and it is not a small one.** The intake
+has no rural/urban field and adding one is a real question with a real error
+rate — many workers migrate seasonally and would answer differently in March
+and October. Two defensible designs:
+
+1. Test against the **rural** ceiling of ₹46,080, the stricter number, and say
+   in the fail text that the urban limit is higher so someone near the line
+   should still go and ask. This is the pattern `uk_old_age.toml` already uses
+   where the department and myScheme disagree — resolve toward telling her to
+   ask, never toward refusing her.
+2. Ask rural or urban. More accurate in principle, one more question for
+   everybody, and wrong whenever the answer is seasonal.
+
+Option 1, on the same reasoning as the existing file: a wrong NO is a missed
+entitlement, and the cost of being told "ask at the office" is far lower than
+the cost of being told "no".
+
+## The other four — blocked on sources, not on effort
+
+| State | Status |
+|---|---|
+| **Delhi, Haryana, Himachal Pradesh, Bihar** | Not researched. Needs the same department-page pass as UP. |
+| **Uttar Pradesh (widow)** | `sspy-up.gov.in` refused connections repeatedly, and myScheme's own detail tabs render no text to read. Not obtainable tonight by any route that would produce a citable figure. |
+
+**Do not fill these from an aggregator.** This project has already been burned
+once: `uk_widow.toml` rests on a myScheme page whose own "Official Website" link
+points at a different scheme entirely, and that single weak citation is the
+reason one of seven files carries a disclosure the other six do not.
+
+Where the department's own page cannot be read, the honest output is a `"TODO"`
+and an UNKNOWN verdict, not a plausible number.

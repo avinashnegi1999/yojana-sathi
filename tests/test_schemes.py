@@ -161,7 +161,15 @@ def test_rejects_empty_documents():
 # ! Every "TODO" still left in a real scheme file, and why. Adding a line here
 # ! is a deliberate act with a reason attached; the test above refuses any stub
 # ! that is not on this list.
-KNOWN_STUBS = ()  # ! nothing outstanding; add a line here with its reason, never a bare TODO
+KNOWN_STUBS = (
+    # ! APY guarantees ₹1,000-₹5,000 a month from 60, and the monthly
+    # ! contribution depends on BOTH the tier chosen and the age at entry -
+    # ! PFRDA publishes it as a chart, not a figure. A single integer would be
+    # ! wrong for almost everyone, so premium_inr stays "TODO" and the summary
+    # ! tells her to ask the bank what each tier costs at her age. Resolve it by
+    # ! encoding the chart, never by picking one row of it.
+    ("APY", "benefit.premium_inr"),
+)  # ! add a line here with its reason, never a bare TODO
 
 
 def test_documented_stubs_are_actually_still_stubbed():
@@ -178,7 +186,15 @@ def test_documented_stubs_are_actually_still_stubbed():
 def test_real_scheme_files_are_structurally_valid():
     root = Path(__file__).resolve().parent.parent
     schemes = load_all(root / "data" / "schemes")
-    assert set(schemes) == {"ESHRAM", "PM_SYM", "PMSBY", "PMJJBY", "UK_OLD_AGE", "UK_WIDOW", "PMUY"}, sorted(schemes)
+    # ! Pinned on purpose. A new scheme file must be a deliberate change with a
+    # ! test edit beside it, never something that appears because a file landed
+    # ! in the directory.
+    assert set(schemes) == {
+        "ESHRAM", "PM_SYM", "PMSBY", "PMJJBY", "UK_OLD_AGE", "UK_WIDOW", "PMUY",
+        # Drafted 12 September 2026, unsigned - both return UNKNOWN until a
+        # human signs them, which is what is_servable enforces.
+        "APY", "PMJAY_70",
+    }, sorted(schemes)
     for code, s in schemes.items():
         assert s.source_path.endswith(".toml")
         # ! Not "no stubs" any more, but "no stub nobody wrote down". Every

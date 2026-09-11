@@ -325,13 +325,22 @@ def test_every_document_of_every_scheme_is_reachable():
     with tempfile.TemporaryDirectory() as d:
         schemes = _schemes(Path(d))
         for lang in ("hi", "en"):
+            # ! Three ages, because no single worker qualifies for everything
+            # ! and the age bands do not overlap: entry schemes cap at 40, the
+            # ! state pensions start at 60, and PM-JAY's income-blind cover
+            # ! starts at 70. A scheme nobody in this list can reach is a
+            # ! scheme whose documents were never offered to anyone, which is
+            # ! precisely what this test exists to catch - it caught PMJAY_70
+            # ! on the day it was added.
             young_codes, young_docs = run(schemes, lang, "30")
             old_codes, old_docs = run(schemes, lang, "65")
-            assert young_codes | old_codes == set(schemes), (
-                f"[{lang}] no eligible path to {sorted(set(schemes) - young_codes - old_codes)}"
+            eldest_codes, eldest_docs = run(schemes, lang, "72")
+            reached = young_codes | old_codes | eldest_codes
+            assert reached == set(schemes), (
+                f"[{lang}] no eligible path to {sorted(set(schemes) - reached)}"
             )
             expected = {doc for sc in schemes.values() for doc in sc.docs(lang)}
-            missing = expected - (young_docs | old_docs)
+            missing = expected - (young_docs | old_docs | eldest_docs)
             assert not missing, f"[{lang}] documents never offered: {sorted(missing)}"
 
 

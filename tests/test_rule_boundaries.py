@@ -123,6 +123,33 @@ def _oracle(code: str, p: Profile) -> bool | None:
             # ! both schemes tell the worker to ask instead of turning her away
             # ! on an aggregator's unsourced line. The answer is still collected
             # ! and still shown; it just does not decide a verdict.
+    elif code == "APY":
+        # pfrda.org.in/w/faqs/atal-pension-yojana, read 12 September 2026:
+        # "(i) The age of an individual should be between 18 and 40 years.
+        #  (ii) He / She should have a savings bank account/ post office savings
+        #  bank account. (iii) From 1st October, 2022, any Indian citizen who is
+        #  or has been an income-tax payer ... will not be eligible to open a
+        #  new APY account."
+        # ! Two age criteria in the file rather than one range, so the worker is
+        # ! told WHICH end she missed. The oracle states it as a range because
+        # ! the verdict is identical either way - that difference is exactly
+        # ! what this sweep is allowed to prove, and what it must not assume.
+        criterion(None if age is None else 18 <= age <= 40)
+        criterion(bank)
+        # ! No EPFO/ESIC or NPS exclusion, deliberately. PM-SYM has one and the
+        # ! shapes are otherwise near-identical, so the temptation to copy it is
+        # ! real. The PFRDA FAQ states no such bar and explicitly allows
+        # ! Central/State Government employees. An unsourced exclusion REFUSES
+        # ! someone, which is the failure this project cares about most.
+        exclusion(tax)
+    elif code == "PMJAY_70":
+        # Union Cabinet, PIB PRID=2053883: "all the senior citizens aged 70
+        # years and above irrespective of income".
+        # ! One condition, and the oracle has to be as bare as the file. There
+        # ! is no income test, no occupation test and no state test to mirror -
+        # ! adding any here would make the sweep agree with a file that wrongly
+        # ! refused people, which is the one thing an oracle exists to catch.
+        criterion(None if age is None else age >= 70)
     elif code == "PMUY":
         criterion(None if age is None else age >= 18)
         criterion(p.is_woman)
@@ -160,7 +187,8 @@ def _signed_schemes() -> dict:
 
 def test_every_combination_matches_the_encoded_source_interpretation():
     schemes = _signed_schemes()
-    missing = set(schemes) - {"ESHRAM", "PM_SYM", "PMSBY", "PMJJBY", "UK_OLD_AGE", "UK_WIDOW", "PMUY"}
+    missing = set(schemes) - {"ESHRAM", "PM_SYM", "PMSBY", "PMJJBY", "UK_OLD_AGE",
+                              "UK_WIDOW", "PMUY", "APY", "PMJAY_70"}
     assert not missing, f"a scheme was added with no oracle: {sorted(missing)}"
 
     checked = 0

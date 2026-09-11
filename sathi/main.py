@@ -135,7 +135,16 @@ def main(argv: list[str] | None = None) -> int:
             # * The scheme count on the page comes from what this process
             # * actually loaded, not from a number typed into a config file
             # * that would quietly go stale the next time a scheme is signed.
-            os.environ.setdefault("SCHEME_COUNT", str(len(schemes)))
+            # !
+            # ! SERVABLE, not loaded. The landing page labels this number
+            # ! "schemes signed off and screened against", and a drafted file
+            # ! sitting unsigned in data/schemes is neither - it returns UNKNOWN
+            # ! to every worker. Publishing len(schemes) would have claimed
+            # ! credit for two files the moment they were drafted, which is the
+            # ! exact shape of overstatement this project keeps auditing itself
+            # ! for. The number rises when you sign, not when I write a file.
+            os.environ.setdefault(
+                "SCHEME_COUNT", str(sum(1 for sc in schemes.values() if sc.is_servable)))
             links.serve_in_background()
 
             try:

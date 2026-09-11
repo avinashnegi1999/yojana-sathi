@@ -95,6 +95,7 @@ class Conversation:
         self._have_docs: set[str] = set()
         self._required_docs: tuple[str, ...] = ()
         self._document_page = 0
+        self._known_page = 0
         self._results: tuple = ()
         # * Set once the worker agrees to anonymous metrics. The adapter uses
         # * it to count one unique person, in a table that has no session id.
@@ -302,14 +303,35 @@ class Conversation:
         )
 
     def _ask_known_schemes(self) -> Reply:
-        """The question the headline metric depends on. It ships in v1, always."""
+        """The question the headline metric depends on. It ships in v1, always.
+
+        # ! Paginated for the same reason the documents screen is: WhatsApp
+        # ! renders a list of at most ten rows. This screen used to emit one
+        # ! button per scheme plus "none of these" plus "next", which fitted
+        # ! while there were seven schemes and broke at nine - the screen simply
+        # ! could not be delivered on WhatsApp, and the failure would have been
+        # ! a worker seeing nothing rather than an exception anybody noticed.
+        # !
+        # ! Seven per page leaves room for both trailing buttons AND the page
+        # ! control, so the count cannot creep back over ten as more schemes are
+        # ! signed. Codes are used as ids, never positions, so a selection made
+        # ! on page one survives paging to page two and back.
+        """
+        codes = list(self.schemes)
+        page_count = max(1, (len(codes) + 6) // 7)
+        self._known_page %= page_count
+        start = self._known_page * 7
         buttons = tuple(
             Button(
-                ("✅ " if code in self._known else "") + sc.name(self.lang),
+                ("✅ " if code in self._known else "") + self.schemes[code].name(self.lang),
                 f"known:{code}",
             )
-            for code, sc in self.schemes.items()
-        ) + (Button(self._s("buttons.none_of_these"), NONE), Button(self._s("buttons.next"), NEXT))
+            for code in codes[start:start + 7]
+        )
+        if page_count > 1:
+            buttons += (Button(self._s("buttons.show_more"), "known:more"),)
+        buttons += (Button(self._s("buttons.none_of_these"), NONE),
+                    Button(self._s("buttons.next"), NEXT))
         return Reply(text=self._s("questions.known_schemes"), buttons=buttons)
 
     def _ask_documents(self) -> Reply:
@@ -593,6 +615,12 @@ class Conversation:
         return [self._current_question()]
 
     def _on_known_schemes(self, answer: str) -> list[Reply]:
+        # ! Before the code branch, not after. "more" is not a scheme code, so
+        # ! it would fall through to the membership test, fail it silently, and
+        # ! redraw the same page - a dead button that looks alive.
+        if answer == "known:more":
+            self._known_page += 1
+            return [self._ask_known_schemes()]
         if answer.startswith("known:"):
             code = answer.split(":", 1)[1]
             if code in self.schemes:

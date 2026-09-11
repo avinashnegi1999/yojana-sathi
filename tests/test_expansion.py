@@ -196,7 +196,15 @@ def test_all_unknown_never_tells_a_worker_they_failed():
     # ! data. This test is about what the RESULT SCREEN says when nothing could
     # ! be checked; it broke the day PMJJBY was signed, which had nothing to do
     # ! with the message it exists to pin.
-    schemes = {c: replace(v, verified_by='unconfirmed — PENDING HUMAN VERIFICATION')
+    # ! stubs=() as well as the signature. "Nothing signed off" is what this
+    # ! test models, and _gap() deliberately tells a worker apart "nobody has
+    # ! looked this up yet" (a file with a TODO) from "one person looked it up
+    # ! and a second has not confirmed it". Leaving APY's premium_inr stub in
+    # ! mixes both reasons, the shared-reason path stops applying, and the test
+    # ! fails for a difference it is not about. The mixed case is real and
+    # ! belongs in its own test, not smuggled into this one.
+    schemes = {c: replace(v, verified_by='unconfirmed — PENDING HUMAN VERIFICATION',
+                          stubs=())
                for c, v in load_all(ROOT / 'data/schemes').items()}
     # The profile from that screening: answers given, nothing signed off.
     p = Profile(state='UK', age=30, occupation='construction',

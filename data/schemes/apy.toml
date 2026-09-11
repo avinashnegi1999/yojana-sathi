@@ -1,0 +1,110 @@
+# Source-researched draft, 12 September 2026. NO HUMAN SIGN-OFF IS CLAIMED.
+# Every value below was read from the PFRDA FAQ at
+# https://pfrda.org.in/w/faqs/atal-pension-yojana on 12 September 2026.
+# PFRDA is the statutory regulator that administers APY, so this is a primary
+# source rather than an aggregator.
+#
+# ! THE BENEFIT IS A RANGE, AND THE FILE HAS TO PICK A NUMBER.
+# ! APY guarantees ₹1,000 / ₹2,000 / ₹3,000 / ₹4,000 or ₹5,000 a month from 60,
+# ! and which one a worker gets depends on the contribution she chooses at
+# ! enrolment. annual_value_inr must be a single integer, so it holds the
+# ! MINIMUM guaranteed tier — ₹1,000/month = ₹12,000/year — and the summary
+# ! states the full range.
+# !
+# ! Understating is the lesser error here but it is still an error: someone who
+# ! could have had ₹60,000 a year is shown ₹12,000. The alternative — showing
+# ! ₹60,000 — would promise a payment that depends on contributions she has not
+# ! agreed to make, which is the failure this project exists to avoid. If the
+# ! intake ever asks what she can afford monthly, this should become the tier
+# ! that matches, and the range should stop being a summary sentence.
+#
+# ! WHY THIS IS NOT A DUPLICATE OF PM-SYM. Both pay a pension from 60 to
+# ! unorganised workers and both take entry at 18-40, so it is tempting to group
+# ! them. They are NOT alternative routes to one payment: PM-SYM is a Ministry
+# ! of Labour scheme with a government matching contribution, APY is a PFRDA
+# ! scheme with a government guarantee, and nothing in either source says
+# ! holding one bars the other. No exclusive_group until a source says so —
+# ! inventing one would hide a real entitlement, which fails exactly as badly
+# ! as double-counting creates a false one.
+#
+# ? Open question for sign-off: PM-SYM excludes EPFO/ESIC/NPS members. The APY
+# ? FAQ states no such bar and explicitly allows Central/State Government
+# ? employees. Confirm before assuming the same exclusions apply.
+code = "APY"
+name_en = "Atal Pension Yojana"
+name_hi = "अटल पेंशन योजना"
+authority = "Pension Fund Regulatory and Development Authority (PFRDA)"
+official_url = "https://pfrda.org.in/schemes/atal-pension-yojana-apy"
+verified_on = "2026-09-12"
+verified_by = "claude — AUTO-RESEARCHED, PENDING HUMAN VERIFICATION"
+
+[benefit]
+annual_value_inr = 12000
+value_basis = "annual_payout"
+premium_inr = "TODO"
+summary_en = "A pension every month from age 60, guaranteed by the Central Government, for life. You choose the amount when you join — ₹1,000, ₹2,000, ₹3,000, ₹4,000 or ₹5,000 a month — and the monthly contribution depends on the amount you pick and your age when you join. The younger you join, the less you pay. After your death your spouse receives the same pension for life. The figure shown here is the smallest tier; ask the bank what each tier would cost you. Open it at the bank or post office where you already have a savings account."
+summary_hi = "60 साल की उम्र से हर महीने पेंशन, केंद्र सरकार की गारंटी के साथ, जीवन भर। रकम आप जुड़ते समय चुनते हैं — ₹1,000, ₹2,000, ₹3,000, ₹4,000 या ₹5,000 हर महीने — और हर महीने कितना जमा करना होगा यह आपकी चुनी रकम और जुड़ने की उम्र पर निर्भर करता है। जितनी कम उम्र में जुड़ेंगे, उतना कम जमा करना होगा। आपके बाद यही पेंशन आपके पति या पत्नी को जीवन भर मिलती है। यहाँ दिखाई रकम सबसे छोटी है; बैंक से पूछें कि हर विकल्प में कितना जमा करना होगा। जिस बैंक या डाकघर में आपका बचत खाता है, वहीं खाता खुलवाएँ।"
+
+# ! "The age of an individual should be between 18 and 40 years." Two criteria
+# ! rather than a range operator, so a 45-year-old is told which end she missed
+# ! instead of a bare no.
+[[criteria]]
+field = "age"
+op = "gte"
+value = 18
+ask_en = "How old are you?"
+ask_hi = "आपकी उम्र कितनी है?"
+pass_en = "Your reported age is above the minimum entry age."
+pass_hi = "आपकी बताई उम्र न्यूनतम प्रवेश आयु से ऊपर है।"
+fail_en = "This pension can be joined from age 18."
+fail_hi = "यह पेंशन 18 साल की उम्र से शुरू की जा सकती है।"
+source_url = "https://pfrda.org.in/w/faqs/atal-pension-yojana"
+
+[[criteria]]
+field = "age"
+op = "lte"
+value = 40
+ask_en = "How old are you?"
+ask_hi = "आपकी उम्र कितनी है?"
+pass_en = "Your reported age is within the entry-age limit."
+pass_hi = "आपकी बताई उम्र प्रवेश की आयु-सीमा के भीतर है।"
+fail_en = "A new account can only be opened up to age 40. Ask at the bank whether any other pension scheme is open to you."
+fail_hi = "नया खाता 40 साल की उम्र तक ही खुल सकता है। बैंक से पूछें कि आपके लिए कोई और पेंशन योजना है या नहीं।"
+source_url = "https://pfrda.org.in/w/faqs/atal-pension-yojana"
+
+# ! "No, the savings bank account/ post office savings bank account is mandatory
+# ! for joining APY." Not a soft preference — the FAQ answers a direct question
+# ! about opening without one with a flat no.
+[[criteria]]
+field = "has_bank_account"
+op = "eq"
+value = true
+ask_en = "Do you have a bank account or a post office savings account?"
+ask_hi = "क्या आपका बैंक या डाकघर में बचत खाता है?"
+pass_en = "You reported having an account; the bank confirms it is suitable."
+pass_hi = "आपने खाता होना बताया; बैंक जाँचेगा कि वह खाता उपयुक्त है।"
+fail_en = "A savings account at a bank or post office is required. You can open one first — the same branch can then open this pension for you."
+fail_hi = "बैंक या डाकघर में बचत खाता ज़रूरी है। पहले खाता खुलवा लें — उसी शाखा से यह पेंशन भी शुरू हो सकती है।"
+source_url = "https://pfrda.org.in/w/faqs/atal-pension-yojana"
+
+# ! Income-tax payers, from 1 October 2022. Worded as "is or has been" in the
+# ! source, so a former taxpayer is barred too. The question the intake asks is
+# ! present tense, which is WEAKER than the rule — a past taxpayer who answers
+# ! "no" truthfully would be told yes here and refused at the bank.
+# ? Flag for sign-off: either the intake question gains "or have you ever been",
+# ? or the fail text has to carry the warning. Left as-is rather than silently
+# ? changing a question that four other schemes depend on.
+[[exclusions]]
+field = "is_income_tax_payer"
+op = "eq"
+value = true
+reason_en = "You reported paying income tax. Since 1 October 2022, anyone who is — or has ever been — an income-tax payer cannot open a new APY account."
+reason_hi = "आपने आयकर भरना बताया। 1 अक्टूबर 2022 से, जो व्यक्ति आयकरदाता है या कभी रहा है, वह नया APY खाता नहीं खोल सकता।"
+source_url = "https://pfrda.org.in/w/faqs/atal-pension-yojana"
+
+[paperwork]
+documents_en = ["Bank or post office savings account passbook", "Aadhaar card", "Mobile number", "Nominee's details"]
+documents = ["बैंक या डाकघर बचत खाते की पासबुक", "आधार कार्ड", "मोबाइल नंबर", "नामांकित व्यक्ति (नॉमिनी) का विवरण"]
+where_to_apply = "bank_branch"
+renewal_en = "The contribution is auto-debited from your savings account every month, quarter or half-year. Keep enough balance in the account — a failed debit attracts a charge. Nominee details are mandatory at enrolment."
+renewal = "हर महीने, तिमाही या छमाही आपके बचत खाते से रकम अपने आप कटती है। खाते में पर्याप्त रकम रखें — कटौती विफल होने पर शुल्क लगता है। खाता खोलते समय नॉमिनी का विवरण देना अनिवार्य है।"
