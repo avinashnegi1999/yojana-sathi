@@ -53,13 +53,44 @@ ask whether any explicitly disclosed reuse is permitted. An eligible separate
 entry or withdrawal from this event is a human scope decision; a cosmetic
 recreation of the repository would not resolve the truthfulness issue.
 
+## Contact attempts — dated, because silence has to be evidenced
+
+# ! The point of this table is not admin. If no answer ever comes, the honest
+# ! position is "I asked repeatedly, in public and in private, through every
+# ! published channel, and nobody replied" — and that is only defensible if it
+# ! is written down as it happens, with dates, rather than reconstructed later.
+# ! An unanswered question asked four times in the open is a defensible record.
+# ! An unasked one is not, and neither is a quietly ticked checkbox.
+
+| Date | Channel | What happened |
+|---|---|---|
+| 2026-08 | [Discussion #13](https://github.com/karlmehta/code-for-a-billion/discussions/13) | Asked publicly whether an existing repository can qualify through continued development in AgentFoundry. **Still 0 replies, 1 participant.** The organiser's own Q&A channel appears unattended. |
+| 2026-09-12 | `hello@codeforindia.org` | **Hard bounce** — "the address couldn't be found, or is unable to receive mail". The domain's MX records resolve (IONOS), so mail is configured but that mailbox does not exist. This is the address published on both codeforindia.org and its `/contact` page, and linked as a `mailto:` from the site's own footer. |
+| 2026-09-12 | `partners@codeforindia.org` | Sent. The second address on the same contact page. Awaiting reply. |
+
+Routes not yet tried, in the order worth trying:
+
+1. **Open an issue** on `karlmehta/code-for-a-billion` — issues are enabled and
+   notify differently from Discussions, which is demonstrably unwatched.
+2. **Karl Mehta on LinkedIn** (`linkedin.com/in/mehtakarl`, linked from his own
+   GitHub profile). The hackathon is his; this is a published professional
+   contact, not a dug-up one.
+3. The contact form at `codeforindia.org/contact` — lowest odds, since it most
+   likely posts to the mailbox that just bounced.
+
+**The standing rule, unchanged: do not tick the "Built using AgentFoundry"
+confirmation without an answer worth repeating out loud to a judge.** If the
+answer never arrives, not submitting is a real option and costs this project
+nothing that matters — the bot is live, the schemes are signed, and the
+repository stands on its own.
+
 ## Manual steps for Avinash
 
-1. Check the relevant mailbox for an actual prior response. If none exists,
-   send the question below through the [organizer discussion
-   channel](https://github.com/karlmehta/code-for-a-billion/discussions) or
-   [CFI contact](https://codeforindia.org/). Keep the answer and its date. Do not
-   treat another participant's checked checkbox as organizer permission.
+1. **Done, twice — see the contact table above.** Asked publicly in Discussion
+   #13 (no reply) and by email on 2026-09-12 (`hello@` bounced, `partners@`
+   sent). Next: chase at seven days, then an issue on the hackathon repository.
+   Keep every answer and its date here. Do not treat another participant's
+   checked checkbox as organizer permission.
 2. Complete/confirm [CFI registration](https://codeforindia.org/hackathon/register)
    and AF signup with your own account. The organizer advertises free entry and
    1M smart-code tokens. Check the actual free allowance in the account; no paid
