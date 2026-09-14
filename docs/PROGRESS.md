@@ -8,9 +8,9 @@ identifiers.
 
 - Read the handoff and audited scheme evidence locally. Added source copies and
   SHA-256 records under `docs/audit-evidence/`.
-- Human-signed locally: IGNOAPS, IGNWPS, IGNDPS, and NPS-Traders. Total: 11
-  signed schemes; 4 drafts remain safely `UNKNOWN` (APY, PM Vishwakarma,
-  PM-JAY 70+, PMJDY).
+- Human-signed locally: NPS-Traders and seven earlier files. Total: 7
+  signed schemes; 8 files remain safely `UNKNOWN` (APY, PM Vishwakarma,
+  PM-JAY 70+, PMJDY, IGNOAPS, IGNWPS, IGNDPS, UK widow pension).
 - Removed UP Old Age Pension completely: scheme file, intake field, tests, and
   current candidate references. Uttarakhand schemes are unchanged.
 - Added PM Vishwakarma's government-service-in-family question and source-backed
@@ -54,8 +54,32 @@ identifiers.
   developer/reviewer testing, or skip. Its aggregate is stored without a
   session/channel identifier, so developer testing can be excluded from pilot
   evidence without creating a worker identity record.
+- Added a pilot-role classification at the end of the flow and refreshed the
+  live-site system diagrams to show the current intake, privacy, and verdict
+  paths.
+- Updated the Telegram adapter self-check for the new optional classification;
+  the working tree has not been pushed to GitHub.
+
+## 2026-09-15
+
+- Corrected the Uttarakhand widow-pension exclusion from the department's Hindi
+  pension overview: another pension now blocks that widow route. The rule has
+  its own question and regression test.
+- Fixed NSAP central pension values at age 80+: IGNOAPS, IGNWPS, and IGNDPS
+  now use the official ₹500/month annual band. The engine supports validated
+  age-based annual values instead of showing the under-80 amount to everyone.
+- Withdrew the four affected signatures (UK widow, IGNOAPS, IGNWPS, IGNDPS).
+  This is deliberate: changed facts require fresh human audit; each is live as
+  `UNKNOWN` rather than a possibly wrong verdict.
+- Repaired the Telegram recovery self-check after the optional pilot-role step;
+  local and AWS `check.py` both passed, including 1,377,810 rule verdicts.
+- Moved the production reach HMAC key from SQLite into root-only
+  `/etc/sathi/sathi.env`, preserving prior anonymous reach hashes. Deployment
+  now preserves that key and creates one safely for a new host.
+- Added a `tar` deploy fallback because this Windows Git Bash installation has
+  no `rsync`. Deployed successfully to AWS; `sathi.service` is active.
 
 ## Next
 
-- Manually test the live selected-scheme route in Telegram.
-- Do not push to GitHub unless Avinash explicitly asks.
+- Re-audit and re-sign UK widow, IGNOAPS, IGNWPS, and IGNDPS before treating
+  them as live coverage again.

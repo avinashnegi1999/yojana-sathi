@@ -154,7 +154,9 @@ both halves to anyone who obtains one backup.**
 
 Move it out once, per host:
 
-    sudo -u sathi python3 -m sathi.metrics.events         --migrate-reach-key /etc/sathi/sathi.env         --db /var/lib/sathi/sathi.db
+    sudo systemctl stop sathi
+    cd /opt/sathi && sudo python3 -m sathi.metrics.events --migrate-reach-key /etc/sathi/sathi.env --db /var/lib/sathi/sathi.db
+    sudo chown sathi:sathi /var/lib/sathi/sathi.db
     sudo systemctl restart sathi
 
 It moves the **existing value** rather than generating a new one, on purpose: a

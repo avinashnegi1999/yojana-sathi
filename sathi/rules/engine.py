@@ -104,7 +104,7 @@ def evaluate(profile: Profile, scheme: Scheme) -> Result:
       4. anything undecidable           → UNKNOWN
       5. otherwise                      → ELIGIBLE
     """
-    value = scheme.annual_value_inr()
+    value = scheme.annual_value_inr(profile.age)
     basis = scheme.benefit.get("value_basis")
     basis = basis if isinstance(basis, str) else ""
 

@@ -587,6 +587,9 @@ def test_selected_scheme_route_asks_only_its_required_fields():
 def test_gender_answer_skips_widow_and_pmuy_followups_when_not_applicable():
     """A male answer removes the dependent widow question; LPG success removes PMUY's declaration."""
     schemes = load_all()
+    # * IGNWPS is deliberately unsigned during renewed source review. This
+    # * routing test needs its widow condition, not its production sign-off.
+    schemes["IGNWPS"] = replace(schemes["IGNWPS"], verified_by="test fixture only")
     widow = Conversation(schemes, None)
     widow.start(); widow.handle(LANG_EN); widow.handle(consent.YES)
     widow.handle("pick:choose"); widow.handle("pick:IGNWPS")

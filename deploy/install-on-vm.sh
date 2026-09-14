@@ -33,17 +33,25 @@ echo "==> syncing code (no .env, no local database, no git history)"
 # ! sathi.db is excluded deliberately. The VM keeps its own event log; copying
 # ! the laptop's test database over it would put fake sessions in the impact
 # ! numbers, and those numbers are 25% of the hackathon score.
-rsync -az --delete -e "ssh -i $KEY" \
-  --exclude '.git' --exclude '.env' --exclude 'sathi.db' \
-  --exclude '__pycache__' --exclude '*.pyc' \
-  "$SRC/sathi" "$SRC/data" "$SRC/tests" "$SRC/check.py" "$SRC/pyproject.toml" \
-  "$TARGET:/tmp/sathi-stage/"
+if command -v rsync >/dev/null 2>&1; then
+  rsync -az --delete -e "ssh -i $KEY" \
+    --exclude '.git' --exclude '.env' --exclude 'sathi.db' \
+    --exclude '__pycache__' --exclude '*.pyc' \
+    "$SRC/sathi" "$SRC/data" "$SRC/tests" "$SRC/check.py" "$SRC/pyproject.toml" \
+    "$TARGET:/tmp/sathi-stage/"
+else
+  # * Git for Windows ships tar but not rsync. The fixed staging paths keep
+  # * this equivalent to rsync --delete without adding another dependency.
+  "${SSH[@]}" 'rm -rf /tmp/sathi-stage/sathi /tmp/sathi-stage/data /tmp/sathi-stage/tests /tmp/sathi-stage/check.py /tmp/sathi-stage/pyproject.toml'
+  tar -C "$SRC" --exclude='*/__pycache__/*' --exclude='*.pyc' \
+    -czf - sathi data tests check.py pyproject.toml \
+    | "${SSH[@]}" 'tar -xzf - -C /tmp/sathi-stage'
+fi
 
 echo "==> installing secrets (mode 0600, root-owned)"
 # ! DB_PATH is rewritten: the laptop's path does not exist on the VM, and the
 # ! event log must land on the persistent disk, not in /tmp.
-sed -E 's#^DB_PATH=.*#DB_PATH=/var/lib/sathi/sathi.db#' "$SRC/.env" \
-  | "${SSH[@]}" 'sudo tee /etc/sathi/sathi.env >/dev/null && sudo chmod 600 /etc/sathi/sathi.env'
+scp -i "$KEY" "$SRC/.env" "$TARGET:/tmp/sathi-stage/sathi.env"
 
 echo "==> installing the unit file"
 scp -i "$KEY" "$SRC/deploy/sathi.service" "$TARGET:/tmp/sathi-stage/sathi.service"
@@ -54,9 +62,29 @@ set -euo pipefail
 rsync -a --delete /tmp/sathi-stage/{sathi,data,tests,check.py,pyproject.toml} /opt/sathi/
 chown -R sathi:sathi /opt/sathi
 
+# ! A re-deploy updates ordinary configuration but must not replace the key
+# ! that already hashes reach rows. It stays only on the host, never in git.
+old_reach_key="$(sed -n 's/^REACH_HMAC_KEY=//p' /etc/sathi/sathi.env 2>/dev/null | head -n 1 || true)"
+sed -E 's#^DB_PATH=.*#DB_PATH=/var/lib/sathi/sathi.db#' /tmp/sathi-stage/sathi.env > /etc/sathi/sathi.env
+if [[ -n "$old_reach_key" ]]; then
+  printf '\nREACH_HMAC_KEY=%s\n' "$old_reach_key" >> /etc/sathi/sathi.env
+fi
+chmod 600 /etc/sathi/sathi.env
+
 # ! The same check.py that gates the Docker build gates the deploy. A VM that
 # ! cannot pass its own tests must not talk to a worker.
 cd /opt/sathi && python3 check.py
+
+# ! Preserve the old key when upgrading: changing it would count existing
+# ! chats again. A new host gets a random key before the service starts.
+python3 -m sathi.metrics.events --migrate-reach-key /etc/sathi/sathi.env \
+  --db /var/lib/sathi/sathi.db
+if ! grep -q '^REACH_HMAC_KEY=' /etc/sathi/sathi.env; then
+  printf '\nREACH_HMAC_KEY=%s\n' "$(python3 -c 'import secrets; print(secrets.token_hex(32))')" \
+    >> /etc/sathi/sathi.env
+  chmod 600 /etc/sathi/sathi.env
+fi
+chown sathi:sathi /var/lib/sathi/sathi.db
 
 install -m 644 /tmp/sathi-stage/sathi.service /etc/systemd/system/sathi.service
 systemctl daemon-reload

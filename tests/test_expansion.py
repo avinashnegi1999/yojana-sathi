@@ -37,19 +37,20 @@ def test_new_scheme_boundaries():
         q=replace(p,income_band=band,uk_pension_income_or_bpl=None)
         assert evaluate(q,schemes['UK_WIDOW']).verdict is Verdict.UNKNOWN
     assert evaluate(replace(p,uk_pension_income_or_bpl=False),schemes['UK_WIDOW']).verdict is Verdict.INELIGIBLE
-    # ! Neither pension refuses someone for already drawing one. myScheme says
-    # ! it disqualifies; both departmental pages omit it entirely, and a wrong
-    # ! refusal is a pension nobody claims. Both files tell her to ask at the
-    # ! office instead. The answer is still collected and still shown.
+    # ! The department's Hindi pension overview explicitly excludes a widow
+    # ! already receiving another pension; its old-age page still does not.
     q=replace(p,age=65,receives_other_pension=True)
-    for code in ('UK_OLD_AGE','UK_WIDOW'):
-        assert evaluate(q,schemes[code]).is_eligible, \
-            f'{code}: an existing pension must not silently refuse this route'
+    assert evaluate(q,schemes['UK_OLD_AGE']).is_eligible
+    assert evaluate(q,schemes['UK_WIDOW']).verdict is Verdict.INELIGIBLE
     assert evaluate(p,schemes['PMUY']).is_eligible
     assert evaluate(replace(p,household_has_lpg=True),schemes['PMUY']).verdict is Verdict.INELIGIBLE
     assert evaluate(replace(p,pmuy_declaration_met=None),schemes['PMUY']).verdict is Verdict.UNKNOWN
     assert schemes['PMUY'].benefit['value_basis']=='in_kind'
     assert schemes['PMUY'].benefit['annual_value_inr']==0
+    # ! NSAP's central pension amount rises to ₹500/month at age 80.
+    for code, before_80 in (('IGNOAPS', 2400), ('IGNWPS', 3600), ('IGNDPS', 3600)):
+        assert schemes[code].annual_value_inr(79) == before_80
+        assert schemes[code].annual_value_inr(80) == 6000
     # ! Unsigned schemes stay UNKNOWN on the real files. Signed ones are meant
     # ! to answer, so skip those rather than making every future sign-off fail
     # ! a boundary test that is not about sign-off at all.
@@ -239,7 +240,9 @@ def test_all_unknown_never_tells_a_worker_they_failed():
 
 
 def test_followups_preserve_unknown_and_language():
-    schemes=load_all(ROOT/'data/schemes')
+    real=load_all(ROOT/'data/schemes')
+    # * This tests follow-up routing, including unsigned files under review.
+    schemes={code: replace(sc, verified_by='test fixture only') for code, sc in real.items()}
     for lang in ('en','hi'):
         c=Conversation(schemes); c.lang=lang
         c.profile=Profile(state='UK',age=30,income_band='upto_5000')
@@ -307,8 +310,7 @@ def test_additional_answers_are_not_persisted_and_demo_has_no_events():
 
 def test_new_boolean_conditions_against_source_oracle():
     import itertools
-    # stubs=() for the same reason as above: UK_WIDOW's withdrawn benefit
-    # amount is a documented TODO, and this sweep is about conditions, not ₹.
+    # * This sweep is about conditions, not the production sign-off state.
     schemes={k:replace(v,verified_by='test fixture only',stubs=())
              for k,v in load_all(ROOT/'data/schemes').items()}
     def expected(conditions):
@@ -325,7 +327,8 @@ def test_new_boolean_conditions_against_source_oracle():
         for code,limit in (('UK_OLD_AGE',60),('UK_WIDOW',18)):
             conditions=[None if state is None else state=='UK',
                         None if age is None else age>=limit,income,selected]
-            if code=='UK_WIDOW': conditions.append(widow)
+            if code=='UK_WIDOW':
+                conditions += [widow, None if other is None else not other]
             assert evaluate(p,schemes[code]).verdict is expected(conditions)
             checked+=1
     for age,woman,lpg,poor in itertools.product(

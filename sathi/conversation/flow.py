@@ -762,7 +762,7 @@ class Conversation:
         if field == "is_woman":
             return Reply(text=self._s("questions.is_woman"),
                          buttons=_yes_no(self.lang, with_dont_know=True))
-        criterion = next(c for sc in self._active_schemes().values() for c in sc.criteria
+        criterion = next(c for sc in self._active_schemes().values() for c in sc.criteria + sc.exclusions
                          if c.field == field)
         return Reply(text=criterion.text("ask", self.lang),
                      buttons=_yes_no(self.lang, with_dont_know=True))

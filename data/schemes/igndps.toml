@@ -19,10 +19,11 @@ name_hi = "इंदिरा गांधी राष्ट्रीय दि
 authority = "Ministry of Rural Development (NSAP)"
 official_url = "https://nsap.nic.in/"
 verified_on = "2026-09-14"
-verified_by = "Avinash Negi, checked 2026-09-14"
+verified_by = "unconfirmed — PENDING HUMAN VERIFICATION"
 
 [benefit]
 annual_value_inr = 3600
+annual_value_age_bands = [{ min_age = 80, annual_value_inr = 6000 }]
 value_basis = "annual_payout"
 exclusive_group = "uk_state_pension"
 premium_inr = 0

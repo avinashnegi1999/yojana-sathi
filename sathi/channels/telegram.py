@@ -1083,6 +1083,9 @@ def _self_check() -> None:
         skip_keyboard = delivered[-1][0]
         _tap("skip", skip_keyboard)
         _tap("skip", delivered[-1][0])
+        # ! Pilot classification is optional too. A third tap now completes
+        # ! the flow; without it this old recovery check expected cleanup early.
+        _tap("role:tester", delivered[-1][0])
         assert "88" not in guarded.sessions, "a completed session was not dropped"
     finally:
         mod._call, mod._upload = real_call, real_upload

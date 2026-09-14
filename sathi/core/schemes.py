@@ -75,7 +75,7 @@ _BENEFIT_KEYS = frozenset(
 # ! adding them would promise her two pensions when the state pays one.
 # ! total_value() counts the largest member of a group once. This is the same
 # ! class of bug as the insurance cover that used to be added to a pension.
-_BENEFIT_OPTIONAL = frozenset({"exclusive_group"})
+_BENEFIT_OPTIONAL = frozenset({"exclusive_group", "annual_value_age_bands"})
 
 _CRITERION_KEYS = frozenset(
     {"field", "op", "value", "ask_hi", "pass_hi", "fail_hi", "source_url"}
@@ -83,7 +83,7 @@ _CRITERION_KEYS = frozenset(
 _CRITERION_OPTIONAL = frozenset({"ask_en", "pass_en", "fail_en"})
 
 _EXCLUSION_KEYS = frozenset({"field", "op", "value", "reason_hi", "source_url"})
-_EXCLUSION_OPTIONAL = frozenset({"reason_en"})
+_EXCLUSION_OPTIONAL = frozenset({"reason_en", "ask_hi", "ask_en"})
 
 
 class SchemeError(Exception):
@@ -195,10 +195,18 @@ class Scheme:
         v = self.benefit.get("exclusive_group")
         return v if isinstance(v, str) and v != STUB else ""
 
-    def annual_value_inr(self) -> int:
+    def annual_value_inr(self, age: int | None = None) -> int:
         """₹ figure for the impact metric. 0 while unverified — never a guess."""
         v = self.benefit.get("annual_value_inr")
-        return v if self.is_servable and type(v) is int and v >= 0 else 0
+        if not (self.is_servable and type(v) is int and v >= 0):
+            return 0
+        # * A pension can increase at a stated age. The base amount remains
+        # * useful when age is absent; the highest matching band wins otherwise.
+        if type(age) is int:
+            for band in self.benefit.get("annual_value_age_bands", ()):
+                if age >= band["min_age"]:
+                    v = band["annual_value_inr"]
+        return v
 
 
 def _find_stubs(node, path: str = "") -> list[str]:
@@ -345,6 +353,21 @@ def load_scheme(path: Path) -> Scheme:
     # * empty label would silently put every scheme in one group, so refuse it.
     if "exclusive_group" in b and b["exclusive_group"] != STUB:
         _check_str(b["exclusive_group"], f"{where}.benefit.exclusive_group")
+    bands = b.get("annual_value_age_bands", ())
+    if bands:
+        if not isinstance(bands, list):
+            raise SchemeError(f"{where}.benefit.annual_value_age_bands: expected a list")
+        previous = -1
+        for i, band in enumerate(bands):
+            band_where = f"{where}.benefit.annual_value_age_bands[{i}]"
+            if set(band) != {"min_age", "annual_value_inr"}:
+                raise SchemeError(f"{band_where}: expected min_age and annual_value_inr")
+            minimum, amount = band["min_age"], band["annual_value_inr"]
+            if type(minimum) is not int or minimum < 0 or minimum <= previous:
+                raise SchemeError(f"{band_where}.min_age: expected increasing non-negative integer")
+            if type(amount) is not int or amount < 0:
+                raise SchemeError(f"{band_where}.annual_value_inr: expected non-negative integer")
+            previous = minimum
     _require_keys(raw["paperwork"], _PAPERWORK_KEYS | _PAPERWORK_OPTIONAL,
                   _PAPERWORK_KEYS, f"{where}.paperwork")
     pw = raw["paperwork"]
