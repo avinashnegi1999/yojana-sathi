@@ -14,6 +14,8 @@
 
 import sys
 import tempfile
+from collections import deque
+from copy import deepcopy
 from dataclasses import replace
 from pathlib import Path
 
@@ -177,21 +179,19 @@ def test_every_button_in_both_languages():
 
         for lang in (LANG_HI, LANG_EN):
             code = lang.split(":")[1]
-            frontier = [[lang]]  # * BFS: first visit to a screen is its shortest path
+            first = Conversation(schemes, log, channel="cli")
+            first.start()
+            frontier = deque([(first, first.handle(lang), [lang])])
             visited = set()
             ended = 0
             explored = 0
 
             while frontier:
-                path = frontier.pop(0)
+                convo, replies, path = frontier.popleft()
                 if len(path) > MAX_DEPTH:
                     problems.append(f"[{code}] path longer than {MAX_DEPTH}: {path}")
                     continue
 
-                convo = Conversation(schemes, log, channel="cli")
-                replies = convo.start()
-                for step in path:
-                    replies = convo.handle(step)
                 explored += 1
 
                 typed = [step for step in path if not step.startswith(
@@ -227,9 +227,12 @@ def test_every_button_in_both_languages():
                 visited.add(key)
 
                 for b in last.buttons:
-                    frontier.append(path + [b.value])
+                    child = deepcopy(convo, {id(log): log})
+                    frontier.append((child, child.handle(b.value), path + [b.value]))
                 if convo.state in TYPED_STATES:
-                    frontier.append(path + ["30" if convo.state is State.AGE else "ईंट का काम"])
+                    child = deepcopy(convo, {id(log): log})
+                    answer = "30" if convo.state is State.AGE else "ईंट का काम"
+                    frontier.append((child, child.handle(answer), path + [answer]))
 
             assert ended, f"[{code}] no path ever reached the end of a session"
             assert {State.TAX_CONFIRM, State.TAX_INCOME} <= {key[0] for key in visited}, \
@@ -295,14 +298,17 @@ def test_every_document_of_every_scheme_is_reachable():
     """
     keep = {"is_woman": "yes", "is_widow": "yes", "household_has_lpg": "no",
             "pmuy_declaration_met": "yes", "uk_pension_income_or_bpl": "yes",
-            "receives_other_pension": "no", "uk_pension_selected": "yes"}
+            "receives_other_pension": "no", "uk_pension_selected": "yes",
+            "is_bpl": "yes", "has_disability_80pct": "yes", "is_small_trader": "yes",
+            "is_vishwakarma_artisan": "yes", "took_business_loan_5yr": "no",
+            "has_government_service_in_family": "no"}
 
-    def run(schemes, lang: str, age: str):
+    def run(schemes, lang: str, age: str, state: str = "UK", bank: str = "yes"):
         convo = Conversation(schemes, None)
         convo.start()
         for step in (LANG_EN if lang == "en" else LANG_HI, "consent_yes",
-                     "state:UK", age, "occ:construction", "inc:upto_5000",
-                     "land:landless", "fam:4", "yes", "no", "no", "no", "yes"):
+                     f"state:{state}", age, "occ:construction", "inc:upto_5000",
+                     "land:landless", "fam:4", bank, "no", "no", "no", "yes"):
             convo.handle(step)
         while convo.state is State.FOLLOWUP:
             field = convo._followup_field()
@@ -335,12 +341,15 @@ def test_every_document_of_every_scheme_is_reachable():
             young_codes, young_docs = run(schemes, lang, "30")
             old_codes, old_docs = run(schemes, lang, "65")
             eldest_codes, eldest_docs = run(schemes, lang, "72")
-            reached = young_codes | old_codes | eldest_codes
+            # ! PMJDY is surfaced only to someone without an account — the one
+            # ! person it helps. No separate state-specific profile is needed.
+            unbanked_codes, unbanked_docs = run(schemes, lang, "65", bank="no")
+            reached = young_codes | old_codes | eldest_codes | unbanked_codes
             assert reached == set(schemes), (
                 f"[{lang}] no eligible path to {sorted(set(schemes) - reached)}"
             )
             expected = {doc for sc in schemes.values() for doc in sc.docs(lang)}
-            missing = expected - (young_docs | old_docs | eldest_docs)
+            missing = expected - (young_docs | old_docs | eldest_docs | unbanked_docs)
             assert not missing, f"[{lang}] documents never offered: {sorted(missing)}"
 
 
@@ -353,20 +362,7 @@ def test_commands_at_every_state():
         # ! DOCUMENTS, PACK and DONE were never reached by a test that claims to
         # ! cover every state. NPS needs its own answer before "next" means
         # ! anything.
-        walk = [LANG_EN, "consent_yes", "state:UK", "30", "occ:construction",
-                "inc:upto_5000", "land:landless", "fam:4", "yes", "no", "no", "no", "yes",
-                # ! The seven follow-ups, in the order they are asked:
-                # ! is_woman, household_has_lpg, pmuy_declaration_met,
-                # ! uk_pension_income_or_bpl, receives_other_pension,
-                # ! uk_pension_selected, is_widow. The fifth must be "no" —
-                # ! answering that a pension is already being drawn makes both
-                # ! state pensions INELIGIBLE, and this walk needs the eligible
-                # ! half of the conversation to stay reachable.
-                "yes", "no", "yes", "yes", "no", "yes", "yes",
-                # ! The sheet, then the two optional questions after it. Both
-                # ! skipped here: the point of this walk is that a command works
-                # ! at every state, not that anyone rates the bot.
-                "next", "next", "yes", "skip", "skip"]
+        walk = _derive_walk(schemes)
         reached = set()
 
         for stop in range(len(walk) + 1):
@@ -403,9 +399,50 @@ def test_commands_at_every_state():
                 problems.append(f"/language at {state_before.value} lost an answer")
 
         assert reached == set(State) - {
-            State.OCCUPATION_FREE, State.OCCUPATION_CONFIRM, State.TAX_CONFIRM, State.TAX_INCOME,
+            State.SCHEME_PICKER, State.STATE,
+            State.OCCUPATION_FREE, State.OCCUPATION_CONFIRM,
+            State.TAX_CONFIRM, State.TAX_INCOME,
         }, "the tax-No command walk must reach DONE without entering confirmation"
     assert not problems, "\n".join(f"  - {p}" for p in sorted(set(problems))[:25])
+
+
+_KEEP = {"is_woman": "yes", "is_widow": "yes", "household_has_lpg": "no",
+         "pmuy_declaration_met": "yes", "uk_pension_income_or_bpl": "yes",
+         "receives_other_pension": "no", "uk_pension_selected": "yes",
+         "is_bpl": "yes", "has_disability_80pct": "yes", "is_small_trader": "yes",
+         "is_vishwakarma_artisan": "yes", "took_business_loan_5yr": "no",
+         "has_government_service_in_family": "no"}
+
+
+def _derive_walk(schemes) -> list[str]:
+    """One full English screening, with the follow-ups DERIVED, not listed.
+
+    # ! Two tests used to carry seven literal follow-up answers in file order.
+    # ! The day two more schemes landed both lists were wrong, the walk stalled
+    # ! in FOLLOWUP, and every state after it went untested by tests that claim
+    # ! to reach every state. So: drive a throwaway conversation to the
+    # ! follow-up stage, read which fields it asks and in what order, and
+    # ! answer each from one map. receives_other_pension stays "no" - a pension
+    # ! already drawn makes both state pensions INELIGIBLE, and the walk needs
+    # ! the eligible half of the conversation reachable.
+    """
+    head = [LANG_EN, "consent_yes", "state:UK", "30", "occ:construction",
+            "inc:upto_5000", "land:landless", "fam:4", "yes", "no", "no", "no", "yes"]
+    probe = Conversation(schemes, None)
+    probe.start()
+    for step in head:
+        probe.handle(step)
+    assert probe.state is State.FOLLOWUP, probe.state
+    followups = []
+    while probe.state is State.FOLLOWUP:
+        field = probe._followup_field()
+        assert field in _KEEP, f"new follow-up {field} - decide its answer for the walk"
+        followups.append(_KEEP[field])
+        probe.handle(_KEEP[field])
+    # * The sheet, then the two optional questions after it, both skipped: the
+    # * point of a walk is that every state is reachable, not that anyone
+    # * rates the bot.
+    return head + followups + ["next", "next", "yes", "skip", "skip"]
 
 
 def test_every_command_through_the_adapter_at_every_state():
@@ -423,12 +460,9 @@ def test_every_command_through_the_adapter_at_every_state():
     problems: list[str] = []
     with tempfile.TemporaryDirectory() as d:
         schemes = _schemes(Path(d))
-        walk = ["lang:en", "consent_yes", "state:UK", "30", "occ:construction",
-                "inc:upto_5000", "land:landless", "fam:4", "yes", "no", "no", "no", "yes",
-                # ! Same seven follow-ups as the walk above, same reason for the
-                # ! "no" in fifth place: receives_other_pension.
-                "yes", "no", "yes", "yes", "no", "yes", "yes",
-                "next", "next", "yes", "skip", "skip"]
+        # ! Derived the same way as the walk above, for the same reason: a
+        # ! literal list of follow-up answers is wrong the day a scheme lands.
+        walk = _derive_walk(schemes)
         reached = set()
 
         sent: list[tuple[str, dict]] = []
@@ -510,7 +544,9 @@ def test_every_command_through_the_adapter_at_every_state():
             mod._call, mod._upload = real_call, real_upload
 
         assert reached == set(State) - {
-            State.OCCUPATION_FREE, State.OCCUPATION_CONFIRM, State.TAX_CONFIRM, State.TAX_INCOME,
+            State.SCHEME_PICKER, State.STATE,
+            State.OCCUPATION_FREE, State.OCCUPATION_CONFIRM,
+            State.TAX_CONFIRM, State.TAX_INCOME,
         }, "the adapter's tax-No walk must reach DONE without entering confirmation"
     assert not problems, "\n".join(f"  - {p}" for p in sorted(set(problems))[:25])
 

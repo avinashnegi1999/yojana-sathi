@@ -1,0 +1,73 @@
+# Source-researched draft, 12 September 2026. NO HUMAN SIGN-OFF IS CLAIMED.
+# ! nsap.nic.in refused every connection on 12 September 2026. The eligibility
+# ! rules and central amounts below are instead confirmed by the 2026 Government
+# ! of India Lok Sabha reply linked on each criterion.
+# !
+# ! THE ₹ FIGURE IS THE CENTRAL SHARE, NOT WHAT SHE RECEIVES. States top this
+# ! up - myScheme's own text: "beneficiaries are getting anywhere between
+# ! ₹200/- to ₹1000/- depending on the State Contribution". Where a state
+# ! pension file exists (UK_OLD_AGE) it carries the real figure, and
+# ! this file sits in the same exclusive_group so the two are never added: the
+# ! group keeps the larger, which is the state figure. This file exists so a
+# ! worker in a state with no file yet is still told the pension exists.
+# ! The threshold is a CERTIFICATE, not a self-assessment. The question asks
+# ! whether a certificate says so, because that is what the office will check
+# ! and it is the only version a self-report can honestly answer.
+code = "IGNDPS"
+name_en = "Indira Gandhi National Disability Pension"
+name_hi = "इंदिरा गांधी राष्ट्रीय दिव्यांगता पेंशन"
+authority = "Ministry of Rural Development (NSAP)"
+official_url = "https://nsap.nic.in/"
+verified_on = "2026-09-14"
+verified_by = "Avinash Negi, checked 2026-09-14"
+
+[benefit]
+annual_value_inr = 3600
+value_basis = "annual_payout"
+exclusive_group = "uk_state_pension"
+premium_inr = 0
+summary_en = "A monthly pension from the central government for people aged 18 and above with a disability certificate showing 80% or more, in a BPL household: ₹300 a month, ₹500 from age 80. States usually add to this amount. If you do not yet have a disability certificate, that is the first step — ask at the district hospital. Apply through UMANG or at the panchayat or municipal office."
+summary_hi = "बीपीएल परिवार के 18 साल या उससे ऊपर के उन लोगों के लिए केंद्र सरकार की मासिक पेंशन जिनका दिव्यांगता प्रमाणपत्र 80% या अधिक दिखाता है: ₹300 हर महीने, 80 साल से ₹500। राज्य आमतौर पर इस रकम में जोड़ते हैं। अगर अभी दिव्यांगता प्रमाणपत्र नहीं है, तो पहला कदम वही है — ज़िला अस्पताल में पूछें। UMANG से या पंचायत/नगरपालिका कार्यालय में आवेदन करें।"
+
+[[criteria]]
+field = "age"
+op = "gte"
+value = 18
+ask_en = "How old are you?"
+ask_hi = "आपकी उम्र कितनी है?"
+pass_en = "Your reported age meets the entry-age condition."
+pass_hi = "आपकी बताई उम्र प्रवेश की आयु-शर्त पूरी करती है।"
+fail_en = "This pension starts at age 18."
+fail_hi = "यह पेंशन 18 साल की उम्र से शुरू होती है।"
+source_url = "https://cdnbbsr.s3waas.gov.in/s3e58aea67b01fa747687f038dfde066f6/uploads/2026/05/20260526963824969.pdf"
+
+[[criteria]]
+field = "has_disability_80pct"
+op = "eq"
+value = true
+ask_en = "Do you have a disability certificate that shows 80% or more?"
+ask_hi = "क्या आपके पास दिव्यांगता प्रमाणपत्र है जिसमें 80% या अधिक लिखा है?"
+pass_en = "You reported a certificate of 80% or more; the office verifies it."
+pass_hi = "आपने 80% या अधिक का प्रमाणपत्र बताया; कार्यालय उसे जाँचेगा।"
+fail_en = "This pension needs a certificate showing 80% or more. If you have a disability but no certificate, get one assessed at the district hospital first."
+fail_hi = "इस पेंशन के लिए 80% या अधिक का प्रमाणपत्र चाहिए। अगर दिव्यांगता है पर प्रमाणपत्र नहीं, तो पहले ज़िला अस्पताल में जाँच करवाएँ।"
+source_url = "https://cdnbbsr.s3waas.gov.in/s3e58aea67b01fa747687f038dfde066f6/uploads/2026/05/20260526963824969.pdf"
+
+[[criteria]]
+field = "is_bpl"
+op = "eq"
+value = true
+ask_en = "Does your household have a BPL card, or is it listed as Below Poverty Line?"
+ask_hi = "क्या आपके परिवार के पास बीपीएल कार्ड है, या परिवार ग़रीबी रेखा से नीचे सूचीबद्ध है?"
+pass_en = "You reported a BPL household; the office checks the list."
+pass_hi = "आपने बीपीएल परिवार बताया; कार्यालय सूची जाँचेगा।"
+fail_en = "This scheme is for households on the BPL list. If you are unsure whether yours is listed, ask at the panchayat or municipal office — do not assume no."
+fail_hi = "यह योजना बीपीएल सूची वाले परिवारों के लिए है। अगर पक्का नहीं है कि आपका परिवार सूची में है, तो पंचायत या नगरपालिका कार्यालय में पूछें — न मान लें।"
+source_url = "https://cdnbbsr.s3waas.gov.in/s3e58aea67b01fa747687f038dfde066f6/uploads/2026/05/20260526963824969.pdf"
+
+[paperwork]
+documents_en = ["Aadhaar card", "Disability certificate (UDID)", "BPL card or BPL list extract", "Age proof", "Bank or post office passbook", "Photograph"]
+documents = ["आधार कार्ड", "दिव्यांगता प्रमाणपत्र (UDID)", "बीपीएल कार्ड या बीपीएल सूची की प्रति", "उम्र का प्रमाण", "बैंक या डाकघर पासबुक", "फोटो"]
+where_to_apply = "csc"
+renewal_en = "Paid to your bank or post office account. Rises automatically at 80."
+renewal = "आपके बैंक या डाकघर खाते में आती है। 80 साल पर अपने आप बढ़ती है।"

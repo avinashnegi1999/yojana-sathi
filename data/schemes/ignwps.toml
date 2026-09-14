@@ -1,0 +1,76 @@
+# Source-researched draft, 12 September 2026. NO HUMAN SIGN-OFF IS CLAIMED.
+# ! nsap.nic.in refused every connection on 12 September 2026, so the values
+# ! below were read from the myScheme entry, which reproduces the NSAP FAQ
+# ! text. That is an aggregator, and this project has been burned by one
+# ! before (uk_widow.toml). Before signing: open nsap.nic.in/circular.do?method=faq
+# ! yourself and confirm every figure against the ministry's own page.
+# !
+# ! THE ₹ FIGURE IS THE CENTRAL SHARE, NOT WHAT SHE RECEIVES. States top this
+# ! up - myScheme's own text: "beneficiaries are getting anywhere between
+# ! ₹200/- to ₹1000/- depending on the State Contribution". Where a state
+# ! pension file exists (UK_OLD_AGE) it carries the real figure, and
+# ! this file sits in the same exclusive_group so the two are never added: the
+# ! group keeps the larger, which is the state figure. This file exists so a
+# ! worker in a state with no file yet is still told the pension exists.
+# ! Age band 40-79 as stated on the myScheme entry (the 2009 guideline said
+# ! 40-59; it was later extended). Confirm which the ministry page states now.
+# ! Discontinued on remarriage or on moving above the poverty line - said in
+# ! the summary, not encoded, because neither is a fact the intake can ask.
+code = "IGNWPS"
+name_en = "Indira Gandhi National Widow Pension"
+name_hi = "इंदिरा गांधी राष्ट्रीय विधवा पेंशन"
+authority = "Ministry of Rural Development (NSAP)"
+official_url = "https://nsap.nic.in/"
+verified_on = "2026-09-14"
+verified_by = "Avinash Negi, checked 2026-09-14"
+
+[benefit]
+annual_value_inr = 3600
+value_basis = "annual_payout"
+exclusive_group = "uk_state_pension"
+premium_inr = 0
+summary_en = "A monthly pension from the central government for widows aged 40 to 79 in a BPL household: ₹300 a month, rising to ₹500 from age 80. States usually add to this, so the real amount is often higher. It stops on remarriage or if the household moves above the poverty line. You get one pension, not both this and a state widow pension. Apply through UMANG or at the panchayat or municipal office."
+summary_hi = "बीपीएल परिवार की 40 से 79 साल की विधवाओं के लिए केंद्र सरकार की मासिक पेंशन: ₹300 हर महीने, 80 साल से ₹500। राज्य आमतौर पर इसमें अपनी रकम जोड़ते हैं, इसलिए असली रकम अक्सर ज़्यादा होती है। पुनर्विवाह पर या परिवार के ग़रीबी रेखा से ऊपर जाने पर बंद हो जाती है। पेंशन एक ही मिलती है, यह और राज्य की विधवा पेंशन दोनों नहीं। UMANG से या पंचायत/नगरपालिका कार्यालय में आवेदन करें।"
+
+[[criteria]]
+field = "is_widow"
+op = "eq"
+value = true
+ask_en = "Are you a widow?"
+ask_hi = "क्या आप विधवा हैं?"
+pass_en = "You reported being a widow; the office checks the certificate."
+pass_hi = "आपने विधवा होना बताया; कार्यालय प्रमाणपत्र जाँचेगा।"
+fail_en = "This pension is for widows."
+fail_hi = "यह पेंशन विधवाओं के लिए है।"
+source_url = "https://www.myscheme.gov.in/schemes/ignwps"
+
+[[criteria]]
+field = "age"
+op = "gte"
+value = 40
+ask_en = "How old are you?"
+ask_hi = "आपकी उम्र कितनी है?"
+pass_en = "Your reported age meets the entry-age condition."
+pass_hi = "आपकी बताई उम्र प्रवेश की आयु-शर्त पूरी करती है।"
+fail_en = "This pension starts at age 40. Below 40 there is no central widow pension — ask the office about state schemes."
+fail_hi = "यह पेंशन 40 साल से शुरू होती है। 40 से कम उम्र में केंद्र की विधवा पेंशन नहीं है — राज्य की योजनाओं के बारे में कार्यालय में पूछें।"
+source_url = "https://www.myscheme.gov.in/schemes/ignwps"
+
+[[criteria]]
+field = "is_bpl"
+op = "eq"
+value = true
+ask_en = "Does your household have a BPL card, or is it listed as Below Poverty Line?"
+ask_hi = "क्या आपके परिवार के पास बीपीएल कार्ड है, या परिवार ग़रीबी रेखा से नीचे सूचीबद्ध है?"
+pass_en = "You reported a BPL household; the office checks the list."
+pass_hi = "आपने बीपीएल परिवार बताया; कार्यालय सूची जाँचेगा।"
+fail_en = "This scheme is for households on the BPL list. If you are unsure whether yours is listed, ask at the panchayat or municipal office — do not assume no."
+fail_hi = "यह योजना बीपीएल सूची वाले परिवारों के लिए है। अगर पक्का नहीं है कि आपका परिवार सूची में है, तो पंचायत या नगरपालिका कार्यालय में पूछें — न मान लें।"
+source_url = "https://www.myscheme.gov.in/schemes/ignwps"
+
+[paperwork]
+documents_en = ["Aadhaar card", "Husband's death certificate", "BPL card or BPL list extract", "Age proof", "Bank or post office passbook", "Photograph"]
+documents = ["आधार कार्ड", "पति का मृत्यु प्रमाणपत्र", "बीपीएल कार्ड या बीपीएल सूची की प्रति", "उम्र का प्रमाण", "बैंक या डाकघर पासबुक", "फोटो"]
+where_to_apply = "csc"
+renewal_en = "Paid to your bank or post office account. Stops on remarriage. Rises automatically at 80."
+renewal = "आपके बैंक या डाकघर खाते में आती है। पुनर्विवाह पर बंद। 80 साल पर अपने आप बढ़ती है।"

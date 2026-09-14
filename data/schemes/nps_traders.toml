@@ -1,0 +1,106 @@
+# Source-researched draft, 12 September 2026. NO HUMAN SIGN-OFF IS CLAIMED.
+# Every value below from the scheme's own FAQ on maandhan.in (Ministry of
+# Labour & Employment), read 12 September 2026. Q2: "Any retail trader,
+# shopkeepers and self-employed person with annual turn-over not exceeding
+# Rs.1.5 crore, in the age group of 18-40 year can subscribe this Scheme. They
+# should not be an income tax payer or a member of National Pension Scheme
+# (NPS - GOVT FUNDED), Employees' State Insurance Corporation scheme (ESIC)
+# and Employees' Provident Fund Organization (EPFO) and Pradhan Mantri Shram
+# Yogi Maan-dhan."
+#
+# ! The SAME shape as PM-SYM, for the other half of the informal economy: the
+# ! shopkeeper rather than the labourer. The last exclusion - PM-SYM members
+# ! cannot also join this - is encoded through known_schemes rather than a new
+# ! question, because the intake already asks which schemes she has.
+# ! The Ministry's published entry-age table gives the worker contribution and
+# ! the equal Central contribution; preserve the range rather than pretending
+# ! there is one premium for every worker.
+code = "NPS_TRADERS"
+name_en = "National Pension Scheme for Traders and Self-Employed (NPS-Traders)"
+name_hi = "व्यापारियों और स्वरोज़गार के लिए राष्ट्रीय पेंशन योजना (NPS-Traders)"
+authority = "Ministry of Labour and Employment"
+official_url = "https://maandhan.in/"
+verified_on = "2026-09-14"
+verified_by = "Avinash Negi, checked 2026-09-14"
+
+[benefit]
+annual_value_inr = 36000
+value_basis = "annual_payout"
+premium_inr = "₹55–₹200/month by entry age; the Central Government matches the same amount"
+summary_en = "Age 60 onwards, a minimum assured pension of ₹3,000 a month for small shopkeepers, retail traders and the self-employed with yearly turnover up to ₹1.5 crore. Your fixed contribution depends on your entry age and continues until 60. If you die after the pension begins, your spouse receives half the pension. You cannot hold this together with PM-SYM — it is one or the other. Enrol at a Common Service Centre."
+summary_hi = "60 साल की उम्र से छोटे दुकानदारों, खुदरा व्यापारियों और स्वरोज़गार वालों के लिए कम-से-कम ₹3,000 हर महीने की पेंशन, जिनका सालाना कारोबार ₹1.5 करोड़ तक है। आपकी तय मासिक जमा रकम प्रवेश की उम्र पर निर्भर है और 60 साल तक चलती है। पेंशन शुरू होने के बाद आपकी मृत्यु होने पर पति/पत्नी को आधी पेंशन मिलती है। यह और PM-SYM दोनों साथ नहीं मिलतीं — कोई एक। जन सेवा केंद्र पर नामांकन करें।"
+
+[[criteria]]
+field = "is_small_trader"
+op = "eq"
+value = true
+ask_en = "Do you run a shop, retail trade or self-employed business with yearly turnover of ₹1.5 crore or less?"
+ask_hi = "क्या आप दुकान, खुदरा व्यापार या स्वरोज़गार चलाते हैं जिसका सालाना कारोबार ₹1.5 करोड़ या उससे कम है?"
+pass_en = "You reported running a small trade or business."
+pass_hi = "आपने छोटा व्यापार या कारोबार चलाना बताया।"
+fail_en = "This pension is for shopkeepers, traders and the self-employed. If you work for wages, PM-SYM is the matching scheme."
+fail_hi = "यह पेंशन दुकानदारों, व्यापारियों और स्वरोज़गार वालों के लिए है। अगर आप मज़दूरी करते हैं, तो PM-SYM आपके लिए है।"
+source_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=78&lid=64&page=74"
+
+[[criteria]]
+field = "age"
+op = "gte"
+value = 18
+ask_en = "How old are you?"
+ask_hi = "आपकी उम्र कितनी है?"
+pass_en = "Your reported age meets the entry-age condition."
+pass_hi = "आपकी बताई उम्र प्रवेश की आयु-शर्त पूरी करती है।"
+fail_en = "This pension can be joined from age 18."
+fail_hi = "यह पेंशन 18 साल की उम्र से शुरू की जा सकती है।"
+source_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=78&lid=64&page=74"
+
+[[criteria]]
+field = "age"
+op = "lte"
+value = 40
+ask_en = "How old are you?"
+ask_hi = "आपकी उम्र कितनी है?"
+pass_en = "Your reported age is within the entry-age limit."
+pass_hi = "आपकी बताई उम्र प्रवेश की आयु-सीमा के भीतर है।"
+fail_en = "New entry is only up to age 40."
+fail_hi = "नया प्रवेश 40 साल की उम्र तक ही है।"
+source_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=78&lid=64&page=74"
+
+[[exclusions]]
+field = "is_income_tax_payer"
+op = "eq"
+value = true
+reason_en = "You reported paying income tax; income-tax payers cannot join."
+reason_hi = "आपने आयकर भरना बताया; आयकरदाता इसमें शामिल नहीं हो सकते।"
+source_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=78&lid=64&page=74"
+
+[[exclusions]]
+field = "is_epfo_or_esic_member"
+op = "eq"
+value = true
+reason_en = "You reported EPFO or ESIC membership; members are excluded."
+reason_hi = "आपने EPFO या ESIC सदस्यता बताई; सदस्य शामिल नहीं हो सकते।"
+source_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=78&lid=64&page=74"
+
+[[exclusions]]
+field = "nps_exclusion_applies"
+op = "eq"
+value = true
+reason_en = "You reported membership of the government-funded NPS; members are excluded."
+reason_hi = "आपने सरकारी NPS की सदस्यता बताई; सदस्य शामिल नहीं हो सकते।"
+source_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=78&lid=64&page=74"
+
+[[exclusions]]
+field = "known_schemes"
+op = "in"
+value = ["PM_SYM"]
+reason_en = "You reported PM-SYM membership; it cannot be held together with NPS-Traders."
+reason_hi = "आपने PM-SYM की सदस्यता बताई; इसे NPS-Traders के साथ नहीं लिया जा सकता।"
+source_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=78&lid=64&page=74"
+
+[paperwork]
+documents_en = ["Aadhaar card", "Savings bank account passbook or IFSC"]
+documents = ["आधार कार्ड", "बचत खाते की पासबुक या IFSC"]
+where_to_apply = "csc"
+renewal_en = "A fixed monthly contribution is auto-debited until age 60; the amount depends on your age at entry. Leaving early returns your own contribution with the interest set by the scheme rules."
+renewal = "60 साल तक हर महीने तय रकम अपने आप कटती है; रकम प्रवेश की उम्र पर निर्भर है। बीच में छोड़ने पर योजना के नियमों के अनुसार आपकी जमा रकम ब्याज के साथ लौटती है।"

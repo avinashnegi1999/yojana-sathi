@@ -559,6 +559,50 @@ def test_a_worker_with_no_income_is_still_screened():
         assert "Test Scheme A" in out[1].text
 
 
+def test_selected_scheme_route_asks_only_its_required_fields():
+    """A PMSBY-only check must not become the old full intake."""
+    convo = Conversation(load_all(), None)
+    convo.start(); convo.handle(LANG_EN); convo.handle(consent.YES)
+    picker = convo.handle("pick:choose")[0]
+    codes = {button.value.removeprefix("pick:") for button in picker.buttons
+             if button.value.startswith("pick:")}
+    assert "PMSBY" in codes and "PMJAY_70" not in codes
+    convo.handle("pick:PMSBY")
+    question = convo.handle("pick:done")[0]
+    assert convo.state is State.AGE and question.text == s("questions.age", "en")
+    question = convo.handle("30")[0]
+    assert convo.state is State.BANK
+    assert question.text == s("questions.has_bank_account", "en")
+    out = convo.handle(YES)
+    assert convo.state is State.DOCUMENTS
+    assert "Pradhan Mantri Suraksha Bima Yojana" in out[1].text
+    assert "state:" not in convo._answered_fields
+
+
+def test_gender_answer_skips_widow_and_pmuy_followups_when_not_applicable():
+    """A male answer removes the dependent widow question; LPG success removes PMUY's declaration."""
+    schemes = load_all()
+    widow = Conversation(schemes, None)
+    widow.start(); widow.handle(LANG_EN); widow.handle(consent.YES)
+    widow.handle("pick:choose"); widow.handle("pick:IGNWPS")
+    widow.handle("pick:done"); widow.handle("45")
+    assert widow._followup_field() == "is_woman"
+    widow.handle(NO)
+    assert widow._followup_field() == "is_bpl"
+    out = widow.handle(YES)
+    assert widow.state is State.PACK
+    assert "is_widow" not in widow._answered_fields
+
+    pmuy = Conversation(schemes, None)
+    pmuy.start(); pmuy.handle(LANG_EN); pmuy.handle(consent.YES)
+    pmuy.handle("pick:choose"); pmuy.handle("pick:PMUY")
+    pmuy.handle("pick:done"); pmuy.handle("30"); pmuy.handle(YES)
+    assert pmuy._followup_field() == "household_has_lpg"
+    out = pmuy.handle(YES)
+    assert pmuy.state is State.PACK
+    assert "pmuy_declaration_met" not in pmuy._answered_fields
+
+
 def test_declining_consent_stores_nothing():
     with tempfile.TemporaryDirectory() as d:
         directory = Path(d)

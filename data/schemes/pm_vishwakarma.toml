@@ -1,0 +1,93 @@
+# Source-researched draft, 12 September 2026. NO HUMAN SIGN-OFF IS CLAIMED.
+# Eligibility per PIB PRID=1989108 (Ministry of MSME), verified 14 September 2026:
+# an artisan working with hands and tools in one of 18 family-based
+# traditional trades, unorganised, self-employed; minimum age 18; engaged in
+# the trade on the date of registration; no loan under PMEGP, MUDRA or
+# PM SVANidhi in the past 5 years (fully repaid MUDRA/SVANidhi is fine); one
+# member per family.
+#
+# ! THE 18 TRADES ARE A LIST, AND THE INTAKE CANNOT SHOW A LIST OF 18. The
+# ! question asks whether her work is one of them and names the common ones;
+# ! the full list is at pmvishwakarma.gov.in/Home/TradeNames and the summary
+# ! says to check it. A yes here is a self-report the CSC verifies.
+# !
+# ! THE ₹ FIGURE IS THE TOOLKIT INCENTIVE ONLY. The scheme also offers
+# ! training with a stipend and collateral-free credit at a subsidised rate;
+# ! a loan is not a benefit and is not counted. value_basis = "one_time".
+# ? Sign-off: confirm the toolkit incentive is ₹15,000 on the portal itself,
+# ? and whether it is paid as e-vouchers rather than cash.
+code = "PM_VISHWAKARMA"
+name_en = "PM Vishwakarma"
+name_hi = "पीएम विश्वकर्मा"
+authority = "Ministry of Micro, Small and Medium Enterprises"
+official_url = "https://pmvishwakarma.gov.in/"
+verified_on = "2026-09-12"
+verified_by = "claude — AUTO-RESEARCHED, PENDING HUMAN VERIFICATION"
+
+[benefit]
+# ! 0, NOT 15000, and not because the grant is not real. The validator refuses
+# ! a one_time basis with a value, because no total anywhere sums one-time
+# ! grants - and a figure no total can count is a figure that shows up in one
+# ! place and vanishes from another. The ₹15,000 is stated in the summary,
+# ! where it is read, and kept out of every sum. Extending the payout/cover
+# ! split to a third bucket is the honest fix and is a separate change.
+annual_value_inr = 0
+value_basis = "one_time"
+premium_inr = 0
+summary_en = "For artisans who work with their hands in one of 18 traditional trades — carpenter, blacksmith, potter, cobbler, tailor, mason, barber, washerman, goldsmith, boat maker, basket/mat weaver, toy maker and others. Registration brings a recognition certificate and ID card, skills training with a daily stipend, a one-time toolkit grant worth up to ₹15,000, and access to collateral-free loans at a reduced rate — a loan you would repay, not a payment. One person per family. Not for anyone with an unpaid PMEGP, MUDRA or PM SVANidhi loan from the last five years. Check the full trade list on the portal, then register at a Common Service Centre."
+summary_hi = "अपने हाथों से 18 पारंपरिक कामों में से किसी एक में काम करने वाले कारीगरों के लिए — बढ़ई, लोहार, कुम्हार, मोची, दर्ज़ी, राजमिस्त्री, नाई, धोबी, सुनार, नाव बनाने वाले, टोकरी/चटाई बुनने वाले, खिलौने बनाने वाले और अन्य। पंजीकरण से पहचान प्रमाणपत्र और कार्ड, दैनिक भत्ते के साथ प्रशिक्षण, ₹15,000 तक का एकमुश्त औज़ार अनुदान, और कम दर पर बिना गारंटी ऋण मिलता है — ऋण लौटाना होता है, यह भुगतान नहीं है। परिवार से एक व्यक्ति। पिछले पाँच साल में PMEGP, MUDRA या PM SVANidhi का बकाया ऋण हो तो नहीं। पोर्टल पर पूरी सूची देखें, फिर जन सेवा केंद्र पर पंजीकरण करें।"
+
+[[criteria]]
+field = "is_vishwakarma_artisan"
+op = "eq"
+value = true
+ask_en = "Do you work with your hands in a traditional trade — such as carpenter, blacksmith, potter, cobbler, tailor, mason, barber, washerman, goldsmith or weaver?"
+ask_hi = "क्या आप अपने हाथों से किसी पारंपरिक काम में लगे हैं — जैसे बढ़ई, लोहार, कुम्हार, मोची, दर्ज़ी, राजमिस्त्री, नाई, धोबी, सुनार या बुनकर?"
+pass_en = "You reported working in a traditional artisan trade; the CSC checks it against the list of 18."
+pass_hi = "आपने पारंपरिक कारीगरी का काम बताया; जन सेवा केंद्र 18 की सूची से मिलान करेगा।"
+fail_en = "This scheme is only for the 18 listed traditional trades. If your work is close to one of them, check the list on the portal before ruling yourself out."
+fail_hi = "यह योजना सिर्फ़ 18 सूचीबद्ध पारंपरिक कामों के लिए है। अगर आपका काम इनमें से किसी के क़रीब है, तो ख़ुद को बाहर मानने से पहले पोर्टल पर सूची देखें।"
+source_url = "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=1989108"
+
+[[criteria]]
+field = "age"
+op = "gte"
+value = 18
+ask_en = "How old are you?"
+ask_hi = "आपकी उम्र कितनी है?"
+pass_en = "Your reported age meets the entry-age condition."
+pass_hi = "आपकी बताई उम्र प्रवेश की आयु-शर्त पूरी करती है।"
+fail_en = "Registration is from age 18."
+fail_hi = "पंजीकरण 18 साल की उम्र से है।"
+source_url = "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=1989108"
+
+[[criteria]]
+field = "took_business_loan_5yr"
+op = "eq"
+value = false
+ask_en = "In the last five years, have you taken a PMEGP, MUDRA or PM SVANidhi loan that is still unpaid?"
+ask_hi = "पिछले पाँच साल में क्या आपने PMEGP, MUDRA या PM SVANidhi का ऐसा ऋण लिया है जो अभी बाकी है?"
+pass_en = "You reported no unpaid loan under those schemes."
+pass_hi = "आपने उन योजनाओं का कोई बकाया ऋण न होना बताया।"
+fail_en = "An unpaid PMEGP, MUDRA or PM SVANidhi loan from the last five years bars registration. A fully repaid MUDRA or SVANidhi loan does not — if yours is repaid, answer no."
+fail_hi = "पिछले पाँच साल का बकाया PMEGP, MUDRA या PM SVANidhi ऋण पंजीकरण रोकता है। पूरा चुकाया हुआ MUDRA या SVANidhi ऋण नहीं रोकता — अगर आपका चुक गया है तो 'नहीं' चुनें।"
+source_url = "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=1989108"
+
+[[criteria]]
+field = "has_government_service_in_family"
+op = "eq"
+value = false
+ask_en = "Are you, your spouse, or any unmarried child in government service?"
+ask_hi = "क्या आप, आपके पति/पत्नी या कोई अविवाहित बच्चा सरकारी नौकरी में है?"
+pass_en = "You reported no government service in your immediate family."
+pass_hi = "आपने अपने निकट परिवार में कोई सरकारी नौकरी न होना बताया।"
+fail_en = "A person in government service, and their family members, cannot register for this scheme."
+fail_hi = "सरकारी नौकरी करने वाला व्यक्ति और उसके परिवार के सदस्य इस योजना में पंजीकरण नहीं कर सकते।"
+source_url = "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=1989108"
+
+[paperwork]
+documents_en = ["Aadhaar card", "Mobile number linked to Aadhaar", "Bank account details", "Ration card (for family details)"]
+documents = ["आधार कार्ड", "आधार से जुड़ा मोबाइल नंबर", "बैंक खाते का विवरण", "राशन कार्ड (परिवार के विवरण के लिए)"]
+where_to_apply = "csc"
+renewal_en = "Registration is verified by the gram panchayat or urban local body, then the district. The toolkit incentive follows basic training. Loans are optional and separate."
+renewal = "पंजीकरण की जाँच ग्राम पंचायत या शहरी निकाय, फिर ज़िला करता है। औज़ार अनुदान बुनियादी प्रशिक्षण के बाद मिलता है। ऋण वैकल्पिक और अलग है।"

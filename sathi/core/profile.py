@@ -81,6 +81,14 @@ class Profile:
     receives_other_pension: bool | None = None
     household_has_lpg: bool | None = None
     pmuy_declaration_met: bool | None = None
+    # * Added 12 Sep 2026 with the expansion drafts. Each is a yes/no/don't-know
+    # * follow-up asked only when a loaded scheme needs it, like the ones above.
+    is_bpl: bool | None = None                  # BPL card / listed household
+    has_disability_80pct: bool | None = None    # certificate says 80% or more
+    is_small_trader: bool | None = None         # shop/trade, turnover <= 1.5 cr
+    is_vishwakarma_artisan: bool | None = None  # one of the 18 listed trades
+    took_business_loan_5yr: bool | None = None  # PMEGP / MUDRA / SVANidhi, unpaid
+    has_government_service_in_family: bool | None = None  # self/spouse/unmarried child
     known_schemes: frozenset[str] = frozenset()  # ! drives the headline metric
 
     def age_band(self) -> str | None:

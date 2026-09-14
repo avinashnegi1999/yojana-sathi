@@ -37,6 +37,12 @@ yes = "Yes, let's start"
 no = "No"
 declined = "That's alright. Nothing has been saved. Send /start whenever you want to begin."
 
+[scheme_picker]
+mode = "Would you like to find all verified schemes, or check selected schemes only?"
+choose = "Choose schemes to check, then press Done."
+all = "All verified schemes"
+done = "Done — check selected"
+
 # =====================================================================
 [questions]
 is_unorganised_worker = "Do you currently do paid or income-earning work in the unorganised sector, such as work from home, self-employment or casual wage work? A job title alone does not decide this. If you are unsure whether your work qualifies, choose Don't know."
@@ -54,6 +60,7 @@ has_bank_account = "Do you have a bank account?"
 is_income_tax_payer = "Do you pay income tax?"
 is_epfo_or_esic_member = """Does your work deduct PF (EPFO) or ESIC?"""
 nps_exclusion_applies = "Which describes your National Pension System (NPS) account? Other types need confirmation at the centre because official eligibility descriptions differ."
+is_woman = "Are you a woman? This only helps skip questions that cannot apply; choosing Don't know keeps them open."
 known_schemes = """Which of these do you already have?
 Tap the ones you already hold, then press 'Next'."""
 
@@ -101,6 +108,12 @@ receives_other_pension = "already receiving another pension"
 uk_pension_selected = "local pension selection"
 household_has_lpg = "household LPG connection"
 pmuy_declaration_met = "Ujjwala deprivation declaration"
+is_bpl = "BPL household"
+has_disability_80pct = "disability certificate (80% or more)"
+is_small_trader = "small trader / shopkeeper"
+is_vishwakarma_artisan = "traditional artisan trade"
+took_business_loan_5yr = "recent government business loan"
+has_government_service_in_family = "government service in family"
 
 is_unorganised_worker = "unorganised work (self-reported)"
 # =====================================================================

@@ -16,7 +16,7 @@
 
 <div align="center">
   <img src="https://img.shields.io/badge/Status-Live%20on%20Telegram-brightgreen" alt="Status">
-  <img src="https://img.shields.io/badge/Schemes-7%20signed%20off-blue" alt="Schemes">
+  <img src="https://img.shields.io/badge/Schemes-11%20signed%20and%20live-blue" alt="Schemes">
   <img src="https://img.shields.io/badge/Field%20pilot-not%20yet-lightgrey" alt="Field pilot">
   <img src="https://img.shields.io/badge/Licence-Apache--2.0-blue" alt="Licence">
 </div>
@@ -73,16 +73,20 @@ Site source in [`livesite/`](livesite/), published by
 [`.github/workflows/pages.yml`](.github/workflows/pages.yml).
 
 > **Status — read before you use it on anyone.**
-> The software is complete, tested end to end, and **live**. All seven scheme
-> files are filled from official sources with a deep link on every single value:
+> The software is complete, tested end to end, and **live**. Eleven signed
+> scheme files are deployed, each with a deep link on every encoded value:
 > PMJJBY and PMSBY (`financialservices.gov.in`), PM-SYM (`maandhan.in` and
 > `labour.gov.in`), e-Shram (`eshram.gov.in`), PMUY (`pmuy.gov.in`), and the
-> Uttarakhand old-age and widow pensions (`socialwelfare.uk.gov.in`).
+> Uttarakhand old-age and widow pensions (`socialwelfare.uk.gov.in`), plus
+> three National Social Assistance Programme pensions and NPS-Traders.
 >
-> **All seven are signed off.** Avinash Negi read each official page in full on
-> 9–10 September 2026 and confirmed every encoded value against it; `verified_by`
-> in each file names him. The bot gives real verdicts, real ₹ figures and a place
-> to walk to.
+> **All eleven deployed files are signed off.** `verified_by` in each file
+> names Avinash Negi and records the review date. The bot gives real verdicts,
+> real ₹ figures and a place to walk to.
+>
+> **Four further files remain drafts and are not offered to workers:** APY,
+> PM Vishwakarma, PM-JAY 70+, and PMJDY. They stay `UNKNOWN` until human
+> sign-off.
 >
 > That signature is enforced, not merely recorded. Until a named human signs a
 > file, the rule engine returns `UNKNOWN` for that scheme to every worker,
@@ -187,10 +191,12 @@ A worker legally entitled to a pension or an accident cover simply never claims 
 
 ## What it does
 
-Asks a short set of plain questions, answerable entirely by tapping buttons.
-Runs the answers through a deterministic rule engine. Says which schemes they
-qualify for **and why**, in their language. Produces a document checklist and a
-one-page sheet they can carry to a centre, then tells them exactly where to go.
+After consent, a worker can check all verified schemes or select only the
+scheme(s) they care about. It asks a short set of plain questions, answerable
+entirely by tapping buttons, then runs the answers through a deterministic rule
+engine. It says which schemes they qualify for **and why**, in their language.
+It produces a document checklist and a one-page sheet they can carry to a
+centre, then tells them exactly where to go.
 
 Where it cannot be sure, it says so and hands over a question to ask a human,
 instead of guessing.
@@ -214,9 +220,9 @@ matching, and this project does not try to replace them. Scheme Sathi is
      ! this page. -->
 
 _Running since 3 September 2026 on a single small cloud instance, restarted
-under systemd and verified to survive a reboot. All seven schemes were signed
-off on 9–10 September 2026, so the engine now returns real verdicts and the
-event log can record eligible results._
+under systemd and verified to survive a reboot. Eleven signed schemes are
+deployed, so the engine returns real verdicts and the event log can record
+eligible results. Selected-scheme screening was deployed on 14 September 2026._
 
 **There are still no impact numbers here, and that is the honest state.** The
 gate that produced zero results has been lifted; the field pilot that would
@@ -342,7 +348,7 @@ Worth knowing about three of them:
 - `tests/test_privacy.py` — the reason the privacy claim above is defensible
   rather than aspirational.
 - `tests/test_all_paths.py` — presses **every button at every reachable screen**
-  in both languages (4,218 paths, 866 completed sessions), opens every generated
+  in both languages (1,688 paths, 122 completed sessions), opens every generated
   sheet, runs every path through a real event log, drives every command through
   the channel adapter, and fuzzes the typed questions. It asserts its own
   coverage counters, because a green test that never reached the thing it checks

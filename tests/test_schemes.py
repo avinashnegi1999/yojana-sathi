@@ -194,6 +194,8 @@ def test_real_scheme_files_are_structurally_valid():
         # Drafted 12 September 2026, unsigned - both return UNKNOWN until a
         # human signs them, which is what is_servable enforces.
         "APY", "PMJAY_70",
+        # Drafted 12 September 2026 (second batch), unsigned, same gate.
+        "IGNOAPS", "IGNWPS", "IGNDPS", "NPS_TRADERS", "PM_VISHWAKARMA", "PMJDY",
     }, sorted(schemes)
     for code, s in schemes.items():
         assert s.source_path.endswith(".toml")
@@ -291,7 +293,7 @@ def test_every_shipped_signature_is_a_real_person_or_no_signature_at_all():
 # ! Which schemes a named human has signed off, and therefore which ones give
 # ! real verdicts to real people. Adding a line here is a claim the README, the
 # ! checkpoint and the submission draft all repeat, so they change together.
-SIGNED_OFF = ("ESHRAM", "PMJJBY", "PMSBY", "PMUY", "PM_SYM", "UK_OLD_AGE", "UK_WIDOW")  # Avinash Negi, 2026-09-09/10
+SIGNED_OFF = ("ESHRAM", "IGNDPS", "IGNOAPS", "IGNWPS", "NPS_TRADERS", "PMJJBY", "PMSBY", "PMUY", "PM_SYM", "UK_OLD_AGE", "UK_WIDOW")  # Avinash Negi, 2026-09-09/10 and 2026-09-14
 
 
 def test_the_signed_list_matches_the_files():

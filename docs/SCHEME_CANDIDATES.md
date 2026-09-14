@@ -1,12 +1,21 @@
 # Scheme expansion — researched candidates
 
-**Status: research only, 11 September 2026. Nothing here is signed, and nothing
-here is in the bot.** A candidate becomes a scheme when a file exists with a
-source URL on every value and Avinash's name in `verified_by`. This document is
-the queue, not the product.
+**Status, 12 September 2026: nine of the candidates below are now DRAFTED as
+files in `data/schemes/`, loaded by the bot, and returning UNKNOWN to every
+worker until a human signs them.** Seven schemes are signed and live: PMJJBY,
+PMSBY, PM-SYM, e-Shram, PMUY, UK_OLD_AGE, UK_WIDOW.
 
-Seven schemes are live: PMJJBY, PMSBY, PM-SYM, e-Shram, PMUY, UK_OLD_AGE,
-UK_WIDOW.
+Drafted, unsigned: APY, PMJAY_70, IGNOAPS, IGNWPS, IGNDPS, NPS_TRADERS,
+PM_VISHWAKARMA, PMJDY. Each file states its source at the top and
+flags what to confirm before signing. Sign with `python3 -m sathi.review`.
+
+Not drafted, on purpose: PM-JAY (general) and NFSA. Neither has a criterion the
+intake can ask - SECC-list membership and state ration lists are lookups, not
+rules - and the validator refuses a file with no criterion, which is the right
+refusal. "Check whether your family is on the Ayushman list" already lives in
+PMJAY_70's fail text, where a worker under 70 will read it.
+
+The rest of this document is the research as it stood before drafting.
 
 ---
 

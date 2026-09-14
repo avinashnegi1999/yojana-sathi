@@ -25,12 +25,15 @@ from sathi.core.schemes import Scheme
 from sathi.metrics.events import EventLog
 from sathi.pack import checklist, pack
 from sathi.render import llm, templates
+from sathi.rules import operators
 from sathi.rules.engine import Verdict, evaluate_all
 
 
 class State(Enum):
     LANGUAGE = "language"
     CONSENT = "consent"
+    SCHEME_MODE = "scheme_mode"
+    SCHEME_PICKER = "scheme_picker"
     STATE = "state"
     AGE = "age"
     OCCUPATION = "occupation"
@@ -55,7 +58,30 @@ class State(Enum):
     DONE = "done"
 
 
-EXTRA_FIELDS = ('is_woman', 'is_widow', 'uk_pension_income_or_bpl', 'receives_other_pension', 'uk_pension_selected', 'household_has_lpg', 'pmuy_declaration_met')
+EXTRA_FIELDS = ('is_woman', 'is_widow', 'uk_pension_income_or_bpl', 'receives_other_pension', 'uk_pension_selected', 'household_has_lpg', 'pmuy_declaration_met',
+                'is_bpl', 'has_disability_80pct', 'is_small_trader', 'is_vishwakarma_artisan',
+                'took_business_loan_5yr', 'has_government_service_in_family')
+
+# ! The order follow-ups are asked in. Not alphabetical, not file order.
+_FOLLOWUP_ORDER = (
+    "is_woman", "is_bpl",                                   # broad, shared
+    "household_has_lpg", "pmuy_declaration_met",            # PMUY pair
+    "is_small_trader",                                      # NPS-Traders
+    "is_vishwakarma_artisan", "took_business_loan_5yr",     # PM Vishwakarma loan
+    "has_government_service_in_family",                      # PM Vishwakarma exclusion
+    "uk_pension_income_or_bpl",                              # state pension money
+    "receives_other_pension", "uk_pension_selected",        # state pension admin
+    "is_widow", "has_disability_80pct",                     # sensitive, last
+)
+
+_CORE_FIELD_STATES = {
+    "state": State.STATE, "age": State.AGE, "occupation": State.OCCUPATION,
+    "income_band": State.INCOME, "land_holding_band": State.LAND,
+    "family_size": State.FAMILY, "has_bank_account": State.BANK,
+    "is_income_tax_payer": State.TAX,
+    "is_epfo_or_esic_member": State.EPFO_ESIC,
+    "nps_exclusion_applies": State.NPS, "is_unorganised_worker": State.WORKER,
+}
 
 YES, NO, DK = "yes", "no", "dont_know"
 NEXT, OTHER, NONE = "next", "other", "none"
@@ -103,6 +129,10 @@ class Conversation:
         self._rating: int | None = None
         self._followup_fields: list[str] = []
         self._followup_index = 0
+        self._selected: set[str] = set()
+        self._picker_page = 0
+        self._legacy_full = False
+        self._answered_fields: set[str] = set()
 
     # * ------------------------------------------------------------- plumbing
 
@@ -117,6 +147,7 @@ class Conversation:
     def _set(self, field: str, value) -> None:
         """Record one answer, then log that a field was captured — never its value."""
         self.profile = replace(self.profile, **{field: value})
+        self._answered_fields.add(field)
         self._event("profile_field_captured")
 
     # * -------------------------------------------------------------- asking
@@ -177,6 +208,8 @@ class Conversation:
         asker = {
             State.LANGUAGE: lambda: self.start()[0],
             State.CONSENT: lambda: consent.ask(self.lang),
+            State.SCHEME_MODE: self._ask_scheme_mode,
+            State.SCHEME_PICKER: self._ask_scheme_picker,
             State.STATE: self._ask_state,
             State.AGE: lambda: Reply(text=self._s("questions.age")),
             State.OCCUPATION: self._ask_occupation,
@@ -251,6 +284,8 @@ class Conversation:
         self._known.clear()
         self._followup_fields.clear()
         self._followup_index = 0
+        self._selected.clear()
+        self._answered_fields.clear()
         self._have_docs.clear()
         self._results = ()
         self.state = State.DONE
@@ -262,6 +297,51 @@ class Conversation:
             for st in content.states() if st.common
         )
         return Reply(text=self._s("questions.state"), buttons=buttons)
+
+    def _active_schemes(self) -> dict[str, Scheme]:
+        """Only signed selections are screened; drafts stay out of the route."""
+        # * Tests and restored pre-picker conversations may begin mid-flow.
+        # * Until a new picker choice exists, preserve their old all-schemes
+        # * meaning rather than silently evaluating an empty set.
+        codes = self._selected or set(self.schemes)
+        return {code: self.schemes[code] for code in codes}
+
+    def _advance_core(self) -> list[Reply]:
+        """Ask the next selected-scheme field, then enter follow-ups."""
+        # * Tiny input-validation conversations use no scheme data at all.
+        # * Keep their historical field-to-field route instead of treating the
+        # * empty catalogue as a completed screening.
+        if not self.schemes:
+            self.state = State.BANK
+            return [self._current_question()]
+        wanted = ((set(_CORE_FIELD_STATES) - {"is_unorganised_worker"}) if self._legacy_full else
+                  {c.field for sc in self._active_schemes().values()
+                   for c in sc.criteria + sc.exclusions})
+        for field, state in _CORE_FIELD_STATES.items():
+            if field in wanted and field not in self._answered_fields:
+                self.state = state
+                return [self._current_question()]
+        return self._begin_followups()
+
+    def _ask_scheme_mode(self) -> Reply:
+        return Reply(text=self._s("scheme_picker.mode"), buttons=(
+            Button(self._s("scheme_picker.all"), "pick:all"),
+            Button(self._s("scheme_picker.choose"), "pick:choose"),
+        ))
+
+    def _ask_scheme_picker(self) -> Reply:
+        codes = sorted(code for code, sc in self.schemes.items() if sc.is_servable)
+        page_count = max(1, (len(codes) + 6) // 7)
+        self._picker_page %= page_count
+        start = self._picker_page * 7
+        buttons = tuple(Button(("✅ " if code in self._selected else "") + self.schemes[code].name(self.lang),
+                               f"pick:{code}") for code in codes[start:start + 7])
+        if page_count > 1:
+            buttons += (Button(self._s("buttons.show_more"), "pick:more"),)
+        return Reply(text=self._s("scheme_picker.choose"), buttons=buttons + (
+            Button(self._s("scheme_picker.all"), "pick:all"),
+            Button(self._s("scheme_picker.done"), "pick:done"),
+        ))
 
     def _ask_occupation(self) -> Reply:
         buttons = tuple(
@@ -317,7 +397,7 @@ class Conversation:
         # ! signed. Codes are used as ids, never positions, so a selection made
         # ! on page one survives paging to page two and back.
         """
-        codes = list(self.schemes)
+        codes = self._known_options()
         page_count = max(1, (len(codes) + 6) // 7)
         self._known_page %= page_count
         start = self._known_page * 7
@@ -374,8 +454,39 @@ class Conversation:
         self.consent_granted = True
         if self.log and self.session:
             self.log.grant_consent(self.session)
-        self.state = State.STATE
-        return [self._ask_state()]
+        self.state = State.SCHEME_MODE
+        return [self._ask_scheme_mode()]
+
+    def _on_scheme_mode(self, answer: str) -> list[Reply]:
+        # * Existing chats can have a state button in flight when this version
+        # * deploys. Treat it as the legacy full-screening route, not an error.
+        if answer.startswith("state:") or content.match_state(answer):
+            self._selected = set(self.schemes)
+            self._legacy_full = True
+            self.state = State.STATE
+            return self._on_state(answer)
+        if answer == "pick:all":
+            self._selected = {code for code, sc in self.schemes.items() if sc.is_servable}
+            return self._advance_core()
+        if answer == "pick:choose":
+            self.state = State.SCHEME_PICKER
+            return [self._ask_scheme_picker()]
+        return [self._ask_scheme_mode()]
+
+    def _on_scheme_picker(self, answer: str) -> list[Reply]:
+        if answer == "pick:more":
+            self._picker_page += 1
+        elif answer == "pick:all":
+            self._selected = {code for code, sc in self.schemes.items() if sc.is_servable}
+        elif answer == "pick:done":
+            if self._selected:
+                self.state = State.STATE
+                return self._advance_core()
+        elif answer.startswith("pick:"):
+            code = answer.split(":", 1)[1]
+            if code in self.schemes and self.schemes[code].is_servable:
+                self._selected.symmetric_difference_update({code})
+        return [self._ask_scheme_picker()]
 
     def _on_state(self, answer: str) -> list[Reply]:
         code = None
@@ -389,8 +500,10 @@ class Conversation:
             retry = self._ask_state()
             return [Reply(text=self._s("questions.state_retry"), buttons=retry.buttons)]
         self._set("state", code)
-        self.state = State.AGE
-        return [Reply(text=self._s("questions.age"))]
+        if not self.schemes:
+            self.state = State.AGE
+            return [self._current_question()]
+        return self._advance_core()
 
     def _on_age(self, answer: str) -> list[Reply]:
         # ! Reject the whole input, never repair it. Stripping non-digits turned
@@ -403,16 +516,14 @@ class Conversation:
         if len(digits) > 3 or not digits.isdecimal() or not (1 <= int(digits) <= 120):
             return [Reply(text=self._s("questions.age_retry"))]
         self._set("age", int(digits))
-        self.state = State.OCCUPATION
-        return [self._ask_occupation()]
+        return self._advance_core()
 
     def _on_occupation(self, answer: str) -> list[Reply]:
         if answer.startswith("occ:"):
             code = answer.split(":", 1)[1]
             if code in content.occupation_codes():
                 self._set("occupation", code)
-                self.state = State.INCOME
-                return [self._ask_income()]
+                return self._advance_core()
         if answer == OTHER:
             self.state = State.OCCUPATION_FREE
             return [Reply(text=self._s("questions.occupation_free"))]
@@ -463,8 +574,7 @@ class Conversation:
             self._set("occupation", self._pending_occupation)
             self._event("occupation_clarified")
             self._pending_occupation = None
-            self.state = State.INCOME
-            return [self._ask_income()]
+            return self._advance_core()
         # ! Rejected guess is thrown away, not "close enough". Back to the menu.
         self._pending_occupation = None
         self.state = State.OCCUPATION
@@ -478,8 +588,7 @@ class Conversation:
         if self.state is State.TAX_INCOME:
             self.state = State.TAX_CONFIRM
             return [self._ask_tax_confirm()]
-        self.state = State.LAND
-        return [self._ask_land()]
+        return self._advance_core()
 
     def _on_tax_income(self, answer: str) -> list[Reply]:
         return self._on_income_band(answer)
@@ -489,8 +598,7 @@ class Conversation:
         if band not in LAND_HOLDING_BANDS:
             return [Reply(text=self._s("errors.pick_from_list"), buttons=self._ask_land().buttons)]
         self._set("land_holding_band", band)
-        self.state = State.FAMILY
-        return [self._ask_family()]
+        return self._advance_core()
 
     def _on_family_size(self, answer: str) -> list[Reply]:
         raw = answer.split(":", 1)[1] if answer.startswith("fam:") else answer
@@ -498,17 +606,13 @@ class Conversation:
         if len(digits) > 2 or not digits.isdecimal() or not (1 <= int(digits) <= 30):
             return [Reply(text=self._s("errors.pick_from_list"), buttons=self._ask_family().buttons)]
         self._set("family_size", int(digits))
-        self.state = State.BANK
-        return [Reply(text=self._s("questions.has_bank_account"), buttons=_yes_no(self.lang))]
+        return self._advance_core()
 
     def _on_has_bank_account(self, answer: str) -> list[Reply]:
         if answer not in (YES, NO):
             return [Reply(text=self._s("errors.pick_from_list"), buttons=_yes_no(self.lang))]
         self._set("has_bank_account", answer == YES)
-        self.state = State.TAX
-        return [
-            Reply(text=self._s("questions.is_income_tax_payer"), buttons=_yes_no(self.lang, with_dont_know=True))
-        ]
+        return self._advance_core()
 
     def _on_is_income_tax_payer(self, answer: str) -> list[Reply]:
         if answer in (YES, NO):
@@ -520,14 +624,16 @@ class Conversation:
             return [
                 Reply(text=self._s("errors.pick_from_list"), buttons=_yes_no(self.lang, with_dont_know=True))
             ]
-        self.state = State.TAX_CONFIRM if answer == YES else State.EPFO_ESIC
+        self.state = State.TAX_CONFIRM if answer == YES else self.state
+        if answer != YES:
+            return self._advance_core()
         return [self._current_question()]
 
     def _on_tax_confirm(self, answer: str) -> list[Reply]:
         # ! Only the worker's explicit re-answer changes a field. Keep both
         # ! continues at the next question without writing either answer again.
         if answer == "tax:keep":
-            self.state = State.EPFO_ESIC
+            return self._advance_core()
         elif answer == "tax:income":
             self.state = State.TAX_INCOME
         elif answer == "tax:answer":
@@ -547,8 +653,7 @@ class Conversation:
             return [
                 Reply(text=self._s("errors.pick_from_list"), buttons=_yes_no(self.lang, with_dont_know=True))
             ]
-        self.state = State.NPS
-        return [self._ask_nps()]
+        return self._advance_core()
 
     def _ask_nps(self) -> Reply:
         return Reply(text=self._s("questions.nps_exclusion_applies"), buttons=(
@@ -564,13 +669,12 @@ class Conversation:
         # ! Other NPS types remain unresolved across official descriptions.
         # ! Do not turn them into either a refusal or a confirmed exemption.
         self._set("nps_exclusion_applies", answer == YES if answer in (YES, NO) else None)
-        # * Ask only when a loaded scheme needs this fact; a job title is not proof.
-        needs_worker = any(c.field == "is_unorganised_worker"
-                           for scheme in self.schemes.values() for c in scheme.criteria)
-        if not needs_worker:
-            return self._begin_followups()
-        self.state = State.WORKER
-        return [self._current_question()]
+        # * Ask only when a screened scheme needs this fact; a job title is not proof.
+        if any(c.field == "is_unorganised_worker"
+               for sc in self._active_schemes().values() for c in sc.criteria):
+            self.state = State.WORKER
+            return [self._current_question()]
+        return self._begin_followups()
 
     def _on_is_unorganised_worker(self, answer: str) -> list[Reply]:
         if answer not in (YES, NO, DK):
@@ -579,28 +683,73 @@ class Conversation:
         return self._begin_followups()
 
     def _begin_followups(self) -> list[Reply]:
-        # * Only new yes/no facts used by loaded schemes. State routing avoids
-        # * asking Uttarakhand pension questions of residents of another state.
+        # * Only new yes/no facts used by loaded schemes.
+        #
+        # ! SKIP A SCHEME THE WORKER HAS ALREADY FAILED. Sixteen schemes turned
+        # ! this into eleven yes/no questions for everyone, and the first one a
+        # ! 30-year-old construction worker met was "do you have an 80%
+        # ! disability certificate?" Most of those questions belong to schemes
+        # ! she cannot qualify for on answers ALREADY GIVEN - a 60+ pension
+        # ! when she said 30, a Uttar Pradesh pension when she said Uttarakhand.
+        # ! Apply each criterion whose field is already answered; a definite
+        # ! False on any of them means nothing she says later can change the
+        # ! verdict, so its follow-ups are not asked. This is the same
+        # ! three-valued operator the engine uses - it decides NOTHING, it only
+        # ! notices that the engine's answer is already settled. UNKNOWN (None)
+        # ! never skips: an unanswered field is exactly what a follow-up is for.
         supported = EXTRA_FIELDS
-        self._followup_fields = []
-        self._followup_index = 0
-        for scheme in self.schemes.values():
-            if any(c.field == "state" and c.op == "eq" and
-                   self.profile.state is not None and c.value != self.profile.state
-                   for c in scheme.criteria):
+        wanted: set[str] = set()
+        for scheme in self._active_schemes().values():
+            settled_no = False
+            for c in scheme.criteria:
+                actual = getattr(self.profile, c.field, None)
+                if actual is None:
+                    continue
+                try:
+                    if operators.apply(c.op, actual, c.value) is False:
+                        settled_no = True
+                        break
+                except operators.OperatorError:
+                    continue  # * a broken file is the engine's to report, not ours to hide
+            if settled_no:
                 continue
             for c in scheme.criteria + scheme.exclusions:
-                if c.field in supported and c.field not in self._followup_fields:
-                    self._followup_fields.append(c.field)
-        self.state = State.FOLLOWUP if self._followup_fields else State.KNOWN_SCHEMES
-        return [self._current_question()]
+                if c.field in supported:
+                    wanted.add(c.field)
+        # * Widow routes ask a gender question first. A "no" makes the widow
+        # * question irrelevant; "don't know" deliberately does not infer it.
+        # * Gender is intake routing only here — the scheme files remain the
+        # * sole source of eligibility criteria.
+        if "is_widow" in wanted:
+            if self.profile.is_woman is False:
+                wanted.discard("is_widow")
+            else:
+                wanted.add("is_woman")
+        # ! ASK IN A FIXED, HUMANE ORDER, not file-load order. Broad facts that
+        # ! many schemes share come first; questions that only matter given an
+        # ! earlier answer sit right after it; the sensitive ones - disability,
+        # ! widowhood - come last, so nobody is asked about a certificate of
+        # ! disability before being asked whether they have a bank account.
+        ordered = [f for f in _FOLLOWUP_ORDER if f in wanted]
+        ordered += sorted(wanted - set(_FOLLOWUP_ORDER))  # anything new
+        self._followup_fields = ordered
+        self._followup_index = 0
+        for field in ordered:
+            if field not in self._answered_fields:
+                self._followup_index = ordered.index(field)
+                self.state = State.FOLLOWUP
+                return [self._current_question()]
+        return self._continue_after_questions()
 
     def _followup_field(self) -> str:
         return self._followup_fields[self._followup_index]
 
     def _ask_followup(self) -> Reply:
         field = self._followup_field()
-        criterion = next(c for sc in self.schemes.values() for c in sc.criteria
+        if field == "is_woman":
+            return Reply(text=self._s("questions.is_woman"),
+                         buttons=_yes_no(self.lang, with_dont_know=True))
+        criterion = next(c for sc in self._active_schemes().values() for c in sc.criteria
                          if c.field == field)
         return Reply(text=criterion.text("ask", self.lang),
                      buttons=_yes_no(self.lang, with_dont_know=True))
@@ -609,10 +758,26 @@ class Conversation:
         if answer not in (YES, NO, DK):
             return [self._ask_followup()]
         self._set(self._followup_field(), None if answer == DK else answer == YES)
-        self._followup_index += 1
-        if self._followup_index == len(self._followup_fields):
+        return self._begin_followups()
+
+    def _known_options(self) -> list[str]:
+        """Only ask about schemes that can change one selected result."""
+        if self._legacy_full:
+            return list(self.schemes)
+        options: set[str] = set()
+        for scheme in self._active_schemes().values():
+            for criterion in scheme.exclusions:
+                if criterion.field == "known_schemes" and isinstance(criterion.value, list):
+                    options.update(criterion.value)
+        return sorted(code for code in options if code in self.schemes)
+
+    def _continue_after_questions(self) -> list[Reply]:
+        if self._known_options():
             self.state = State.KNOWN_SCHEMES
-        return [self._current_question()]
+            return [self._ask_known_schemes()]
+        self.profile = replace(self.profile, known_schemes=frozenset())
+        self._event("known_schemes_declared")
+        return self._evaluate()
 
     def _on_known_schemes(self, answer: str) -> list[Reply]:
         # ! Before the code branch, not after. "more" is not a scheme code, so
@@ -686,20 +851,21 @@ class Conversation:
             self.state = State.DONE
             return [Reply(text=self._s("errors.no_schemes_loaded"), end=True)]
 
-        self._results = evaluate_all(self.profile, self.schemes)
+        active = self._active_schemes()
+        self._results = evaluate_all(self.profile, active)
         if self.log and self.session:
             self.log.log_results(
                 self.session, self.profile, self._results, frozenset(self._known)
             )
 
-        text = templates.result_message(self._results, self.schemes,
+        text = templates.result_message(self._results, active,
                                         frozenset(self._known), self.lang)
         # * Recap first: the worker sees what was recorded, then the verdict
         # * built on it. Its own message so a long result cannot push it away.
         replies = [Reply(text=self._recap()), Reply(text=text)]
         self._event("guidance_shown")
 
-        self._required_docs = checklist.required_documents(self._results, self.schemes, self.lang)
+        self._required_docs = checklist.required_documents(self._results, active, self.lang)
         if self._required_docs:
             self.state = State.DOCUMENTS
             replies.append(self._ask_documents())

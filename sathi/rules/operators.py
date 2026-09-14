@@ -55,13 +55,17 @@ def apply(op: str, actual: object, expected: object) -> bool | None:
         values = [expected] if op == "eq" else expected
         if not isinstance(values, (list, tuple)):
             raise OperatorError(f"{op!r} needs a list, got {expected!r}")
-        for value in values:
-            if type(actual) in (int, float) and type(value) in (int, float):
-                _num(actual, f"{op}.actual")
-                _num(value, f"{op}.value")
-            elif type(actual) is not type(value):
-                # ! Python equates True with 1; malformed data is UNKNOWN instead.
-                raise OperatorError(f"{op!r}: comparison types do not match")
+        actual_values = actual if op in ("in", "not_in") and isinstance(
+            actual, (set, frozenset, list, tuple)
+        ) else (actual,)
+        for actual_value in actual_values:
+            for value in values:
+                if type(actual_value) in (int, float) and type(value) in (int, float):
+                    _num(actual_value, f"{op}.actual")
+                    _num(value, f"{op}.value")
+                elif type(actual_value) is not type(value):
+                    # ! Python equates True with 1; malformed data is UNKNOWN instead.
+                    raise OperatorError(f"{op!r}: comparison types do not match")
 
     if op == "between":
         if not isinstance(expected, (list, tuple)) or len(expected) != 2:
@@ -75,7 +79,10 @@ def apply(op: str, actual: object, expected: object) -> bool | None:
         return lo <= _num(actual, "between.actual") <= hi
 
     if op in ("in", "not_in"):
-        hit = actual in expected
+        # * Membership fields such as known_schemes are a set. A scheme excludes
+        # * a worker when ANY declared membership appears in its exclusion list.
+        hit = (any(value in expected for value in actual)
+               if isinstance(actual, (set, frozenset, list, tuple)) else actual in expected)
         return hit if op == "in" else not hit
 
     if op == "lte":
@@ -116,6 +123,8 @@ def _self_check() -> None:
     assert apply("in", "upto_5000", ["upto_5000", "5001_10000"]) is True
     assert apply("in", "above_25000", ["upto_5000"]) is False
     assert apply("not_in", "above_25000", ["upto_5000"]) is True
+    assert apply("in", frozenset({"PM_SYM"}), ["PM_SYM"]) is True
+    assert apply("in", frozenset(), ["PM_SYM"]) is False
 
     assert apply("lte", 3, 5) is True and apply("gte", 3, 5) is False
     assert apply("eq", True, True) is True and apply("eq", False, True) is False

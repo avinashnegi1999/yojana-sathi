@@ -1,0 +1,41 @@
+# Source-researched draft, 12 September 2026. NO HUMAN SIGN-OFF IS CLAIMED.
+# ! A GATEWAY, like e-Shram: no ₹ of its own. A savings account is a
+# ! prerequisite for PMJJBY, PMSBY, APY and every pension here, so the most
+# ! useful thing this bot can tell someone with no account is where to open
+# ! one for free. The criterion is deliberately inverted - it is surfaced to
+# ! the worker who does NOT have an account, which is the only person it helps.
+# ? Sign-off: confirm on pmjdy.gov.in that the account still needs no minimum
+# ? balance and that the RuPay card carries the accident cover.
+code = "PMJDY"
+name_en = "Jan Dhan bank account (PMJDY)"
+name_hi = "जन धन बैंक खाता (PMJDY)"
+authority = "Department of Financial Services, Ministry of Finance"
+official_url = "https://pmjdy.gov.in/"
+verified_on = "2026-09-12"
+verified_by = "claude — AUTO-RESEARCHED, PENDING HUMAN VERIFICATION"
+
+[benefit]
+annual_value_inr = 0
+value_basis = "gateway"
+premium_inr = 0
+summary_en = "A free basic savings account at any bank, with no minimum balance, for anyone who does not have one. It comes with a RuPay debit card. Almost every scheme on this list — the insurance covers, the pensions — needs a bank account to pay into, so this is the first door. Open it at any bank branch or a Bank Mitra with your Aadhaar; if you have no Aadhaar, the branch can still open a small account with another ID."
+summary_hi = "किसी भी बैंक में मुफ़्त बुनियादी बचत खाता, बिना न्यूनतम राशि के, हर उस व्यक्ति के लिए जिसका खाता नहीं है। इसके साथ RuPay डेबिट कार्ड मिलता है। इस सूची की लगभग हर योजना — बीमा, पेंशन — का पैसा बैंक खाते में आता है, इसलिए यह पहला दरवाज़ा है। आधार लेकर किसी भी बैंक शाखा या बैंक मित्र के पास खुलवाएँ; आधार न हो तो शाखा दूसरी पहचान से छोटा खाता खोल सकती है।"
+
+[[criteria]]
+field = "has_bank_account"
+op = "eq"
+value = false
+ask_en = "Do you have a bank account or a post office savings account?"
+ask_hi = "क्या आपका बैंक या डाकघर में बचत खाता है?"
+pass_en = "You reported having no account yet — this is where to get one."
+pass_hi = "आपने खाता न होना बताया — खाता यहीं खुलवाएँ।"
+fail_en = "You already have an account, so this does not apply to you."
+fail_hi = "आपके पास पहले से खाता है, इसलिए यह आपके लिए नहीं है।"
+source_url = "https://pmjdy.gov.in/"
+
+[paperwork]
+documents_en = ["Aadhaar card (or another photo ID)", "Passport-size photograph"]
+documents = ["आधार कार्ड (या कोई अन्य फोटो पहचान)", "पासपोर्ट साइज़ फोटो"]
+where_to_apply = "bank_branch"
+renewal_en = "No minimum balance. Keep the account active with a transaction every few months, or it may be marked dormant."
+renewal = "कोई न्यूनतम राशि नहीं। हर कुछ महीने में एक लेन-देन करके खाता चालू रखें, नहीं तो निष्क्रिय हो सकता है।"

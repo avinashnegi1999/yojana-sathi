@@ -35,6 +35,21 @@ class TelegramError(Exception):
 
 
 API = "https://api.telegram.org/bot{token}/{method}"
+_TEXT_LIMIT = 4096
+
+
+def _text_chunks(text: str) -> list[str]:
+    """Split a long reply without cutting a word; Telegram caps messages at 4096."""
+    if len(text) <= _TEXT_LIMIT:
+        return [text]
+    chunks = []
+    while len(text) > _TEXT_LIMIT:
+        cut = max(text.rfind("\n", 0, _TEXT_LIMIT + 1), text.rfind(" ", 0, _TEXT_LIMIT + 1))
+        cut = cut if cut > 0 else _TEXT_LIMIT
+        chunks.append(text[:cut].rstrip())
+        text = text[cut:].lstrip()
+    chunks.append(text)
+    return chunks
 _TIMEOUT_S = 65  # must exceed the long-poll timeout below
 _POLL_S = 50
 
@@ -193,7 +208,11 @@ class TelegramBot(Router):
     # * ------------------------------------------------------------- sending
 
     def send(self, chat_id: str, reply: Reply) -> None:
-        payload = {"chat_id": chat_id, "text": reply.text}
+        chunks = _text_chunks(reply.text)
+        for text in chunks[:-1]:
+            sent = _call(self.token, "sendMessage", {"chat_id": chat_id, "text": text})
+            self._track(chat_id, (sent.get("result") or {}).get("message_id"))
+        payload = {"chat_id": chat_id, "text": chunks[-1]}
         markup = keyboard(reply.buttons)
         if markup is not None:
             # ! Only include the key when there IS a keyboard. A message with no

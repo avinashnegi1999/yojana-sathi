@@ -20,6 +20,7 @@ interesting part.
 | 31 Aug 2026 | Core built end to end. Scheme data researched from official sources. Bot went live on Telegram. First real testing session found six bugs. |
 | 1 Sep 2026 | README problem section given real citations — three of four headline numbers were wrong. Verification worksheet and deploy scripts written. Hit three signup walls trying to host it. |
 | 3 Sep 2026 | Outside review found a safety bug in the verification logic. Fixed it, plus abuse controls, retry backoff, container hardening, CI. Bot restarted as a real service. |
+| 14 Sep 2026 | Added and deployed selected-scheme screening: a worker can choose signed schemes and answer only their relevant questions. |
 
 ---
 

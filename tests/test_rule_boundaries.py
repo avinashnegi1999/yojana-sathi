@@ -150,6 +150,41 @@ def _oracle(code: str, p: Profile) -> bool | None:
         # ! adding any here would make the sweep agree with a file that wrongly
         # ! refused people, which is the one thing an oracle exists to catch.
         criterion(None if age is None else age >= 70)
+    elif code in ("IGNOAPS", "IGNWPS", "IGNDPS"):
+        # NSAP, via myscheme.gov.in/schemes/nsap-ignoaps, /ignwps, /igndps
+        # (nsap.nic.in refused connections on 12 September 2026). All three:
+        # BPL household. Then 60+ / widow 40+ / 18+ with an 80% certificate.
+        criterion(p.is_bpl)
+        if code == "IGNOAPS":
+            criterion(None if age is None else age >= 60)
+        elif code == "IGNWPS":
+            criterion(p.is_widow)
+            criterion(None if age is None else age >= 40)
+        else:
+            criterion(None if age is None else age >= 18)
+            criterion(p.has_disability_80pct)
+    elif code == "NPS_TRADERS":
+        # maandhan.in FAQ Q2: trader/shopkeeper/self-employed, turnover <= 1.5
+        # crore, 18-40, not an income-tax payer, not NPS(govt)/ESIC/EPFO.
+        criterion(p.is_small_trader)
+        criterion(None if age is None else 18 <= age <= 40)
+        exclusion(tax)
+        exclusion(epfo_or_esic)
+        exclusion(nps)
+    elif code == "PM_VISHWAKARMA":
+        # PIB PRID=1989108: one of 18 trades, 18+, no unpaid PMEGP/MUDRA/
+        # SVANidhi loan in 5 years, and no government service in the immediate
+        # family. These are criteria (eq false) so the intake asks them; a
+        # field used only by an exclusion would never be collected.
+        criterion(p.is_vishwakarma_artisan)
+        criterion(None if age is None else age >= 18)
+        criterion(None if p.took_business_loan_5yr is None else not p.took_business_loan_5yr)
+        criterion(None if p.has_government_service_in_family is None
+                  else not p.has_government_service_in_family)
+    elif code == "PMJDY":
+        # pmjdy.gov.in. Inverted on purpose: surfaced to the person WITHOUT an
+        # account, the only person a free account helps.
+        criterion(None if bank is None else not bank)
     elif code == "PMUY":
         criterion(None if age is None else age >= 18)
         criterion(p.is_woman)
@@ -188,24 +223,27 @@ def _signed_schemes() -> dict:
 def test_every_combination_matches_the_encoded_source_interpretation():
     schemes = _signed_schemes()
     missing = set(schemes) - {"ESHRAM", "PM_SYM", "PMSBY", "PMJJBY", "UK_OLD_AGE",
-                              "UK_WIDOW", "PMUY", "APY", "PMJAY_70"}
+                              "UK_WIDOW", "PMUY", "APY", "PMJAY_70",
+                              "IGNOAPS", "IGNWPS", "IGNDPS", "NPS_TRADERS",
+                              "PM_VISHWAKARMA", "PMJDY"}
     assert not missing, f"a scheme was added with no oracle: {sorted(missing)}"
 
     checked = 0
     wrong = []
-    for age, income, bank, tax, epfo, nps, worker in itertools.product(
-        AGES, INCOME, TRI, TRI, TRI, TRI, TRI
+    for age, income, bank, tax, epfo, nps, worker, government_family in itertools.product(
+        AGES, INCOME, TRI, TRI, TRI, TRI, TRI, TRI
     ):
         p = Profile(is_unorganised_worker=worker, age=age, income_band=income, has_bank_account=bank,
                     is_income_tax_payer=tax, is_epfo_or_esic_member=epfo,
-                    nps_exclusion_applies=nps)
+                    nps_exclusion_applies=nps,
+                    has_government_service_in_family=government_family)
         for code, scheme in schemes.items():
             got = evaluate(p, scheme).verdict
             want = _expected(code, p)
             checked += 1
             if got is not want:
                 wrong.append(f"{code} age={age} income={income} bank={bank} "
-                             f"tax={tax} epfo_or_esic={epfo} nps={nps}: "
+                             f"tax={tax} epfo_or_esic={epfo} nps={nps} government_family={government_family}: "
                              f"got {got.value}, official rules say {want.value}")
     assert not wrong, "\n  " + "\n  ".join(wrong[:20])
     # ! Coverage counter, same reason as test_all_paths: a sweep that swept
@@ -262,6 +300,16 @@ def test_the_named_boundaries_individually():
     # ! conflated field made impossible to express, let alone catch.
     assert verdict("ESHRAM", age=30, nps_exclusion_applies=True) is E
     assert verdict("ESHRAM", age=30, is_income_tax_payer=True) is N
+
+    # PM Vishwakarma: the government-service condition applies to the artisan,
+    # spouse and unmarried children. It must not become a warning-only fact.
+    artisan = dict(age=18, is_vishwakarma_artisan=True, took_business_loan_5yr=False)
+    assert verdict("PM_VISHWAKARMA", **artisan,
+                   has_government_service_in_family=False) is E
+    assert verdict("PM_VISHWAKARMA", **artisan,
+                   has_government_service_in_family=True) is N
+    assert verdict("PM_VISHWAKARMA", **artisan,
+                   has_government_service_in_family=None) is Verdict.UNKNOWN
 
 
 def test_dont_know_never_becomes_a_no():

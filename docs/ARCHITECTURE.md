@@ -88,7 +88,7 @@ plausible default.
 | `sathi/rules/operators.py` | The seven operators, three-valued (`True` / `False` / `None`) |
 | `sathi/rules/engine.py` | `evaluate()` — the only place eligibility is decided |
 | `sathi/conversation/consent.py` | The consent screen |
-| `sathi/conversation/flow.py` | Intake state machine, question order, `known_schemes` capture |
+| `sathi/conversation/flow.py` | Intake state machine, selected-scheme planner, dependency order, `known_schemes` capture |
 | `sathi/render/templates.py` | Result → Hindi, from authored strings only |
 | `sathi/render/llm.py` | Optional: free-text → category proposal, rephrasing |
 | `sathi/render/audio.py` | Optional: TTS via whatever `TTS_CMD` names |
@@ -110,6 +110,11 @@ plausible default.
 - **"Don't know" is a first-class answer.** It leaves the field unset, which
   produces `UNKNOWN` for any scheme that needed it, plus a question to ask at
   the centre. Forcing a yes/no would manufacture a fact.
+- **Selection changes questions, never rules.** After consent a worker can
+  screen all signed schemes or choose signed schemes. `flow.py` derives only
+  the needed profile fields from their TOML criteria/exclusions, then passes
+  the selected schemes unchanged to the deterministic engine. A dependency may
+  suppress an irrelevant later question; it never manufactures a rule fact.
 - **A rejected LLM guess is discarded, not softened.** The confirmation step is
   the whole guard on free-text intake; "close enough" would defeat it.
 - **The pack is HTML, not PDF.** The stdlib has no PDF writer, and a dependency
