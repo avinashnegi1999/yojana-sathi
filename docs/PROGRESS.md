@@ -8,9 +8,9 @@ identifiers.
 
 - Read the handoff and audited scheme evidence locally. Added source copies and
   SHA-256 records under `docs/audit-evidence/`.
-- Human-signed locally: NPS-Traders and seven earlier files. Total: 7
-  signed schemes; 8 files remain safely `UNKNOWN` (APY, PM Vishwakarma,
-  PM-JAY 70+, PMJDY, IGNOAPS, IGNWPS, IGNDPS, UK widow pension).
+- Human-signed locally: NPS-Traders and seven earlier files. Total: 10
+  signed schemes; 5 files remain safely `UNKNOWN` (APY, PM Vishwakarma,
+  PM-JAY 70+, PMJDY, UK widow pension).
 - Removed UP Old Age Pension completely: scheme file, intake field, tests, and
   current candidate references. Uttarakhand schemes are unchanged.
 - Added PM Vishwakarma's government-service-in-family question and source-backed
@@ -70,7 +70,8 @@ identifiers.
   age-based annual values instead of showing the under-80 amount to everyone.
 - Withdrew the four affected signatures (UK widow, IGNOAPS, IGNWPS, IGNDPS).
   This is deliberate: changed facts require fresh human audit; each is live as
-  `UNKNOWN` rather than a possibly wrong verdict.
+  `UNKNOWN` rather than a possibly wrong verdict. On 15 September, Avinash
+  re-audited and re-signed the three NSAP files; UK widow remains unsigned.
 - Repaired the Telegram recovery self-check after the optional pilot-role step;
   local and AWS `check.py` both passed, including 1,377,810 rule verdicts.
 - Moved the production reach HMAC key from SQLite into root-only
@@ -81,5 +82,4 @@ identifiers.
 
 ## Next
 
-- Re-audit and re-sign UK widow, IGNOAPS, IGNWPS, and IGNDPS before treating
-  them as live coverage again.
+- Resolve the Uttarakhand widow-pension ₹1,500 primary source before re-signing it.

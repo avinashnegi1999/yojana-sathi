@@ -16,7 +16,7 @@
 
 <div align="center">
   <img src="https://img.shields.io/badge/Status-Live%20on%20Telegram-brightgreen" alt="Status">
-  <img src="https://img.shields.io/badge/Schemes-7%20signed%20and%20live-blue" alt="Schemes">
+  <img src="https://img.shields.io/badge/Schemes-10%20signed%20and%20live-blue" alt="Schemes">
   <img src="https://img.shields.io/badge/Field%20pilot-not%20yet-lightgrey" alt="Field pilot">
   <img src="https://img.shields.io/badge/Licence-Apache--2.0-blue" alt="Licence">
 </div>
@@ -73,7 +73,7 @@ Site source in [`livesite/`](livesite/), published by
 [`.github/workflows/pages.yml`](.github/workflows/pages.yml).
 
 > **Status — read before you use it on anyone.**
-> The software is complete, tested end to end, and **live**. Seven signed
+> The software is complete, tested end to end, and **live**. Ten signed
 > scheme files are deployed, each with a deep link on every encoded value:
 > PMJJBY and PMSBY (`financialservices.gov.in`), PM-SYM (`maandhan.in` and
 > `labour.gov.in`), e-Shram (`eshram.gov.in`), PMUY (`pmuy.gov.in`), and the
@@ -220,7 +220,7 @@ matching, and this project does not try to replace them. Scheme Sathi is
      ! this page. -->
 
 _Running since 3 September 2026 on a single small cloud instance, restarted
-under systemd and verified to survive a reboot. Seven signed schemes are
+under systemd and verified to survive a reboot. Ten signed schemes are
 deployed, so the engine returns real verdicts and the event log can record
 eligible results. Selected-scheme screening was deployed on 14 September 2026._
 

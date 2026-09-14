@@ -21,8 +21,8 @@ name_en = "Indira Gandhi National Widow Pension"
 name_hi = "इंदिरा गांधी राष्ट्रीय विधवा पेंशन"
 authority = "Ministry of Rural Development (NSAP)"
 official_url = "https://nsap.nic.in/"
-verified_on = "2026-09-14"
-verified_by = "unconfirmed — PENDING HUMAN VERIFICATION"
+verified_on = "2026-09-15"
+verified_by = "Avinash Negi, checked 2026-09-15"
 
 [benefit]
 annual_value_inr = 3600
