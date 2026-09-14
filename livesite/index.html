@@ -8,7 +8,7 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Yojana Sathi — Know before you go">
 <meta property="og:description" content="A welfare-scheme screener for unorganised workers. Deterministic rules, cited sources, and an answer that is allowed to be UNKNOWN.">
-<meta property="og:image" content="assets/system-map.svg">
+<meta property="og:image" content="assets/core-logic.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -257,9 +257,9 @@ footer{border-top:1px solid var(--hairline);padding:var(--section) 0 var(--xxl)}
 <!-- white canvas returns -->
 <section id="how" style="padding-top:var(--xxl)">
   <div class="wrap">
-    <div class="head" style="max-width:44ch;margin-bottom:var(--xl)"><p class="eyebrow">How it decides</p><h2 class="d-lg" style="margin:var(--md) 0">A verdict ledger, not a black box.</h2><p class="body-lg">Every answer moves through the same four stages, producing the same result each time it runs.</p></div>
+    <div class="head" style="max-width:44ch;margin-bottom:var(--xl)"><p class="eyebrow">How it decides</p><h2 class="d-lg" style="margin:var(--md) 0">A verdict ledger, not a black box.</h2><p class="body-lg">Each screening selects its scope first, then runs the same cited rules against the answers it needs.</p></div>
     <div class="grid-4">
-      <div class="tile"><span class="n">01 — Input</span><h3>Worker answers</h3><p>Buttons before typing. "Don't know" is offered on every question and survives to the verdict.</p></div>
+      <div class="tile"><span class="n">01 — Input</span><h3>Choose, then answer</h3><p>Workers can screen all verified schemes or select only the ones they want. The flow asks only what that choice needs.</p></div>
       <div class="tile"><span class="n">02 — Evidence</span><h3>Cited rules</h3><p>One readable TOML file per scheme, each condition beside its official source and review date.</p></div>
       <div class="tile"><span class="n">03 — Decide</span><h3>Pure rule engine</h3><p>Same answers, same verdict. No network call in the path, no language-model import in the module.</p></div>
       <div class="tile"><span class="n">04 — Explain</span><h3>Next step</h3><p>The reason behind the result, the documents to carry, and the kind of counter to start at.</p></div>
@@ -310,12 +310,7 @@ footer{border-top:1px solid var(--hairline);padding:var(--section) 0 var(--xxl)}
 <section id="build" style="padding-top:var(--xxl)">
   <div class="wrap">
     <div class="head" style="max-width:44ch;margin-bottom:var(--xl)"><p class="eyebrow">Architecture</p><h2 class="d-lg" style="margin:var(--md) 0">The whole system, on one screen.</h2><p class="body-lg">The optional language model sits outside the decision path. It may propose an occupation label for the worker to confirm — and nothing else.</p></div>
-    <figure><img src="assets/system-map.svg" alt="Channels — worker, Telegram bot, WhatsApp bot, terminal preview — feed a conversation that builds an in-memory profile. That profile and source-cited TOML scheme rules enter a deterministic rule engine returning eligible, ineligible or unknown, with no language model in the verdict path. Outputs are an explained verdict, a document checklist, a one-page application pack, and where to begin. Separately, a consented coarse event log feeds a duplicate-safe reach counter and an impact report." loading="lazy"><figcaption>Fig. 4 — Channels, decision core, outputs, and the measurement it is allowed to keep</figcaption></figure>
-    <div class="plates">
-      <figure><img src="assets/backend-verdict.svg" alt="A profile and a source-cited scheme file enter the deterministic rule engine and result in eligible, ineligible, or unknown." loading="lazy"><figcaption>Fig. 5 — No model, no network call, no hidden scoring step</figcaption></figure>
-      <figure><img src="assets/backend-intake.svg" alt="Worker answers move through the conversation flow into a session profile, while consent controls coarse event logging." loading="lazy"><figcaption>Fig. 6 — Never infers identity, never turns a missing fact into a no</figcaption></figure>
-      <figure><img src="assets/backend-privacy.svg" alt="A session profile is discarded while coarse consented events can reach the impact report." loading="lazy"><figcaption>Fig. 7 — Coarse bands and a random session id, never a name or number</figcaption></figure>
-    </div>
+    <figure><img src="assets/core-logic.png" alt="The complete Yojana Sathi core flow: a worker opens Telegram, WhatsApp or preview; selects language; gives consent; chooses all verified schemes or selected schemes; answers only the needed questions; builds a temporary profile; and receives deterministic eligible, ineligible or unknown verdicts from human-signed TOML rules. The flow then explains results, documents, an application pack and where to go. Privacy-safe metrics retain only consented coarse events and an optional self-reported pilot role." loading="lazy" width="1496" height="1057"><figcaption>Fig. 4 — The complete core logic: selected schemes reduce questions; the deterministic engine decides eligibility</figcaption></figure>
 
     <div class="block b-lime handoff">
       <figure class="shot-frame">
@@ -329,7 +324,7 @@ footer{border-top:1px solid var(--hairline);padding:var(--section) 0 var(--xxl)}
           <li>A sheet built <b>in memory</b> — no copy is kept on the server.</li>
           <li>Papers they said they do <b>not</b> have, turned into questions to ask at the counter.</li>
           <li><b>No name, no Aadhaar</b> on it — only what to ask for and what to carry.</li>
-          <li>The last question is optional, and says so: <b>“you can skip it.”</b></li>
+          <li>Optional feedback includes a self-reported pilot role, and says so: <b>“you can skip it.”</b></li>
         </ul>
       </div>
     </div>
@@ -340,7 +335,7 @@ footer{border-top:1px solid var(--hairline);padding:var(--section) 0 var(--xxl)}
 <section id="schemes" style="padding-top:var(--xxl)">
   <div class="wrap">
     <div class="block b-cream">
-      <div class="head" style="max-width:38ch"><p class="eyebrow">Coverage</p><h2 class="d-lg">Seven schemes. Narrow on purpose.</h2><p class="body-lg">A short list of answers that hold up beats a long directory of approximate ones. The two Uttarakhand pensions are alternative routes to one state payment and are never added together.</p></div>
+      <div class="head" style="max-width:42ch"><p class="eyebrow">Coverage</p><h2 class="d-lg">Eleven signed schemes. Still narrow by design.</h2><p class="body-lg">A reviewed set of answers that hold up beats a broad directory of approximate ones. National pension figures below are the stated central share; state pensions can be higher, and overlapping pension routes are never added together.</p></div>
       <table>
         <thead><tr><th>Scheme</th><th>Stated benefit</th><th>Where an application begins</th></tr></thead>
         <tbody>
@@ -351,6 +346,10 @@ footer{border-top:1px solid var(--hairline);padding:var(--section) 0 var(--xxl)}
           <tr><td class="name">PM Suraksha Bima Yojana</td><td>₹2,00,000 accident cover</td><td>Bank branch</td></tr>
           <tr><td class="name">PM Ujjwala Yojana</td><td>In-kind LPG support</td><td>Online or an LPG distributor</td></tr>
           <tr><td class="name">e-Shram registration</td><td>Gateway — no payout of its own</td><td>e-Shram portal or a CSC</td></tr>
+          <tr><td class="name">Indira Gandhi National Old Age Pension</td><td>₹2,400 per year central share; ₹6,000 from age 80</td><td>Common Service Centre</td></tr>
+          <tr><td class="name">Indira Gandhi National Widow Pension</td><td>₹3,600 per year central share; ₹6,000 from age 80</td><td>Common Service Centre</td></tr>
+          <tr><td class="name">Indira Gandhi National Disability Pension</td><td>₹3,600 per year central share; ₹6,000 from age 80</td><td>Common Service Centre</td></tr>
+          <tr><td class="name">National Pension Scheme for Traders</td><td>₹36,000 per year from age 60</td><td>Common Service Centre</td></tr>
         </tbody>
       </table>
       <div class="tags"><span>Python stdlib</span><span>TOML rules</span><span>SQLite</span><span>Telegram Bot API</span><span>WhatsApp Cloud API</span><span>Docker</span><span>Ubuntu + systemd</span><span>One small server</span></div>

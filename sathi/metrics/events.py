@@ -102,6 +102,9 @@ class EventLog:
         self._lock = threading.Lock()
         self._conn.row_factory = sqlite3.Row
         self._conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
+        columns = {row[1] for row in self._conn.execute("PRAGMA table_info(feedback)")}
+        if "participant_role" not in columns:
+            self._conn.execute("ALTER TABLE feedback ADD COLUMN participant_role TEXT")
         self._conn.commit()
         self._consented: set[str] = set()
 
@@ -400,17 +403,19 @@ class EventLog:
     _DIGIT_RUN = re.compile(r"\d(?:[\d\s\-]*\d){3,}")
 
     def record_feedback(self, rating: int | None, suggestion: str = "",
-                        channel: str = "cli") -> None:
+                        channel: str = "cli", participant_role: str | None = None) -> None:
         """One rating and/or one suggestion, attached to nobody."""
         if rating is not None and not (1 <= int(rating) <= 10):
             raise ValueError(f"rating {rating!r} is outside 1-10")
+        if participant_role not in (None, "self", "helping", "tester"):
+            raise ValueError(f"unknown participant role {participant_role!r}")
         text = self._DIGIT_RUN.sub("[number removed]", suggestion or "").strip()[:500]
-        if rating is None and not text:
+        if rating is None and not text and participant_role is None:
             return
         self._conn.execute(
-            "INSERT INTO feedback (ts, channel, rating, suggestion) VALUES (?, ?, ?, ?)",
+            "INSERT INTO feedback (ts, channel, rating, suggestion, participant_role) VALUES (?, ?, ?, ?, ?)",
             (datetime.now(timezone.utc).date().isoformat(), channel,
-             int(rating) if rating is not None else None, text or None))
+             int(rating) if rating is not None else None, text or None, participant_role))
         self._conn.commit()
 
     def feedback_summary(self, limit: int = 25) -> dict:
@@ -424,9 +429,12 @@ class EventLog:
         notes = [str(r[0]) for r in q(
             "SELECT suggestion FROM feedback WHERE suggestion IS NOT NULL"
             " ORDER BY ts DESC LIMIT ?", (limit,)).fetchall()]
+        roles = [(str(a), int(b)) for a, b in q(
+            "SELECT participant_role, COUNT(*) FROM feedback"
+            " WHERE participant_role IS NOT NULL GROUP BY participant_role ORDER BY participant_role")]
         return {"count": int(row[0] or 0),
                 "average": round(float(row[1]), 1) if row[1] is not None else None,
-                "spread": spread, "suggestions": notes}
+                "spread": spread, "suggestions": notes, "participant_roles": roles}
 
     def schedule_followup(self, channel_id: str, channel: str, days: int = 14) -> str | None:
         """Opt-in. Returns None unless FOLLOWUP_SALT is set.

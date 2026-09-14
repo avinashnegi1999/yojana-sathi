@@ -439,10 +439,10 @@ def _derive_walk(schemes) -> list[str]:
         assert field in _KEEP, f"new follow-up {field} - decide its answer for the walk"
         followups.append(_KEEP[field])
         probe.handle(_KEEP[field])
-    # * The sheet, then the two optional questions after it, both skipped: the
+    # * The sheet, then the three optional questions after it, all skipped: the
     # * point of a walk is that every state is reachable, not that anyone
     # * rates the bot.
-    return head + followups + ["next", "next", "yes", "skip", "skip"]
+    return head + followups + ["next", "next", "yes", "skip", "skip", "skip"]
 
 
 def test_every_command_through_the_adapter_at_every_state():

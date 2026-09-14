@@ -348,7 +348,7 @@ Worth knowing about three of them:
 - `tests/test_privacy.py` — the reason the privacy claim above is defensible
   rather than aspirational.
 - `tests/test_all_paths.py` — presses **every button at every reachable screen**
-  in both languages (1,688 paths, 122 completed sessions), opens every generated
+  in both languages (2,168 paths, 482 completed sessions), opens every generated
   sheet, runs every path through a real event log, drives every command through
   the channel adapter, and fuzzes the typed questions. It asserts its own
   coverage counters, because a green test that never reached the thing it checks

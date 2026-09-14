@@ -80,6 +80,11 @@ the event log should retain only its band. Do not copy the transient profile
 into facilitator notes. Keep `FOLLOWUP_SALT` unset for the pilot unless a
 separately explained and approved follow-up design is adopted.
 
+At the end, the bot optionally asks how it is being used: checking for oneself,
+helping someone else, or testing as a developer/reviewer. This is anonymous
+self-report, not proof of occupation. Treat developer/reviewer replies as
+technical testing, never worker-pilot evidence.
+
 A participant may hold their own sheet; facilitators do not retain copies. A
 sheet still includes sensitive answers even when it has no name. On shared
 devices, clear the previous conversation before another person starts and
@@ -112,9 +117,9 @@ participant read or understood the result.
 
 Keep an access-restricted local tally outside Git. One row per observed visit:
 
-| Language | Channel | Assisted? | First/repeat visit (self-report) | Finished? | All UNKNOWN? | Understood no approval? | Next step understood? | Sheet usable? | Error code/question key |
+| Language | Channel | Use type (self-report) | Assisted? | First/repeat visit (self-report) | Finished? | All UNKNOWN? | Understood no approval? | Next step understood? | Sheet usable? | Error code/question key |
 |---|---|---|---|---|---|---|---|---|---|
-| blank | blank | blank | blank | blank | blank | blank | blank | blank | blank |
+| blank | blank | blank | blank | blank | blank | blank | blank | blank | blank | blank |
 
 Do not include timestamps precise enough to match a person to a chat, free-text
 worker quotes, session IDs or contact fields. Use aggregate counts in the

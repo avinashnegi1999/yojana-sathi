@@ -323,6 +323,11 @@ ask_rating = """One last thing, and you can skip it.
 How useful was this, from 1 to 10? Just send the number."""
 ask_suggestion = """Thank you. Is there anything I should improve, or any question that was confusing?
 Send it in a few words, or skip."""
+ask_participant_type = """One optional question for our pilot count.
+How are you using Yojana Sathi today?"""
+participant_self = "Checking for myself"
+participant_helping = "Helping someone else"
+participant_tester = "Testing as a developer/reviewer"
 thanks = "Thank you — that helps me make this better for the next person."
 skip = "Skip"
 bad_rating = "Please send a number from 1 to 10, or skip."

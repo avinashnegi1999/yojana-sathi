@@ -50,6 +50,10 @@ identifiers.
   route, current exhaustive-path coverage, and AWS deployment state.
 - Repaired stale flow and Telegram self-check expectations after the picker
   launch; the full local `check.py` is green again.
+- Added an optional anonymous end question: self-checking, helping someone,
+  developer/reviewer testing, or skip. Its aggregate is stored without a
+  session/channel identifier, so developer testing can be excluded from pilot
+  evidence without creating a worker identity record.
 
 ## Next
 

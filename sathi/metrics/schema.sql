@@ -109,5 +109,6 @@ CREATE TABLE IF NOT EXISTS feedback (
     ts          TEXT NOT NULL,      -- ISO 8601 UTC, day precision
     channel     TEXT NOT NULL,
     rating      INTEGER,            -- 1-10, or NULL if skipped
-    suggestion  TEXT                -- scrubbed free text, or NULL if skipped
+    suggestion  TEXT,               -- scrubbed free text, or NULL if skipped
+    participant_role TEXT            -- self | helping | tester, or NULL if skipped
 );
