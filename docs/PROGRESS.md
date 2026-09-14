@@ -48,6 +48,8 @@ identifiers.
   was not changed.
 - Synced the master README with the 11 deployed signed schemes, selected-scheme
   route, current exhaustive-path coverage, and AWS deployment state.
+- Repaired stale flow and Telegram self-check expectations after the picker
+  launch; the full local `check.py` is green again.
 
 ## Next
 

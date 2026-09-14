@@ -988,7 +988,12 @@ def _self_check() -> None:
     assert c.handle(LANG_HI)[0].button_values() == {consent.YES, consent.NO}
 
     c.handle(consent.YES)
-    assert c.state is State.STATE
+    assert c.state is State.SCHEME_MODE
+    # * The picker is the normal new route. A state callback is still accepted
+    # * below for a keyboard tap that was already in flight during deployment.
+    picked = Conversation(schemes)
+    picked.handle(LANG_HI); picked.handle(consent.YES); picked.handle("pick:all")
+    assert picked.state is State.AGE
     c.handle("state:UK")
     c.handle("34")
     assert c.profile.age == 34 and c.profile.state == "UK"

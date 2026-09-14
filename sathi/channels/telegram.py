@@ -798,7 +798,7 @@ def _self_check() -> None:
                     attempts.append(payload)
                     if armed and payload["chat_id"] == "42":
                         if failure == "notice" or (failure == "question" and
-                                payload["text"] == s("questions.state", lang)):
+                                payload["text"] == s("scheme_picker.mode", lang)):
                             raise TelegramError("sendMessage failed: injected failure")
                     mid = 1000 + len(attempts)
                     delivered.append((mid, payload))
@@ -848,8 +848,8 @@ def _self_check() -> None:
                 assert any(p["chat_id"] == "42" and p["text"] == notice
                            for _, p in delivered) == (failure != "notice")
                 assert recovering.sessions["99"] is neighbour
-                assert neighbour.state.value == "state", "another chat stopped progressing"
-                assert delivered[-1][1]["text"] == s("questions.state", lang)
+                assert neighbour.state.value == "scheme_mode", "another chat stopped progressing"
+                assert delivered[-1][1]["text"] == s("scheme_picker.mode", lang)
                 assert recovering._offset == 9
                 before = len(attempts)
                 assert recovering.poll_once() == 0 and len(attempts) == before, "delivery was retried"
@@ -894,9 +894,9 @@ def _self_check() -> None:
             assert recovering.poll_once() == 1
             assert uploaded == [True], "the audio failure was never reached"
             assert recovering.sessions.get("42") is current, "optional audio reset the session"
-            assert current.state.value == "state"
+            assert current.state.value == "scheme_mode"
             assert len(delivered) == before + 1
-            assert delivered[-1][1]["text"] == s("questions.state", "en")
+            assert delivered[-1][1]["text"] == s("scheme_picker.mode", "en")
             assert recovering._active_keyboard["42"] == delivered[-1][0]
 
         # ! A delivered pack carries the answer recap. It used to survive /clear
@@ -1220,7 +1220,7 @@ def _self_check() -> None:
             except urllib.error.URLError:
                 assert status is None, "permanent upload failure bypassed recovery"
             assert failures, "wire failure was never exercised"
-            assert current.state.value == "state", "test never advanced the intake"
+            assert current.state.value == "scheme_mode", "test never advanced the intake"
             assert recovering._offset == 2
             assert "31" not in recovering._active_keyboard
             if status is None:
