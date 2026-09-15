@@ -29,7 +29,17 @@ def required_documents(results: tuple[Result, ...], schemes: dict[str, Scheme],
 
 
 def missing_documents(required: tuple[str, ...], have: frozenset[str]) -> tuple[str, ...]:
-    return tuple(d for d in required if d not in have)
+    # * Schemes sometimes add a parenthetical convenience note to the same
+    # * document name, e.g. "form" and "form (available at bank)". A worker
+    # * needs one form, not two bullets on the sheet.
+    seen: set[str] = set()
+    missing: list[str] = []
+    for doc in required:
+        key = doc.split("(", 1)[0].strip().casefold()
+        if doc not in have and key not in seen:
+            seen.add(key)
+            missing.append(doc)
+    return tuple(missing)
 
 
 def documents_for(scheme: Scheme, lang: str = "hi") -> tuple[str, ...]:
@@ -62,6 +72,7 @@ def _self_check() -> None:
     assert "वोटर कार्ड" not in req, "documents for an ineligible scheme are noise"
     assert STUB not in req, "a stub document must never be shown to a worker"
     assert missing_documents(req, frozenset({"आधार"})) == ("बैंक पासबुक", "राशन कार्ड")
+    assert missing_documents(("Form", "Form (available at bank)"), frozenset()) == ("Form",)
     print("checklist.py OK")
 
 

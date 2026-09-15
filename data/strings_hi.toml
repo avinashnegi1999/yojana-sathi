@@ -176,11 +176,11 @@ value_line = "इनसे आपको साल भर में लगभग 
 # ! Insurance is stated separately and never added to the line above. A ₹2 लाख
 # ! cover is money paid only if an accident happens; adding it to a pension
 # ! would tell a worker they are getting lakhs, which is false.
-cover_line = "इसके अलावा {total} रुपये तक का दुर्घटना बीमा भी है — यह रकम तभी मिलती है जब दुर्घटना हो।"
+cover_line = "इसके अलावा दिखाई गई पॉलिसियों में कुल {total} रुपये तक का बीमा कवर भी है। हर पॉलिसी अपनी शर्तों के अनुसार ही भुगतान करती है।"
 # ! Used when insurance is the ONLY thing that matched. "इसके अलावा" needs
 # ! something to come after, and with no pension line above it reads as if a
 # ! sentence went missing.
-cover_only_line = "आपको {total} रुपये तक का दुर्घटना बीमा मिल सकता है — यह रकम तभी मिलती है जब दुर्घटना हो।"
+cover_only_line = "आपको दिखाई गई पॉलिसियों में कुल {total} रुपये तक का बीमा कवर मिल सकता है। हर पॉलिसी अपनी शर्तों के अनुसार ही भुगतान करती है।"
 # ! Honest labelling, kept in the product and not only in the README: this is
 # ! entitlement we surfaced, not money anyone has received.
 value_caveat = "यह वह रकम है जिसके आप हक़दार हो सकते हैं — यह पैसा अभी मिला नहीं है। मिलने के लिए आवेदन करना होगा।"

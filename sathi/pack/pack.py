@@ -198,6 +198,7 @@ def _self_check() -> None:
     _, en = build(results, schemes, known=frozenset(), lang="en")
     en_text = en.decode("utf-8")
     assert "12,000" in en_text and "has not been paid yet" in en_text
+    assert "accident insurance" not in s("result.cover_line", "en")
     # ! An English sheet must carry no Devanagari at all — not in the heading,
     # ! not in a label. A real pack shipped with Hindi scheme names and Hindi
     # ! field labels because both were built outside the string files.

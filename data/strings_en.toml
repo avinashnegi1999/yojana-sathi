@@ -156,8 +156,8 @@ scheme_line = """{index}. {name_hi} {new_badge}
    Where to go: {where}"""
 new_badge = "🆕 (you do not have this yet)"
 value_line = "These could be worth about ₹{total} to you in a year."
-cover_line = "On top of that there is accident insurance of up to ₹{total} — that amount is paid only if an accident happens."
-cover_only_line = "You can get accident insurance of up to ₹{total} — that amount is paid only if an accident happens."
+cover_line = "On top of that there is insurance cover of up to ₹{total} across the policies shown. Each policy pays only under its own terms."
+cover_only_line = "You can get insurance cover of up to ₹{total} across the policies shown. Each policy pays only under its own terms."
 value_caveat = "This is what you may be entitled to — the money has not been paid yet. You have to apply for it."
 
 unknown_header = """There are {count} scheme(s) I cannot be sure about.
