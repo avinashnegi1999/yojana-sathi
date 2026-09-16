@@ -620,6 +620,22 @@ def test_tax_payer_on_a_route_without_an_income_question_is_not_dropped():
     assert convo.profile.is_income_tax_payer is True
 
 
+def test_dont_know_on_epfo_moves_on_instead_of_reasking_forever():
+    """Regression: DK skipped _set, so the field never counted as answered and
+    _advance_core re-asked EPFO/ESIC on every tap."""
+    convo = Conversation(load_all(), None)
+    convo.start(); convo.handle(LANG_EN); convo.handle(consent.YES)
+    convo.handle("pick:choose"); convo.handle("pick:ESHRAM"); convo.handle("pick:done")
+    for _ in range(10):
+        if convo.state is State.EPFO_ESIC:
+            break
+        convo.handle("30" if convo.state is State.AGE else NO)
+    assert convo.state is State.EPFO_ESIC
+    convo.handle(DK)
+    assert convo.state is not State.EPFO_ESIC, "Don't know must not re-ask the same question"
+    assert convo.profile.is_epfo_or_esic_member is None
+
+
 def test_two_maandhan_pensions_are_one_pension_in_the_total():
     """PM-SYM and NPS-Traders each bar members of the other; a small trader who
     qualifies for both can enrol in one. The screen used to say ₹72,000."""

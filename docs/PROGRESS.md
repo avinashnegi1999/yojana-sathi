@@ -133,6 +133,12 @@ identifiers.
 - `/start linkedin` (and facebook, instagram, google, ads) now counts as a
   reach source; unlisted slugs still fall to "direct". Reach and feedback
   writers take the same lock as the event writer.
+- Drove every subset of the ten signed schemes through intake (1,023 picks ×
+  3 tax answers × 5 ages × 3 answer styles, 46,035 sessions). One more fault:
+  "Don't know" on the EPFO/ESIC question skipped the recording step, so the
+  field never counted as answered and the same question came back on every
+  tap. Recorded as None now, like the NPS and tax questions. All 46,035
+  sessions reach the end.
 - Not deployed. Production still runs the 15 September build.
 
 ## Next

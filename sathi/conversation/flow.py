@@ -662,15 +662,15 @@ class Conversation:
     # ! e-Shram excludes only EPFO and ESIC. Asking once and applying
     # ! the answer to both made e-Shram stricter than its own source.
     def _on_is_epfo_or_esic_member(self, answer: str) -> list[Reply]:
-        if answer in (YES, NO):
-            self._set("is_epfo_or_esic_member", answer == YES)
-        elif answer != DK:
-            # * Same as the tax question: "don't know" stays unset, and any
-            # * scheme that excludes members comes back UNKNOWN rather than a
-            # * verdict built on an answer the worker never gave.
+        if answer not in (YES, NO, DK):
             return [
                 Reply(text=self._s("errors.pick_from_list"), buttons=_yes_no(self.lang, with_dont_know=True))
             ]
+        # ! "Don't know" is RECORDED as None, not skipped. The field stays
+        # ! unset so any scheme that excludes members comes back UNKNOWN — but
+        # ! it must still count as answered, or _advance_core asks this same
+        # ! question again, forever. That is what a tap on Don't know did.
+        self._set("is_epfo_or_esic_member", None if answer == DK else answer == YES)
         return self._advance_core()
 
     def _ask_nps(self) -> Reply:
