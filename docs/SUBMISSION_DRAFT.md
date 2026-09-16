@@ -12,10 +12,11 @@ PM-SYM, e-Shram and the Uttarakhand old-age pension. Avinash Negi read
 both Department of Financial Services FAQs in full and confirmed every encoded
 value on 9 September 2026; each file names him in `verified_by`.
 
-All seven now screen. Say so plainly, and say that the widow pension's rate
-rests on a single aggregator page rather than the department's own. A judge who
-checks will find that, and finding it in your own documentation is very
-different from finding it themselves. That distinction has to survive into the demo video and the problem
+Ten now screen (as of 15 September 2026); five drafts stay UNKNOWN. Say so
+plainly, and say that the Uttarakhand widow pension was signed, then withdrawn
+because its rate rests on a single aggregator page rather than the
+department's own. A judge who checks will find that, and finding it in your
+own documentation is very different from finding it themselves. That distinction has to survive into the demo video and the problem
 statement unchanged — a judge will try it.
 
 ## What the official form actually asks for — rechecked 9 September 2026
@@ -49,8 +50,8 @@ what we assumed.
    which value to select**, or choose Other and name the impact area in the
    problem statement. Do not silently file under Financial Inclusion.
 5. **A working demo URL is required** — live app or video. Satisfied twice over:
-   the Telegram bot gives real verdicts (all seven scheme files were signed on
-   9-10 September 2026), and https://avinashnegi.com/yojana-sathi carries a
+   the Telegram bot gives real verdicts (ten scheme files signed between 9 and
+   15 September 2026; five drafts return UNKNOWN), and https://avinashnegi.com/yojana-sathi carries a
    walkthrough, real screenshots of both channels, and counters read live from
    the running bot. The video should still show the UNKNOWN path, because a
    scheme refusing to answer is the thing worth demonstrating.
@@ -95,10 +96,11 @@ worker is uneducated or unable to use government services.
 Yojana Sathi asks a small set of questions, reads the answers back, evaluates
 source-backed Python rules, and explains what can and cannot be concluded.
 Where a human-verified scheme supports a result, it provides a document
-checklist and application directions. **All seven scheme files were signed on
-9-10 September 2026** — Avinash Negi read each official page in full and
+checklist and application directions. **Ten scheme files were signed between
+9 and 15 September 2026** — Avinash Negi read each official page in full and
 confirmed every encoded value against it, and `verified_by` in each file names
-him. The bot gives real verdicts, real rupee figures, and a place to walk to.
+him. Five drafts, including the Uttarakhand widow pension, return UNKNOWN
+until they are signed. The bot gives real verdicts, real rupee figures, and a place to walk to.
 
 The gate that produced the earlier unsigned state is still there and still
 enforced: an unresearched value or an unsigned file yields UNKNOWN, never a

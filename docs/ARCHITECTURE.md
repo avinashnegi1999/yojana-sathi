@@ -85,7 +85,7 @@ plausible default.
 | `sathi/core/profile.py` | The `Profile` dataclass, income/land/age bands |
 | `sathi/core/schemes.py` | TOML loader, structural validator, stub detection |
 | `sathi/core/content.py` | Loaders for `occupations.toml`, `states.toml`, `strings_hi.toml` |
-| `sathi/rules/operators.py` | The seven operators, three-valued (`True` / `False` / `None`) |
+| `sathi/rules/operators.py` | The eight operators, three-valued (`True` / `False` / `None`) |
 | `sathi/rules/engine.py` | `evaluate()` — the only place eligibility is decided |
 | `sathi/conversation/consent.py` | The consent screen |
 | `sathi/conversation/flow.py` | Intake state machine, selected-scheme planner, dependency order, `known_schemes` capture |

@@ -1,12 +1,12 @@
 # Scheme expansion — researched candidates
 
-**Status, 12 September 2026: nine of the candidates below are now DRAFTED as
-files in `data/schemes/`, loaded by the bot, and returning UNKNOWN to every
-worker until a human signs them.** Seven schemes are signed and live: PMJJBY,
-PMSBY, PM-SYM, e-Shram, PMUY, UK_OLD_AGE, UK_WIDOW.
+**Status, 17 September 2026: every candidate below that was drafted is a file
+in `data/schemes/`, loaded by the bot, and returns UNKNOWN to every worker
+until a human signs it.** Ten schemes are signed and live: PMJJBY, PMSBY,
+PM-SYM, e-Shram, PMUY, UK_OLD_AGE, IGNOAPS, IGNWPS, IGNDPS, NPS_TRADERS.
 
-Drafted, unsigned: APY, PMJAY_70, IGNOAPS, IGNWPS, IGNDPS, NPS_TRADERS,
-PM_VISHWAKARMA, PMJDY. Each file states its source at the top and
+Drafted, unsigned: APY, PMJAY_70, PM_VISHWAKARMA, PMJDY, and UK_WIDOW
+(signature withdrawn 15 September pending a primary source for its rate). Each file states its source at the top and
 flags what to confirm before signing. Sign with `python3 -m sathi.review`.
 
 Not drafted, on purpose: PM-JAY (general) and NFSA. Neither has a criterion the
@@ -129,9 +129,11 @@ return UNKNOWN in twenty new places. Coverage grows when you sign, not when a
 file appears. So the sequence is: draft with citations → you read the source →
 `python3 -m sathi.review` → the scheme goes live.
 
-At roughly 30–60 minutes of careful reading per scheme, Tier 1 is about three
-hours of your time and would take the bot from seven schemes to eleven,
-including the largest health scheme in the country for everyone over 70.
+At roughly 30–60 minutes of careful reading per scheme, the two Tier 1 files
+still unsigned (APY, PM-JAY 70+) are about an hour and a half of your time and
+would take the bot from ten schemes to twelve, including the largest health
+scheme in the country for everyone over 70. IGNOAPS and IGNWPS were signed on
+15 September.
 
 ## Open questions that need a phone call, not a search
 
@@ -215,7 +217,8 @@ the cost of being told "no".
 **Do not fill these from an aggregator.** This project has already been burned
 once: `uk_widow.toml` rests on a myScheme page whose own "Official Website" link
 points at a different scheme entirely, and that single weak citation is the
-reason one of seven files carries a disclosure the other six do not.
+reason that file's signature was withdrawn on 15 September and it is served
+as UNKNOWN.
 
 Where the department's own page cannot be read, the honest output is a `"TODO"`
 and an UNKNOWN verdict, not a plausible number.

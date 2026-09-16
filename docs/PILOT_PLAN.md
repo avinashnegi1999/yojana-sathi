@@ -12,8 +12,9 @@ use a source-checked next-step sheet without being misled about benefit approval
 Priorities:
 
 1. ~~Finish [scheme verification](VERIFICATION.md)~~ — **done 9–10 September
-   2026.** All seven schemes are signed off against their official pages and the
-   bot returns real verdicts. This gate is cleared.
+   2026, extended to ten schemes by 15 September.** Each signed file is checked
+   against its official page and the bot returns real verdicts for it; the five
+   unsigned drafts return UNKNOWN. This gate is cleared.
 
    **The remaining gate is [Hindi review](HUMAN_REVIEW_CHECKLIST.md), and it is
    not cleared.** Every Hindi string in this bot was drafted by a language model

@@ -73,40 +73,40 @@ Site source in [`livesite/`](livesite/), published by
 [`.github/workflows/pages.yml`](.github/workflows/pages.yml).
 
 > **Status — read before you use it on anyone.**
-> The software is complete, tested end to end, and **live**. Ten signed
-> scheme files are deployed, each with a deep link on every encoded value:
-> PMJJBY and PMSBY (`financialservices.gov.in`), PM-SYM (`maandhan.in` and
-> `labour.gov.in`), e-Shram (`eshram.gov.in`), PMUY (`pmuy.gov.in`), and the
-> Uttarakhand old-age and widow pensions (`socialwelfare.uk.gov.in`), plus
-> three National Social Assistance Programme pensions and NPS-Traders.
+> The software is complete, tested end to end, and **live**. Fifteen scheme
+> files are deployed, each with a deep link on every encoded value.
 >
-> **All eleven deployed files are signed off.** `verified_by` in each file
-> names Avinash Negi and records the review date. The bot gives real verdicts,
-> real ₹ figures and a place to walk to.
+> **Ten are signed off** and give real verdicts, real ₹ figures and a place to
+> walk to: PMJJBY and PMSBY (`financialservices.gov.in`), PM-SYM and
+> NPS-Traders (`maandhan.in`), e-Shram (`eshram.gov.in`), PMUY
+> (`pmuy.gov.in`), the Uttarakhand old-age pension
+> (`socialwelfare.uk.gov.in`), and the three National Social Assistance
+> Programme pensions (IGNOAPS, IGNWPS, IGNDPS). `verified_by` in each file
+> names Avinash Negi and records the review date.
 >
-> **Four further files remain drafts and are not offered to workers:** APY,
-> PM Vishwakarma, PM-JAY 70+, and PMJDY. They stay `UNKNOWN` until human
-> sign-off.
+> **Five remain drafts and are not offered to workers:** APY, PM Vishwakarma,
+> PM-JAY 70+, PMJDY, and the Uttarakhand widow pension. They stay `UNKNOWN`
+> until human sign-off.
 >
 > That signature is enforced, not merely recorded. Until a named human signs a
 > file, the rule engine returns `UNKNOWN` for that scheme to every worker,
 > contributes ₹0 to every number on the dashboard, and says so at startup — and
-> `tests/test_schemes.py` fails the build if this README and the data ever
-> disagree about which schemes are signed. A wrong threshold sends someone on a
-> day-long trip that costs them a day's wages.
+> `tests/test_schemes.py` pins the signed list, so a signature added or
+> withdrawn without updating that test fails the build. A wrong threshold sends
+> someone on a day-long trip that costs them a day's wages.
 >
-> **One file is thinner than the others, and the repository says so.** The
+> **One file was withdrawn from service, and the repository says why.** The
 > Uttarakhand widow pension's department page states no amount at all. The
 > ₹1,500 comes from myScheme — whose own "Official Website" link for that scheme
-> points at a *different* scheme. It is signed on the maintainer's judgement, and
-> `data/schemes/uk_widow.toml` records exactly that in its header. Two questions
-> to the SSP helpline would settle it.
+> points at a *different* scheme. It was signed on 10 September and the
+> signature was withdrawn on 15 September when its other-pension rule changed;
+> it stays `UNKNOWN` until the rate is settled at a primary source. `data/schemes/uk_widow.toml` records exactly that
+> in its header.
 >
-> Where a source refuses people without saying so anywhere official, this project
-> declines to. Both Uttarakhand pensions collect "are you already drawing another
-> pension?" and **tell the worker to ask at the office** rather than refusing her
-> on it, because only myScheme states that bar and a wrong NO is a pension nobody
-> claims.
+> Pensions that sit on the same money are never added together. The Uttarakhand
+> pensions and the three NSAP pensions share one `exclusive_group`, as do PM-SYM
+> and NPS-Traders: a worker who qualifies for two routes to one pension is
+> shown the larger, once.
 >
 > The full source comparison, including what could *not* be resolved, is in
 > [`docs/SOURCE_REVIEW_2026-09-09.md`](docs/SOURCE_REVIEW_2026-09-09.md); the
@@ -237,7 +237,9 @@ The plan for that pilot, including consent and what will be measured, is in
 Two ₹ figures are reported, never one. An annual pension (PM-SYM, ₹36,000/year)
 and an accident cover (PMSBY, ₹2,00,000 paid only on a claim) are different
 kinds of money; adding them would overstate what a worker actually receives by
-roughly six times.
+roughly six times. "Newly surfaced" rests on one intake question — which of
+the screened schemes the worker already holds — asked on every route,
+including a single-scheme check.
 
 Methodology, and what each number does **not** claim:
 [`docs/IMPACT.md`](docs/IMPACT.md).
@@ -348,7 +350,7 @@ Worth knowing about three of them:
 - `tests/test_privacy.py` — the reason the privacy claim above is defensible
   rather than aspirational.
 - `tests/test_all_paths.py` — presses **every button at every reachable screen**
-  in both languages (2,168 paths, 482 completed sessions), opens every generated
+  in both languages (9,860 paths, 2,290 completed sessions), opens every generated
   sheet, runs every path through a real event log, drives every command through
   the channel adapter, and fuzzes the typed questions. It asserts its own
   coverage counters, because a green test that never reached the thing it checks
@@ -356,7 +358,7 @@ Worth knowing about three of them:
 - `tests/test_rule_boundaries.py` — asks whether the **answers** are right, not
   whether the code runs. Each scheme's rules are re-encoded from the official
   source text, independently of `data/schemes/`, and compared against the engine
-  across every combination of the fields any rule touches — 214,326 verdicts,
+  across every combination of the fields any rule touches — 1,377,810 verdicts,
   plus every named threshold one per line. Pressing every button cannot find a
   wrong threshold; a wrong threshold renders a perfectly well-formed screen.
 
@@ -378,7 +380,7 @@ that looks automated. `--unsign` reverses it.
 
 `sathi/sources.py` answers the question a signature cannot: a person checked
 this in September, but is it still true? [`data/sources/`](data/sources/) holds a
-fingerprint of each official page plus **43 named claims** — one per value we
+fingerprint of each official page plus **44 named claims** — one per value we
 rely on — and re-reads the live pages on demand. It also watches for things that
 must *not* reappear, like the "16–59" age limit e-Shram no longer states.
 

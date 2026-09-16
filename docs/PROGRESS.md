@@ -8,9 +8,9 @@ identifiers.
 
 - Read the handoff and audited scheme evidence locally. Added source copies and
   SHA-256 records under `docs/audit-evidence/`.
-- Human-signed locally: NPS-Traders and seven earlier files. Total: 10
-  signed schemes; 5 files remain safely `UNKNOWN` (APY, PM Vishwakarma,
-  PM-JAY 70+, PMJDY, UK widow pension).
+- By the end of 14 September: 11 schemes were signed; 4 drafts remained
+  safely `UNKNOWN` (APY, PM Vishwakarma, PM-JAY 70+, PMJDY). Superseded on
+  15 September, below: UK widow was unsigned again, leaving 10 signed.
 - Removed UP Old Age Pension completely: scheme file, intake field, tests, and
   current candidate references. Uttarakhand schemes are unchanged.
 - Added PM Vishwakarma's government-service-in-family question and source-backed
@@ -79,6 +79,61 @@ identifiers.
   now preserves that key and creates one safely for a new host.
 - Added a `tar` deploy fallback because this Windows Git Bash installation has
   no `rsync`. Deployed successfully to AWS; `sathi.service` is active.
+- Audited a generated application sheet and fixed two worker-facing mistakes:
+  combined PMJJBY + PMSBY cover is now called insurance cover, not accident
+  insurance, and equivalent missing-form entries are shown once.
+- Ran the full local and AWS release gate again: 1,377,810 independent-rule
+  verdict checks and all conversation, pack, privacy and channel checks passed.
+- The online source-drift check found no changed encoded claim. e-Shram and
+  PM-SYM page wording changed since the previous capture, but every tracked
+  value still checks out; PMJJBY, PMSBY, PMUY and UK old-age pages are unchanged.
+- Published the repair commits to GitHub and AWS. Current production state is
+  10 signed schemes; five remain `UNKNOWN`: APY, PM Vishwakarma, PM-JAY 70+,
+  PMJDY and UK widow pension.
+- Refreshed the live-site system diagrams and added the intro video poster and
+  custom thumbnail.
+
+## 2026-09-16
+
+- Added a JPG social-sharing preview and updated the live-site metadata to use
+  it.
+- No application checks or AWS deployment were recorded today; no deployment
+  status change is claimed.
+
+## 2026-09-17
+
+- Full-project review against the core mechanism. Two worker-facing defects
+  found and fixed, both with regression tests in `tests/test_flow.py`:
+  - PM-SYM and NPS-Traders were both counted in the payout total, so a small
+    trader eligible for both was told "about ₹72,000 a year" while the same
+    screen said the two cannot be held together. Both files now share
+    `exclusive_group = "maandhan_pension"`; the total is ₹36,000.
+  - Since the 14 September selected-scheme redesign, the "which of these do
+    you already have?" question listed only codes named in a `known_schemes`
+    exclusion (PM_SYM alone), so a worker already holding PMSBY, PMJJBY or an
+    e-Shram card was never asked and every match was logged as
+    `scheme_newly_surfaced`. The list is now every screened scheme.
+- Follow-ups are also skipped when an exclusion is already settled on earlier
+  answers (an income-tax payer is no longer asked the NPS-Traders questions).
+- Docs brought back in line with the data: README said "ten signed", "all
+  eleven signed" and "four drafts" in three consecutive paragraphs and listed
+  the UK widow pension as signed; it, `CLAUDE.md` (frozen at 31 August),
+  `AGENTS.md`, `SUBMISSION_DRAFT.md`, `PILOT_PLAN.md`, `SCHEME_CANDIDATES.md`
+  and the operator count in `ARCHITECTURE.md` now match the files.
+  `uk_widow.toml`'s header records its 15 September withdrawal.
+- Pre-ads hardening. Fuzzed 25 interleaved hostile users (6,000 turns: empty,
+  5,000-char, emoji, RTL, SQL, Devanagari digits, stale buttons, every command
+  at every state) through the router against a real event log: zero
+  exceptions, only whitelisted bands reach the log, dashboard renders.
+- One crash found and fixed: on a selected route that never asks income
+  (e-Shram, PMSBY, NPS-Traders alone), answering Yes to income tax rendered
+  the confirm screen with no band and raised, dropping the session. The
+  button walk missed it because its visited-key ignored the selection; it now
+  keys on selection too and proves it catches the reverted bug.
+- `/start linkedin` (and facebook, instagram, google, ads) now counts as a
+  reach source; unlisted slugs still fall to "direct". Reach and feedback
+  writers take the same lock as the event writer.
+- Not deployed. Production still runs the 15 September build.
 
 ## Next
 
