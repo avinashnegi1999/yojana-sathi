@@ -366,11 +366,13 @@ class EventLog:
         # * Day precision. An exact timestamp beside a stable id is a pattern
         # * of life; the date is all any dashboard here needs.
         day = datetime.now(timezone.utc).date().isoformat()
-        cur = self._conn.execute(
-            "INSERT OR IGNORE INTO reach (anon_id, channel, source, purpose, first_seen)"
-            " VALUES (?, ?, ?, ?, ?)",
-            (anon, channel, source or None, purpose or None, day))
-        self._conn.commit()
+        # ! Same lock as log(): the WhatsApp adapter counts from two threads.
+        with self._lock:
+            cur = self._conn.execute(
+                "INSERT OR IGNORE INTO reach (anon_id, channel, source, purpose, first_seen)"
+                " VALUES (?, ?, ?, ?, ?)",
+                (anon, channel, source or None, purpose or None, day))
+            self._conn.commit()
         return cur.rowcount == 1
 
     def set_purpose(self, channel_id: str, purpose: str) -> None:
@@ -379,9 +381,10 @@ class EventLog:
             raise ValueError(f"unknown purpose {purpose!r}")
         anon = hmac.new(self._reach_key(), channel_id.encode("utf-8"),
                         hashlib.sha256).hexdigest()
-        self._conn.execute("UPDATE reach SET purpose = ? WHERE anon_id = ?",
-                           (purpose, anon))
-        self._conn.commit()
+        with self._lock:
+            self._conn.execute("UPDATE reach SET purpose = ? WHERE anon_id = ?",
+                               (purpose, anon))
+            self._conn.commit()
 
     def reach_counts(self) -> dict:
         """Unique people, and where they came from. Never per-person rows."""
@@ -412,11 +415,12 @@ class EventLog:
         text = self._DIGIT_RUN.sub("[number removed]", suggestion or "").strip()[:500]
         if rating is None and not text and participant_role is None:
             return
-        self._conn.execute(
-            "INSERT INTO feedback (ts, channel, rating, suggestion, participant_role) VALUES (?, ?, ?, ?, ?)",
-            (datetime.now(timezone.utc).date().isoformat(), channel,
-             int(rating) if rating is not None else None, text or None, participant_role))
-        self._conn.commit()
+        with self._lock:
+            self._conn.execute(
+                "INSERT INTO feedback (ts, channel, rating, suggestion, participant_role) VALUES (?, ?, ?, ?, ?)",
+                (datetime.now(timezone.utc).date().isoformat(), channel,
+                 int(rating) if rating is not None else None, text or None, participant_role))
+            self._conn.commit()
 
     def feedback_summary(self, limit: int = 25) -> dict:
         """Average rating, the spread, and the most recent suggestions."""

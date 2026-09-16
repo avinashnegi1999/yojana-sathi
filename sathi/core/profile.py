@@ -74,10 +74,11 @@ class Profile:
     is_widow: bool | None = None
     uk_pension_income_or_bpl: bool | None = None
     uk_pension_selected: bool | None = None
-    # ! Both Uttarakhand pensions require that the applicant is NOT already
-    # ! drawing another pension — myScheme states it as an eligibility bar on
-    # ! each scheme page, not merely as an arithmetic problem in a total. Asked
-    # ! once and used by both files, because the condition is the same one.
+    # ! The Uttarakhand widow pension bars an applicant already drawing another
+    # ! pension — the department's Hindi pension overview states it, and
+    # ! uk_widow.toml encodes it as an exclusion. The old-age file does not
+    # ! carry the bar because its own source does not state one. One field,
+    # ! so a second file can reuse the answer if its source ever does.
     receives_other_pension: bool | None = None
     household_has_lpg: bool | None = None
     pmuy_declaration_met: bool | None = None

@@ -35,6 +35,11 @@
 # ! If this scheme is ever shown to a real widow rather than a tester, make the
 # ! call first. Withdrawing the figure is one edit: set annual_value_inr to
 # ! "TODO" and the scheme returns UNKNOWN with "ask at the centre".
+# !
+# ! SIGNATURE WITHDRAWN on 2026-09-15. The other-pension bar above was changed
+# ! from "ask at the office" to an exclusion on the department's Hindi overview,
+# ! and a changed rule needs a fresh human audit. The file is served as UNKNOWN
+# ! until question (a) is settled at a primary source and it is re-signed.
 code = "UK_WIDOW"
 name_en = "Uttarakhand widow pension"
 name_hi = "उत्तराखंड विधवा पेंशन"

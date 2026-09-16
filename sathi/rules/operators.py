@@ -1,4 +1,4 @@
-"""The seven comparison operators a scheme file may use.
+"""The eight comparison operators a scheme file may use.
 
 # ! Three-valued on purpose. Every operator returns True, False or None, where
 # ! None means "cannot decide" — the worker did not answer, or the scheme file

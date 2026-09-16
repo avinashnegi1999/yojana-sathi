@@ -637,9 +637,14 @@ class Conversation:
             return [
                 Reply(text=self._s("errors.pick_from_list"), buttons=_yes_no(self.lang, with_dont_know=True))
             ]
-        self.state = State.TAX_CONFIRM if answer == YES else self.state
-        if answer != YES:
+        # ! The confirm screen sets the tax answer beside the income band. On a
+        # ! selected route that never asked for income there is nothing to set
+        # ! it beside, and formatting the missing band raised ContentError and
+        # ! dropped the session — for every income-tax payer checking e-Shram,
+        # ! PMSBY or NPS-Traders alone. No band, no confirmation to ask.
+        if answer != YES or self.profile.income_band is None:
             return self._advance_core()
+        self.state = State.TAX_CONFIRM
         return [self._current_question()]
 
     def _on_tax_confirm(self, answer: str) -> list[Reply]:
@@ -714,12 +719,15 @@ class Conversation:
         wanted: set[str] = set()
         for scheme in self._active_schemes().values():
             settled_no = False
-            for c in scheme.criteria:
+            # * A criterion already False, or an exclusion already True, settles
+            # * the verdict the same way: nothing asked later can reopen it.
+            for c, settling in ([(c, False) for c in scheme.criteria]
+                                + [(x, True) for x in scheme.exclusions]):
                 actual = getattr(self.profile, c.field, None)
                 if actual is None:
                     continue
                 try:
-                    if operators.apply(c.op, actual, c.value) is False:
+                    if operators.apply(c.op, actual, c.value) is settling:
                         settled_no = True
                         break
                 except operators.OperatorError:
@@ -774,10 +782,17 @@ class Conversation:
         return self._begin_followups()
 
     def _known_options(self) -> list[str]:
-        """Only ask about schemes that can change one selected result."""
+        """Every scheme being screened, plus any a rule names as an exclusion.
+
+        # ! This list is what "newly surfaced" means. From 14 September until
+        # ! this fix it held only codes named in a known_schemes exclusion
+        # ! (just PM_SYM), so a worker who already carried PMSBY, PMJJBY and an
+        # ! e-Shram card was never asked and every match was logged as new.
+        # ! The headline metric quietly counted what people already had.
+        """
         if self._legacy_full:
             return list(self.schemes)
-        options: set[str] = set()
+        options: set[str] = set(self._active_schemes())
         for scheme in self._active_schemes().values():
             for criterion in scheme.exclusions:
                 if criterion.field == "known_schemes" and isinstance(criterion.value, list):

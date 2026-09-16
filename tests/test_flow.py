@@ -578,10 +578,63 @@ def test_selected_scheme_route_asks_only_its_required_fields():
     question = convo.handle("30")[0]
     assert convo.state is State.BANK
     assert question.text == s("questions.has_bank_account", "en")
-    out = convo.handle(YES)
+    known = convo.handle(YES)[0]
+    # ! The "which of these do you already have?" question must still be asked
+    # ! on the selected route — it is the only thing "newly surfaced" rests on.
+    assert convo.state is State.KNOWN_SCHEMES
+    assert any(b.value == "known:PMSBY" for b in known.buttons)
+    out = convo.handle(NEXT)
     assert convo.state is State.DOCUMENTS
     assert "Pradhan Mantri Suraksha Bima Yojana" in out[1].text
     assert "state:" not in convo._answered_fields
+
+
+def test_selected_route_does_not_log_a_scheme_the_worker_already_holds():
+    """Regression: from 14 to 17 Sep the selected route only offered codes named
+    in an exclusion, so a worker already carrying PMSBY was never asked and the
+    headline metric counted it as newly surfaced."""
+    with tempfile.TemporaryDirectory() as d:
+        log = EventLog(Path(d) / "known.db")
+        convo = Conversation(load_all(), log)
+        convo.start(); convo.handle(LANG_EN); convo.handle(consent.YES)
+        convo.handle("pick:choose"); convo.handle("pick:PMSBY"); convo.handle("pick:done")
+        convo.handle("30"); convo.handle(YES)
+        assert convo.state is State.KNOWN_SCHEMES
+        convo.handle("known:PMSBY"); convo.handle(NEXT)
+        assert log.query("SELECT * FROM events WHERE event_type='scheme_matched'")
+        assert not log.query("SELECT * FROM events WHERE event_type='scheme_newly_surfaced'")
+        log.close()
+
+
+def test_tax_payer_on_a_route_without_an_income_question_is_not_dropped():
+    """Regression: e-Shram alone never asks income; a Yes to income tax then
+    tried to render the confirm screen with income_band=None and raised."""
+    convo = Conversation(load_all(), None)
+    convo.start(); convo.handle(LANG_EN); convo.handle(consent.YES)
+    convo.handle("pick:choose"); convo.handle("pick:ESHRAM"); convo.handle("pick:done")
+    while convo.state is not State.TAX:
+        assert convo.state is not State.DONE, convo.state
+        convo.handle("30" if convo.state is State.AGE else YES)
+    out = convo.handle(YES)
+    assert out and convo.state is not State.TAX_CONFIRM
+    assert convo.profile.is_income_tax_payer is True
+
+
+def test_two_maandhan_pensions_are_one_pension_in_the_total():
+    """PM-SYM and NPS-Traders each bar members of the other; a small trader who
+    qualifies for both can enrol in one. The screen used to say ₹72,000."""
+    from sathi.core.profile import Profile
+    from sathi.rules.engine import evaluate_all, value_totals
+    schemes = load_all()
+    trader = Profile(state="UP", age=30, occupation="shop", is_unorganised_worker=True,
+                     income_band="upto_5000", has_bank_account=True, is_income_tax_payer=False,
+                     is_epfo_or_esic_member=False, nps_exclusion_applies=False,
+                     is_small_trader=True, is_woman=False, is_widow=False, is_bpl=False)
+    results = evaluate_all(trader, schemes)
+    eligible = {r.scheme_code for r in results if r.is_eligible}
+    assert {"PM_SYM", "NPS_TRADERS"} <= eligible, eligible
+    payout, _cover = value_totals(results, schemes)
+    assert payout == 36000, payout
 
 
 def test_gender_answer_skips_widow_and_pmuy_followups_when_not_applicable():
@@ -597,7 +650,9 @@ def test_gender_answer_skips_widow_and_pmuy_followups_when_not_applicable():
     assert widow._followup_field() == "is_woman"
     widow.handle(NO)
     assert widow._followup_field() == "is_bpl"
-    out = widow.handle(YES)
+    widow.handle(YES)
+    assert widow.state is State.KNOWN_SCHEMES
+    out = widow.handle(NEXT)
     assert widow.state is State.PACK
     assert "is_widow" not in widow._answered_fields
 
@@ -606,7 +661,9 @@ def test_gender_answer_skips_widow_and_pmuy_followups_when_not_applicable():
     pmuy.handle("pick:choose"); pmuy.handle("pick:PMUY")
     pmuy.handle("pick:done"); pmuy.handle("30"); pmuy.handle(YES)
     assert pmuy._followup_field() == "household_has_lpg"
-    out = pmuy.handle(YES)
+    pmuy.handle(YES)
+    assert pmuy.state is State.KNOWN_SCHEMES
+    out = pmuy.handle(NEXT)
     assert pmuy.state is State.PACK
     assert "pmuy_declaration_met" not in pmuy._answered_fields
 

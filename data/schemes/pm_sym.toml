@@ -31,6 +31,12 @@ verified_by  = "Avinash Negi, checked 2026-09-10"
 # ! which is what keeps this honest.
 annual_value_inr = 36000
 value_basis      = "annual_payout"
+# ! One Maandhan pension per person. PM-SYM and NPS-Traders each exclude
+# ! members of the other, so a worker eligible for both can enrol in ONE.
+# ! Without this group the result screen added them and promised ₹72,000
+# ! a year to someone who can receive ₹36,000. Accounting label only —
+# ! each scheme is still decided on its own rules.
+exclusive_group  = "maandhan_pension"
 # ! Contribution depends on entry age: ₹55/month at 18, ₹200/month at 40, and
 # ! the Central Government matches it 1:1. A single number would be wrong for
 # ! almost every worker, so this field carries the range instead.

@@ -26,6 +26,12 @@ verified_by = "Avinash Negi, checked 2026-09-14"
 [benefit]
 annual_value_inr = 36000
 value_basis = "annual_payout"
+# ! One Maandhan pension per person. PM-SYM and NPS-Traders each exclude
+# ! members of the other, so a worker eligible for both can enrol in ONE.
+# ! Without this group the result screen added them and promised ₹72,000
+# ! a year to someone who can receive ₹36,000. Accounting label only —
+# ! each scheme is still decided on its own rules.
+exclusive_group = "maandhan_pension"
 premium_inr = "₹55–₹200/month by entry age; the Central Government matches the same amount"
 summary_en = "Age 60 onwards, a minimum assured pension of ₹3,000 a month for small shopkeepers, retail traders and the self-employed with yearly turnover up to ₹1.5 crore. Your fixed contribution depends on your entry age and continues until 60. If you die after the pension begins, your spouse receives half the pension. You cannot hold this together with PM-SYM — it is one or the other. Enrol at a Common Service Centre."
 summary_hi = "60 साल की उम्र से छोटे दुकानदारों, खुदरा व्यापारियों और स्वरोज़गार वालों के लिए कम-से-कम ₹3,000 हर महीने की पेंशन, जिनका सालाना कारोबार ₹1.5 करोड़ तक है। आपकी तय मासिक जमा रकम प्रवेश की उम्र पर निर्भर है और 60 साल तक चलती है। पेंशन शुरू होने के बाद आपकी मृत्यु होने पर पति/पत्नी को आधी पेंशन मिलती है। यह और PM-SYM दोनों साथ नहीं मिलतीं — कोई एक। जन सेवा केंद्र पर नामांकन करें।"

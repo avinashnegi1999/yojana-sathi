@@ -101,7 +101,10 @@ class Router:
     # ! Where a person arrived from, e.g. "/start reddit" behind
     # ! t.me/YojanaSathiBot?start=reddit. A short slug from a fixed set, so a
     # ! link cannot smuggle free text into the database.
+    # * Paid placements get their own slugs so an ad's reach is separable from
+    # * an organic post's. Link as t.me/YojanaSathiBot?start=linkedin.
     SOURCES = frozenset({"reddit", "discord", "github", "youtube", "twitter",
+                         "linkedin", "facebook", "instagram", "google", "ads",
                          "whatsapp", "poster", "csc", "direct"})
 
     def _remember_source(self, key: str, answer: str) -> None:

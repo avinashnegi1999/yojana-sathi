@@ -212,8 +212,15 @@ def test_every_button_in_both_languages():
 
                 # * Key on what changes the screen. Without this the two
                 # * multi-select states alone would fan out to thousands of paths.
+                # ! The selection is part of the key. Without it the tax
+                # ! question was "visited" once, on the all-schemes route, and
+                # ! every single-scheme route was pruned — which is how a Yes to
+                # ! income tax on an e-Shram-only check crashed in production
+                # ! while this walk stayed green. Every one-scheme route and the
+                # ! all-schemes route are now walked; multi-picks collapse.
                 key = (
                     convo.state,
+                    tuple(sorted(convo._selected)) if len(convo._selected) <= 1 else ("multiple",),
                     convo._followup_field() if convo.state is State.FOLLOWUP else None,
                     convo._document_page,
                     # * Cover empty, each singleton and multiple selections.
