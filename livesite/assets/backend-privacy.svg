@@ -1,27 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" role="img" aria-labelledby="title desc">
-  <title id="title">How privacy safe impact measurement works</title>
-  <desc id="desc">A session profile is discarded after the screening. Consented events keep only coarse bands and a random session id for aggregate reporting.</desc>
-  <style>
-    .bg{fill:#fffdf7}.edge{fill:none;stroke:#657066;stroke-width:4}.dash{fill:none;stroke:#e77833;stroke-width:4;stroke-dasharray:12 10}.card{fill:#fffdf7;stroke:#14221c;stroke-width:3}.dark{fill:#173f32}.lime{fill:#d6f05c}.t{font:700 28px Georgia,serif;fill:#14221c}.sub{font:500 20px Arial,sans-serif;fill:#5c675d}.white{fill:#fffdf7}.mint{fill:#d7e5dc}.tag{font:800 17px Arial,sans-serif;letter-spacing:2px;fill:#e77833}.arrow{fill:#657066}
-  </style>
-  <rect class="bg" width="1200" height="560" rx="32"/>
-  <text x="65" y="72" class="tag">03 / MEASURE</text>
-  <text x="65" y="118" class="t">Impact counts events, not identities.</text>
-  <rect class="dark" x="65" y="196" width="275" height="175" rx="22"/>
-  <text x="202" y="258" text-anchor="middle" class="t white">Session profile</text>
-  <text x="202" y="300" text-anchor="middle" class="sub mint">exact answers stay here</text>
-  <text x="202" y="332" text-anchor="middle" class="sub mint">then leave memory</text>
-  <path class="edge" d="M340 282H430"/><path class="arrow" d="M430 282l-20-12v24z"/>
-  <rect class="card" x="450" y="175" width="305" height="215" rx="22"/>
-  <text x="602" y="235" text-anchor="middle" class="t">Consent-gated events</text>
-  <text x="602" y="278" text-anchor="middle" class="sub">random session id</text>
-  <text x="602" y="312" text-anchor="middle" class="sub">state · age band · occupation</text>
-  <text x="602" y="346" text-anchor="middle" class="sub">income band · no raw answers</text>
-  <path class="edge" d="M755 282H840"/><path class="arrow" d="M840 282l-20-12v24z"/>
-  <rect class="lime" x="860" y="196" width="275" height="175" rx="22"/>
-  <text x="997" y="258" text-anchor="middle" class="t">Impact report</text>
-  <text x="997" y="300" text-anchor="middle" class="sub">screenings · matches</text>
-  <text x="997" y="332" text-anchor="middle" class="sub">packs · coarse aggregates</text>
-  <path class="dash" d="M202 371V465H602V390"/>
-  <text x="402" y="508" text-anchor="middle" class="sub">names · phones · Aadhaar · exact income never enter the log</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc">
+  <title id="title">Privacy-first pilot measurement</title><desc id="desc">The temporary screening profile disappears. With consent, coarse non-identifying events and an optional self-reported participant role create aggregate pilot metrics.</desc>
+  <defs><linearGradient id="m" x1="0" x2="1"><stop stop-color="#e7fbf1"/><stop offset="1" stop-color="#fafffc"/></linearGradient><linearGradient id="l" x1="0" x2="1"><stop stop-color="#eff2ff"/><stop offset="1" stop-color="#fbfcff"/></linearGradient><marker id="a" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="9" markerHeight="8" orient="auto"><path d="M0 0 10 4 0 8z" fill="#2c6a64"/></marker></defs>
+  <style>.bg{fill:#fbfffd}.c{stroke:#b9ded5;stroke-width:2}.ln{fill:none;stroke:#2c6a64;stroke-width:3;marker-end:url(#a)}.dash{fill:none;stroke:#de7257;stroke-width:3;stroke-dasharray:10 8}.t{font:800 35px Arial,sans-serif;fill:#123b3a}.h{font:800 24px Arial,sans-serif;fill:#123b3a}.p{font:500 18px Arial,sans-serif;fill:#416967}.tag{font:800 15px Arial,sans-serif;letter-spacing:1.8px;fill:#d25d4e}.w{fill:#fff}</style>
+  <rect class="bg" width="1200" height="650" rx="30"/><text class="tag" x="62" y="62">03 / PRIVACY + PILOT</text><text class="t" x="62" y="108">Measure the flow. Never identify a person.</text><text class="p" x="62" y="139">Pilot roles separate testing from real use without asking who someone is.</text>
+  <path class="ln" d="M325 310H412"/><path class="ln" d="M760 310H847"/>
+  <g><rect x="55" y="205" width="270" height="202" rx="24" fill="#123b3a"/><circle fill="#46bf94" cx="95" cy="247" r="21"/><text x="95" y="254" text-anchor="middle" font-family="Arial" font-size="20" font-weight="800" class="w">1</text><text x="84" y="301" font-family="Arial" font-size="25" font-weight="800" class="w">Session profile</text><text x="84" y="337" font-family="Arial" font-size="18" fill="#c9e8dd">exact answers live only</text><text x="84" y="366" font-family="Arial" font-size="18" fill="#c9e8dd">in temporary memory</text></g>
+  <g><rect class="c" fill="url(#m)" x="412" y="181" width="348" height="250" rx="24"/><circle fill="#46bf94" cx="453" cy="223" r="21"/><text x="453" y="230" text-anchor="middle" font-family="Arial" font-size="20" font-weight="800" class="w">2</text><text class="h" x="440" y="277">Consent-gated event</text><text class="p" x="440" y="316">random session id · channel</text><text class="p" x="440" y="346">state · age / income bands · work</text><text class="p" x="440" y="376">optional: self / helping / tester</text><text class="p" x="440" y="406">no raw answers</text></g>
+  <g><rect class="c" fill="url(#l)" x="847" y="205" width="298" height="202" rx="24"/><circle fill="#6d7ee1" cx="888" cy="247" r="21"/><text x="888" y="254" text-anchor="middle" font-family="Arial" font-size="20" font-weight="800" class="w">3</text><text class="h" x="875" y="301">Aggregate report</text><text class="p" x="875" y="337">screenings · results</text><text class="p" x="875" y="366">packs · pilot role mix</text></g>
+  <path class="dash" d="M190 409V502H585V435"/><text x="387" y="537" text-anchor="middle" font-family="Arial" font-size="20" font-weight="800" fill="#c45346">THE PROFILE STOPS HERE</text>
+  <rect x="56" y="565" width="1088" height="42" rx="21" fill="#eaf6f1"/><text x="600" y="592" text-anchor="middle" font-family="Arial" font-size="18" font-weight="800" fill="#245b57">Never stored: name · phone · Aadhaar · exact income · exact location</text>
 </svg>

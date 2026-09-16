@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 748" role="img" aria-labelledby="smTitle smDesc">
   <title id="smTitle">How Yojana Sathi works, end to end</title>
-  <desc id="smDesc">Workers reach the bot through Telegram, WhatsApp or a terminal preview. A button-led conversation builds a session-only profile. Source-cited TOML scheme rules and that profile enter a deterministic rule engine, which returns eligible, ineligible or unknown. Outputs are an explained verdict, a document checklist, a one-page application pack and guidance on where to begin. Separately, a consented coarse event log feeds a duplicate-safe reach counter and an impact report. An optional language model only suggests an occupation label and never decides eligibility.</desc>
+  <desc id="smDesc">Workers reach the bot through Telegram, WhatsApp or a terminal preview. They select all verified schemes or specific ones after language and consent. An adaptive button-led conversation builds a session-only profile. Selected source-cited TOML scheme rules and that profile enter a deterministic rule engine, which returns eligible, ineligible or unknown. Outputs are an explained verdict, a document checklist, a one-page application pack and guidance on where to begin. Separately, consented coarse events and an optional self-reported pilot role feed aggregate reporting. An optional language model only suggests an occupation label and never decides eligibility.</desc>
   <style>
     .bg{fill:#fffdf7}
     .zone{fill:none;stroke:#cfc6b1;stroke-width:2}
@@ -28,6 +28,7 @@
     </marker>
   </defs>
 
+  <g display="none">
   <rect class="bg" width="1400" height="748" rx="28"/>
   <text class="head" x="700" y="52" text-anchor="middle">How Yojana Sathi works</text>
   <text class="sub" x="700" y="79" text-anchor="middle">Channels, decision core, outputs, and the measurement it is allowed to keep</text>
@@ -60,13 +61,13 @@
   <rect class="zone" x="352" y="104" width="620" height="416" rx="14"/>
   <circle cx="378" cy="136" r="13" fill="#173f32"/><text class="num" x="378" y="141">2</text>
   <text class="zn" x="400" y="133">DECISION CORE</text>
-  <text class="zs" x="400" y="151">Ask the least, then decide by rule</text>
+  <text class="zs" x="400" y="151">Choose schemes, ask less, then decide by rule</text>
 
   <rect class="card" x="374" y="240" width="176" height="136" rx="8"/>
   <text class="ct" x="392" y="268">Conversation</text>
-  <text class="cb" x="392" y="291">Consent, then language</text>
-  <text class="cb" x="392" y="311">Buttons before typing</text>
-  <text class="cb" x="392" y="331">“Don’t know” allowed</text>
+  <text class="cb" x="392" y="291">Language, then consent</text>
+  <text class="cb" x="392" y="311">All schemes or selected</text>
+  <text class="cb" x="392" y="331">Adaptive buttons; “don’t know”</text>
   <text class="cb" x="392" y="351">Hindi is the default</text>
 
   <path class="edge" d="M552 308 H586" marker-end="url(#a)"/>
@@ -82,7 +83,7 @@
 
   <rect class="card" x="758" y="164" width="192" height="86" rx="8"/>
   <text class="ct" x="776" y="190">Scheme rules</text>
-  <text class="cb" x="776" y="211">One TOML file per scheme</text>
+  <text class="cb" x="776" y="211">Selected signed TOML files</text>
   <text class="cb" x="776" y="231">Official source + review date</text>
 
   <path class="edge" d="M854 252 V268" marker-end="url(#a)"/>
@@ -147,7 +148,7 @@
   <rect class="card" x="392" y="596" width="296" height="96" rx="8"/>
   <text class="ct" x="410" y="623">Consented event log</text>
   <text class="cb" x="410" y="645">Written only after the worker agrees</text>
-  <text class="cb" x="410" y="664">State, age band, income band, occupation</text>
+  <text class="cb" x="410" y="664">Bands, occupation, optional pilot role</text>
   <text class="cb" x="410" y="683">Random session id · never a name or number</text>
 
   <path class="edge" d="M692 644 H726" marker-end="url(#a)"/>
@@ -167,4 +168,24 @@
   <text class="cb" x="1064" y="683" fill="#173f32">Never claims a benefit was received</text>
 
   <text class="foot" x="700" y="736" text-anchor="middle">Python standard library · TOML rules · SQLite · Telegram and WhatsApp adapters · Docker on a single small server</text>
+  </g>
+  <!-- * Current core flow. The older architecture drawing above is retained as source history but hidden. -->
+  <rect width="1400" height="748" rx="28" fill="#fbfdff"/>
+  <style>
+    .xhead{font:800 37px Arial,sans-serif;fill:#102c4b}.xsub{font:500 18px Arial,sans-serif;fill:#45617d}.xcard{stroke:#b9d3e8;stroke-width:2}.xh{font:800 20px Arial,sans-serif;fill:#102c4b}.xp{font:500 15px Arial,sans-serif;fill:#385570}.xn{font:800 16px Arial,sans-serif;fill:#fff}.xa{fill:none;stroke:#355f84;stroke-width:3;marker-end:url(#a)}.xsmall{font:800 13px Arial,sans-serif;letter-spacing:1.2px;fill:#5a52c9}
+  </style>
+  <text class="xhead" x="700" y="58" text-anchor="middle">YOJANA SATHI — Core Logic</text>
+  <text class="xsub" x="700" y="86" text-anchor="middle">Choose a scheme scope → answer only what matters → apply audited rules → explain the next step</text>
+  <path class="xa" d="M181 254H211"/><path class="xa" d="M371 254H401"/><path class="xa" d="M561 254H591"/><path class="xa" d="M751 254H781"/><path class="xa" d="M941 254H971"/><path class="xa" d="M1131 254H1161"/>
+  <g><rect class="xcard" x="31" y="145" width="150" height="205" rx="18" fill="#e9f6ff"/><circle cx="59" cy="174" r="16" fill="#49a8df"/><text class="xn" x="59" y="180" text-anchor="middle">1</text><text class="xh" x="49" y="221">Open bot</text><text class="xp" x="49" y="251">Telegram</text><text class="xp" x="49" y="275">WhatsApp</text><text class="xp" x="49" y="299">or preview</text></g>
+  <g><rect class="xcard" x="211" y="145" width="160" height="205" rx="18" fill="#f1efff"/><circle cx="239" cy="174" r="16" fill="#796fe4"/><text class="xn" x="239" y="180" text-anchor="middle">2</text><text class="xh" x="229" y="221">Language</text><text class="xp" x="229" y="251">Hindi or</text><text class="xp" x="229" y="275">English</text></g>
+  <g><rect class="xcard" x="401" y="145" width="160" height="205" rx="18" fill="#e7faef"/><circle cx="429" cy="174" r="16" fill="#36ad84"/><text class="xn" x="429" y="180" text-anchor="middle">3</text><text class="xh" x="419" y="221">Consent</text><text class="xp" x="419" y="251">privacy promise</text><text class="xp" x="419" y="275">before intake</text></g>
+  <g><rect class="xcard" x="591" y="145" width="160" height="205" rx="18" fill="#fff7df"/><circle cx="619" cy="174" r="16" fill="#eba63c"/><text class="xn" x="619" y="180" text-anchor="middle">4</text><text class="xh" x="609" y="221">Scheme mode</text><text class="xp" x="609" y="251">all verified</text><text class="xp" x="609" y="275">or selected</text></g>
+  <g><rect class="xcard" x="781" y="145" width="160" height="205" rx="18" fill="#e9f6ff"/><circle cx="809" cy="174" r="16" fill="#49a8df"/><text class="xn" x="809" y="180" text-anchor="middle">5</text><text class="xh" x="799" y="221">Questions</text><text class="xp" x="799" y="251">only needed</text><text class="xp" x="799" y="275">facts asked</text></g>
+  <g><rect class="xcard" x="971" y="145" width="160" height="205" rx="18" fill="#f1efff"/><circle cx="999" cy="174" r="16" fill="#796fe4"/><text class="xn" x="999" y="180" text-anchor="middle">6</text><text class="xh" x="989" y="221">Profile</text><text class="xp" x="989" y="251">temporary</text><text class="xp" x="989" y="275">in memory</text></g>
+  <g><rect x="1161" y="145" width="205" height="205" rx="18" fill="#fff1f1" stroke="#ee7a76" stroke-width="2"/><circle cx="1189" cy="174" r="16" fill="#e85d5b"/><text class="xn" x="1189" y="180" text-anchor="middle">7</text><text class="xh" x="1179" y="221">Rule engine</text><text class="xp" x="1179" y="251">selected TOML</text><text class="xp" x="1179" y="275">rules decide</text><text x="1179" y="316" font-family="Arial" font-size="13" font-weight="800" fill="#bd4545">NO LLM VERDICTS</text></g>
+  <path class="xa" d="M1263 352V418H1190"/><path class="xa" d="M361 510H391"/><path class="xa" d="M571 510H601"/><path class="xa" d="M781 510H811"/><path class="xa" d="M991 510H1021"/>
+  <g><rect x="31" y="418" width="330" height="175" rx="20" fill="#effbf4" stroke="#b9ded5" stroke-width="2"/><text class="xsmall" x="54" y="451">VERDICTS</text><rect x="55" y="468" width="126" height="31" rx="10" fill="#caefda"/><text class="xp" x="118" y="489" text-anchor="middle">✓ Eligible</text><rect x="55" y="506" width="126" height="31" rx="10" fill="#f4ecec"/><text class="xp" x="118" y="527" text-anchor="middle">× Ineligible</text><rect x="55" y="544" width="126" height="31" rx="10" fill="#fff0b9"/><text class="xp" x="118" y="565" text-anchor="middle">? Unknown</text><text class="xp" x="205" y="490">missing data</text><text class="xp" x="205" y="517">or unsigned rule</text></g>
+  <g><rect class="xcard" x="391" y="438" width="180" height="145" rx="18" fill="#eaf4ff"/><text class="xh" x="414" y="478">Explain results</text><text class="xp" x="414" y="507">why yes / no /</text><text class="xp" x="414" y="530">unknown</text></g><g><rect class="xcard" x="601" y="438" width="180" height="145" rx="18" fill="#f1efff"/><text class="xh" x="624" y="478">Documents</text><text class="xp" x="624" y="507">what to carry</text></g><g><rect class="xcard" x="811" y="438" width="180" height="145" rx="18" fill="#e7faef"/><text class="xh" x="834" y="478">Application pack</text><text class="xp" x="834" y="507">optional one-page</text><text class="xp" x="834" y="530">sheet in memory</text></g><g><rect class="xcard" x="1021" y="438" width="180" height="145" rx="18" fill="#fff7df"/><text class="xh" x="1044" y="478">Where to go</text><text class="xp" x="1044" y="507">CSC · bank ·</text><text class="xp" x="1044" y="530">official portal</text></g>
+  <path fill="none" stroke="#4c9083" stroke-width="3" d="M1189 595V630H700V604" marker-end="url(#a)"/><rect x="435" y="635" width="530" height="67" rx="18" fill="#eaf6f1"/><text x="700" y="663" text-anchor="middle" font-family="Arial" font-size="21" font-weight="800" fill="#245b57">Privacy-first pilot metrics</text><text x="700" y="687" text-anchor="middle" font-family="Arial" font-size="15" fill="#416967">consented coarse events · optional self-reported role · never a name or number</text>
 </svg>
