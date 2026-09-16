@@ -139,7 +139,8 @@ identifiers.
   field never counted as answered and the same question came back on every
   tap. Recorded as None now, like the NPS and tax questions. All 46,035
   sessions reach the end.
-- Not deployed. Production still runs the 15 September build.
+- Deployed to AWS at 23:58 UTC via `deploy/install-on-vm.sh`: server `check.py`
+  passed, `sathi.service` active, 15 schemes loaded (10 signed).
 
 ## Next
 
