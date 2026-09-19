@@ -15,7 +15,11 @@ CADDYFILE="/etc/caddy/Caddyfile"
 echo "==> unit"
 install -m 644 /tmp/sathi-web.service "$UNIT"
 systemctl daemon-reload
-systemctl enable --now sathi-web
+# * A unit that crash-looped earlier (code not yet synced) trips systemd's
+# * start limit and stays "failed" until told otherwise.
+systemctl reset-failed sathi-web 2>/dev/null || true
+systemctl enable sathi-web
+systemctl restart sathi-web
 systemctl restart sathi-whatsapp   # * install-on-vm.sh restarts only sathi
 
 echo "==> caddy"
