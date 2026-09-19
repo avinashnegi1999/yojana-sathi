@@ -104,6 +104,11 @@ class LocalWeb:
             while len(self.sessions) >= self.MAX_SESSIONS:
                 self.sessions.pop(next(iter(self.sessions)))
             convo = Conversation(self.schemes, self.log, channel="web")
+            # ponytail: the cookie is per browser session, so a web "person"
+            # ponytail: is one tab until restart; add a long-lived uid cookie
+            # ponytail: if cross-visit dedupe ever matters.
+            if self.log is not None:
+                convo.person = self.log.anon_id(session)
             self.sessions[session] = convo
             return convo.start()
         return self.sessions[session].handle(answer)

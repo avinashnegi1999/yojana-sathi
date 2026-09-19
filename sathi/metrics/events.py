@@ -105,6 +105,8 @@ class EventLog:
         columns = {row[1] for row in self._conn.execute("PRAGMA table_info(feedback)")}
         if "participant_role" not in columns:
             self._conn.execute("ALTER TABLE feedback ADD COLUMN participant_role TEXT")
+        if "person" not in columns:
+            self._conn.execute("ALTER TABLE feedback ADD COLUMN person TEXT")
         self._conn.commit()
         self._consented: set[str] = set()
 
@@ -350,6 +352,11 @@ class EventLog:
         return (f"moved: the key is now in {where} and the row is deleted from "
                 f"the database.{note} Restart the service so it is read.")
 
+    def anon_id(self, channel_id: str) -> str:
+        """The one keyed hash every per-person row uses. Stable while the key is."""
+        return hmac.new(self._reach_key(), channel_id.encode("utf-8"),
+                        hashlib.sha256).hexdigest()
+
     def record_reach(self, channel_id: str, channel: str,
                      source: str = "", purpose: str = "") -> bool:
         """Count one person once. Returns True the first time only.
@@ -359,8 +366,7 @@ class EventLog:
         # ! is no way afterwards to tell a drifted count from a real one.
         # ! Someone pressing /start fifty times stays one person.
         """
-        anon = hmac.new(self._reach_key(), channel_id.encode("utf-8"),
-                        hashlib.sha256).hexdigest()
+        anon = self.anon_id(channel_id)
         if purpose and purpose not in self.PURPOSES:
             raise ValueError(f"unknown purpose {purpose!r}")
         # * Day precision. An exact timestamp beside a stable id is a pattern
@@ -379,8 +385,7 @@ class EventLog:
         """Record what someone said they were using it for, if they said."""
         if purpose not in self.PURPOSES:
             raise ValueError(f"unknown purpose {purpose!r}")
-        anon = hmac.new(self._reach_key(), channel_id.encode("utf-8"),
-                        hashlib.sha256).hexdigest()
+        anon = self.anon_id(channel_id)
         with self._lock:
             self._conn.execute("UPDATE reach SET purpose = ? WHERE anon_id = ?",
                                (purpose, anon))
@@ -406,8 +411,14 @@ class EventLog:
     _DIGIT_RUN = re.compile(r"\d(?:[\d\s\-]*\d){3,}")
 
     def record_feedback(self, rating: int | None, suggestion: str = "",
-                        channel: str = "cli", participant_role: str | None = None) -> None:
-        """One rating and/or one suggestion, attached to nobody."""
+                        channel: str = "cli", participant_role: str | None = None,
+                        person: str | None = None) -> None:
+        """One rating and/or one suggestion, attached to a keyed hash at most.
+
+        # ! `person` is anon_id(channel id) - the same value the reach table
+        # ! keys on - so a tester who rates five times shows as one hash and
+        # ! nobody can be named from the database alone. Never the raw id.
+        """
         if rating is not None and not (1 <= int(rating) <= 10):
             raise ValueError(f"rating {rating!r} is outside 1-10")
         if participant_role not in (None, "self", "helping", "tester"):
@@ -417,9 +428,11 @@ class EventLog:
             return
         with self._lock:
             self._conn.execute(
-                "INSERT INTO feedback (ts, channel, rating, suggestion, participant_role) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO feedback (ts, channel, rating, suggestion, participant_role, person)"
+                " VALUES (?, ?, ?, ?, ?, ?)",
                 (datetime.now(timezone.utc).date().isoformat(), channel,
-                 int(rating) if rating is not None else None, text or None, participant_role))
+                 int(rating) if rating is not None else None, text or None,
+                 participant_role, person))
             self._conn.commit()
 
     def feedback_summary(self, limit: int = 25) -> dict:

@@ -114,6 +114,9 @@ class Conversation:
         self.log = log
         self.channel = channel
         self.session = log.start_session(channel) if log else None
+        # ! Set by the channel layer: log.anon_id(channel id). The flow never
+        # ! sees the id itself, only the hash, and only uses it for feedback.
+        self.person: str | None = None
         self.profile = Profile()
         self.lang = content.DEFAULT_LANG
         self.state = State.LANGUAGE
@@ -990,9 +993,11 @@ class Conversation:
             return [self._ask_participant_type()]
         role = roles.get(answer)
         if self.log and (self._rating is not None or self._suggestion or role):
-            # ! Attached to nobody: this table has no session or channel id, so
-            # ! an honest answer cannot be traced back to the person who gave it.
-            self.log.record_feedback(self._rating, self._suggestion, self.channel, role)
+            # ! No session id here: the row carries a keyed person hash so
+            # ! duplicate submissions can be told apart, but never links to
+            # ! what that person answered in the screening.
+            self.log.record_feedback(self._rating, self._suggestion, self.channel, role,
+                                     person=self.person)
         self.state = State.DONE
         replies = []
         if self._rating is not None or self._suggestion or role:

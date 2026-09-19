@@ -158,6 +158,24 @@ def test_the_unique_people_table_cannot_say_who_did_what():
             log.close()
 
 
+def test_feedback_dedupes_a_person_without_naming_them():
+    """Two ratings from one chat share a hash; the raw id and session never land."""
+    with tempfile.TemporaryDirectory() as d:
+        log = EventLog(Path(d) / "f.db")
+        try:
+            chat = "919812345678"
+            log.record_feedback(8, "first", "telegram", "self", person=log.anon_id(chat))
+            log.record_feedback(9, "again", "telegram", "self", person=log.anon_id(chat))
+            log.record_feedback(7, "other", "web", "tester", person=log.anon_id("cookie"))
+            people = [r[0] for r in log.query("SELECT person FROM feedback ORDER BY rowid")]
+            assert people[0] == people[1] != people[2]
+            assert chat not in people[0] and len(people[0]) == 64
+            cols = {r[1] for r in log.query("PRAGMA table_info(feedback)")}
+            assert "session_id" not in cols
+        finally:
+            log.close()
+
+
 def test_schema_has_only_coarse_columns():
     with tempfile.TemporaryDirectory() as d:
         log = EventLog(Path(d) / "t.db")

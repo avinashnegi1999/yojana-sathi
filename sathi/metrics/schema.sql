@@ -94,11 +94,12 @@ CREATE TABLE IF NOT EXISTS meta (
 );
 
 -- =====================================================================
--- Feedback — what people thought, with nothing attached to who they are
+-- Feedback — what people thought, with no link to what they answered
 -- =====================================================================
--- ! No id of any kind. Not a session id, not a channel hash, nothing. A rating
--- ! is only useful in aggregate, and a rating that can be traced to the person
--- ! who gave it is a reason not to give an honest one.
+-- ! No session id, ever: a rating must not be joinable to a screening. The
+-- ! only id is `person`, the same keyed hash the reach table uses, there so
+-- ! one tester rating ten times is visible as one hash. Without the key
+-- ! (which lives outside this file) it names nobody.
 --
 -- ! `suggestion` is the only free text anywhere in this database, so it is the
 -- ! only place a worker could type a phone number into a welfare log by
@@ -110,5 +111,7 @@ CREATE TABLE IF NOT EXISTS feedback (
     channel     TEXT NOT NULL,
     rating      INTEGER,            -- 1-10, or NULL if skipped
     suggestion  TEXT,               -- scrubbed free text, or NULL if skipped
-    participant_role TEXT            -- self | helping | tester, or NULL if skipped
+    participant_role TEXT,           -- self | helping | tester, or NULL if skipped
+    person      TEXT                -- HMAC(reach key, channel id) - same key as `reach`;
+                                    -- tells two rows from one person apart, names nobody
 );

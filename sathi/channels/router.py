@@ -94,6 +94,8 @@ class Router:
     def _conversation(self, key: str, fresh: bool = False) -> Conversation:
         if fresh or key not in self.sessions:
             convo = Conversation(self.schemes, self.log, channel=self.channel)
+            if self.log is not None:
+                convo.person = self.log.anon_id(key)
             convo.lang = self._lang.get(key, DEFAULT_LANG)
             self.sessions[key] = convo
         return self.sessions[key]
