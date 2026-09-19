@@ -136,6 +136,39 @@ published a pack can serve it. Two copies would answer `410` for half the links.
         }
     }
 
+### The browser channel — a third unit, not yet routed
+
+`deploy/sathi-web.service` runs `sathi.local_web` on `127.0.0.1:8765` with the
+production database and `--secure-cookie`. Same shape as the WhatsApp unit:
+loopback only, Caddy in front. The page fetches `/answer` and `/document/*`
+as root-relative paths, so it needs a host of its own rather than a path
+under the existing one:
+
+    sathi.avinashnegi.com {
+        log
+        reverse_proxy 127.0.0.1:8765
+    }
+
+DNS first: an A record `sathi` → `13.206.84.69` at Spaceship. Caddy fetches
+the certificate on first request, so the record must resolve before the
+site block goes in. Then, after `install-on-vm.sh` has synced the code:
+
+    scp -i ~/.ssh/sathi_aws deploy/sathi-web.service ubuntu@13.206.84.69:/tmp/
+    ssh -i ~/.ssh/sathi_aws ubuntu@13.206.84.69 'sudo install -m 644 /tmp/sathi-web.service /etc/systemd/system/ && sudo systemctl daemon-reload && sudo systemctl enable --now sathi-web && systemctl is-active sathi-web'
+    ssh -i ~/.ssh/sathi_aws ubuntu@13.206.84.69 'printf "
+sathi.avinashnegi.com {
+    log
+    reverse_proxy 127.0.0.1:8765
+}
+" | sudo tee -a /etc/caddy/Caddyfile >/dev/null && sudo caddy validate --config /etc/caddy/Caddyfile && sudo systemctl reload caddy'
+
+`install-on-vm.sh` syncs the code but restarts only `sathi`, so restart
+`sathi-web` (and `sathi-whatsapp`) by hand after every deploy.
+
+Web sessions log events under channel `web`. They do not appear in the
+unique-people count: that table is keyed by a channel id, and a browser
+cookie is a random routing key on purpose.
+
 `sathi.service` needs two variables in `/etc/sathi/sathi.env`:
 
     PACK_BASE_URL=https://yojanasathi.avinashnegi.com

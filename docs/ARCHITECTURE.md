@@ -98,6 +98,7 @@ plausible default.
 | `sathi/channels/router.py` | Sessions, slash commands, keyboard retirement — shared by every channel |
 | `sathi/channels/telegram.py` | Long-polling adapter, `urllib` only |
 | `sathi/channels/whatsapp.py` | Cloud API adapter: signed webhook in, `urllib` out |
+| `sathi/local_web.py` | Browser channel on loopback: one page, JSON turns, cookie = random routing key. Drives `Conversation` directly, so no slash commands and no reach row |
 | `sathi/metrics/events.py` | The **only** writer to the event log |
 | `sathi/metrics/report.py` | `impact.html` — the six numbers, provenance, methodology |
 | `sathi/main.py` | Terminal session, one channel per process, startup verification report |

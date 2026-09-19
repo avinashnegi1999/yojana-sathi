@@ -145,3 +145,23 @@ identifiers.
 ## Next
 
 - Resolve the Uttarakhand widow-pension ₹1,500 primary source before re-signing it.
+
+## 2026-09-18
+
+- Drafted `sathi/local_web.py`, a browser channel for the same conversation:
+  one page, JSON turns, loopback only, no database unless `--db` is given.
+  `deploy/sathi-web.service` runs it beside the other two units. Not
+  committed or deployed that day.
+
+## 2026-09-19
+
+- Reviewed the browser channel. Added one lock around each turn (the server
+  is threaded and a double-tap was two requests inside one Conversation),
+  made the session cookie server-issued only, and aligned the docstring,
+  README, ARCHITECTURE and RUNBOOK, which had disagreed on whether it was a
+  local experiment or a public service. It is a loopback service for Caddy
+  to front; the Caddy route is written down but not applied.
+- Browser page restyled to the repo's `DESIGN.md` tokens (monochrome frame,
+  lime block, pill buttons), logo added, text box shown only on typed
+  questions, 1–10 rating as tappable circles on web only. Target host
+  `sathi.avinashnegi.com`; DNS and the Caddy block are Avinash's steps.
