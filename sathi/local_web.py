@@ -74,13 +74,13 @@ class LocalWeb:
 
     MAX_SESSIONS = 500
     MAX_DOCUMENTS = 100
-    # ! Screens where a typed answer is expected. The page shows the text box
-    # ! only here; everywhere else the buttons are the whole answer. Guessing
-    # ! from "no buttons" was wrong both ways: the rating screen has a Skip
-    # ! button AND wants a number, the state screen has buttons and also took
-    # ! a typed name.
-    TYPED_STATES = frozenset({State.STATE, State.AGE, State.OCCUPATION,
-                              State.OCCUPATION_FREE, State.RATING, State.SUGGESTION})
+    # ! Screens where typing is the ONLY way to answer. Everywhere else the
+    # ! buttons are the whole answer and the text box would just be noise.
+    # ! Age has no buttons; the free-text occupation screen exists because
+    # ! the worker tapped "other"; the suggestion is prose or Skip. State and
+    # ! rating take typed input on Telegram, but here they have buttons for
+    # ! every value, so they get none.
+    TYPED_STATES = frozenset({State.AGE, State.OCCUPATION_FREE, State.SUGGESTION})
 
     def __init__(self, schemes: dict[str, Scheme], log: EventLog | None = None) -> None:
         self.schemes = schemes
@@ -232,7 +232,7 @@ def _self_check() -> None:
     assert hi["replies"][0]["typed"] is False, "consent is buttons only"
     app.sessions[session].state = State.RATING
     rating = json.loads(app.payload(session, "noop"))["replies"][-1]
-    assert rating["typed"] is True, "the rating screen must still take a typed number"
+    assert rating["typed"] is False, "ten buttons and Skip: no text box"
     assert [b["label"] for b in rating["buttons"]][:10] == [str(n) for n in range(1, 11)]
     assert rating["buttons"][-1]["value"] == "skip", rating["buttons"][-1]
     # * The button value goes through the same handler as a typed number.
