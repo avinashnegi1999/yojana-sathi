@@ -164,4 +164,10 @@ identifiers.
 - Browser page restyled to the repo's `DESIGN.md` tokens (monochrome frame,
   lime block, pill buttons), logo added, text box shown only on typed
   questions, 1–10 rating as tappable circles on web only. Target host
-  `sathi.avinashnegi.com`; DNS and the Caddy block are Avinash's steps.
+  `sathi.avinashnegi.com`.
+- **Live at https://sathi.avinashnegi.com** (00:30 UTC). A record added at
+  Spaceship, code synced with `install-on-vm.sh`, unit and Caddy block
+  applied with `deploy/enable-web.sh`. Two snags, both now in the script:
+  commands typed from PowerShell lose their inner double quotes before ssh
+  sees them, and a unit that crash-looped before the code arrived trips
+  systemd's start limit and needs `reset-failed`. All three units active.
