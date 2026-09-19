@@ -15,7 +15,7 @@
 ---
 
 <div align="center">
-  <img src="https://img.shields.io/badge/Status-Live%20on%20Telegram-brightgreen" alt="Status">
+  <img src="https://img.shields.io/badge/Status-Live%20on%20web%20and%20Telegram-brightgreen" alt="Status">
   <img src="https://img.shields.io/badge/Schemes-10%20signed%20and%20live-blue" alt="Schemes">
   <img src="https://img.shields.io/badge/Field%20pilot-not%20yet-lightgrey" alt="Field pilot">
   <img src="https://img.shields.io/badge/Licence-Apache--2.0-blue" alt="Licence">
@@ -37,6 +37,7 @@
 </p>
 
 <p align="center">
+  <a href="https://sathi.avinashnegi.com"><img src="https://img.shields.io/badge/Try%20it%20in%20the%20browser-sathi.avinashnegi.com-000000?style=for-the-badge&logo=googlechrome&logoColor=white" /></a>
   <a href="https://t.me/YojanaSathiBot"><img src="https://img.shields.io/badge/Try%20it%20on%20Telegram-@YojanaSathiBot-229ED9?style=for-the-badge&logo=telegram&logoColor=white" /></a>
 </p>
 
@@ -63,7 +64,13 @@
 government schemes they are entitled to, what each is worth in ₹, and where to
 walk to claim it.**
 
+Live in the browser: [sathi.avinashnegi.com](https://sathi.avinashnegi.com)
 Live on Telegram: [@YojanaSathiBot](https://t.me/YojanaSathiBot)
+
+The browser version is the same conversation and the same rule engine behind
+Caddy on the same small server. No account, no app; open the link and tap. It
+has no slash commands and does not count towards the unique-people number,
+because a browser cookie is a random routing key, not an identity.
 
 WhatsApp speaks the same conversation from the same rule engine. The channel is
 built and verified end to end against Meta's test number — a real phone, a full
@@ -303,7 +310,7 @@ python3 -m sathi.main                # one screening in the terminal, buttons on
 python3 -m sathi.main --telegram     # the bot (needs TELEGRAM_TOKEN)
 python3 -m sathi.main --whatsapp     # the webhook (needs WHATSAPP_*, behind TLS)
 python3 -m sathi.main --preview whatsapp   # what the wire would carry — no token, nothing sent
-python3 -m sathi.local_web            # the same conversation in a browser, http://127.0.0.1:8765, no database
+python3 -m sathi.local_web            # the browser version on http://127.0.0.1:8765, no database
 python3 -m sathi.metrics.report --out impact.html   # the impact dashboard
 ```
 
