@@ -1,0 +1,30 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "sathi.local_web",
+        "--port",
+        "8765"
+      ],
+      "port": 8765
+    },
+    {
+      "name": "livesite",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8766",
+        "--bind",
+        "127.0.0.1",
+        "--directory",
+        "livesite"
+      ],
+      "port": 8766
+    }
+  ]
+}

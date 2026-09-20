@@ -12,3 +12,4 @@ venv/
 
 # * Local working notes, not part of the project.
 CLAUDE.md
+.codex-remote-attachments/
