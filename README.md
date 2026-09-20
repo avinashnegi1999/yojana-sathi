@@ -214,8 +214,9 @@ instead of guessing.
 matching, and this project does not try to replace them. Scheme Sathi is
 **last-mile delivery on top of that work**:
 
-> myScheme is an English web form. It assumes literacy, a browser, and a user
-> who knows what "land holding in hectares" means. Scheme Sathi is a
+> myScheme is a web form — available in Hindi and other languages, but still a
+> form. It assumes literacy, a browser, and a user who knows what "land holding
+> in hectares" means. Scheme Sathi is a
 > conversation on a ₹6,000 phone that ends in a filled checklist and an address
 > to walk to.
 
@@ -333,7 +334,7 @@ Optional, all off by default and all tested in the off state:
 |---|---|
 | `LLM_API_KEY` | Free-text intake maps to a category, always confirmed by the worker; text is rephrased. Verdicts are unchanged. |
 | `TTS_CMD` | Replies also arrive as an audio note, e.g. `espeak-ng -v hi -w {out} {text}`. |
-| `FOLLOWUP_SALT` | Enables the 14-day follow-up, storing a salted hash of the channel id in a table that cannot be joined to the event log. |
+| `FOLLOWUP_SALT` | Records opt-ins for a 14-day "did you get it?" follow-up as a salted hash in a table that cannot be joined to the event log. **The sender that would deliver the follow-up is not built**; a hash cannot be turned back into a chat id, so delivery needs a design of its own. Leave unset. |
 
 ## Bot commands
 

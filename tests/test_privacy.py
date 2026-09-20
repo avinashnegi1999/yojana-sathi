@@ -116,8 +116,9 @@ def test_a_cleared_table_starts_counting_again():
 def test_the_unique_people_table_cannot_say_who_did_what():
     """Counting people must not become identifying them.
 
-    # ! `reach` is the one table keyed on a channel id, so it is the one place
-    # ! the privacy story could quietly collapse. Three guarantees, asserted
+    # ! `reach` is keyed on a hash of the channel id (so is `feedback`, in a
+    # ! separate namespace - see the test below), so it is the place the
+    # ! privacy story could quietly collapse. Three guarantees, asserted
     # ! rather than promised: the raw id never lands, there is no session_id to
     # ! join back to the impact log, and no profile answer sits beside it.
     """
@@ -164,14 +165,21 @@ def test_feedback_dedupes_a_person_without_naming_them():
         log = EventLog(Path(d) / "f.db")
         try:
             chat = "919812345678"
-            log.record_feedback(8, "first", "telegram", "self", person=log.anon_id(chat))
-            log.record_feedback(9, "again", "telegram", "self", person=log.anon_id(chat))
-            log.record_feedback(7, "other", "web", "tester", person=log.anon_id("cookie"))
+            log.record_reach(chat, "telegram", "linkedin")
+            log.record_feedback(8, "first", "telegram", "self", person=log.feedback_id(chat))
+            log.record_feedback(9, "again", "telegram", "self", person=log.feedback_id(chat))
+            log.record_feedback(7, "other", "web", "tester", person=log.feedback_id("cookie"))
             people = [r[0] for r in log.query("SELECT person FROM feedback ORDER BY rowid")]
             assert people[0] == people[1] != people[2]
             assert chat not in people[0] and len(people[0]) == 64
             cols = {r[1] for r in log.query("PRAGMA table_info(feedback)")}
             assert "session_id" not in cols
+            # ! The feedback hash must not join to the reach table. Same chat id,
+            # ! same key, different namespace: a JOIN across them finds nothing.
+            assert log.feedback_id(chat) != log.anon_id(chat)
+            joined = log.query("SELECT COUNT(*) FROM feedback f JOIN reach r"
+                               " ON f.person = r.anon_id")[0][0]
+            assert joined == 0, "feedback is joinable to reach (channel, source, date)"
         finally:
             log.close()
 

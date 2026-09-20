@@ -171,3 +171,19 @@ identifiers.
   commands typed from PowerShell lose their inner double quotes before ssh
   sees them, and a unit that crash-looped before the code arrived trips
   systemd's start limit and needs `reset-failed`. All three units active.
+
+## 2026-09-20
+
+- Reliability/privacy cleanup from an external audit of `main`, each finding
+  checked against the code first. Fixed: campaign source now resets on every
+  `/start` (a plain start after `/start linkedin` counted as LinkedIn);
+  `feedback.person` moved to its own HMAC namespace so it no longer joins to
+  `reach`; feedback prompt tells the worker not to type name/phone/address
+  (both languages, Hindi unreviewed); SQLite opened in WAL mode for the three
+  processes sharing one file; `install-on-vm.sh` restarts every enabled
+  `sathi-*` unit, and the runbook's reach-key migration stops all of them
+  first. README no longer calls myScheme "an English web form" (it has Hindi)
+  and says plainly that the follow-up sender is unbuilt. Two regression tests
+  added. Deferred with reasons in ARCHITECTURE.md: transactional turn delivery
+  and a durable WhatsApp inbox. **Still to do on the VM:** redact `/p/<token>`
+  from the Caddy access log (snippet in RUNBOOK) and purge the existing log.

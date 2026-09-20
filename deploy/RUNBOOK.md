@@ -127,7 +127,19 @@ arbitrary: the pack store is a dict in memory, so only the process that
 published a pack can serve it. Two copies would answer `410` for half the links.
 
     yojanasathi.avinashnegi.com {
-        log
+        log {
+            # ! /p/<token> IS the credential for a worker's sheet. Caddy's
+            # ! default access log would write the full URI beside the client
+            # ! IP, which is exactly the "who opened which pack, when" record
+            # ! that sathi/pack/links.py promises never to keep. Redact it.
+            format filter {
+                wrap console
+                request>uri replace REDACTED
+                request>remote_ip delete
+                request>client_ip delete
+                request>headers>Cookie delete
+            }
+        }
         handle /p/* {
             reverse_proxy 127.0.0.1:8081
         }
@@ -135,6 +147,12 @@ published a pack can serve it. Two copies would answer `410` for half the links.
             reverse_proxy 127.0.0.1:8080
         }
     }
+
+**Not yet applied on the VM (2026-09-20).** The live Caddyfile still has a bare
+`log`. Apply the block above with `sudo caddy validate --config
+/etc/caddy/Caddyfile && sudo systemctl reload caddy`, then check the existing
+log for `/p/` lines and delete it: `sudo journalctl -u caddy --rotate
+--vacuum-time=1s` if Caddy logs to journald, or truncate the file it names.
 
 ### The browser channel — a third unit, not yet routed
 
@@ -162,8 +180,8 @@ sathi.avinashnegi.com {
 }
 " | sudo tee -a /etc/caddy/Caddyfile >/dev/null && sudo caddy validate --config /etc/caddy/Caddyfile && sudo systemctl reload caddy'
 
-`install-on-vm.sh` syncs the code but restarts only `sathi`, so restart
-`sathi-web` (and `sathi-whatsapp`) by hand after every deploy.
+`install-on-vm.sh` restarts every enabled `sathi-*` unit after the sync, so
+all three channels run the same code from the same deploy.
 
 Web sessions log events under channel `web`. They do not appear in the
 unique-people count: that table is keyed by a channel id, and a browser
@@ -187,10 +205,17 @@ both halves to anyone who obtains one backup.**
 
 Move it out once, per host:
 
-    sudo systemctl stop sathi
+    sudo systemctl stop sathi sathi-whatsapp sathi-web
     cd /opt/sathi && sudo python3 -m sathi.metrics.events --migrate-reach-key /etc/sathi/sathi.env --db /var/lib/sathi/sathi.db
     sudo chown sathi:sathi /var/lib/sathi/sathi.db
-    sudo systemctl restart sathi
+    sudo systemctl start sathi sathi-whatsapp sathi-web
+
+**Stop every unit that opens the database, not just `sathi`.** A unit left
+running holds the old environment; once the row is deleted from `meta` it finds
+no key anywhere and generates a fresh one, and from then on two keys hash the
+same people into different rows. (`install-on-vm.sh` now does this migration
+itself and restarts all enabled units, so the steps above are only for a host
+that was set up by hand.)
 
 It moves the **existing value** rather than generating a new one, on purpose: a
 fresh key would orphan every reach row, so the next message from someone already

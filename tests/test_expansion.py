@@ -357,6 +357,19 @@ def test_demo_is_fictional_and_has_no_session_or_signature_mutation():
     assert bot.sessions['test'] is original
     assert bot._active_keyboard['test']==123
 
+def test_plain_start_resets_campaign_source():
+    # ! "/start linkedin" on Monday, "/cancel", plain "/start" on Friday: the
+    # ! Friday visit is direct. A sticky slug would count it as LinkedIn.
+    from sathi.channels.router import Router
+    bot=Router(load_all(ROOT/'data/schemes'))
+    bot.dispatch('t','/start linkedin')
+    assert bot._source['t']=='linkedin'
+    bot.dispatch('t','/cancel')
+    bot.dispatch('t','/start')
+    assert bot._source['t']==''
+    bot.dispatch('t','/start notaslug')
+    assert bot._source['t']==''
+
 if __name__=='__main__':
     for name, fn in sorted(list(globals().items())):
         if name.startswith('test_'):

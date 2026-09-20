@@ -125,6 +125,20 @@ plausible default.
   real outcome measure available, and the only feature that stores a channel
   id — salted, hashed, in a table with no `session_id` column so it cannot be
   joined back to the event log, purged on completion or after 30 days.
+  **The sender is not built** and a hash cannot address a message, so today
+  the table records intent only.
+- **A turn commits state before the reply is delivered.** `Conversation.handle`
+  mutates the profile, then the adapter sends the next question; a Telegram or
+  Meta failure on that one send leaves the worker at the new state with no
+  live keyboard. Known and accepted for the pilot: the next thing they type
+  re-asks the current question, and a durable outbox with retry is a few
+  hundred lines across two adapters for a window that is one HTTP call wide.
+  Revisit if the pilot logs show `send failed` more than once a day.
+  WhatsApp additionally acknowledges Meta's POST before the in-RAM queue is
+  drained, so a crash in between loses that one message; same accepted trade.
+- **`feedback.person` and `reach.anon_id` are different hashes of the same
+  key** (`feedback_id` prefixes a namespace). One tester's repeat ratings still
+  collapse to one row; a JOIN across the two tables finds nothing.
 - **The terminal accepts a typed age.** Every question is answerable by picking
   a number from a list; age and state also accept typing, because a keypad beats
   120 buttons. Neither needs a language model, which is what "works with

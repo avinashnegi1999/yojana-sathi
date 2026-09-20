@@ -108,7 +108,7 @@ class LocalWeb:
             # ponytail: is one tab until restart; add a long-lived uid cookie
             # ponytail: if cross-visit dedupe ever matters.
             if self.log is not None:
-                convo.person = self.log.anon_id(session)
+                convo.person = self.log.feedback_id(session)
             self.sessions[session] = convo
             return convo.start()
         return self.sessions[session].handle(answer)

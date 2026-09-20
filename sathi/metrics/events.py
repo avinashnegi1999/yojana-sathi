@@ -101,6 +101,11 @@ class EventLog:
         self._conn = sqlite3.connect(self.db_path, check_same_thread=False)
         self._lock = threading.Lock()
         self._conn.row_factory = sqlite3.Row
+        # ! Three processes (telegram, whatsapp, web) share one file. The lock
+        # ! above covers threads in one process only; WAL lets a dashboard read
+        # ! while another process writes, and sqlite3's default 5 s busy timeout
+        # ! covers writer-vs-writer. Persistent per file, harmless on :memory:.
+        self._conn.execute("PRAGMA journal_mode=WAL")
         self._conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
         columns = {row[1] for row in self._conn.execute("PRAGMA table_info(feedback)")}
         if "participant_role" not in columns:
@@ -357,6 +362,16 @@ class EventLog:
         return hmac.new(self._reach_key(), channel_id.encode("utf-8"),
                         hashlib.sha256).hexdigest()
 
+    def feedback_id(self, channel_id: str) -> str:
+        """The hash the feedback table keys on. Deliberately NOT anon_id().
+
+        # ! Same key, different namespace, so one tester's repeat ratings still
+        # ! collapse to one value but `feedback.person` cannot be joined to
+        # ! `reach.anon_id`. Keeps feedback unlinkable from channel/source/date.
+        """
+        return hmac.new(self._reach_key(), b"feedback:" + channel_id.encode("utf-8"),
+                        hashlib.sha256).hexdigest()
+
     def record_reach(self, channel_id: str, channel: str,
                      source: str = "", purpose: str = "") -> bool:
         """Count one person once. Returns True the first time only.
@@ -415,9 +430,9 @@ class EventLog:
                         person: str | None = None) -> None:
         """One rating and/or one suggestion, attached to a keyed hash at most.
 
-        # ! `person` is anon_id(channel id) - the same value the reach table
-        # ! keys on - so a tester who rates five times shows as one hash and
-        # ! nobody can be named from the database alone. Never the raw id.
+        # ! `person` is feedback_id(channel id): a keyed hash in its own
+        # ! namespace, so a tester who rates five times shows as one hash, and
+        # ! the value joins to nothing else in the database. Never the raw id.
         """
         if rating is not None and not (1 <= int(rating) <= 10):
             raise ValueError(f"rating {rating!r} is outside 1-10")

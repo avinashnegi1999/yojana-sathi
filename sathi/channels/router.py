@@ -95,7 +95,7 @@ class Router:
         if fresh or key not in self.sessions:
             convo = Conversation(self.schemes, self.log, channel=self.channel)
             if self.log is not None:
-                convo.person = self.log.anon_id(key)
+                convo.person = self.log.feedback_id(key)
             convo.lang = self._lang.get(key, DEFAULT_LANG)
             self.sessions[key] = convo
         return self.sessions[key]
@@ -112,8 +112,9 @@ class Router:
     def _remember_source(self, key: str, answer: str) -> None:
         payload = answer.strip().split()[1:2]
         slug = payload[0].strip().lower()[:20] if payload else ""
-        if slug in self.SOURCES:
-            self._source[key] = slug
+        # ! Every /start resets it. A plain /start after an earlier
+        # ! "/start linkedin" is a direct visit, not a second LinkedIn one.
+        self._source[key] = slug if slug in self.SOURCES else ""
 
     def _count_person(self, key: str, convo: Conversation) -> None:
         """One person, counted once, after they agreed to be counted.

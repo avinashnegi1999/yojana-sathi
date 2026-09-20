@@ -89,9 +89,12 @@ chown sathi:sathi /var/lib/sathi/sathi.db
 install -m 644 /tmp/sathi-stage/sathi.service /etc/systemd/system/sathi.service
 systemctl daemon-reload
 systemctl enable sathi
-systemctl restart sathi
+# ! Every enabled Sathi unit, together. They share /opt/sathi and one database;
+# ! restarting only `sathi` left whatsapp and web on the previous code.
+UNITS="sathi $(systemctl list-unit-files 'sathi-*.service' --state=enabled --no-legend | awk '{print $1}')"
+systemctl restart $UNITS
 sleep 3
-systemctl --no-pager --lines=15 status sathi
+systemctl --no-pager --lines=15 status $UNITS
 REMOTE
 
 cat <<EOF
