@@ -127,32 +127,37 @@ arbitrary: the pack store is a dict in memory, so only the process that
 published a pack can serve it. Two copies would answer `410` for half the links.
 
     yojanasathi.avinashnegi.com {
+        # ! A pack URL is a bearer token for one worker's sheet. The Python
+        # ! server refuses to log it; this proxy sees the request FIRST, so
+        # ! redact the token before it is written and drop the client IP.
         log {
-            # ! /p/<token> IS the credential for a worker's sheet. Caddy's
-            # ! default access log would write the full URI beside the client
-            # ! IP, which is exactly the "who opened which pack, when" record
-            # ! that sathi/pack/links.py promises never to keep. Redact it.
             format filter {
                 wrap console
-                request>uri replace REDACTED
-                request>remote_ip delete
-                request>client_ip delete
-                request>headers>Cookie delete
+                fields {
+                    request>uri regexp "/p/[^\s?#]+" "/p/REDACTED"
+                    request>remote_ip delete
+                    request>remote_port delete
+                    request>headers>User-Agent delete
+                }
             }
         }
         handle /p/* {
             reverse_proxy 127.0.0.1:8081
         }
+        handle /stats.json {
+            reverse_proxy 127.0.0.1:8081
+        }
+        @browsing {
+            method GET HEAD
+            path / /index.html
+        }
+        redir @browsing https://avinashnegi1999.github.io/yojana-sathi/ 302
         handle {
             reverse_proxy 127.0.0.1:8080
         }
     }
 
-**Not yet applied on the VM (2026-09-20).** The live Caddyfile still has a bare
-`log`. Apply the block above with `sudo caddy validate --config
-/etc/caddy/Caddyfile && sudo systemctl reload caddy`, then check the existing
-log for `/p/` lines and delete it: `sudo journalctl -u caddy --rotate
---vacuum-time=1s` if Caddy logs to journald, or truncate the file it names.
+This is what is live (checked against `/etc/caddy/Caddyfile` on 2026-09-20).
 
 ### The browser channel — a third unit, not yet routed
 

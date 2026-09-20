@@ -185,5 +185,6 @@ identifiers.
   first. README no longer calls myScheme "an English web form" (it has Hindi)
   and says plainly that the follow-up sender is unbuilt. Two regression tests
   added. Deferred with reasons in ARCHITECTURE.md: transactional turn delivery
-  and a durable WhatsApp inbox. **Still to do on the VM:** redact `/p/<token>`
-  from the Caddy access log (snippet in RUNBOOK) and purge the existing log.
+  and a durable WhatsApp inbox. Deployed the same day with `install-on-vm.sh`; all three
+  units restarted together. The Caddy `/p/<token>` log redaction the audit
+  flagged was already live on the VM - only the runbook was stale, now fixed.
