@@ -188,3 +188,12 @@ identifiers.
   and a durable WhatsApp inbox. Deployed the same day with `install-on-vm.sh`; all three
   units restarted together. The Caddy `/p/<token>` log redaction the audit
   flagged was already live on the VM - only the runbook was stale, now fixed.
+- First outside review of the browser channel: "legit good, but reading
+  should be minimal and fast." Walked the live flow: every question screen is
+  5-20 words; the result screen was ~700 words on one page (recap, four
+  schemes at a paragraph each, six ineligible reasons) with the next button
+  under all of it. Each eligible scheme on screen is now name, the first
+  sentence of its signed summary, and where to go; the full summary and the
+  "why you qualify" stay on the sheet, where they already were. Eligible
+  block 646 -> 214 words on the test profile. Nothing rewritten, no new
+  Hindi.

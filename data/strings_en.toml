@@ -150,9 +150,11 @@ change_tax = "Change tax answer"
 evaluating = "One moment, I am checking…"
 eligible_header = """I found {count} scheme(s) for you.
 The one with the largest benefit is at the top."""
+# ! One sentence of benefit and the place to go. The full description and the
+# ! "why you qualify" are on the sheet; on a phone, four schemes at a paragraph
+# ! each buried the next button under 600 words.
 scheme_line = """{index}. {name_hi} {new_badge}
-   What you get: {benefit}
-   Why you qualify: {why}
+   {benefit}
    Where to go: {where}"""
 new_badge = "🆕 (you do not have this yet)"
 value_line = "These could be worth about ₹{total} to you in a year."

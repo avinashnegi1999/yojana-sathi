@@ -295,7 +295,9 @@ def test_full_session_with_no_llm_key_reaches_a_pack():
         out = _answer_all(convo, tax=NO)
         text = out[1].text  # * [0] is the answer recap
         assert "जाँच योजना A" in text and "12,000" in text
-        assert "आपकी उम्र इस योजना के दायरे में है" in text, "authored pass reason must show"
+        # ! The screen carries one benefit sentence and where to go; the authored
+        # ! "why you qualify" moved to the sheet (asserted on the blob below).
+        assert "आपकी उम्र इस योजना के दायरे में है" not in text, "why-line back on the screen"
         # * The stubbed scheme appears, honestly, as something we could not check.
         assert "जाँच योजना B" in text
         assert convo.state is State.DOCUMENTS
@@ -306,6 +308,7 @@ def test_full_session_with_no_llm_key_reaches_a_pack():
         out = convo.handle(YES)  # yes, build the pack
         filename, blob = out[0].document
         assert filename.endswith(".html") and b"12,000" in blob
+        assert "आपकी उम्र इस योजना के दायरे में है".encode() in blob,             "authored pass reason must be on the sheet"
         # ! The sheet is delivered and the screening is already logged complete;
         # ! the optional feedback questions come after it and can be skipped.
         assert convo.state is State.RATING and not out[-1].end
@@ -462,7 +465,7 @@ def test_english_gives_the_same_verdicts_with_no_devanagari():
         # ! The fixture authors pass_en/fail_en, so an English session must not
         # ! fall back to Devanagari anywhere in the result screen — recap included,
         # ! since that is assembled from the same string files.
-        assert "qualify" in text.lower()
+        assert "where to go" in text.lower(), text
         assert not any(_devanagari(r.text) for r in out), \
             "Devanagari leaked into an English result screen"
 

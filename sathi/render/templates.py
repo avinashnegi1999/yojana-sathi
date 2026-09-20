@@ -9,6 +9,8 @@
 # * this is the entire output layer and the result text is identical.
 """
 
+import re
+
 from sathi.core import content
 from sathi.core.content import s
 from sathi.core.schemes import STUB, Scheme
@@ -111,6 +113,25 @@ def _gap(result: Result, scheme: Scheme, lang: str = "hi") -> str:
     return s("result.unknown_reason_data", lang)
 
 
+def first_sentence(text: str) -> str:
+    """The opening sentence of a signed summary, for the screen.
+
+    # ! The screen shows one sentence; the sheet shows all of them. Nothing is
+    # ! rewritten - the sentence is Avinash's, cut at the first full stop or
+    # ! danda. A very short opener ("Accident insurance.") takes the next
+    # ! sentence too, because the ₹ figure is usually in it.
+    """
+    # ponytail: sentence split on . / ।, no abbreviation handling; fine for
+    # ponytail: summaries a human wrote and read back.
+    parts = [p.strip() for p in re.split(r"(?<=[.।])\s+", text.strip()) if p.strip()]
+    if not parts:
+        return ""
+    out = parts[0]
+    if len(out.split()) < 4 and len(parts) > 1:
+        out += " " + parts[1]
+    return out
+
+
 def eligible_block(results: tuple[Result, ...], schemes: dict[str, Scheme],
                    known: frozenset[str], lang: str = "hi") -> str:
     hits = [r for r in results if r.verdict is Verdict.ELIGIBLE]
@@ -125,8 +146,7 @@ def eligible_block(results: tuple[Result, ...], schemes: dict[str, Scheme],
                 index=i,
                 name_hi=sc.name(lang),
                 new_badge=s("result.new_badge", lang) if r.scheme_code not in known else "",
-                benefit=sc.summary(lang),
-                why=_why(r, sc, lang),
+                benefit=first_sentence(sc.summary(lang)),
                 where=where_label(sc, lang),
             )
         )
@@ -349,6 +369,11 @@ def _self_check() -> None:
     none_text = result_message(evaluate_all(Profile(age=50), schemes), schemes, frozenset())
     assert s("result.no_match_footer") in none_text
     assert documents_block(schemes["A"], missing=("आधार",)).count("आधार") >= 2
+
+    # ! The screen carries one sentence of the summary, never the paragraph.
+    assert first_sentence("Accident insurance. ₹2 lakh on death. Not health cover.") ==         "Accident insurance. ₹2 lakh on death."
+    assert first_sentence("हर साल ₹36,000 की पेंशन मिलती है। आधार ज़रूरी है।") ==         "हर साल ₹36,000 की पेंशन मिलती है।"
+    assert first_sentence("") == ""
     print("templates.py OK")
 
 
