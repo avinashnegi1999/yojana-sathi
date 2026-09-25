@@ -45,8 +45,21 @@ az login                       # you, in a browser
 
 `install-on-vm.sh` is host-agnostic and re-runnable — it picks `sathi_aws` as
 the key when that file exists. Running it again **is** the update path: it
-re-syncs code, keeps `/var/lib/sathi/sathi.db` and `/etc/sathi/sathi.env`, runs
-`check.py` on the VM, and restarts.
+runs `check.py` on the staged copy, re-syncs code, keeps
+`/var/lib/sathi/sathi.db`, and restarts. It **merges** your local `.env` into
+`/etc/sathi/sathi.env`: every setting your `.env` has wins, every setting only
+the server has (e.g. `PACK_BASE_URL`, `BOT_URL`) is kept and named in the
+output, and the server's `REACH_HMAC_KEY` is never replaced. Until 2026-09-25
+it replaced the file, which dropped anything set on the server by hand.
+
+**Deploying from a new computer.** `provision-aws.sh` made the SSH key with
+`ssh-keygen` and gave AWS only the public half, so AWS cannot hand the private
+key back. On a machine without it: create `~/.ssh/sathi_aws` with
+`ssh-keygen -t ed25519 -f ~/.ssh/sathi_aws -C sathi-aws`, open **EC2 → sathi-vm
+→ Connect → EC2 Instance Connect** in the console (ap-south-1), append the new
+`sathi_aws.pub` line to `~/.ssh/authorized_keys` there, and set the security
+group's SSH rule to your current IP. On Windows, run the script through Git
+Bash: `& "C:\Program Files\Git\bin\bash.exe" ./deploy/install-on-vm.sh ubuntu@13.206.84.69`.
 
 Stop the local service first — **two copies long-polling the same bot token
 will steal updates from each other** and roughly half of every conversation

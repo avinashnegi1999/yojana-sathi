@@ -71,14 +71,36 @@ rsync -a --delete --exclude '__pycache__' \
   /tmp/sathi-stage/{sathi,data,tests,check.py,pyproject.toml} /opt/sathi/
 chown -R sathi:sathi /opt/sathi
 
-# ! A re-deploy updates ordinary configuration but must not replace the key
-# ! that already hashes reach rows. It stays only on the host, never in git.
-old_reach_key="$(sed -n 's/^REACH_HMAC_KEY=//p' /etc/sathi/sathi.env 2>/dev/null | head -n 1 || true)"
-sed -E 's#^DB_PATH=.*#DB_PATH=/var/lib/sathi/sathi.db#' /tmp/sathi-stage/sathi.env > /etc/sathi/sathi.env
-if [[ -n "$old_reach_key" ]]; then
-  printf '\nREACH_HMAC_KEY=%s\n' "$old_reach_key" >> /etc/sathi/sathi.env
+# ! MERGE the laptop's .env into the server's, never replace it. The laptop
+# ! file sets what it sets, but the server also carries settings added there
+# ! by hand — PACK_BASE_URL and BOT_URL (RUNBOOK.md), anything else later —
+# ! and the REACH_HMAC_KEY that hashes every reach row. Replacing the file
+# ! wholesale silently switched pack links and /stats.json off on any deploy
+# ! from a laptop whose .env lacked them (found 2026-09-25).
+# !   - every KEY= the laptop sets wins, except REACH_HMAC_KEY;
+# !   - every KEY= only the server has is carried over, and named below;
+# !   - the server's REACH_HMAC_KEY always wins: a new key would count every
+# !     existing chat a second time.
+merged=/tmp/sathi-stage/sathi.env.merged
+# * Strip CR too: a .env saved on Windows would put "\r" at the end of every value.
+sed -E -e 's/\r$//' -e 's#^DB_PATH=.*#DB_PATH=/var/lib/sathi/sathi.db#' \
+  /tmp/sathi-stage/sathi.env > "$merged"
+[[ -s "$merged" && -n "$(tail -c1 "$merged")" ]] && echo >> "$merged"
+if [[ -f /etc/sathi/sathi.env ]]; then
+  if grep -q '^REACH_HMAC_KEY=' /etc/sathi/sathi.env; then
+    sed -i '/^REACH_HMAC_KEY=/d' "$merged"
+  fi
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    [[ "$line" =~ ^([A-Za-z_][A-Za-z0-9_]*)= ]] || continue
+    key="${BASH_REMATCH[1]}"
+    if ! grep -q "^${key}=" "$merged"; then
+      printf '%s\n' "$line" >> "$merged"
+      echo "    kept from the server: $key"
+    fi
+  done < /etc/sathi/sathi.env
 fi
-chmod 600 /etc/sathi/sathi.env
+install -m 600 "$merged" /etc/sathi/sathi.env
+rm -f "$merged"
 
 cd /opt/sathi
 
