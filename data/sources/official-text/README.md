@@ -36,6 +36,26 @@ python3 -m sathi.sources
 re-reads the live pages and reports which of our claims they still support.
 Run that before trusting anything in this folder, and after any long gap.
 
+### Signed schemes the drift check cannot watch (as of 2026-09-25)
+
+Eight pages are watched: the seven above plus NPS-Traders
+(`data/sources/nps_traders.json`, maandhan.in FAQ). Three signed schemes are
+**not**, and need a person to re-read their source monthly instead:
+
+| Scheme | Cited source | Why no record |
+|---|---|---|
+| IGNOAPS, IGNWPS | `myscheme.gov.in/schemes/…` | A JavaScript app. A plain fetch gets "Something went wrong", not the text. |
+| IGNDPS | a government PDF on `s3waas.gov.in` | Binary PDF. The standard library cannot pull text out of it. |
+| all three | `nsap.nic.in` (the ministry's own FAQ) | Refused connections on 12 Sep and failed to resolve on 25 Sep 2026. |
+
+The primary PDFs actually read at sign-off are in
+[`docs/audit-evidence/`](../../../docs/audit-evidence/).
+
+`~ page text changed` for ESHRAM and PM_SYM on and after 25 Sep 2026 is noise:
+both sites print a visitor counter, which `normalise()` now removes. Their
+stored fingerprints still include the old counter. Re-read each page, then
+re-save its record, and the `~` goes away.
+
 ## What was and was not changed
 
 Navigation menus, accessibility widgets, font-size controls, social links and

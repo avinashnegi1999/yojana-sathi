@@ -199,9 +199,11 @@ A worker legally entitled to a pension or an accident cover simply never claims 
 ## What it does
 
 After consent, a worker can check all verified schemes or select only the
-scheme(s) they care about. It asks a short set of plain questions, answerable
-entirely by tapping buttons, then runs the answers through a deterministic rule
-engine. It says which schemes they qualify for **and why**, in their language.
+scheme(s) they care about. It asks a short set of plain questions — every one
+has buttons except age, which is typed as a number — then runs the answers
+through a deterministic rule engine. It says which schemes they qualify for
+**and why**, what each one costs them, and when a pension actually starts, in
+their language.
 It produces a document checklist and a one-page sheet they can carry to a
 centre, then tells them exactly where to go.
 
@@ -242,6 +244,14 @@ from an estimate, a projection, or a "potential reach" figure.
 The plan for that pilot, including consent and what will be measured, is in
 [`docs/PILOT_PLAN.md`](docs/PILOT_PLAN.md).
 
+Pilot screenings are kept apart from testing by the link they arrive through:
+`t.me/YojanaSathiBot?start=csc` or `sathi.avinashnegi.com/?start=csc`. That
+slug is recorded on the session after consent, and
+`python3 -m sathi.metrics.report --cohort csc` counts only those sessions.
+Terminal (`cli`) runs are never counted unless `--include-cli` is passed. Every
+screening in the log before the pilot link is used — including all of the
+maintainer's own testing — has no cohort.
+
 Two ₹ figures are reported, never one. An annual pension (PM-SYM, ₹36,000/year)
 and an accident cover (PMSBY, ₹2,00,000 paid only on a claim) are different
 kinds of money; adding them would overstate what a worker actually receives by
@@ -267,10 +277,12 @@ Methodology, and what each number does **not** claim:
   threshold and an income-tax exclusion; the official rules contain neither, so
   both were **deleted rather than filled**. An unsourced exclusion turns
   eligible people away, which is the same failure as a guessed threshold.
-- A language model is optional and stays outside the engine entirely. It maps
-  free text to a category — always confirmed by the worker before anything is
-  recorded — and rephrases text a human wrote. It never sees a threshold and
-  never produces a ₹ figure or a verdict.
+- A language model is optional and stays outside the engine entirely. Its one
+  job is to suggest an occupation category for free text, which the worker
+  confirms before anything is recorded. No signed scheme has an occupation
+  rule, so the selected-scheme flow does not ask occupation and **in normal use
+  the model is never called**. It never sees a threshold and never produces a
+  ₹ figure or a verdict.
 - With no API key the whole thing works on buttons and templated text, with
   identical results. That is a tested configuration, not a degraded one.
 
@@ -285,11 +297,18 @@ Details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 No Aadhaar number. No name. No phone number. **Those fields do not exist in the
 profile**, so they cannot be stored by accident.
 
-The profile lives in process memory for one session and is discarded. The event
-log holds counts and coarse bands only — state, age band, occupation, income
-band — under a random per-session id that is not derived from any messaging
-account, so two sessions by the same worker are not linkable. Dashboard
-aggregates covering fewer than 5 people are suppressed.
+The profile lives in process memory for one session and is discarded when the
+screening ends, on `/cancel`, or after 30 minutes without a reply. The event log
+holds counts and coarse bands only — state, age band, occupation (rarely asked;
+see above), income band — plus the channel and, after consent, the arrival-link
+slug (`?start=csc`), under a random per-session id that is not derived from any
+messaging account, so two sessions by the same worker are not linkable. On the
+dashboard, breakdown tables suppress any row covering fewer than 5 sessions;
+the headline totals are not suppressed.
+
+The one free-text field that is stored is the optional suggestion at the end:
+digit runs are removed before it is written, and it sits in a table with no
+session id.
 
 `tests/test_privacy.py` drives every event type through the log and then asserts,
 column by column, that nothing else survived.
@@ -304,7 +323,7 @@ citation.
 ## Run it yourself
 
 ```bash
-git clone <repo> && cd scheme-sathi
+git clone https://github.com/avinashnegi1999/yojana-sathi && cd yojana-sathi
 
 python3 check.py                     # every self-check and test, nothing to install
 python3 -m sathi.main                # one screening in the terminal, buttons only
@@ -312,7 +331,8 @@ python3 -m sathi.main --telegram     # the bot (needs TELEGRAM_TOKEN)
 python3 -m sathi.main --whatsapp     # the webhook (needs WHATSAPP_*, behind TLS)
 python3 -m sathi.main --preview whatsapp   # what the wire would carry — no token, nothing sent
 python3 -m sathi.local_web            # the browser version on http://127.0.0.1:8765, no database
-python3 -m sathi.metrics.report --out impact.html   # the impact dashboard
+python3 -m sathi.metrics.report --out impact.html   # the impact dashboard (reads DB_PATH)
+python3 -m sathi.metrics.report --cohort csc --since 2026-10-01 --out pilot.html   # pilot only
 ```
 
 Requires Python 3.11+ (uses stdlib `tomllib`). **There are no third-party
@@ -332,8 +352,8 @@ Optional, all off by default and all tested in the off state:
 
 | Variable | Effect when set |
 |---|---|
-| `LLM_API_KEY` | Free-text intake maps to a category, always confirmed by the worker; text is rephrased. Verdicts are unchanged. |
-| `TTS_CMD` | Replies also arrive as an audio note, e.g. `espeak-ng -v hi -w {out} {text}`. |
+| `LLM_API_KEY` | Free-text occupation is mapped to a category, always confirmed by the worker. No signed scheme asks occupation today, so in normal use this is never called. Verdicts are unchanged. |
+| `TTS_CMD` | **Not wired yet.** `sathi/render/audio.py` can call a TTS command, but no channel sends its output; setting this only changes the startup line. There are no voice notes today. |
 | `FOLLOWUP_SALT` | Records opt-ins for a 14-day "did you get it?" follow-up as a salted hash in a table that cannot be joined to the event log. **The sender that would deliver the follow-up is not built**; a hash cannot be turned back into a chat id, so delivery needs a design of its own. Leave unset. |
 
 ## Bot commands
@@ -357,7 +377,8 @@ Optional, all off by default and all tested in the off state:
 python3 check.py
 ```
 
-21 module self-checks and 15 test files, no framework and nothing to install.
+22 module self-checks and 15 test files, no framework and nothing to install.
+They pass on Python 3.11 and 3.12, and CI also builds the Docker image.
 Worth knowing about three of them:
 
 - `tests/test_privacy.py` — the reason the privacy claim above is defensible
@@ -370,10 +391,16 @@ Worth knowing about three of them:
   is worse than no test.
 - `tests/test_rule_boundaries.py` — asks whether the **answers** are right, not
   whether the code runs. Each scheme's rules are re-encoded from the official
-  source text, independently of `data/schemes/`, and compared against the engine
-  across every combination of the fields any rule touches — 1,377,810 verdicts,
-  plus every named threshold one per line. Pressing every button cannot find a
+  source text, separately from `data/schemes/`, and compared against the engine
+  in two sweeps: 1,377,810 verdicts over the shared fields (age, income, bank,
+  tax, EPFO/ESIC, NPS, unorganised work), and a per-scheme sweep over **every
+  combination of exactly the fields each signed scheme uses** — state, BPL,
+  widow, disability, trader and the rest included — which must reach ELIGIBLE
+  at least once for every signed scheme. Pressing every button cannot find a
   wrong threshold; a wrong threshold renders a perfectly well-formed screen.
+  Both oracle and rules were written by the same project, so the sweep proves
+  the two encodings agree, not that either matches the law; the signature is
+  what covers that.
 
 ## Keeping the rules honest after they are written
 
@@ -393,8 +420,11 @@ that looks automated. `--unsign` reverses it.
 
 `sathi/sources.py` answers the question a signature cannot: a person checked
 this in September, but is it still true? [`data/sources/`](data/sources/) holds a
-fingerprint of each official page plus **44 named claims** — one per value we
-rely on — and re-reads the live pages on demand. It also watches for things that
+fingerprint of each official page plus **50 named claims across 8 pages**, and
+re-reads the live pages on demand. The three NSAP pensions cannot be watched
+this way (a JavaScript-only page, a PDF, and a ministry host that does not
+resolve); they need a monthly manual re-read, listed in
+[`data/sources/official-text/README.md`](data/sources/official-text/README.md). It also watches for things that
 must *not* reappear, like the "16–59" age limit e-Shram no longer states.
 
 [`data/sources/official-text/`](data/sources/official-text/) keeps the pages
@@ -404,13 +434,16 @@ these hosts refuse an ordinary fetcher, and one official source is a 320 MB scan
 
 ## How this was built
 
+[`docs/README.md`](docs/README.md) — which documents are current and which are
+dated snapshots. Start there before quoting any of them.
 [`docs/LESSONS.md`](docs/LESSONS.md) — ten lessons from building it, including
 the ones that cost something.
 [`docs/BUILD_LOG.md`](docs/BUILD_LOG.md) — the unedited version: every bug, the
 headline numbers that turned out to be wrong, what is still open, and what I
 would do differently.
-[`docs/assessment/`](docs/assessment/README.md) — a scored breakdown of where
-this stands, including why product maturity is a 7 while the engineering is not.
+[`docs/assessment/`](docs/assessment/README.md) — a **historical** self-assessment
+from early September (three schemes, nothing signed), kept as an audit trail.
+The current, independent audit is [`AUDIT.md`](AUDIT.md).
 
 ## Add a scheme
 

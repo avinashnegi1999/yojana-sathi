@@ -25,9 +25,9 @@ channels/       telegram.py · whatsapp.py     thin adapters, no logic
 conversation/   intake flow, question order, consent, state
      │                                    │
      ▼ Profile                            ▼ facts
-rules/          DETERMINISTIC             render/    templated Hindi (default)
-  evaluate(profile, scheme)                          LLM rephrase (optional)
-  → ELIGIBLE | INELIGIBLE | UNKNOWN                  TTS audio note
+rules/          DETERMINISTIC             render/    templated Hindi / English
+  evaluate(profile, scheme)                          (TTS module present, not wired)
+  → ELIGIBLE | INELIGIBLE | UNKNOWN
      │ reads
 data/schemes/*.toml    human-authored, provenance-stamped
      │
@@ -43,11 +43,15 @@ Same inputs, same output, always. That makes it testable with a plain table of
 profiles and expected verdicts, and defensible when someone asks how a result
 was reached.
 
-The model is used for conversation flow, mapping free text to a category, and
-rephrasing Hindi a human wrote. It never sees a threshold, never produces a ₹
-figure, and never produces a verdict. With `LLM_API_KEY` unset the whole system
-runs on buttons and templated strings with identical results — that is a tested
-configuration, not a degraded one.
+The model has one job: suggest an occupation category for free text, which the
+worker confirms before it is recorded. It does not drive the conversation and
+does not rephrase anything. No signed scheme has an occupation rule, so the
+selected-scheme flow never asks occupation and the model is not called in
+normal use (only a typed state name at the all-or-choose screen reaches the
+legacy full route that does ask it). It never sees a threshold, never produces
+a ₹ figure, and never produces a verdict. With `LLM_API_KEY` unset the whole
+system runs on buttons and templated strings with identical results — that is
+a tested configuration, not a degraded one.
 
 ## Three-valued verdicts
 
@@ -90,17 +94,17 @@ plausible default.
 | `sathi/conversation/consent.py` | The consent screen |
 | `sathi/conversation/flow.py` | Intake state machine, selected-scheme planner, dependency order, `known_schemes` capture |
 | `sathi/render/templates.py` | Result → Hindi, from authored strings only |
-| `sathi/render/llm.py` | Optional: free-text → category proposal, rephrasing |
-| `sathi/render/audio.py` | Optional: TTS via whatever `TTS_CMD` names |
+| `sathi/render/llm.py` | Optional: free-text → occupation proposal (the only model call) |
+| `sathi/render/audio.py` | TTS via whatever `TTS_CMD` names — **not called by any channel yet** |
 | `sathi/pack/checklist.py` | Which documents are needed, which are missing |
 | `sathi/pack/pack.py` | The one-page pack, built in memory, never written server-side |
-| `sathi/channels/base.py` | `ChannelMessage` / `Reply` — the channel boundary |
-| `sathi/channels/router.py` | Sessions, slash commands, keyboard retirement — shared by every channel |
+| `sathi/channels/base.py` | `Button` / `Reply` — the channel boundary |
+| `sathi/channels/router.py` | Sessions, slash commands, keyboard retirement, 30-minute idle expiry — shared by every channel |
 | `sathi/channels/telegram.py` | Long-polling adapter, `urllib` only |
 | `sathi/channels/whatsapp.py` | Cloud API adapter: signed webhook in, `urllib` out |
-| `sathi/local_web.py` | Browser channel on loopback: one page, JSON turns, cookie = random routing key. Drives `Conversation` directly, so no slash commands and no reach row |
+| `sathi/local_web.py` | Browser channel on loopback: one page, JSON turns, cookie = random routing key, request limits, idle expiry, `?start=` cohort. Drives `Conversation` directly, so no slash commands and no reach row |
 | `sathi/metrics/events.py` | The **only** writer to the event log |
-| `sathi/metrics/report.py` | `impact.html` — the six numbers, provenance, methodology |
+| `sathi/metrics/report.py` | `impact.html` — the headline numbers, provenance, methodology; `--cohort`, `--since`, CLI sessions excluded |
 | `sathi/main.py` | Terminal session, one channel per process, startup verification report |
 
 ## Decisions worth knowing before you change something
@@ -139,22 +143,30 @@ plausible default.
 - **`feedback.person` and `reach.anon_id` are different hashes of the same
   key** (`feedback_id` prefixes a namespace). One tester's repeat ratings still
   collapse to one row; a JOIN across the two tables finds nothing.
-- **The terminal accepts a typed age.** Every question is answerable by picking
-  a number from a list; age and state also accept typing, because a keypad beats
-  120 buttons. Neither needs a language model, which is what "works with
-  `LLM_API_KEY` unset" actually means.
+- **Age is typed.** Every other question has buttons (state also accepts
+  typing); age has none, because a keypad beats 120 buttons and a band would
+  lose the exact boundary a rule needs (40 versus 41). Neither needs a language
+  model, which is what "works with `LLM_API_KEY` unset" actually means.
+- **The recap shows only what was asked.** The selected-scheme flow skips
+  questions its schemes do not need; the recap used to print "you did not say"
+  for every one of them.
+- **Idle sessions expire.** Telegram, WhatsApp and the browser drop a
+  conversation's answers after 30 minutes without a reply; per-chat bookkeeping
+  (language, `/clear` ids) goes after 48 hours.
 
 ## Verification
 
-`python3 check.py` runs 21 module self-checks and 15 test files, with no
+`python3 check.py` runs 22 module self-checks and 15 test files, with no
 framework and nothing to install.
 
 - `tests/test_schemes.py` — the loader accepts good files and rejects the
   mistakes a human actually makes while authoring rules.
 - `tests/test_rule_boundaries.py` — asks whether the ANSWERS are right, not
-  just whether the code runs: an independent oracle of each scheme's official
-  rules is compared against the engine across every combination of the fields
-  any rule touches (~30,000 verdicts), plus each named threshold one per line.
+  just whether the code runs: a separately written oracle of each scheme's
+  official rules is compared against the engine over 1,377,810 combinations of
+  the shared fields, then per signed scheme over every combination of exactly
+  the fields that scheme uses (each must reach ELIGIBLE), plus each named
+  threshold one per line.
 - `tests/test_rules.py` — a table of `(profile, scheme) → verdict`, every
   `UNKNOWN` path, and an assertion that importing `sathi.rules` pulls in no
   LLM module and no HTTP client at all.
@@ -181,7 +193,7 @@ source, not by taste.
 - **No `prerequisites` link was added.** Neither PMSBY nor PM-SYM requires the
   e-Shram UAN in its own rules, so asserting one would be an invented rule. The
   loader already accepts `prerequisites` if a scheme is ever found that needs it.
-- **`Profile.is_epfo_or_esic_member` and `Profile.is_nps_member`.** PM-SYM bars
+- **`Profile.is_epfo_or_esic_member` and `Profile.nps_exclusion_applies`.** PM-SYM bars
   members of NPS, ESIC and EPFO; e-Shram defines an unorganised worker as someone
   who is not an ESIC or EPFO member, and never mentions NPS. These were one
   `is_statutory_scheme_member` field until 2026-09-03, which silently gave
@@ -206,7 +218,7 @@ Hindi is the default and the fallback.
 - Scheme text carries optional `ask_en` / `pass_en` / `fail_en` / `reason_en`,
   `documents_en` and `renewal_en`. Optional in the loader, so a Hindi-only
   contribution still works and falls back rather than going blank — but
-  `tests/test_schemes.py` holds *our* three files to full bilingual coverage.
+  `tests/test_schemes.py` holds every shipped scheme file to full bilingual coverage.
 - `documents_en` is used only when it has the same length as `documents`. The
   flow tracks "do you have this paper?" by position, so a mismatched
   translation would pair an answer with the wrong document.
@@ -234,6 +246,7 @@ exposes plain methods (`info`, `scheme_list`, `set_language`, `cancel`).
 | `/clear` | Delete the messages this process still has a record of |
 | `/clearall` | Also walk ids backwards to cover the full 48-hour window |
 | `/cancel` `/stop` | Drop the profile now and end |
+| `/demo` | Fixed fictional people run through the real rules, labelled a demonstration; opens no session and logs nothing |
 
 Clearing is best-effort by design: **Telegram refuses to let a bot delete
 anything older than 48 hours**, so every reply states the count deleted and says

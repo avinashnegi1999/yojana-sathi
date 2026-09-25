@@ -7,10 +7,9 @@ placeholders only with observed facts.
 
 ## Sign-off status, 9 September 2026
 
-**Six schemes are signed off and giving real answers:** PMJJBY, PMSBY, PMUY,
-PM-SYM, e-Shram and the Uttarakhand old-age pension. Avinash Negi read
-both Department of Financial Services FAQs in full and confirmed every encoded
-value on 9 September 2026; each file names him in `verified_by`.
+*(Heading kept for history; current state is the next paragraph.)* On 9
+September six schemes were signed: PMJJBY, PMSBY, PMUY, PM-SYM, e-Shram and the
+Uttarakhand old-age pension.
 
 Ten now screen (as of 15 September 2026); five drafts stay UNKNOWN. Say so
 plainly, and say that the Uttarakhand widow pension was signed, then withdrawn
@@ -109,8 +108,10 @@ exactly as badly as a wrong YES.
 
 ## Why conversational
 
-Short questions, Hindi/English buttons, typed age/state input and confirmed
-occupation classification reduce the amount a person must type. Telegram and
+Short questions and Hindi/English buttons reduce the amount a person must
+type; only age is typed. The optional model's one job — suggesting an
+occupation for free text — is not reached by any button route today, because no
+signed scheme needs occupation. Telegram and
 WhatsApp use the same conversation. These are design choices to test with real
 workers; accessibility and comprehension improvements are not yet measured.
 No claim of universal literacy independence or production voice assistance is
@@ -154,8 +155,8 @@ established. On **8 September 2026**, a read-only SSH check confirmed that
 reported running. This establishes process status, not successful message
 delivery or independent judge access. No new phone test was performed.
 `python3 check.py` also passed locally at commit
-`e4a10e7be39b85a0ac3c2b19bbcfff96788812f0`. Earlier offline validation is reported
-in [HACKATHON_READINESS.md](../HACKATHON_READINESS.md).
+`e4a10e7be39b85a0ac3c2b19bbcfff96788812f0`. The current audit, including what
+was re-run on Python 3.11 and 3.12 and in CI, is [AUDIT.md](../AUDIT.md).
 
 Before submitting, fill: **[actual deployed commit, date checked, independent
 judge-access test and sanitized evidence link]**.

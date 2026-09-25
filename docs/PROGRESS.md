@@ -197,3 +197,50 @@ identifiers.
   "why you qualify" stay on the sheet, where they already were. Eligible
   block 646 -> 214 words on the test profile. Nothing rewritten, no new
   Hindi.
+
+## 2026-09-25 — fixes from AUDIT.md (not yet deployed)
+
+Local working tree only: nothing committed, nothing deployed. `check.py` must
+pass again on the VM through `install-on-vm.sh`, which now gates the staged
+copy before touching `/opt/sathi`.
+
+- **C1 money wording.** A 25-year-old matching PM-SYM was told, in Hindi, she
+  could get ₹36,000 "साल भर में". The total now says each pension is paid only
+  from its own starting age, and every scheme that costs money shows what the
+  worker pays (from `premium_inr`, which was loaded and never shown), on the
+  screen and the sheet. New Hindi strings are marked for native review.
+- **C2 pilot vs testing.** Sessions now carry the arrival-link slug
+  (`?start=csc`) as `events.cohort`, written only after consent, from a fixed
+  list in `sathi/metrics/events.py`. The report excludes `cli` sessions by
+  default and takes `--cohort`; `/stats.json` excludes `cli` too.
+  **Correction to 2026-09-14 above:** the participant-type answer is stored
+  without a session id, so it never could exclude developer testing from
+  pilot evidence. The cohort link does that now.
+- **M3 correctness sweep.** Added a per-scheme sweep over exactly the fields
+  each signed scheme uses; every signed scheme must reach ELIGIBLE. It found
+  the oracle had dropped NPS-Traders' PM-SYM exclusion (now added from the
+  maandhan FAQ capture). UK widow's oracle is marked stale, not copied from
+  the TOML — read the department overview before re-signing it.
+- **M4 headers.** The four signed files that still began "NO HUMAN SIGN-OFF IS
+  CLAIMED" now name the signature and the evidence PDF. Comment lines only.
+  IGNOAPS/IGNWPS still cite myScheme per value; fix at the next re-sign.
+- **M5 deploy.** `check.py` runs on `/tmp/sathi-stage` before the rsync.
+- **M6/M8 web + sessions.** Browser channel: bounded, validated request
+  bodies, socket timeout, crash → message, 30-minute idle expiry, 1-hour
+  sheets, 30 new sessions per client per 10 minutes, and page-side error
+  handling. Telegram/WhatsApp sessions also expire after 30 idle minutes.
+  `enable-web.sh` now writes a redacting Caddy log block; **the live host
+  still has the plain `log` block** — replace it per RUNBOOK.md.
+- **M7** rating accepts only 1–10 as decimal digits (`²` used to crash it).
+- **M1** recap lists only questions actually asked. Docs now say the model is
+  not called in normal use.
+- **Sources.** Visitor counters and "Last Update" stamps on maandhan.in and
+  eshram.gov.in made every fetch look changed; `normalise()` drops them.
+  Added a drift record for NPS-Traders. ESHRAM and PM_SYM still show `~`
+  until someone re-reads those pages and re-saves the records.
+- Added `.gitattributes` so `*.sh` and `*.service` are always checked out
+  with LF; `core.autocrlf=true` had made `enable-web.sh` CRLF on Windows,
+  and it is copied to the Linux host as-is.
+- Docs brought in line with the code: README, ARCHITECTURE, IMPACT,
+  CONTRIBUTING, SUBMISSION_DRAFT, DEMO_SCRIPT (re-run end to end), RUNBOOK,
+  PILOT_PLAN, `.env.example`, the landing page table and authorship line.

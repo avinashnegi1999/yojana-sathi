@@ -1,4 +1,10 @@
-# Source-researched draft, 12 September 2026. NO HUMAN SIGN-OFF IS CLAIMED.
+# SIGNED 14 September 2026 by Avinash Negi (see verified_by), against the
+# maandhan.in FAQ captured that day and the Labour Ministry contribution chart:
+# docs/audit-evidence/nps-traders-maandhan-faq-2026-09-14.txt and
+# docs/audit-evidence/nps-traders-labour-contribution-chart.pdf.
+# * The drift check watches the FAQ page: data/sources/nps_traders.json.
+# * Everything below this line is the research record from the 12 September
+# * draft, kept as written. Header updated 2026-09-25 (AUDIT.md M4).
 # Every value below from the scheme's own FAQ on maandhan.in (Ministry of
 # Labour & Employment), read 12 September 2026. Q2: "Any retail trader,
 # shopkeepers and self-employed person with annual turn-over not exceeding

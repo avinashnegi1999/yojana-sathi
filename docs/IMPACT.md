@@ -6,7 +6,7 @@ What each number counts, and what it does not claim.
 > used it. There are no projections in this project and no "potential reach"
 > figures. If it is not in the event log, it does not get reported.
 
-## The six numbers
+## The headline numbers
 
 | Number | Counts | Does **not** claim |
 |---|---|---|
@@ -47,17 +47,40 @@ one question, which is why it ships in the first deployed version and not later.
 
 ## Privacy
 
-Counts and coarse bands only: state, age band, occupation, income band. No
-name, phone, Aadhaar, village or exact income is written to the event log, and
-those fields do not exist in the profile.
+Counts and coarse bands only: state, age band, occupation, income band, plus
+the channel and — after consent — the arrival-link slug. Occupation is asked
+only when a screened scheme needs it, and no signed scheme does today, so it is
+usually empty. Income is asked only when PM-SYM is screened. No name, phone,
+Aadhaar, village or exact income is written to the event log, and those fields
+do not exist in the profile.
 
 Each session gets a fresh random id that is **not** derived from the messaging
 account, so two sessions by the same worker are not linkable in the log. That
 is why "workers screened" is honestly "sessions screened" — the alternative
 would be tracking people, which is worse.
 
-Aggregates covering fewer than 5 sessions are suppressed and shown as `<5`, so
-that state × occupation × age cannot re-identify one person in a small district.
+Breakdown tables (scheme, state, occupation) suppress any row covering fewer
+than 5 sessions and show it as `<5`. The headline totals are not suppressed, and
+the dashboard says so; this is not a guarantee of anonymity.
+
+## Pilot versus testing
+
+Every number is filtered the same way. Terminal (`cli`) sessions are always
+someone at a keyboard and are excluded unless `--include-cli` is given. A pilot
+is counted on its own by the link it arrives through: hand workers
+`t.me/YojanaSathiBot?start=csc` (or `sathi.avinashnegi.com/?start=csc`) and run
+`python3 -m sathi.metrics.report --cohort csc --since <pilot start>`. The
+end-of-session "who is this for?" answer cannot filter screenings — it is
+stored without a session id on purpose — so the link is the separator.
+
+## PM-SYM and NPS-Traders are future pensions
+
+Both pay ₹3,000 a month **from age 60**, and the worker contributes ₹55–₹200 a
+month until then. They are counted in "annual entitlement surfaced" at their
+annual value, because that is what the scheme states, but a 25-year-old
+receives nothing for 35 years. The worker is told so: the result screen and
+the sheet show each scheme's cost, and the total says each pension is paid
+only from its own starting age.
 
 ## Data freshness
 

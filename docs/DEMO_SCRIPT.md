@@ -16,35 +16,48 @@ No channel token or network send is needed; `--no-db` keeps these synthetic
 sessions out of impact data. The renderer prints the buttons/lists that the
 channel would send, but terminal preview is not a real Android rendering test.
 
-Enter one answer per prompt. Numbers select visible buttons; `UK` and `30` are
-typed text. The path was exercised in both languages and both channels.
+Enter one answer per prompt. Numbers select visible buttons; only the age is
+typed. Re-run against the current flow on **25 September 2026** in both
+languages (the same numbers work in each; use `1` instead of `2` at the first
+prompt for Hindi).
 
 | Prompt | Input | Meaning |
 |---|---|---|
-| Language | `1` | Hindi; use `2` for English |
+| Language | `2` | English (`1` for Hindi) |
 | Consent | `1` | Agree in this fictional demonstration |
-| State | `UK` | Uttarakhand |
-| Age | `30` | Fictional adult |
-| Occupation | `1` | Construction worker |
-| Income | `2` | Up to ₹5,000 monthly |
-| Land | `1` | No land |
-| Household | `4` | Four people |
+| All or choose | `1` | All verified schemes |
+| State | `1` | Uttarakhand |
+| Age | `30` | Typed — the one question with no buttons |
+| Income | `2` | Up to ₹5,000 a month |
 | Bank account | `1` | Yes |
 | Income tax | `2` | No |
-| EPFO/ESIC | `2` | No |
-| NPS | `2` | No |
-| Schemes already held | `4` | None of these |
-| Sheet offer | `1` | Accept |
+| PF / ESIC | `2` | No |
+| NPS | `1` | No NPS account |
+| Unorganised work | `1` | Yes |
+| Are you a woman? | `2` | No — skips the widow and Ujjwala follow-ups |
+| BPL household | `2` | No |
+| Shop / trade | `2` | No |
+| Schemes already held | `9` | None of these |
+| Papers you have | `1`, `4`, `8` | Aadhaar, bank passbook, then Next |
+| Sheet offer | `1` | Yes |
+| Rating | `8` | Typed |
+| Suggestion | `1` | Skip |
+| Who is this for? | `4` | Skip |
 | Exit | blank line | End preview |
 
-Expected: an answer recap, then real verdicts — eligible schemes with their ₹
-figures and where to apply, ineligible ones with the authored reason. Any answer
-left as "don't know" still produces **UNKNOWN** for the schemes that need it,
-which is the behaviour worth showing deliberately. Older wording here described
-human confirmation, a sheet offer, simulated document send and closing message.
-the pre-sign-off state, when there could be no eligible verdict for these
-schemes. Income in the answer recap is the fictional input, not a benefit.
-If the menu changes, follow the stated meaning and rerun before recording.
+Expected: an answer recap listing only the questions asked, then four matches
+(PMJJBY, PMSBY, PM-SYM, e-Shram). Each scheme that costs money shows **"You
+pay"** (₹436 a year, ₹20 a year, and for PM-SYM a line that points to the centre
+in English, or the ₹55–₹200 a month text in Hindi). The pension total says each
+pension is paid only from its own starting age. The ineligible list gives each
+authored reason.
+
+**Do not type a state name at the "All verified schemes / Choose" screen.** It
+opens the legacy full route that existed for deploy-time callbacks: it screens
+the unsigned drafts as UNKNOWN and asks occupation, land and household size,
+which no button route does. To show UNKNOWN deliberately, answer **Don't know**
+to the income-tax question instead: e-Shram and PM-SYM come back UNKNOWN with
+the missing fact named.
 
 ## Narration and shots
 

@@ -84,7 +84,20 @@ separately explained and approved follow-up design is adopted.
 At the end, the bot optionally asks how it is being used: checking for oneself,
 helping someone else, or testing as a developer/reviewer. This is anonymous
 self-report, not proof of occupation. Treat developer/reviewer replies as
-technical testing, never worker-pilot evidence.
+technical testing, never worker-pilot evidence. That answer is stored without a
+session id, so it **cannot** be used to filter screenings out of the numbers.
+
+**Use the pilot link, every time.** Hand participants
+`t.me/YojanaSathiBot?start=csc` (or `https://sathi.avinashnegi.com/?start=csc`),
+never the plain link. After consent, the session's events carry cohort `csc`,
+and the pilot is reported on its own with:
+
+    python3 -m sathi.metrics.report --cohort csc --since <pilot start date> --out pilot.html
+
+Maintainer testing through the plain link has no cohort and never appears in
+that report; terminal (`cli`) runs are excluded from every report by default.
+Use `?start=pilot` instead if a second, non-CSC partner is added, so the two
+can be reported separately.
 
 A participant may hold their own sheet; facilitators do not retain copies. A
 sheet still includes sensitive answers even when it has no name. On shared

@@ -1,7 +1,11 @@
 # Deploy runbook
 
-Three scripts. The unit file is the same everywhere, so moving hosts is a
-change of address and nothing else.
+`provision-aws.sh` creates the host, `install-on-vm.sh` deploys to it (and is
+the update path), and `enable-web.sh` adds the browser channel. The rest of
+`deploy/` is the three systemd units, a laptop runner (`run-locally.sh`), the
+WhatsApp token rotation, and an Azure path kept for reference. The unit files
+are the same everywhere, so moving hosts is a change of address and nothing
+else.
 
 ## Today, before Azure exists — start the usage clock
 
@@ -159,31 +163,60 @@ published a pack can serve it. Two copies would answer `410` for half the links.
 
 This is what is live (checked against `/etc/caddy/Caddyfile` on 2026-09-20).
 
-### The browser channel — a third unit, not yet routed
+### The browser channel — the third unit, live at sathi.avinashnegi.com
 
 `deploy/sathi-web.service` runs `sathi.local_web` on `127.0.0.1:8765` with the
 production database and `--secure-cookie`. Same shape as the WhatsApp unit:
 loopback only, Caddy in front. The page fetches `/answer` and `/document/*`
 as root-relative paths, so it needs a host of its own rather than a path
-under the existing one:
+under the existing one.
+
+**The site block must redact its access log.** The first version of this block
+was a plain `log`, which records every request with the worker's IP, her
+phone's User-Agent and the full `/document/<token>` URL, a bearer link to her
+sheet. That was reproduced on Caddy 2.6.2 (what `apt install caddy` gives on
+Ubuntu 24.04) and 2.11.4 (AUDIT.md M8). Use this block, which passes
+`caddy validate` on both versions and was run on both to confirm no token,
+User-Agent, forwarded IP or cookie reaches the log:
 
     sathi.avinashnegi.com {
-        log
+        log {
+            format filter {
+                wrap console
+                fields {
+                    request>uri regexp "/document/[^\s?#]+" "/document/REDACTED"
+                    request>remote_ip delete
+                    request>remote_port delete
+                    request>client_ip delete
+                    request>headers>User-Agent delete
+                    request>headers>X-Forwarded-For delete
+                }
+            }
+        }
         reverse_proxy 127.0.0.1:8765
     }
+
+`deploy/enable-web.sh` writes exactly this block on a host that has none. On a
+host where an older run already wrote the plain `log` block, it stops with a
+message instead of editing the Caddyfile: replace that `log` line by hand with
+the `log { … }` block above, then `sudo caddy validate --config
+/etc/caddy/Caddyfile && sudo systemctl reload caddy`.
 
 DNS first: an A record `sathi` → `13.206.84.69` at Spaceship. Caddy fetches
 the certificate on first request, so the record must resolve before the
 site block goes in. Then, after `install-on-vm.sh` has synced the code:
 
-    scp -i ~/.ssh/sathi_aws deploy/sathi-web.service ubuntu@13.206.84.69:/tmp/
-    ssh -i ~/.ssh/sathi_aws ubuntu@13.206.84.69 'sudo install -m 644 /tmp/sathi-web.service /etc/systemd/system/ && sudo systemctl daemon-reload && sudo systemctl enable --now sathi-web && systemctl is-active sathi-web'
-    ssh -i ~/.ssh/sathi_aws ubuntu@13.206.84.69 'printf "
-sathi.avinashnegi.com {
-    log
-    reverse_proxy 127.0.0.1:8765
-}
-" | sudo tee -a /etc/caddy/Caddyfile >/dev/null && sudo caddy validate --config /etc/caddy/Caddyfile && sudo systemctl reload caddy'
+    scp -i ~/.ssh/sathi_aws deploy/sathi-web.service deploy/enable-web.sh ubuntu@13.206.84.69:/tmp/
+    ssh -i ~/.ssh/sathi_aws ubuntu@13.206.84.69 'sudo bash /tmp/enable-web.sh'
+
+The web channel has its own limits (AUDIT.md M6): a 10 000-byte body cap, a
+10-second socket timeout, sessions dropped after 30 idle minutes, sheets after
+an hour, and at most 30 new sessions per client per 10 minutes. The client is
+the last `X-Forwarded-For` entry, which is the one Caddy appends.
+
+A pilot link for the browser is `https://sathi.avinashnegi.com/?start=csc`;
+its sessions carry cohort `csc` in the event log, the same as
+`t.me/YojanaSathiBot?start=csc` on Telegram.
 
 `install-on-vm.sh` restarts every enabled `sathi-*` unit after the sync, so
 all three channels run the same code from the same deploy.

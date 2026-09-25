@@ -10,7 +10,9 @@ amount, an age band, or an exclusion must include, for that value:
 - a `source_url` deep-linking the **official** `.gov.in` page carrying it —
   not the site root, not a news article, not an aggregator, not a chatbot
 - an updated `verified_on` date
-- your name in `verified_by`
+- and then a sign-off by a maintainer with `python3 -m sathi.review <CODE>` —
+  the only supported way a name reaches `verified_by`. A hand-edited signature
+  fails `tests/test_schemes.py`, which pins the signed list.
 
 **PRs that change a rule without a source are closed.** This is not
 bureaucracy. A wrong threshold sends a worker on a day-long trip to a CSC that

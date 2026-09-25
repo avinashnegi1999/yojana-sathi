@@ -1,4 +1,12 @@
-# Source-researched draft, 12 September 2026. NO HUMAN SIGN-OFF IS CLAIMED.
+# SIGNED 15 September 2026 by Avinash Negi (see verified_by), against the PIB
+# release of 11 Feb 2026: docs/audit-evidence/ignoaps-pib-2026-02-11.pdf
+# (checked: BPL eligibility; ₹200/month at 60-79; ₹500/month from 80).
+# ? The criteria below still cite the myScheme entry, an aggregator
+# ? CONTRIBUTING.md does not accept. Point each source_url at the PIB release
+# ? (PRID=2226202) at the next re-sign — changing it now would carry a data
+# ? change under an existing signature.
+# * Everything below this line is the research record from the 12 September
+# * draft, kept as written. Header updated 2026-09-25 (AUDIT.md M4).
 # ! nsap.nic.in refused every connection on 12 September 2026, so the values
 # ! below were read from the myScheme entry, which reproduces the NSAP FAQ
 # ! text. That is an aggregator, and this project has been burned by one
