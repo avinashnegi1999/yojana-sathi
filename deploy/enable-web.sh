@@ -23,8 +23,37 @@ systemctl restart sathi-web
 systemctl restart sathi-whatsapp   # * install-on-vm.sh restarts only sathi
 
 echo "==> caddy"
+# ! Redacted access log, the same shape as the pack host in RUNBOOK.md. The
+# ! plain `log` this used to write recorded every worker's IP, phone model and
+# ! the full /document/<token> URL — a bearer link to her sheet — for every
+# ! request (reproduced on Caddy 2.6.2 and 2.11.4; AUDIT.md M8).
 if ! grep -q "^$HOST" "$CADDYFILE"; then
-  printf '\n%s {\n    log\n    reverse_proxy 127.0.0.1:8765\n}\n' "$HOST" >> "$CADDYFILE"
+  cat >> "$CADDYFILE" <<CADDY
+
+$HOST {
+    log {
+        format filter {
+            wrap console
+            fields {
+                request>uri regexp "/document/[^\s?#]+" "/document/REDACTED"
+                request>remote_ip delete
+                request>remote_port delete
+                request>client_ip delete
+                request>headers>User-Agent delete
+                request>headers>X-Forwarded-For delete
+            }
+        }
+    }
+    reverse_proxy 127.0.0.1:8765
+}
+CADDY
+elif ! grep -q "/document/REDACTED" "$CADDYFILE"; then
+  # ! An older run of this script already wrote a plain `log` block. It is
+  # ! not safe to rewrite someone's Caddyfile with sed, so stop and say so.
+  echo "!! $CADDYFILE has a $HOST block without log redaction."
+  echo "!! Replace its 'log' line with the block in deploy/RUNBOOK.md"
+  echo "!! (section: The browser channel), then run: sudo systemctl reload caddy"
+  exit 1
 fi
 caddy validate --config "$CADDYFILE"
 systemctl reload caddy

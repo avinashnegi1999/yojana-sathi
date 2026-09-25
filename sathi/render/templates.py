@@ -132,6 +132,36 @@ def first_sentence(text: str) -> str:
     return out
 
 
+def _is_devanagari(text: str) -> bool:
+    return any("ऀ" <= ch <= "ॿ" for ch in text)
+
+
+def premium_text(scheme: Scheme, lang: str = "hi") -> str:
+    """What the WORKER pays for this scheme, in words — or "" when it is free.
+
+    # ! premium_inr was loaded, validated and then never shown, so a worker was
+    # ! told PM-SYM is worth ₹36,000 a year and never told she pays ₹55–₹200 a
+    # ! month into it. The screen and the sheet both call this one function.
+    #
+    # * data/schemes/_TEMPLATE.toml defines an integer premium_inr as ₹/year
+    # * the worker pays. Prose is allowed where the amount varies (by entry
+    # * age, for the Maandhan pensions) and is shown word for word, but only in
+    # * the language it was written in. A Hindi sentence on an English screen
+    # * is as unreadable as a blank one, so the other language gets a generic
+    # * "ask at the centre for the amount" instead of a translation nobody
+    # * signed.
+    """
+    value = scheme.benefit.get("premium_inr")
+    if value is None or value == STUB or value == 0:
+        return ""
+    if type(value) is int:
+        return s("result.premium_per_year", lang, amount=rupees(value))
+    text = str(value).strip()
+    if _is_devanagari(text) == (lang == "hi"):
+        return text
+    return s("result.premium_ask", lang)
+
+
 def eligible_block(results: tuple[Result, ...], schemes: dict[str, Scheme],
                    known: frozenset[str], lang: str = "hi") -> str:
     hits = [r for r in results if r.verdict is Verdict.ELIGIBLE]
@@ -140,16 +170,20 @@ def eligible_block(results: tuple[Result, ...], schemes: dict[str, Scheme],
     lines = [s("result.eligible_header", lang, count=len(hits))]
     for i, r in enumerate(hits, start=1):
         sc = schemes[r.scheme_code]
-        lines.append(
-            s(
-                "result.scheme_line", lang,
-                index=i,
-                name_hi=sc.name(lang),
-                new_badge=s("result.new_badge", lang) if r.scheme_code not in known else "",
-                benefit=first_sentence(sc.summary(lang)),
-                where=where_label(sc, lang),
-            )
+        entry = s(
+            "result.scheme_line", lang,
+            index=i,
+            name_hi=sc.name(lang),
+            new_badge=s("result.new_badge", lang) if r.scheme_code not in known else "",
+            benefit=first_sentence(sc.summary(lang)),
+            where=where_label(sc, lang),
         )
+        # * The cost sits with the scheme it belongs to, so nobody walks to a
+        # * centre expecting money and finds out there that she pays in first.
+        premium = premium_text(sc, lang)
+        if premium:
+            entry += "\n" + s("result.premium_line", lang, premium=premium)
+        lines.append(entry)
     # ! Two different kinds of money, never added together, and alternative
     # ! routes to one payment collapsed. Both numbers come from engine so the
     # ! screen and the printed pack cannot drift apart — they used to sum this

@@ -5,13 +5,12 @@
 # ! open. It refuses to run without a terminal, refuses a name that looks
 # ! automated, and makes you type the scheme code back before it writes.
 #
-# * Why this exists. Every scheme ships unsigned, so every worker gets UNKNOWN
-# * and the bot says the same thing to everybody. That is correct — nobody
-# * should be sent to a CSC on a number one machine transcribed once — but it
-# * also means the product does nothing until a person checks the values. The
-# * checking was the slow part: seven files, forty-odd values, each needing its
-# * source opened. So this prints every value NEXT TO the URL it came from and
-# * the sentence it was transcribed from, one scheme at a time.
+# * Why this exists. A scheme file ships unsigned, so every worker gets UNKNOWN
+# * for it until a person has checked the values — nobody should be sent to a
+# * CSC on a number one machine transcribed once. The checking is the slow
+# * part: every value needs its source opened. So this prints every value NEXT
+# * TO the URL it came from and the sentence it was transcribed from, one
+# * scheme at a time. (As of 2026-09-25, 10 of the 15 files are signed.)
 #
 # ! What this tool does NOT do: it does not check anything for you. It shows
 # ! you what to check. Typing "yes" is you saying you opened the page and read

@@ -157,7 +157,16 @@ scheme_line = """{index}. {name_hi} {new_badge}
    {benefit}
    Where to go: {where}"""
 new_badge = "🆕 (you do not have this yet)"
-value_line = "These could be worth about ₹{total} to you in a year."
+# ! Not "you could get this in a year". PM-SYM and NPS-Traders pay nothing
+# ! until 60, so that line told a 25-year-old ₹36,000 was a year away. The
+# ! total is still stated, with the start age pointed at every time.
+value_line = "Added up, the pensions above come to about ₹{total} a year — but each one is paid only from its own starting age, which may be years away. Read each line above."
+# * What the worker pays, under the scheme it belongs to. From premium_inr,
+# * which data/schemes/_TEMPLATE.toml defines as ₹/year the WORKER pays.
+premium_line = "   You pay: {premium}"
+premium_per_year = "₹{amount} a year"
+# * Used when the scheme's premium is written only in the other language.
+premium_ask = "a regular payment — ask at the centre for the exact amount"
 cover_line = "On top of that there is insurance cover of up to ₹{total} across the policies shown. Each policy pays only under its own terms."
 cover_only_line = "You can get insurance cover of up to ₹{total} across the policies shown. Each policy pays only under its own terms."
 value_caveat = "This is what you may be entitled to — the money has not been paid yet. You have to apply for it."
@@ -230,6 +239,7 @@ It has no name and no Aadhaar on it — only what to ask for and what to carry."
 title = "Yojana Sathi — your list"
 why = "Why"
 where = "Where"
+you_pay = "You pay"
 carry = "Take with you"
 generated_on = "Generated: {date}"
 disclaimer = """This is not a government document. It is only a list to make the conversation at the centre easier.
@@ -295,6 +305,10 @@ no_schemes_loaded = "Scheme information is not ready yet. Please try again a lit
 pick_from_list = "Please pick one of the options below."
 stale_button = "This button is no longer active. Use the latest question, or send /start to begin again."
 screening_stopped = "This screening stopped because something went wrong. Please send /start and answer the questions again."
+# * The browser has no /start to send; it has a "Start again" button.
+web_stopped = "This screening stopped because something went wrong. Tap “Start again” below to begin again."
+# * Shown before a language is chosen, so the browser sends it in both.
+too_many_sessions = "Too many new screenings have started from this connection. Please wait a few minutes and try again."
 
 # =====================================================================
 [recap]

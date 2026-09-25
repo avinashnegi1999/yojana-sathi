@@ -1,4 +1,4 @@
-"""Telegram adapter. Thin: translates Reply/ChannelMessage, holds no logic.
+"""Telegram adapter. Thin: translates updates into answers and Reply into sends; holds no logic.
 
 # * Long polling (getUpdates), not a webhook. A webhook needs a public URL, TLS
 # * termination and a platform that stays awake — three ways for deploy day to
@@ -267,6 +267,16 @@ class TelegramBot(Router):
         except Exception as e:  # noqa: BLE001 — the file already went; a link is a bonus
             print(f"[telegram] pack link failed: {type(e).__name__}")
 
+    def forget(self, chat_id: str) -> None:
+        """Router.expire_idle() found this chat quiet for 48 hours.
+
+        # * Telegram refuses to delete anything older than 48 hours, so the ids
+        # * kept for /clear are useless now, and pack links die after an hour.
+        """
+        self._sent.pop(chat_id, None)
+        for token in self._tokens.pop(chat_id, []):
+            links.revoke(token)
+
     # * -------------------------------------------------------------- /clear
 
     def _track(self, chat_id: str, message_id: int | None) -> None:
@@ -436,6 +446,8 @@ class TelegramBot(Router):
             answer = cq.get("data", "")
             message_id = cq["message"].get("message_id")
             self._track(chat_id, message_id)
+            # * An idle session is dropped first, so its old keyboard reads as stale.
+            self.expire_idle(chat_id)
             stale = (not message_id or chat_id not in self.sessions
                      or message_id != self._active_keyboard.get(chat_id))
             ack = {"callback_query_id": cq["id"]}

@@ -59,7 +59,16 @@ scp -i "$KEY" "$SRC/deploy/sathi.service" "$TARGET:/tmp/sathi-stage/sathi.servic
 echo "==> moving into place, running the checks, starting"
 "${SSH[@]}" 'sudo bash -s' <<'REMOTE'
 set -euo pipefail
-rsync -a --delete /tmp/sathi-stage/{sathi,data,tests,check.py,pyproject.toml} /opt/sathi/
+
+# ! The gate runs on the STAGED copy, before anything live changes. It used to
+# ! run after the rsync below: a failing build stopped this script but was
+# ! already sitting in /opt/sathi, and the next crash or reboot (every unit is
+# ! Restart=always) would have served it to workers. Now a red check.py leaves
+# ! /opt/sathi exactly as it was. (AUDIT.md M5)
+cd /tmp/sathi-stage && python3 check.py
+
+rsync -a --delete --exclude '__pycache__' \
+  /tmp/sathi-stage/{sathi,data,tests,check.py,pyproject.toml} /opt/sathi/
 chown -R sathi:sathi /opt/sathi
 
 # ! A re-deploy updates ordinary configuration but must not replace the key
@@ -71,9 +80,7 @@ if [[ -n "$old_reach_key" ]]; then
 fi
 chmod 600 /etc/sathi/sathi.env
 
-# ! The same check.py that gates the Docker build gates the deploy. A VM that
-# ! cannot pass its own tests must not talk to a worker.
-cd /opt/sathi && python3 check.py
+cd /opt/sathi
 
 # ! Preserve the old key when upgrading: changing it would count existing
 # ! chats again. A new host gets a random key before the service starts.

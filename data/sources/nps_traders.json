@@ -1,0 +1,34 @@
+{
+  "code": "NPS_TRADERS",
+  "url": "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=78&lid=64&page=74",
+  "read_on": "2026-09-25",
+  "sha256": "e999e4f1703c81dc6484a91c2b00042f64da8d8c646ee89081ff7c5e18dd1631",
+  "chars": 9844,
+  "claims": [
+    {
+      "name": "turnover not exceeding Rs 1.5 crore",
+      "pattern": "turn-?over not exceeding Rs\\.?\\s*1\\.5\\s*crore"
+    },
+    {
+      "name": "entry age 18-40",
+      "pattern": "age group of 18\\s*-\\s*40"
+    },
+    {
+      "name": "excludes income tax payers",
+      "pattern": "should not be an income tax payer"
+    },
+    {
+      "name": "excludes NPS (govt funded), ESIC, EPFO",
+      "pattern": "National Pension Scheme \\(NPS\\s*-\\s*GOVT FUNDED\\),\\s*Employees.{0,3}State Insurance Corporation scheme \\(ESIC\\) and Employees.{0,3}Provident Fund Organization \\(EPFO\\)"
+    },
+    {
+      "name": "excludes PM-SYM members",
+      "pattern": "\\(EPFO\\) and Pradhan Mantri Shram Yogi Maandhan"
+    },
+    {
+      "name": "pension Rs 3000 a month from 60",
+      "pattern": "minimum assured monthly pension of Rs\\.?\\s*3000.{0,30}age of 60 years"
+    }
+  ],
+  "absent": []
+}

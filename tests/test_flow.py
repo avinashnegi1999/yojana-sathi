@@ -659,8 +659,8 @@ def test_two_maandhan_pensions_are_one_pension_in_the_total():
 def test_gender_answer_skips_widow_and_pmuy_followups_when_not_applicable():
     """A male answer removes the dependent widow question; LPG success removes PMUY's declaration."""
     schemes = load_all()
-    # * IGNWPS is deliberately unsigned during renewed source review. This
-    # * routing test needs its widow condition, not its production sign-off.
+    # * IGNWPS is signed (since 2026-09-15); the fixture signature below just
+    # * keeps this routing test about the widow condition, not about sign-off.
     schemes["IGNWPS"] = replace(schemes["IGNWPS"], verified_by="test fixture only")
     widow = Conversation(schemes, None)
     widow.start(); widow.handle(LANG_EN); widow.handle(consent.YES)
@@ -711,8 +711,12 @@ def test_events_survive_a_restart_and_the_dashboard_renders():
         db = directory / "t.db"
 
         log = EventLog(db)
+        # * A worker channel, not the default "cli": the report leaves terminal
+        # * sessions out of every number, because they are always testing.
         for _ in range(6):  # 6 workers, so k-anonymity does not suppress them
-            _answer_all(Conversation(schemes, log), tax=NO)
+            _answer_all(Conversation(schemes, log, channel="telegram"), tax=NO)
+        # ! And one terminal run, which must not move any number below.
+        _answer_all(Conversation(schemes, log), tax=NO)
         before = len(log.query("SELECT * FROM events"))
         log.close()
 
@@ -727,6 +731,51 @@ def test_events_survive_a_restart_and_the_dashboard_renders():
         assert "₹72,000" in page and "not money received" in page
         assert "never verified" in page, "the stubbed fixture must show as unverified"
         conn.close()
+
+
+def test_a_future_pension_is_never_shown_as_money_this_year():
+    """AUDIT.md C1. A 25-year-old matched PM-SYM and was told, in Hindi,
+    "इनसे आपको साल भर में लगभग 36,000 रुपये मिल सकते हैं" — for a pension that
+    starts at 60 and that she pays ₹55–₹200 a month into. Neither the start
+    age nor the contribution was on the screen or the sheet.
+    """
+    from sathi.core.profile import Profile
+    from sathi.pack import pack
+    from sathi.render import templates
+    from sathi.rules.engine import evaluate_all
+
+    signed = {code: sc for code, sc in load_all().items() if sc.is_servable}
+    young = Profile(state="BR", age=25, is_unorganised_worker=True, income_band="upto_5000",
+                    has_bank_account=True, is_income_tax_payer=False,
+                    is_epfo_or_esic_member=False, nps_exclusion_applies=False,
+                    is_small_trader=False, is_bpl=False, is_woman=False,
+                    household_has_lpg=True)
+    results = evaluate_all(young, signed)
+    assert "PM_SYM" in {r.scheme_code for r in results if r.is_eligible}, \
+        "the fixture no longer matches PM-SYM, so this test would prove nothing"
+
+    for lang in ("hi", "en"):
+        screen = templates.result_message(results, signed, frozenset(), lang)
+        _, blob = pack.build(results, signed, frozenset(), lang=lang)
+        sheet = blob.decode("utf-8")
+        for where, text in (("screen", screen), ("sheet", sheet)):
+            # ! The total now names the start age every time it is shown.
+            assert s("result.value_line", lang, total="36,000") in text, (lang, where)
+            # ! What she pays is on both, for every scheme that costs money.
+            assert templates.premium_text(signed["PM_SYM"], lang) in text, (lang, where)
+            assert templates.premium_text(signed["PMSBY"], lang) in text, (lang, where)
+        # ! The old promise is gone from both languages.
+        assert "साल भर में लगभग" not in screen + sheet
+        assert "to you in a year" not in screen + sheet
+
+    # * Prose premiums stay in the language they were written in: PM-SYM's is
+    # * Hindi, so English falls back to the generic line rather than Devanagari.
+    assert "₹55" in templates.premium_text(signed["PM_SYM"], "hi")
+    assert templates.premium_text(signed["PM_SYM"], "en") == s("result.premium_ask", "en")
+    # * Integer premiums use the template's own unit: ₹ a year.
+    assert templates.premium_text(signed["PMSBY"], "en") == "₹20 a year"
+    # * Free schemes say nothing about cost.
+    assert templates.premium_text(signed["ESHRAM"], "en") == ""
 
 
 def run() -> None:

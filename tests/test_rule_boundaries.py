@@ -118,11 +118,14 @@ def _oracle(code: str, p: Profile) -> bool | None:
         criterion(p.uk_pension_selected)
         if code == "UK_WIDOW":
             criterion(p.is_widow)
-            # ! No other-pension criterion on either file. myScheme states it,
-            # ! the department's own pages do not, and it REFUSES people — so
-            # ! both schemes tell the worker to ask instead of turning her away
-            # ! on an aggregator's unsourced line. The answer is still collected
-            # ! and still shown; it just does not decide a verdict.
+            # ! OUT OF DATE, and deliberately not "fixed" from the TOML. Since
+            # ! 2026-09-15 uk_widow.toml carries an other-pension EXCLUSION
+            # ! sourced to the department's Hindi pension overview, and that
+            # ! file is unsigned. Encoding it here by copying the TOML would make
+            # ! the oracle agree with the file by construction. Before UK_WIDOW
+            # ! is re-signed, read that overview and write the exclusion here
+            # ! from it. Until then the per-scheme sweep below skips unsigned
+            # ! files, and the old sweep never varies receives_other_pension.
     elif code == "APY":
         # pfrda.org.in/w/faqs/atal-pension-yojana, read 12 September 2026:
         # "(i) The age of an individual should be between 18 and 40 years.
@@ -171,6 +174,11 @@ def _oracle(code: str, p: Profile) -> bool | None:
         exclusion(tax)
         exclusion(epfo_or_esic)
         exclusion(nps)
+        # ! Same FAQ answer, last clause, which this oracle had dropped: "They
+        # ! should not be … a member of … Pradhan Mantri Shram Yogi Maandhan."
+        # ! (docs/audit-evidence/nps-traders-maandhan-faq-2026-09-14.txt:11).
+        # ! The old sweep never varied known_schemes, so the gap was invisible.
+        exclusion("PM_SYM" in p.known_schemes)
     elif code == "PM_VISHWAKARMA":
         # PIB PRID=1989108: one of 18 trades, 18+, no unpaid PMEGP/MUDRA/
         # SVANidhi loan in 5 years, and no government service in the immediate
@@ -250,6 +258,65 @@ def test_every_combination_matches_the_encoded_source_interpretation():
     # ! nothing passes silently.
     assert checked > 5000, f"only {checked} verdicts checked"
     print(f"  .. {checked:,} verdicts checked against the encoded source interpretation")
+
+
+# * Values for the non-boolean fields a scheme file can touch. Every boolean
+# * Profile field is swept over TRI. A new non-boolean field in a scheme file
+# * fails the sweep below until it gets a list here, so nothing is silently
+# * held at None again.
+SWEEP_VALUES = {
+    "age": sorted(set(a for a in AGES if a is not None) | {49, 50, 51, 79, 80, 81}) + [None],
+    "income_band": INCOME,
+    "state": [None, "UK", "UP", "BR"],
+    "known_schemes": [frozenset(), frozenset({"PM_SYM"}), frozenset({"PMSBY"})],
+}
+NON_BOOLEAN_FIELDS = {"age", "income_band", "state", "known_schemes", "occupation",
+                      "land_holding_band", "family_size"}
+
+
+def test_every_signed_scheme_is_swept_over_its_own_fields():
+    """AUDIT.md M3: the combined sweep above holds every field it does not
+    list at None, so 6 of the 10 signed schemes (the three NSAP pensions,
+    NPS-Traders, PMUY and the Uttarakhand old-age pension) never produced a
+    single ELIGIBLE verdict in it. A wrong BPL, state, widow or trader
+    condition could not fail it.
+
+    This sweeps each SIGNED scheme over every combination of exactly the
+    fields its own criteria and exclusions touch, and compares against the
+    same hand-written oracle. It also requires every signed scheme to reach
+    ELIGIBLE at least once, so an oracle that only ever agrees on UNKNOWN
+    cannot pass.
+    """
+    real = load_all(ROOT / "data" / "schemes")
+    signed_codes = sorted(code for code, sc in real.items() if sc.is_human_verified)
+    schemes = _signed_schemes()
+    wrong, checked = [], 0
+    for code in signed_codes:
+        scheme = schemes[code]
+        fields = sorted({c.field for c in scheme.criteria + scheme.exclusions})
+        domains = []
+        for field in fields:
+            if field in SWEEP_VALUES:
+                domains.append(SWEEP_VALUES[field])
+            elif field in NON_BOOLEAN_FIELDS:
+                raise AssertionError(f"{code} uses {field}; give it values in SWEEP_VALUES")
+            else:
+                domains.append(TRI)
+        eligible = 0
+        for combo in itertools.product(*domains):
+            p = Profile(**dict(zip(fields, combo)))
+            got = evaluate(p, scheme).verdict
+            want = _expected(code, p)
+            checked += 1
+            eligible += got is Verdict.ELIGIBLE
+            if got is not want:
+                wrong.append(f"{code} {dict(zip(fields, combo))}: got {got.value}, "
+                             f"oracle says {want.value}")
+        assert eligible, f"{code} never reached ELIGIBLE — the sweep proves nothing for it"
+    assert not wrong, "\n  " + "\n  ".join(wrong[:20])
+    assert len(signed_codes) >= 10, signed_codes
+    print(f"  .. {checked:,} per-scheme verdicts across {len(signed_codes)} signed schemes, "
+          f"each reaching ELIGIBLE")
 
 
 def test_the_named_boundaries_individually():

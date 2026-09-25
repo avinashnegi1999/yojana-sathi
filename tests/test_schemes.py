@@ -216,7 +216,7 @@ def test_real_scheme_files_are_structurally_valid():
 
 def test_real_scheme_files_are_fully_bilingual():
     # ! English is optional in the loader so a Hindi-only contribution still
-    # ! works. Our own three files are held to a higher bar: a worker who picks
+    # ! works. Every shipped file is held to a higher bar: a worker who picks
     # ! English must never hit a Devanagari sentence mid-result.
     root = Path(__file__).resolve().parent.parent
     for code, s in load_all(root / "data" / "schemes").items():

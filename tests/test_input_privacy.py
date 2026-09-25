@@ -49,6 +49,23 @@ def test_oversized_age_reasks_without_raising():
     assert c.state is State.AGE and c.profile.age is None
 
 
+def test_rating_reasks_on_digits_int_cannot_read():
+    # ! "²" and "④" pass str.isdigit() but int() rejects them; 5,000 digits
+    # ! trip Python's int-conversion limit. Each used to raise ValueError, and
+    # ! Telegram then told a worker who had FINISHED to start the whole
+    # ! screening again. Every one must re-ask the rating instead.
+    for raw in ("²", "④", "9" * 5000, "0", "11", "-3", "7.5"):
+        c = Conversation({})
+        c.state = State.RATING
+        c.handle(raw)
+        assert c.state is State.RATING and c._rating is None, raw
+    # * Devanagari digits are real input and still count.
+    c = Conversation({})
+    c.state = State.RATING
+    c.handle("७")  # ७
+    assert c._rating == 7 and c.state is State.SUGGESTION
+
+
 def test_negative_document_index_does_not_mark_last_document():
     c = Conversation({})
     c.state = State.DOCUMENTS

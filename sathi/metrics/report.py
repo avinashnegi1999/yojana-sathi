@@ -15,6 +15,7 @@
 
 import argparse
 import html
+import os
 import sqlite3
 import statistics
 import sys
@@ -22,6 +23,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from sathi.core.schemes import load_all
+from sathi.metrics.events import SOURCE_SLUGS
 from sathi.rules import engine
 
 # ! Any aggregate cell counting fewer than this many workers is suppressed.
@@ -40,10 +42,34 @@ def _scalar(conn, sql: str, params: tuple = ()) -> int:
     return int(row[0] or 0)
 
 
-def numbers(conn: sqlite3.Connection, since: str = "") -> dict:
-    """The six reportable numbers. One SQL each, printed in the footer."""
-    where = " AND ts >= ?" if since else ""
-    p: tuple = (since,) if since else ()
+def _where(since: str = "", cohort: str = "", include_cli: bool = False) -> tuple[str, tuple]:
+    """The one filter every number on the page shares: (" AND …", params).
+
+    # ! AUDIT.md C2. Every query here used to count every session on every
+    # ! channel, so terminal test runs and the maintainer's own Telegram
+    # ! screenings sat in the same totals a judge would read as worker impact.
+    # !   - channel 'cli' is always a person at a terminal, never a worker, so
+    # !     it is excluded unless --include-cli asks for it;
+    # !   - cohort narrows to sessions that arrived through one link slug, e.g.
+    # !     the `csc` link handed out in the pilot (see events.SOURCE_SLUGS).
+    """
+    clauses: list[str] = []
+    params: list[str] = []
+    if since:
+        clauses.append("ts >= ?")
+        params.append(since)
+    if not include_cli:
+        clauses.append("COALESCE(channel, '') != 'cli'")
+    if cohort:
+        clauses.append("cohort = ?")
+        params.append(cohort)
+    return "".join(f" AND {c}" for c in clauses), tuple(params)
+
+
+def numbers(conn: sqlite3.Connection, since: str = "", cohort: str = "",
+            include_cli: bool = False) -> dict:
+    """The reportable counts. One SQL each, printed in the footer."""
+    where, p = _where(since, cohort, include_cli)
 
     screened = _scalar(
         conn,
@@ -87,7 +113,8 @@ def numbers(conn: sqlite3.Connection, since: str = "") -> dict:
     }
 
 
-def value_split(conn, schemes_dir: str | Path = "data/schemes", since: str = "") -> dict:
+def value_split(conn, schemes_dir: str | Path = "data/schemes", since: str = "",
+                cohort: str = "", include_cli: bool = False) -> dict:
     """Surfaced ₹, split by what kind of money it is.
 
     # ! An insurance cover and an annual pension are not the same number and
@@ -120,8 +147,7 @@ def value_split(conn, schemes_dir: str | Path = "data/schemes", since: str = "")
     # ! visits by the same person still count twice — a separate and disclosed
     # ! limitation, not this bug.
     groups = engine.exclusive_groups(schemes)
-    where = " AND ts >= ?" if since else ""
-    p: tuple = (since,) if since else ()
+    where, p = _where(since, cohort, include_cli)
     out = {"payout": 0, "cover": 0, "unclassified": 0}
 
     best: dict[str, dict[str, dict[str, int]]] = {}
@@ -151,12 +177,14 @@ def value_split(conn, schemes_dir: str | Path = "data/schemes", since: str = "")
     return out
 
 
-def by_week(conn, since: str = "") -> list[tuple[str, int]]:
-    where = " AND ts >= ?" if since else ""
-    p: tuple = (since,) if since else ()
+def by_week(conn, since: str = "", cohort: str = "",
+            include_cli: bool = False) -> list[tuple[str, int]]:
+    # * Consented sessions, not opened ones: the arrival cohort is written only
+    # * after consent, so counting session_start could never be filtered by it.
+    where, p = _where(since, cohort, include_cli)
     rows = conn.execute(
         f"SELECT substr(ts,1,10) d, COUNT(DISTINCT session_id) n FROM events"
-        f" WHERE event_type='session_start'{where} GROUP BY d ORDER BY d", p,
+        f" WHERE event_type='consent_granted'{where} GROUP BY d ORDER BY d", p,
     ).fetchall()
     weeks: dict[str, int] = {}
     for row in rows:
@@ -165,12 +193,12 @@ def by_week(conn, since: str = "") -> list[tuple[str, int]]:
     return sorted(weeks.items())
 
 
-def distribution(conn, column: str, event_type: str, since: str = "") -> list[tuple[str, int, bool]]:
+def distribution(conn, column: str, event_type: str, since: str = "", cohort: str = "",
+                 include_cli: bool = False) -> list[tuple[str, int, bool]]:
     """Counts by one coarse column. Returns (label, n, suppressed)."""
     if column not in ("scheme_code", "state", "occupation", "age_band", "income_band"):
         raise ValueError(f"{column!r} is not a reportable dimension")
-    where = " AND ts >= ?" if since else ""
-    p: tuple = (since,) if since else ()
+    where, p = _where(since, cohort, include_cli)
     rows = conn.execute(
         f"SELECT {column} k, COUNT(DISTINCT session_id) n FROM events"
         f" WHERE event_type=? AND {column} IS NOT NULL{where}"
@@ -296,12 +324,16 @@ def _reach(conn: sqlite3.Connection) -> dict:
 
 
 def render(conn: sqlite3.Connection, since: str = "",
-           schemes_dir: str | Path = "data/schemes", today: date | None = None) -> str:
-    n = numbers(conn, since)
+           schemes_dir: str | Path = "data/schemes", today: date | None = None,
+           cohort: str = "", include_cli: bool = False) -> str:
+    # * One filter for every number on the page, so no card can quietly count
+    # * sessions another card excludes.
+    f = {"since": since, "cohort": cohort, "include_cli": include_cli}
+    n = numbers(conn, **f)
     today = today or date.today()
     prov = provenance(schemes_dir, today)
     unverified = [p for p in prov if not p["servable"]]
-    split = value_split(conn, schemes_dir, since)
+    split = value_split(conn, schemes_dir, **f)
     # ! Sessions are not people. Every conversation gets a fresh unlinkable id
     # ! on purpose, so "182 sessions" could be 182 workers or one patient
     # ! tester. `reach` answers the other question, from a table with no
@@ -333,7 +365,9 @@ def render(conn: sqlite3.Connection, since: str = "",
         f"<title>Scheme Sathi — impact</title><style>{_CSS}</style></head><body><main>",
         "<h1>Scheme Sathi — impact</h1>",
         f"<p class='sub'>{_e(since or 'all time')} → {_e(today.isoformat())} · "
-        f"{n['sessions_total']} sessions opened</p>",
+        f"{n['sessions_total']} sessions opened · "
+        f"{_e('cohort ' + cohort if cohort else 'all arrival links')} · "
+        f"{'terminal test runs included' if include_cli else 'terminal test runs excluded'}</p>",
         "<div class='grid'>",
     ]
     parts += [
@@ -355,16 +389,21 @@ def render(conn: sqlite3.Connection, since: str = "",
         "when generated, so a transport failure may prevent the worker receiving them.</div>"
     )
 
-    parts.append("<section><h2>Sessions per week</h2>" + _sparkline(by_week(conn, since)) + "</section>")
+    parts.append("<section><h2>Consented sessions per week</h2>" + _sparkline(by_week(conn, **f)) + "</section>")
     parts.append("<section><h2>Scheme matches</h2>"
-                 + _table(distribution(conn, "scheme_code", "scheme_matched", since), "Scheme")
+                 + _table(distribution(conn, "scheme_code", "scheme_matched", **f), "Scheme")
                  + "</section>")
     parts.append("<section><h2>Where workers are</h2>"
-                 + _table(distribution(conn, "state", "eligibility_evaluated", since), "State")
+                 + _table(distribution(conn, "state", "eligibility_evaluated", **f), "State")
                  + f"<p class='sub'>Dimension labels and counts below {K_ANON} sessions are suppressed. "
                  "Headline totals are unsuppressed; this is not a guarantee of anonymity.</p></section>")
     parts.append("<section><h2>Work they do</h2>"
-                 + _table(distribution(conn, "occupation", "eligibility_evaluated", since), "Occupation")
+                 + _table(distribution(conn, "occupation", "eligibility_evaluated", **f), "Occupation")
+                 # ! Honest about why this is usually empty: the selected-scheme
+                 # ! flow asks only what the chosen schemes need, and no signed
+                 # ! scheme has an occupation rule (AUDIT.md M1).
+                 + "<p class='sub'>Occupation is asked only when a screened scheme needs it, "
+                 "and no signed scheme does today, so most sessions have none.</p>"
                  + "</section>")
 
     parts.append("<section><h2>Data provenance</h2><table>"
@@ -422,6 +461,10 @@ def render(conn: sqlite3.Connection, since: str = "",
         "channel id, so two visits by the same worker are not linkable here. The unique-"
         "people count lives in a separate table keyed by a hash of the channel id, "
         "with no session id beside it, so it can be counted and not identified.</p>"
+        "<p>Every number above uses the same filter: <code>" + _e(_where(since, cohort, include_cli)[0].strip() or "(none)")
+        + "</code>. Terminal (<code>cli</code>) sessions are a person testing at a keyboard and are "
+        "excluded unless the report is run with <code>--include-cli</code>. A cohort is the "
+        "arrival-link slug (e.g. <code>?start=csc</code>) recorded after consent.</p>"
         "</footer></main></body></html>"
     )
     return "\n".join(parts)
@@ -429,18 +472,31 @@ def render(conn: sqlite3.Connection, since: str = "",
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Scheme Sathi impact dashboard")
-    ap.add_argument("--db", default="./sathi.db")
+    # ! DB_PATH first, like sathi.main and the stats endpoint. On the server the
+    # ! database is /var/lib/sathi/sathi.db and the README's command used to
+    # ! answer "no event database at ./sathi.db".
+    ap.add_argument("--db", default=os.environ.get("DB_PATH", "./sathi.db"))
     ap.add_argument("--since", default="", help="ISO date, e.g. 2026-10-01")
+    ap.add_argument("--cohort", default="",
+                    help="count only sessions that arrived via this link slug, e.g. csc")
+    ap.add_argument("--include-cli", action="store_true",
+                    help="also count terminal (cli) sessions, which are always testing")
     ap.add_argument("--schemes", default="data/schemes")
     ap.add_argument("--out", default="impact.html")
     args = ap.parse_args(argv)
+    if args.cohort and args.cohort not in SOURCE_SLUGS:
+        print(f"unknown cohort {args.cohort!r}; one of {sorted(SOURCE_SLUGS)}", file=sys.stderr)
+        return 2
 
     if not Path(args.db).exists():
         print(f"no event database at {args.db}", file=sys.stderr)
         return 1
     conn = _connect(args.db)
     try:
-        Path(args.out).write_text(render(conn, args.since, args.schemes), encoding="utf-8")
+        Path(args.out).write_text(
+            render(conn, args.since, args.schemes, cohort=args.cohort,
+                   include_cli=args.include_cli),
+            encoding="utf-8")
     finally:
         conn.close()
     print(f"wrote {args.out}")
@@ -458,7 +514,8 @@ def _self_check() -> None:
         log = EventLog(db)
         p = Profile(state="UK", age=34, occupation="construction", income_band="upto_5000")
         for i in range(6):
-            sess = log.start_session("cli")
+            # * Five pilot sessions from the csc link, one from a plain link.
+            sess = log.start_session("telegram", cohort="csc" if i else None)
             log.grant_consent(sess)
             log.log(sess, "eligibility_evaluated", profile=p)
             # * Real scheme codes, because the payout/cover split is derived by
@@ -472,14 +529,26 @@ def _self_check() -> None:
             if i == 0:
                 log.log(sess, "pack_generated", profile=p)
         # * One worker in another state — must be suppressed at n=1 < K_ANON.
-        lone = log.start_session("cli")
+        lone = log.start_session("whatsapp")
         log.grant_consent(lone)
         log.log(lone, "eligibility_evaluated", profile=Profile(state="BR", age=50))
+        # ! And one maintainer at a terminal. It must never reach a headline.
+        desk = log.start_session("cli")
+        log.grant_consent(desk)
+        log.log(desk, "eligibility_evaluated", profile=p)
+        log.log(desk, "scheme_newly_surfaced", profile=p, scheme_code="PM_SYM", value_inr=36000)
         log.close()
 
         conn = _connect(str(db))
         n = numbers(conn)
         assert n["screened"] == 7, n
+        # ! AUDIT.md C2: the terminal session is excluded unless asked for, and
+        # ! a cohort narrows every number to the sessions from that link.
+        assert numbers(conn, include_cli=True)["screened"] == 8
+        assert numbers(conn, cohort="csc")["screened"] == 5
+        assert numbers(conn, cohort="csc")["surfaced"] == 10
+        assert value_split(conn, Path(__file__).resolve().parents[2] / "data" / "schemes",
+                           cohort="csc")["payout"] == 5 * 36000
         assert n["surfaced"] == 12 and "value_inr" not in n, n
         assert n["packs"] == 1
 
@@ -532,7 +601,7 @@ def _self_check() -> None:
         db = Path(d) / "widow.db"
 
         log = EventLog(db)
-        first = log.start_session("cli")
+        first = log.start_session("telegram")
         log.grant_consent(first)
         log.log(first, "eligibility_evaluated", profile=widow)
         for code in ("UK_OLD_AGE", "UK_WIDOW"):
@@ -551,7 +620,7 @@ def _self_check() -> None:
         # ! Collapsing is per session, NOT deduplication. Two different people
         # ! who each qualify for both pensions are still two entitlements.
         log = EventLog(db)
-        second = log.start_session("cli")
+        second = log.start_session("telegram")
         log.grant_consent(second)
         log.log(second, "eligibility_evaluated", profile=widow)
         for code in ("UK_OLD_AGE", "UK_WIDOW"):

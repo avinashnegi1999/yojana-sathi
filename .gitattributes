@@ -1,0 +1,6 @@
+# ! Files that run on the Linux host must have LF line endings in every
+# ! checkout. With core.autocrlf=true on Windows they were checked out as CRLF,
+# ! and deploy/enable-web.sh is copied to the server from the working tree —
+# ! bash reads a CRLF script as "$'\r': command not found".
+*.sh       text eol=lf
+*.service  text eol=lf

@@ -30,6 +30,11 @@ def is_available() -> bool:
 def synthesise(text: str, out_dir: str | Path | None = None) -> Path | None:
     """Render Hindi text to an audio file. Returns None if TTS is off or fails.
 
+    # ! NOT WIRED INTO ANY CHANNEL (AUDIT.md M2). Nothing in the bot calls this,
+    # ! so setting TTS_CMD today changes only the "TTS: on" startup line. The
+    # ! adapters already know how to send Reply.audio; what is missing is a
+    # ! caller, a cleanup for the temp files, and a format WhatsApp accepts.
+
     The caller sends text regardless, so a None here degrades the message from
     "text + voice" to "text" — never to nothing.
     """

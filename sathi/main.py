@@ -80,6 +80,12 @@ def run_cli(schemes: dict, log: EventLog | None) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # ! Same fix as check.py. On Windows a redirected stdout is cp1252, and the
+    # ! startup report's "→" (and every Hindi screen after it) raised
+    # ! UnicodeEncodeError before the first question was asked.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser(description="Scheme Sathi")
     ap.add_argument("--telegram", action="store_true", help="run the Telegram bot")
     # ! One process, one channel. Two pollers on one Telegram token steal each

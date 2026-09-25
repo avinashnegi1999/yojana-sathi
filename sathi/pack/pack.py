@@ -109,6 +109,12 @@ def build(
             f"<p><span class='label'>{_e(s('pack.where', lang))}:</span> "
             f"{_e(templates.where_label(sc, lang))}</p>"
         )
+        # * Same function as the screen, so the sheet cannot state a different cost.
+        premium = templates.premium_text(sc, lang)
+        if premium:
+            parts.append(
+                f"<p><span class='label'>{_e(s('pack.you_pay', lang))}:</span> {_e(premium)}</p>"
+            )
         if docs:
             parts.append(f"<p class='label'>{_e(s('pack.carry', lang))}:</p><ul>")
             parts += [f"<li>{_e(d)}</li>" for d in docs]

@@ -24,6 +24,7 @@ from sathi.metrics.events import (
     EVENT_TYPES,
     ConsentError,
     EventLog,
+    SOURCE_SLUGS,
     PrivacyError,
     coarse_dims,
 )
@@ -31,6 +32,10 @@ from sathi.metrics.events import (
 EXPECTED_COLUMNS = {
     "event_id", "session_id", "ts", "event_type", "scheme_code",
     "state", "age_band", "occupation", "income_band", "value_inr", "channel",
+    # ! Added 2026-09-25 (AUDIT.md C2): the arrival-link slug, from a fixed
+    # ! list, written only after consent. Not a profile field. See
+    # ! test_cohort_is_a_fixed_slug_and_only_after_consent below.
+    "cohort",
 }
 
 # ! Names a well-meaning patch might add. None of them may ever be a column.
@@ -383,6 +388,61 @@ def test_every_module_with_a_self_check_is_in_the_build_gate():
     assert not stale, (
         "check.py lists modules that no longer define _self_check(): "
         + ", ".join(sorted(stale)))
+
+
+def test_cohort_is_a_fixed_slug_and_only_after_consent():
+    """The arrival slug lets the report count a pilot apart from testing.
+
+    # ! It may only ever be one of the fixed link slugs, never free text, and
+    # ! it is written only once the worker has agreed to be counted.
+    """
+    with tempfile.TemporaryDirectory() as d:
+        log = EventLog(Path(d) / "t.db")
+        for bad in ("Ramesh", "9876543210", "csc ", "CSC"):
+            try:
+                log.start_session("telegram", cohort=bad)
+            except PrivacyError:
+                continue
+            raise AssertionError(f"cohort {bad!r} was accepted")
+        s = log.start_session("telegram", cohort="csc")
+        before = log.query("SELECT cohort FROM events WHERE session_id = ?", (s.id,))
+        assert [r["cohort"] for r in before] == [None], "cohort written before consent"
+        log.grant_consent(s)
+        log.log(s, "eligibility_evaluated", profile=FULL_PROFILE)
+        after = log.query("SELECT event_type, cohort FROM events WHERE session_id = ?"
+                          " AND event_type != 'session_start'", (s.id,))
+        assert {r["cohort"] for r in after} == {"csc"}, [tuple(r) for r in after]
+        log.close()
+
+    # * End to end: "/start csc" through the channel router reaches the log.
+    from sathi.channels.router import Router
+    from sathi.conversation import consent
+    from sathi.core.schemes import load_all
+
+    with tempfile.TemporaryDirectory() as d:
+        log = EventLog(Path(d) / "t.db")
+
+        class _Quiet(Router):
+            channel = "telegram"
+
+            def send(self, key, reply):
+                pass
+
+        bot = _Quiet(load_all(ROOT / "data" / "schemes"), log)
+        bot.turn("chat-1", "/start csc")
+        bot.turn("chat-1", "lang:en")
+        bot.turn("chat-1", consent.YES)
+        cohorts = {r["cohort"] for r in log.query(
+            "SELECT cohort FROM events WHERE event_type = 'consent_granted'")}
+        assert cohorts == {"csc"}, cohorts
+        bot.turn("chat-2", "/start")  # a plain link has no cohort
+        bot.turn("chat-2", "lang:en")
+        bot.turn("chat-2", consent.YES)
+        cohorts = [r["cohort"] for r in log.query(
+            "SELECT cohort FROM events WHERE event_type = 'consent_granted'")]
+        assert len(cohorts) == 2 and set(cohorts) == {"csc", None}, cohorts
+        assert set(SOURCE_SLUGS) >= {"csc", "pilot"}
+        log.close()
 
 
 def run() -> None:

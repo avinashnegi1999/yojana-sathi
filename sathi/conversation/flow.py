@@ -109,11 +109,14 @@ class Conversation:
         schemes: dict[str, Scheme],
         log: EventLog | None = None,
         channel: str = "cli",
+        cohort: str | None = None,
     ) -> None:
         self.schemes = schemes
         self.log = log
         self.channel = channel
-        self.session = log.start_session(channel) if log else None
+        # * cohort is the arrival-link slug, validated by the event log. The
+        # * flow never reads it; it only rides along on the session.
+        self.session = log.start_session(channel, cohort) if log else None
         # ! Set by the channel layer: log.anon_id(channel id). The flow never
         # ! sees the id itself, only the hash, and only uses it for feedback.
         self.person: str | None = None
@@ -870,6 +873,14 @@ class Conversation:
             ("known_schemes", ", ".join(held) if held else self._s("recap.none")),
         ]
         pairs.extend((field, yn(getattr(p, field))) for field in self._followup_fields)
+        # ! Only what was actually asked. The selected-scheme flow skips every
+        # ! question its schemes do not need, and this used to print "you did
+        # ! not say" for all of them — work, land and household size on every
+        # ! route — as if the worker had skipped questions nobody put to her
+        # ! (AUDIT.md M1). A "Don't know" answer IS in _answered_fields and
+        # ! still shows as not answered, which is the point of showing it.
+        # ! The held-schemes line is always shown: that question is always asked.
+        pairs = [(f, v) for f, v in pairs if f == "known_schemes" or f in self._answered_fields]
         # * The sheet puts the heading on the box, so it asks for the lines only.
         lines = [self._s("recap.line", label=self._s(f"field_labels.{f}"), value=v)
                  for f, v in pairs]
@@ -975,7 +986,11 @@ class Conversation:
     def _on_rating(self, answer: str) -> list[Reply]:
         if answer != SKIP:
             digits = answer.strip()
-            if not (digits.isdigit() and 1 <= int(digits) <= 10):
+            # ! Same guard as the age question, for the same reason: isdigit()
+            # ! accepts "²" and "④", which int() then rejects, and a 5,000-digit
+            # ! string trips Python's int-conversion limit. Either one raised
+            # ! ValueError here and ended a FINISHED screening with "start again".
+            if len(digits) > 2 or not digits.isdecimal() or not (1 <= int(digits) <= 10):
                 return [Reply(text=self._s("feedback.bad_rating"),
                               buttons=(Button(self._s("feedback.skip"), SKIP),))]
             self._rating = int(digits)

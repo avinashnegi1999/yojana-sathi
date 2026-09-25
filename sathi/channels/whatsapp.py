@@ -1,4 +1,4 @@
-"""WhatsApp Cloud API adapter. Thin: translates Reply/ChannelMessage.
+"""WhatsApp Cloud API adapter. Thin: translates webhook messages into answers and Reply into sends.
 
 # * Push, not poll. Telegram hands us updates when we ask; Meta posts them at a
 # * public HTTPS endpoint, so this module carries an HTTP server the Telegram
@@ -536,6 +536,8 @@ class WhatsAppBot(Router):
                 continue
             answer, tapped = self._answer(message)
             if tapped is not None:
+                # * An idle session is dropped first, so its old keyboard reads as stale.
+                self.expire_idle(key)
                 if (key not in self.sessions
                         or tapped != self._active_keyboard.get(key)):
                     # ! An old keyboard must not answer the current question.

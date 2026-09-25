@@ -37,6 +37,15 @@ SOURCES_DIR = ROOT / "data" / "sources"
 _TAGS = re.compile(r"<(script|style)[\s\S]*?</\1>|<[^>]+>", re.I)
 _ENTITIES = {"&nbsp;": " ", "&amp;": "&", "&#8377;": "₹", "&rsquo;": "'",
              "&lsquo;": "'", "&#8217;": "'", "&ndash;": "–", "&#8211;": "–"}
+# ! Page chrome that changes on every request. maandhan.in prints "Visitor No:
+# ! - 26749001" and "Visitor count 26749001"; eshram.gov.in prints "Total
+# ! Visitors: 578318708" and a "Last Update:" stamp carrying today's date. So
+# ! every fetch of those pages reported "page text changed" forever — found
+# ! 2026-09-25 by diffing two fetches seconds apart. Only these phrases are
+# ! removed; a changed threshold number anywhere else still moves the hash.
+_VISITOR_COUNTER = re.compile(
+    r"(?:Visitor\s+(?:No\s*:?\s*-?|count)|Total\s+Visitors\s*:?)\s*\d+"
+    r"|Last\s+Updated?(?:\s+On)?\s*:?\s*[0-9]{1,2}[-/][A-Za-z0-9]{2,3}[-/][0-9]{4}", re.I)
 
 
 def normalise(html: str) -> str:
@@ -50,6 +59,7 @@ def normalise(html: str) -> str:
     text = _TAGS.sub(" ", html)
     for entity, char in _ENTITIES.items():
         text = text.replace(entity, char)
+    text = _VISITOR_COUNTER.sub(" ", text)
     return re.sub(r"\s+", " ", text).strip()
 
 
@@ -199,6 +209,13 @@ def _self_check() -> None:
     # * Whitespace and banner noise must not move the fingerprint...
     noisy = page.replace("<p>", "\n\n   <p>").replace("</p>", "</p>  \t")
     assert fingerprint(noisy) == fingerprint(page), "whitespace changed the hash"
+    # * ...nor may maandhan.in's per-request hit counter, in either wording.
+    counted = page.replace("</body>", "Visitor No: - 26748995 Visitor count 26748995 "
+                                      "Last Update: 25-Sep-2026 Total Visitors: 578318708"
+                                      " Last Updated On 14/08/2026</body>")
+    recounted = (counted.replace("26748995", "26748996").replace("578318708", "578318709")
+                 .replace("25-Sep-2026", "26-Sep-2026").replace("14/08/2026", "15/08/2026"))
+    assert fingerprint(counted) == fingerprint(recounted), "page chrome changed the hash"
     # * ...but a changed rupee figure must.
     assert fingerprint(page.replace("436", "500")) != fingerprint(page)
 

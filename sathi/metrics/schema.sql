@@ -28,7 +28,10 @@ CREATE TABLE IF NOT EXISTS events (
     income_band TEXT,               -- enum from sathi/core/profile.py
 
     value_inr   INTEGER,            -- annual entitlement, on match events only
-    channel     TEXT                -- 'telegram' | 'cli' | 'whatsapp'
+    channel     TEXT,               -- 'telegram' | 'whatsapp' | 'web' | 'cli'
+    cohort      TEXT                -- arrival link slug (events.SOURCE_SLUGS), after
+                                    -- consent only; lets the report count a pilot
+                                    -- apart from testing. Added 2026-09-25.
 );
 
 CREATE INDEX IF NOT EXISTS idx_events_ts      ON events(ts);
@@ -66,7 +69,8 @@ CREATE INDEX IF NOT EXISTS idx_followups_due ON followups(due_ts);
 -- ? and the wrong number for deciding whether a channel is working.
 --
 -- ! Same mitigations as `followups`, for the same reason: the id is a keyed
--- ! hash of the channel id, the key never leaves this database, and there is
+-- ! hash of the channel id, the key is read from REACH_HMAC_KEY in the env
+-- ! file (migrate_reach_key() moves a legacy in-database key out), and there is
 -- ! NO session_id column — so "how many people" can be answered and "what did
 -- ! person a82f qualify for" cannot. Never add a join key here.
 --

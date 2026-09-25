@@ -13,11 +13,13 @@
 # * It translates payloads. It decides nothing.
 """
 
+import time
+
 from sathi.channels.base import Reply
 from sathi.conversation.flow import Conversation
 from sathi.core.content import DEFAULT_LANG, LANGS, s
 from sathi.core.schemes import Scheme
-from sathi.metrics.events import EventLog
+from sathi.metrics.events import SOURCE_SLUGS, EventLog
 
 # * Commands are handled here, not in the flow, because they are a channel
 # * affordance. The flow exposes plain methods; this maps slash words onto them.
@@ -42,6 +44,17 @@ class Router:
     # * platform named in /privacy. Adapters override it.
     channel = "cli"
 
+    # ! Idle limits (AUDIT.md M8). The README says a profile is discarded when
+    # ! the screening ends; a worker who simply stopped replying used to leave
+    # ! her age, widow status and disability answer in RAM until the next
+    # ! restart, and every chat that ever wrote in stayed in these dicts forever.
+    # ! After 30 quiet minutes the answers go. The language preference and the
+    # ! /clear bookkeeping outlive the session, but not Telegram's own 48-hour
+    # ! window for deleting messages.
+    SESSION_IDLE_SECONDS = 30 * 60
+    CHAT_IDLE_SECONDS = 48 * 60 * 60
+    SWEEP_EVERY_SECONDS = 60
+
     def __init__(self, schemes: dict[str, Scheme], log: EventLog | None = None) -> None:
         self.schemes = schemes
         self.log = log
@@ -59,6 +72,11 @@ class Router:
         # ! until they consent — because the count is of people who agreed to
         # ! be counted, and that answer comes several questions later.
         self._source: dict[str, str] = {}
+        # * When each chat last did anything. Drives expire_idle(); the clock
+        # * is an attribute so the self-check can age a chat without sleeping.
+        self._last_seen: dict[str, float] = {}
+        self._next_sweep = 0.0
+        self.clock = time.monotonic
 
     # * ---------------------------------------------------------- the wire
 
@@ -75,6 +93,36 @@ class Router:
         # ! did not happen, and what they can do instead.
         """
         return Reply(text=self._bilingual("commands.clear_unsupported", lang))
+
+    def forget(self, key: str) -> None:
+        """Drop whatever an adapter keeps per chat. Adapters with state override it."""
+
+    # * ------------------------------------------------------------ idle expiry
+
+    def expire_idle(self, key: str | None = None) -> None:
+        """Drop state nobody has used recently. Call before looking at self.sessions.
+
+        # * Checks `key` itself every time, so a tap on a 40-minute-old keyboard
+        # * is refused as stale rather than answering a session that should be
+        # * gone. Walks every chat at most once a minute.
+        """
+        now = self.clock()
+        if key is not None and now - self._last_seen.get(key, now) > self.SESSION_IDLE_SECONDS:
+            self.sessions.pop(key, None)
+            self._active_keyboard.pop(key, None)
+        if now < self._next_sweep:
+            return
+        self._next_sweep = now + self.SWEEP_EVERY_SECONDS
+        for chat, seen in list(self._last_seen.items()):
+            idle = now - seen
+            if idle > self.SESSION_IDLE_SECONDS:
+                self.sessions.pop(chat, None)
+                self._active_keyboard.pop(chat, None)
+            if idle > self.CHAT_IDLE_SECONDS:
+                self._lang.pop(chat, None)
+                self._source.pop(chat, None)
+                self._last_seen.pop(chat, None)
+                self.forget(chat)
 
     # * -------------------------------------------------------------- shared
 
@@ -93,7 +141,10 @@ class Router:
 
     def _conversation(self, key: str, fresh: bool = False) -> Conversation:
         if fresh or key not in self.sessions:
-            convo = Conversation(self.schemes, self.log, channel=self.channel)
+            # * The arrival slug from the last /start, so a pilot session can be
+            # * counted apart from testing (AUDIT.md C2). "" means a plain link.
+            convo = Conversation(self.schemes, self.log, channel=self.channel,
+                                 cohort=self._source.get(key) or None)
             if self.log is not None:
                 convo.person = self.log.feedback_id(key)
             convo.lang = self._lang.get(key, DEFAULT_LANG)
@@ -105,9 +156,9 @@ class Router:
     # ! link cannot smuggle free text into the database.
     # * Paid placements get their own slugs so an ad's reach is separable from
     # * an organic post's. Link as t.me/YojanaSathiBot?start=linkedin.
-    SOURCES = frozenset({"reddit", "discord", "github", "youtube", "twitter",
-                         "linkedin", "facebook", "instagram", "google", "ads",
-                         "whatsapp", "poster", "csc", "direct"})
+    # * The list lives in sathi/metrics/events.py, beside the only writer, so
+    # * the reach table and the events table can never accept different slugs.
+    SOURCES = SOURCE_SLUGS
 
     def _remember_source(self, key: str, answer: str) -> None:
         payload = answer.strip().split()[1:2]
@@ -184,6 +235,8 @@ class Router:
     def turn(self, key: str, answer: str,
              message_ref: str | int | None = None) -> None:
         """One answer in, replies out."""
+        self.expire_idle(key)
+        self._last_seen[key] = self.clock()
         replies = self.dispatch(key, answer, message_ref)
         # * Remember the language for whatever comes after this session ends.
         convo = self.sessions.get(key)
@@ -267,6 +320,33 @@ def _self_check() -> None:
     bot.abandon("k")
     assert "k" not in bot.sessions and "k" not in bot._active_keyboard
     assert "/start" in bot.out[-1].text
+
+    # ! AUDIT.md M8: an idle session is dropped after 30 minutes, the chat's
+    # ! remaining bookkeeping after 48 hours, and the adapter hears about it.
+    now = [0.0]
+    forgotten = []
+
+    class _Aging(_Recorder):
+        def forget(self, key):
+            forgotten.append(key)
+
+    idle = _Aging()
+    idle.clock = lambda: now[0]
+    idle.turn("w", "/start")
+    idle.turn("w", "lang:en")
+    assert "w" in idle.sessions
+    now[0] += Router.SESSION_IDLE_SECONDS + 1
+    idle.expire_idle("w")
+    assert "w" not in idle.sessions, "a 31-minute-idle profile is still in memory"
+    assert idle._lang["w"] == "en", "the language preference outlives the session"
+    now[0] += Router.CHAT_IDLE_SECONDS
+    idle.expire_idle()
+    assert "w" not in idle._lang and "w" not in idle._last_seen and forgotten == ["w"]
+    # * An active chat is never touched by the sweep.
+    idle.turn("x", "/start")
+    now[0] += Router.SWEEP_EVERY_SECONDS + 1
+    idle.expire_idle()
+    assert "x" in idle.sessions
 
     print("router.py OK")
 

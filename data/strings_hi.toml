@@ -171,7 +171,15 @@ scheme_line = """{index}. {name_hi} {new_badge}
    {benefit}
    कहाँ जाना है: {where}"""
 new_badge = "🆕 (यह आपके पास अभी नहीं है)"
-value_line = "इनसे आपको साल भर में लगभग {total} रुपये मिल सकते हैं।"
+# ! "साल भर में … मिल सकते हैं" नहीं। PM-SYM और NPS-Traders 60 साल से पहले कुछ
+# ! नहीं देतीं, इसलिए पुरानी लाइन 25 साल के मज़दूर को ₹36,000 इसी साल बता रही थी।
+# ? Hindi review: new wording, 2026-09-25 — read aloud before the pilot.
+value_line = "ऊपर की पेंशनें जोड़ें तो साल में लगभग {total} रुपये बनते हैं — लेकिन हर पेंशन अपनी शुरुआत की उम्र से ही मिलती है, जो कई साल बाद भी हो सकती है। हर योजना की लाइन ध्यान से पढ़ें।"
+# * premium_inr से: मज़दूर को कितना देना होगा (_TEMPLATE.toml के अनुसार ₹ प्रति साल)।
+premium_line = "   आपको देना होगा: {premium}"
+premium_per_year = "सालाना ₹{amount}"
+# * जब योजना का प्रीमियम सिर्फ़ दूसरी भाषा में लिखा हो।
+premium_ask = "नियमित रूप से कुछ रकम — सही रकम केंद्र पर पूछें"
 # ! Insurance is stated separately and never added to the line above. A ₹2 लाख
 # ! cover is money paid only if an accident happens; adding it to a pension
 # ! would tell a worker they are getting lakhs, which is false.
@@ -258,6 +266,7 @@ title = "योजना साथी — आपकी सूची"
 # * .py file — and they stayed Hindi on an English worker's sheet because of it.
 why = "क्यों"
 where = "कहाँ"
+you_pay = "आपको देना होगा"
 carry = "साथ ले जाएँ"
 generated_on = "बनाया गया: {date}"
 disclaimer = """यह सरकारी काग़ज़ नहीं है। यह सिर्फ़ एक सूची है जिससे केंद्र पर बात करना आसान हो।
@@ -327,6 +336,9 @@ no_schemes_loaded = "अभी योजनाओं की जानकार�
 pick_from_list = "कृपया नीचे दिए विकल्पों में से चुनें।"
 stale_button = "यह बटन अब काम नहीं करेगा। सबसे नए सवाल का जवाब दें, या फिर से शुरू करने के लिए /start भेजें।"
 screening_stopped = "कुछ गड़बड़ होने से यह जाँच रुक गई। कृपया /start भेजें और सवालों के जवाब फिर से दें।"
+# ? Hindi review: new 2026-09-25 (browser only).
+web_stopped = "कुछ गड़बड़ होने से यह जाँच रुक गई। दोबारा शुरू करने के लिए नीचे “फिर से शुरू करें” दबाएँ।"
+too_many_sessions = "इस कनेक्शन से बहुत सारी नई जाँचें शुरू हुई हैं। कृपया कुछ मिनट रुककर फिर कोशिश करें।"
 
 # =====================================================================
 [recap]

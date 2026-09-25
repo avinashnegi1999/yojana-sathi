@@ -57,6 +57,23 @@ _PRE_CONSENT = frozenset({"session_start", "consent_granted", "consent_declined"
 # ! decision, not a refactor — test_privacy.py pins this exact set.
 COARSE_FIELDS = ("state", "age_band", "occupation", "income_band")
 
+# ! Where a person arrived from: the slug in t.me/YojanaSathiBot?start=csc or
+# ! sathi.avinashnegi.com/?start=csc. A fixed list, so a link cannot smuggle
+# ! free text into the database. Lives here, beside the only writer, and the
+# ! channel router imports it.
+#
+# ! Why events carry it at all (AUDIT.md C2): without it the impact report
+# ! could not tell a pilot worker from the maintainer testing the bot. The
+# ! tester answer lives in `feedback`, which has no session id by design, so
+# ! it can never filter a screening. Give pilot workers the `csc` (or `pilot`)
+# ! link, then `python3 -m sathi.metrics.report --cohort csc` counts only them.
+# ! It is not a profile field and says nothing about the worker; it is
+# ! written only after consent, like everything else that describes a
+# ! session.
+SOURCE_SLUGS = frozenset({"reddit", "discord", "github", "youtube", "twitter",
+                          "linkedin", "facebook", "instagram", "google", "ads",
+                          "whatsapp", "poster", "csc", "pilot", "direct"})
+
 
 class ConsentError(Exception):
     """A profile event was attempted before the worker agreed. Never caught."""
@@ -86,6 +103,7 @@ class Session:
 
     id: str
     channel: str
+    cohort: str | None = None  # one of SOURCE_SLUGS, or None for a plain link
 
 
 class EventLog:
@@ -112,18 +130,25 @@ class EventLog:
             self._conn.execute("ALTER TABLE feedback ADD COLUMN participant_role TEXT")
         if "person" not in columns:
             self._conn.execute("ALTER TABLE feedback ADD COLUMN person TEXT")
+        # * A database created before 2026-09-25 has no cohort column. Its old
+        # * rows stay NULL, which the report reads as "not from a pilot link".
+        event_columns = {row[1] for row in self._conn.execute("PRAGMA table_info(events)")}
+        if "cohort" not in event_columns:
+            self._conn.execute("ALTER TABLE events ADD COLUMN cohort TEXT")
         self._conn.commit()
         self._consented: set[str] = set()
 
     # * ---------------------------------------------------------------- write
 
-    def start_session(self, channel: str = "cli") -> Session:
+    def start_session(self, channel: str = "cli", cohort: str | None = None) -> Session:
         """Open a session. The id is uuid4 — NOT a hash of the Telegram user id.
 
         A hash of a stable id is still a stable id: two visits by the same
         worker would become linkable, and the privacy claim would be false.
         """
-        session = Session(id=str(uuid.uuid4()), channel=channel)
+        if cohort is not None and cohort not in SOURCE_SLUGS:
+            raise PrivacyError(f"cohort must be one of the fixed link slugs, got {cohort!r}")
+        session = Session(id=str(uuid.uuid4()), channel=channel, cohort=cohort)
         self.log(session, "session_start")
         return session
 
@@ -182,24 +207,29 @@ class EventLog:
         if value_inr is not None and not isinstance(value_inr, int):
             raise PrivacyError(f"value_inr must be an integer ₹, got {value_inr!r}")
 
+        # ! The arrival link is recorded only once the worker has agreed to be
+        # ! counted, the same rule the reach table follows.
+        cohort = session.cohort if session.id in self._consented else None
+
         event_id = str(uuid.uuid4())
         with self._lock:
             self._conn.execute(
-            "INSERT INTO events (event_id, session_id, ts, event_type, scheme_code,"
-            " state, age_band, occupation, income_band, value_inr, channel)"
-            " VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-            (
-                event_id,
-                session.id,
-                datetime.now(timezone.utc).isoformat(timespec="seconds"),
-                event_type,
-                scheme_code,
-                row["state"],
-                row["age_band"],
-                row["occupation"],
-                row["income_band"],
-                value_inr,
+                "INSERT INTO events (event_id, session_id, ts, event_type, scheme_code,"
+                " state, age_band, occupation, income_band, value_inr, channel, cohort)"
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                (
+                    event_id,
+                    session.id,
+                    datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                    event_type,
+                    scheme_code,
+                    row["state"],
+                    row["age_band"],
+                    row["occupation"],
+                    row["income_band"],
+                    value_inr,
                     session.channel,
+                    cohort,
                 ),
             )
             self._conn.commit()
@@ -397,7 +427,13 @@ class EventLog:
         return cur.rowcount == 1
 
     def set_purpose(self, channel_id: str, purpose: str) -> None:
-        """Record what someone said they were using it for, if they said."""
+        """Record what someone said they were using it for, if they said.
+
+        # ! NOT CALLED BY ANY CHANNEL (AUDIT.md m3). The end-of-screening
+        # ! question writes participant_role ("self" | "helping" | "tester") to
+        # ! `feedback` instead, and PURPOSES above uses different words. Kept
+        # ! because tests pin the reach.purpose column; wire it up or delete both.
+        """
         if purpose not in self.PURPOSES:
             raise ValueError(f"unknown purpose {purpose!r}")
         anon = self.anon_id(channel_id)
@@ -471,6 +507,9 @@ class EventLog:
     def schedule_followup(self, channel_id: str, channel: str, days: int = 14) -> str | None:
         """Opt-in. Returns None unless FOLLOWUP_SALT is set.
 
+        ! NOT CALLED BY ANY CHANNEL, and no sender exists: a salted hash cannot
+        ! address a message. See the README's FOLLOWUP_SALT row (AUDIT.md m3).
+
         ? Whether this is worth holding a channel id at all is a judgement
         ? Unset salt = feature off, which is the default.
         """
@@ -494,7 +533,12 @@ class EventLog:
         return digest
 
     def purge_followups(self, max_age_days: int = 30) -> int:
-        """Delete answered or stale rows. The only DELETE in the project."""
+        """Delete answered or stale rows.
+
+        # * One of two DELETEs in the project. The other removes the reach key
+        # * from `meta` once migrate_reach_key() has moved it to the env file.
+        # * Neither touches `events`, which is append-only.
+        """
         cutoff = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).isoformat()
         with self._lock:
             cur = self._conn.execute(
