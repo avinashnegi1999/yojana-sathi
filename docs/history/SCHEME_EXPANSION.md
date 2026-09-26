@@ -2,7 +2,7 @@
 
 > **Historical snapshot, kept as evidence of what was checked and when.**
 > It is not the current production status — that lives in
-> [`README.md`](../README.md). Do not read a scheme count here as today's.
+> [`README.md`](../../README.md). Do not read a scheme count here as today's.
 
 Four official-source drafts extend the original PM-SYM, PMSBY and eShram rules:
 

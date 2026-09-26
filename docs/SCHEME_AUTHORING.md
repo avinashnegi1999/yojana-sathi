@@ -1,117 +1,113 @@
-# Authoring a scheme rule file
+# Write a scheme file.
 
-**8 September update:** the profile now also supports `is_unorganised_worker`
-and `nps_exclusion_applies`. The latter is a tri-state exclusion finding, not a
-generic claim of NPS membership. Other/uncertain NPS types remain unresolved.
-`before_nearest_birthday` is an additional age-only operator with a positive
-integer cutoff; it leaves the last whole-year interval below that cutoff UNKNOWN.
-Only use it for a source that explicitly uses nearest-birthday age. Review the
-implementation notes in [SCHEME_AUDIT.md](SCHEME_AUDIT.md) before signing data.
+No Python needed. You fill in a text file and cite where each value came from.
 
-No Python required. You are filling in a text file and citing where each number
-came from.
+<br>
 
-## The one rule
+## The one rule.
 
-**If you cannot find a value on an official `.gov.in` source, leave it as
-`"TODO"`.**
+**If an official `.gov.in` source doesn't state it, write `"TODO"`.**
 
-The loader detects the literal string `"TODO"` and the rule engine reports
-`UNKNOWN` for that scheme — "we could not check this, ask at the CSC". That is
-an honest answer and still useful to a worker.
+- The engine answers `UNKNOWN` for that scheme — "we couldn't check this, ask at the centre". That is honest, and still useful.
+- A guess is not. A wrong threshold sends someone on a trip that costs a day's wage, and most people don't try twice.
+- `"TODO"` is the stub for **every** type, numbers included: `annual_value_inr = "TODO"`, never `0`. A zero looks researched, and no validator can tell.
+- Never fill a value from a news article, a coaching site, an aggregator or a chatbot.
 
-A guessed threshold is not. It sends someone on a day-long trip that costs them
-a day's wages, and most people do not make a second attempt.
+<br>
 
-Stubs are the string `"TODO"` for **every** type, numbers included:
-`annual_value_inr = "TODO"`, never `= 0`. A zero looks like a researched answer
-and the validator cannot tell the difference.
+## Steps.
 
-## Steps
+1. Copy [`data/schemes/_TEMPLATE.toml`](../data/schemes/_TEMPLATE.toml) to `data/schemes/<scheme>.toml`.
+2. Fill what you can find. Cite each value with a `source_url`.
+3. Run `python3 check.py`. Structural mistakes fail loudly — an unknown key, a bad operator, a field the app never asks. Stubs don't fail; they are listed.
+4. Get it signed (below). Until then every worker gets `UNKNOWN` for it.
 
-1. Copy `data/schemes/_TEMPLATE.toml` to `data/schemes/<scheme>.toml`.
-2. Fill what you can find, citing each value.
-3. Run `python3 check.py`. Structural mistakes — an unknown key, a bad
-   operator, a field the app never asks about — fail loudly. Unfilled values do
-   not; they are simply reported as stubs.
+<br>
 
-## What each `source_url` has to be
+## Every `source_url`.
 
-A deep link to the page carrying **that specific value**. Not the site root.
-Not a PDF listing page. A reviewer must be able to click it and see the number.
+A deep link to the page that carries **that exact value**. Not the site root, not a PDF listing page. A reviewer should see the number within 30 seconds of clicking.
 
-## Fields the engine understands
+<br>
 
-`field` must name a field on `Profile` (`sathi/core/profile.py`):
+## Rules.
 
-`state` · `age` · `occupation` · `income_band` · `land_holding_band` ·
-`family_size` · `has_bank_account` · `is_income_tax_payer` · `known_schemes`
+- **All `[[criteria]]` must pass.** Any `[[exclusions]]` match disqualifies, with its `reason_hi`.
+- **`field`** must name a field on `Profile` ([`sathi/core/profile.py`](../sathi/core/profile.py)). The loader checks.
+- **`op`** is one of these:
 
-If a scheme needs something not on that list, open an issue — adding a field
-means adding a question the worker has to answer, which is a product decision,
-not a data one.
+| `op` | `value` |
+|---|---|
+| `between` | `[low, high]`, both ends inclusive |
+| `in` · `not_in` | a list |
+| `lte` · `gte` | a number |
+| `eq` | any value |
+| `exists` | — |
+| `before_nearest_birthday` | a positive whole-number age. Age only. The last whole year below the cutoff stays `UNKNOWN`. Use it only when the source itself counts age by nearest birthday. |
 
-`op` is one of: `between` (`[low, high]`) · `in` / `not_in` (a list) ·
-`lte` / `gte` (a number) · `eq` (any) · `exists`.
+<details>
+<summary><b>Every profile field</b></summary>
 
-All `[[criteria]]` must pass. Any `[[exclusions]]` match disqualifies.
+<br>
 
-## Wording `pass_hi` and `fail_hi`
+`state` · `age` · `occupation` · `is_unorganised_worker` · `income_band` · `land_holding_band` · `family_size` · `has_bank_account` · `is_income_tax_payer` · `is_epfo_or_esic_member` · `nps_exclusion_applies` · `is_woman` · `is_widow` · `uk_pension_income_or_bpl` · `uk_pension_selected` · `receives_other_pension` · `household_has_lpg` · `pmuy_declaration_met` · `is_bpl` · `has_disability_80pct` · `is_small_trader` · `is_vishwakarma_artisan` · `took_business_loan_5yr` · `has_government_service_in_family` · `known_schemes`
 
-These are read aloud to someone who may not read. Write them as speech.
+- `is_unorganised_worker` is what the worker says. It is never inferred from a job title.
+- `nps_exclusion_applies` is a yes / no / not-sure finding about the exclusion, not a general claim of NPS membership. Other or uncertain NPS types stay unresolved.
 
-- `pass_hi` — one plain sentence saying why they qualify.
-- `fail_hi` — why they do not, **and what they could do instead**. A dead end
-  is a failure of the tool, not of the worker. "You need a bank account — any
-  public sector bank will open a zero-balance account with your Aadhaar" is a
-  useful answer. "Not eligible" is not.
+A scheme that needs a field not on this list is a product decision, not a data one: every new field is a new question a worker has to answer. Open an issue.
 
----
+</details>
 
-# Research checklist — the first three schemes
+<br>
 
-Accuracy over coverage. Three schemes done correctly beats twenty done
-approximately.
+## Benefit.
 
-## 1. e-Shram registration
+| Key | What it holds |
+|---|---|
+| `annual_value_inr` | ₹ a year, as the scheme states it. For a cover, the cover amount. |
+| `value_basis` | `annual_payout` · `insurance_cover` · `one_time` · `subsidy` · `in_kind` · `gateway` |
+| `premium_inr` | ₹ a year the **worker** pays. `0` if free. |
+| `exclusive_group` | Optional. Alternative routes to one payment share a group, and are never added together. |
+| `annual_value_age_bands` | Optional. A different amount from a stated age, e.g. from 80. |
 
-- **Primary:** `eshram.gov.in` — registration criteria page
-- **Secondary:** Ministry of Labour & Employment, `labour.gov.in` — guidelines / FAQ PDF
+Where to apply is one of `csc` · `bank_branch` · `post_office` · `eshram_centre` · `online`.
 
-**? Resolve this first, before the rules:** e-Shram is a registration and an
-identity (UAN), not obviously a benefit scheme with a payout. It is the gateway
-that unlocks others. Confirm whether it carries a benefit in its own right —
-there is commonly an accident cover associated, and it matters whether that is
-intrinsic to registration or a separate linked scheme. The answer decides
-whether e-Shram gets a `benefit.annual_value_inr` or is modelled purely as a
-`prerequisites` entry on the other schemes.
+<br>
 
-## 2. PM-SYM (Pradhan Mantri Shram Yogi Maandhan)
+## Words a worker hears.
 
-- **Primary:** `maandhan.in` — official scheme portal, eligibility page
-- **Secondary:** `labour.gov.in` — scheme notification / gazette
+These may be read aloud to someone who doesn't read. Write speech, not notices.
 
-**? Focus on the exclusions.** Contributory pension schemes of this type
-commonly exclude members of other statutory schemes and income-tax payers.
-Find the authoritative list and cite it — that is a category of rule to go
-looking for, not a rule to assume.
+- **`pass_hi`** — one plain sentence: why they qualify.
+- **`fail_hi`** — why not, **and what they can do instead**. "You need a bank account — any public sector bank will open a zero-balance account with your Aadhaar" helps. "Not eligible" doesn't.
+- The `_en` keys are the English versions, with the same citation.
 
-## 3. PMSBY (Pradhan Mantri Suraksha Bima Yojana)
+<br>
 
-- **Primary:** `jansuraksha.gov.in` — PMSBY rules
-- **Secondary:** Department of Financial Services, `financialservices.gov.in`
+## Precision that matters.
 
-**? Check:** whether cover is per person or per bank account, whether auto-debit
-consent is required, the renewal cycle, and how it interacts with PMJJBY — if a
-worker should hear about both together, that is worth knowing before the
-conversation flow is built.
+- **Income.** "Family income" and "personal income" are different rules. Say which one the source says.
+- **Age.** Note whether the source's bounds are inclusive.
+- **Occupation.** Use the scheme's own categories, not ours.
+- **Land.** Always with units.
+- **Documents.** The exact names the office uses, not paraphrases.
 
-## Precision that matters
+<br>
 
-- **Income:** "family income" and "personal income" are different rules. Record
-  which one the scheme text actually says, in `pass_hi`/`fail_hi` too.
-- **Age bands:** note whether bounds are inclusive. `between = [18, 40]` is
-  inclusive of both in this engine.
-- **Occupation:** use the categories the scheme itself defines, not ours.
-- **Land holding:** always with units.
-- **Documents:** the exact names the office asks for, not paraphrases.
+## Sign it.
+
+```bash
+python3 -m sathi.review <CODE>
+```
+
+It shows every value beside its source. You open each page, and if everything matches, you type the code and your name. It writes exactly two lines — a signature can never carry a data change in with it. `--unsign` reverses it.
+
+A signature is a change in what workers are told, so two tests must change with it:
+
+- **`SIGNED_OFF`** in [`tests/test_schemes.py`](../tests/test_schemes.py) pins the signed list.
+- **The hand-written rules** in [`tests/test_rule_boundaries.py`](../tests/test_rule_boundaries.py) must cover the scheme. Every signed scheme is swept against them.
+
+<br>
+
+<sub>Research notes behind the first schemes: [`history/SCHEME_AUDIT.md`](history/SCHEME_AUDIT.md).</sub>

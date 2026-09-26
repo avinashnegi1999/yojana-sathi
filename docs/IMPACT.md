@@ -1,89 +1,73 @@
-# Impact methodology
+# What the numbers mean.
 
-What each number counts, and what it does not claim.
+What each number counts — and what it does not claim.
 
-> Nothing here is populated until the tool is deployed and real workers have
-> used it. There are no projections in this project and no "potential reach"
-> figures. If it is not in the event log, it does not get reported.
+> Nothing here is filled in until real workers use the tool. No projections, no "potential reach". If it isn't in the event log, it isn't reported.
 
-## The headline numbers
+<br>
+
+## The numbers.
 
 | Number | Counts | Does **not** claim |
 |---|---|---|
-| Workers screened | Distinct sessions that reached an eligibility evaluation | Distinct *people*. Sessions are deliberately not linkable — see Privacy. |
-| Schemes matched per worker | Matches ÷ sessions screened | That any of them were applied for |
-| **Newly surfaced** | Matched schemes the worker said they did **not** already have | That the worker was previously unaware in any deeper sense — only that they said they did not hold it |
-| **Annual entitlement surfaced (₹)** | Sum of annual value over newly-surfaced matches whose `value_basis` is a payout | **Money delivered.** Nobody received this. It is what they were told they are entitled to. |
-| **Accident cover surfaced (₹)** | The same sum restricted to `value_basis = "insurance_cover"` | That anyone claimed, or will claim. A cover pays only on a claim, and is never added to the payout total. |
-| Application packs generated | Packs produced in a session | Packs submitted, or accepted |
-| Median session time | Last event − first event, per session, median | Time to complete an application |
+| Workers screened | Sessions that reached an eligibility result | Distinct *people*. Sessions are deliberately not linkable. |
+| Schemes matched per worker | Matches ÷ sessions screened | That any were applied for |
+| **Newly surfaced** | Matches the worker said they did **not** already hold | Deeper unawareness — only that they said they didn't hold it |
+| **Annual entitlement surfaced (₹)** | Yearly value of newly surfaced matches that pay out | **Money delivered.** Nobody received this. It is what they were told they are entitled to. |
+| **Accident cover surfaced (₹)** | The same, for insurance covers — PMJJBY's life cover counts here too | That anyone claimed, or will. A cover pays only on a claim. |
+| Application packs | Sheets produced in a session | Sheets submitted or accepted |
+| Median session time | Last event − first event, per session | Time to finish an application |
 
-**The ₹ figure is the one most likely to be misread**, including by us. It is
-"entitlement surfaced", never "value delivered". That phrasing has to survive
-into the README, the dashboard and the demo video unchanged.
+<br>
 
-**Payouts and covers are reported as two separate numbers.** PM-SYM surfaces a
-₹36,000/year pension; PMSBY surfaces a ₹2,00,000 accident cover that pays only
-if an accident happens. Summing them would report ₹2,36,000 "surfaced" per
-worker when the money they can expect to receive is ₹36,000 — a ~6x overstatement
-and the first thing a judge would take apart. The dashboard shows a payout total
-and a cover total, and the worker-facing message states them on separate lines
-in the same terms.
+## Surfaced, never delivered.
 
-The split is derived by joining `scheme_code` in the event log back to the scheme
-file's `value_basis`, so it needs no extra column and no migration. A scheme code
-in the log with no matching file is counted as `unclassified` rather than folded
-into either number.
+The ₹ figure is the one most likely to be misread — by us too. It is **"entitlement surfaced"**, never "value delivered". That phrase survives unchanged into the README, the dashboard and the demo video.
 
-Schemes still carrying unresearched values contribute ₹0, because their benefit
-amount is a stub. The reported total therefore under-states rather than
-over-states — the right direction to be wrong in.
+<br>
 
-## Where "newly surfaced" comes from
+## Payouts and covers are never added.
 
-During intake the worker is asked which of the schemes they already have. Any
-match not in that set is counted as newly surfaced. It depends entirely on that
-one question, which is why it ships in the first deployed version and not later.
+PM-SYM surfaces a ₹36,000-a-year pension. PMSBY surfaces a ₹2,00,000 cover that pays only if there is an accident. Added together, that is ₹2,36,000 "surfaced" for a worker who can expect ₹36,000 — about six times too much, and the first thing a judge would take apart.
 
-## Privacy
+- The dashboard shows a payout total and a cover total. The worker sees them on separate lines too.
+- The split joins each `scheme_code` in the log to that scheme file's `value_basis`. No extra column, no migration.
+- A code with no matching file counts as `unclassified`, not as either total.
+- Schemes with unresearched values add ₹0. The totals can only understate — the right direction to be wrong in.
 
-Counts and coarse bands only: state, age band, occupation, income band, plus
-the channel and — after consent — the arrival-link slug. Occupation is asked
-only when a screened scheme needs it, and no signed scheme does today, so it is
-usually empty. Income is asked only when PM-SYM is screened. No name, phone,
-Aadhaar, village or exact income is written to the event log, and those fields
-do not exist in the profile.
+<br>
 
-Each session gets a fresh random id that is **not** derived from the messaging
-account, so two sessions by the same worker are not linkable in the log. That
-is why "workers screened" is honestly "sessions screened" — the alternative
-would be tracking people, which is worse.
+## Where "newly surfaced" comes from.
 
-Breakdown tables (scheme, state, occupation) suppress any row covering fewer
-than 5 sessions and show it as `<5`. The headline totals are not suppressed, and
-the dashboard says so; this is not a guarantee of anonymity.
+One intake question: which of these schemes do you already have? Any match not in that answer is newly surfaced. That's why the question shipped in the first deployed version.
 
-## Pilot versus testing
+<br>
 
-Every number is filtered the same way. Terminal (`cli`) sessions are always
-someone at a keyboard and are excluded unless `--include-cli` is given. A pilot
-is counted on its own by the link it arrives through: hand workers
-`t.me/YojanaSathiBot?start=csc` (or `sathi.avinashnegi.com/?start=csc`) and run
-`python3 -m sathi.metrics.report --cohort csc --since <pilot start>`. The
-end-of-session "who is this for?" answer cannot filter screenings — it is
-stored without a session id on purpose — so the link is the separator.
+## Pensions that start at 60.
 
-## PM-SYM and NPS-Traders are future pensions
+PM-SYM and NPS-Traders pay ₹3,000 a month **from age 60**, and the worker pays ₹55–₹200 a month until then. They count at their stated yearly value — but a 25-year-old receives nothing for 35 years. The worker is told: the result and the sheet show each scheme's cost, and the total says each pension starts at its own age.
 
-Both pay ₹3,000 a month **from age 60**, and the worker contributes ₹55–₹200 a
-month until then. They are counted in "annual entitlement surfaced" at their
-annual value, because that is what the scheme states, but a 25-year-old
-receives nothing for 35 years. The worker is told so: the result screen and
-the sheet show each scheme's cost, and the total says each pension is paid
-only from its own starting age.
+<br>
 
-## Data freshness
+## Pilot, not testing.
 
-The dashboard shows each scheme's `verified_on` date and days since. A rule
-verified nine months ago may no longer be correct, and the report says so rather
-than presenting every number as equally current.
+- **Terminal sessions are left out** unless `--include-cli` is given. They are always someone at a keyboard.
+- **A pilot is counted by its link.** Hand out `t.me/YojanaSathiBot?start=csc` or `sathi.avinashnegi.com/?start=csc`, then run `python3 -m sathi.metrics.report --cohort csc --since <pilot start>`.
+- **"Who is this for?" can't filter.** That answer is stored without a session id, on purpose — so the link is the separator.
+- **Browser sessions are not counted as people.** A cookie is a random routing key, not an identity.
+
+<br>
+
+## Privacy.
+
+- **Coarse bands only:** state, age band, occupation, income band — plus the channel and, after consent, the arrival-link tag.
+- **Occupation** is asked only when a screened scheme needs it. No signed scheme does today, so it is usually empty. **Income** is asked only when PM-SYM is screened.
+- **Never written:** name, phone, Aadhaar, village, exact income. Those fields don't exist in the profile.
+- **Each session gets a fresh random id**, not derived from any messaging account. Two sessions by the same worker can't be linked — which is why "workers screened" honestly means sessions.
+- **Breakdown rows under 5 sessions** show as `<5`. Headline totals are not suppressed, and the dashboard says so. This is not a guarantee of anonymity.
+
+<br>
+
+## Freshness.
+
+The dashboard shows each scheme's `verified_on` date and the days since. A rule checked nine months ago may be wrong now, and the report says so.

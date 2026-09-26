@@ -3,7 +3,7 @@
 Checked **7 September 2026** against the live organizer pages and submission
 template. This is a repository readiness assessment, not organizer acceptance.
 The earlier Saans entry and unresolved AgentFoundry question were recovered from
-`docs/BUILD_LOG.md` and the project memory; current sources below take precedence.
+`docs/history/BUILD_LOG.md` and the project memory; current sources below take precedence.
 
 ## Requirement matrix
 
@@ -54,7 +54,7 @@ It explicitly values field outcomes and measured change. It specifies no
 minimum worker count, compulsory impact duration or independent audit certificate.
 
 For this entry, retain citations for the problem, show deterministic tests and
-source-linked explanations for quality, and use [IMPACT.md](IMPACT.md) for
+source-linked explanations for quality, and use [IMPACT.md](../IMPACT.md) for
 measurement definitions. A screening is not an approved benefit. Keep pension
 amounts and contingent insurance cover separate. A 20–50 worker pilot is our
 proposed evidence collection approach, not a competition quota.

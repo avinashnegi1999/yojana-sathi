@@ -3,7 +3,7 @@
 # ! Every other test asks whether the software works. This one asks whether the
 # ! ANSWER matches the encoded source interpretation, which is a different
 # ! question from channel behavior. Unresolved source conflicts remain human
-# ! gates in docs/SCHEME_AUDIT.md; this sweep cannot establish legal correctness.
+# ! gates in docs/history/SCHEME_AUDIT.md; this sweep cannot establish legal correctness.
 # ! A wrong answer costs a
 # ! worker a day's wages when we get it wrong.
 #
@@ -408,7 +408,7 @@ def test_eshram_has_no_upper_age_limit_yet():
     oracle both need correction before human sign-off.
 
     This test PASSES on the current reading. It exists to fail loudly the day
-    someone adds an upper bound without updating docs/VERIFICATION.md — and to
+    someone adds an upper bound without updating docs/history/VERIFICATION.md — and to
     make the exposure visible while the question is open.
     """
     schemes = _signed_schemes()
@@ -417,7 +417,7 @@ def test_eshram_has_no_upper_age_limit_yet():
                   nps_exclusion_applies=False)
     assert evaluate(old, schemes["ESHRAM"]).verdict is Verdict.ELIGIBLE, (
         "e-Shram now has an upper age bound — settle question A2 in "
-        "docs/VERIFICATION.md and update this test deliberately"
+        "docs/history/VERIFICATION.md and update this test deliberately"
     )
 
 

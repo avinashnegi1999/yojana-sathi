@@ -24,7 +24,7 @@ runtime requirement.
 
 ## Current Yojana Sathi status
 
-The local Git history and `docs/BUILD_LOG.md` record an existing Python project.
+The local Git history and `docs/history/BUILD_LOG.md` record an existing Python project.
 The current repository has a standard-library runtime, public Apache-2.0 source,
 Telegram and WhatsApp adapters, deterministic rules, tests and deployment files.
 There is no verified AF origin, AF development session, approved import, or

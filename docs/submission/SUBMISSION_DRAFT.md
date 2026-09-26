@@ -133,7 +133,7 @@ polling and WhatsApp signed webhooks; both invoke the shared conversation and
 three-valued rule engine. TOML holds scheme data and localized content.
 Application sheets are generated in memory. Consent-gated SQLite events support
 aggregate reporting. Offline channel preview exercises rendering without
-sending messages. See [ARCHITECTURE.md](ARCHITECTURE.md).
+sending messages. See [ARCHITECTURE.md](../ARCHITECTURE.md).
 
 ## Safety
 
@@ -143,7 +143,7 @@ the program does not auto-submit government applications. The event schema
 restricts profile data to broad categories under random session IDs. Account
 identifiers still exist transiently for message routing, and messaging providers
 retain their own records. Packs contain sensitive answers and must be handled
-privately. See [VERIFICATION.md](VERIFICATION.md) and [IMPACT.md](IMPACT.md).
+privately. See [VERIFICATION.md](../history/VERIFICATION.md) and [IMPACT.md](../IMPACT.md).
 
 ## Deployment
 
@@ -156,7 +156,7 @@ reported running. This establishes process status, not successful message
 delivery or independent judge access. No new phone test was performed.
 `python3 check.py` also passed locally at commit
 `e4a10e7be39b85a0ac3c2b19bbcfff96788812f0`. The current audit, including what
-was re-run on Python 3.11 and 3.12 and in CI, is [AUDIT.md](../AUDIT.md).
+was re-run on Python 3.11 and 3.12 and in CI, is [AUDIT.md](../../AUDIT.md).
 
 Before submitting, fill: **[actual deployed commit, date checked, independent
 judge-access test and sanitized evidence link]**.
@@ -175,8 +175,8 @@ judge-access test and sanitized evidence link]**.
 
 Tests, previews, sessions and unique workers are different quantities. Potential
 pension and contingent insurance cover are not money received and cannot be
-added into a single impact amount. Follow [PILOT_PLAN.md](PILOT_PLAN.md) and
-[IMPACT.md](IMPACT.md); remove empty promises before final submission.
+added into a single impact amount. Follow [PILOT_PLAN.md](../PILOT_PLAN.md) and
+[IMPACT.md](../IMPACT.md); remove empty promises before final submission.
 
 ## Repository
 
@@ -188,7 +188,7 @@ process clarification.
 
 **[2–3 minute video URL or independently checked live demonstration link]**
 
-[DEMO_SCRIPT.md](DEMO_SCRIPT.md) supplies an honest path using UNKNOWN production
+[DEMO_SCRIPT.md](../DEMO_SCRIPT.md) supplies an honest path using UNKNOWN production
 data and clearly labeled synthetic tests. A script is not a completed recording.
 
 ## AgentFoundry

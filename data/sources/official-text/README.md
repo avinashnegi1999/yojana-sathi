@@ -95,5 +95,5 @@ disagrees with the department, the department is right.
 A snapshot proves what a page said. It does not prove the rule was read
 correctly into `data/schemes/`, and it does not prove a person checked it. That
 second thing is `verified_by` in each scheme file, and it is still pending on
-all seven — see [`docs/VERIFICATION.md`](../../../docs/VERIFICATION.md) and
-[`docs/SOURCE_REVIEW_2026-09-09.md`](../../../docs/SOURCE_REVIEW_2026-09-09.md).
+all seven — see [`docs/history/VERIFICATION.md`](../../../docs/history/VERIFICATION.md) and
+[`docs/history/SOURCE_REVIEW_2026-09-09.md`](../../../docs/history/SOURCE_REVIEW_2026-09-09.md).

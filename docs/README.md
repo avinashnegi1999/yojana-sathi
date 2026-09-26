@@ -1,43 +1,55 @@
-# docs/ — what is current and what is history
+# Docs.
 
-Most files here are dated working records, kept because an audit trail that
-shows what was wrong and when is worth more than a tidy folder. They are **not**
-a description of the project today. Start with the current ones.
+What's current, what's a draft, and what's history. Start with the current ones.
 
-## Current — kept in step with the code
+<br>
 
-| File | What it is |
+## Current.
+
+Kept in step with the code.
+
+| Read | For |
 |---|---|
-| [`../README.md`](../README.md) | What the project does, how to run it, what it does not claim |
-| [`../AUDIT.md`](../AUDIT.md) | The latest independent audit, its re-verification, and the fixes applied |
-| [`ARCHITECTURE.md`](ARCHITECTURE.md) | Module map and the design decisions worth knowing before a change |
-| [`IMPACT.md`](IMPACT.md) | What each reported number counts, and what it does not claim |
-| [`PILOT_PLAN.md`](PILOT_PLAN.md) | How the field pilot runs, including the `?start=csc` link that separates it from testing |
-| [`SCHEME_AUTHORING.md`](SCHEME_AUTHORING.md) | How to write or correct a scheme file |
-| [`DEMO_SCRIPT.md`](DEMO_SCRIPT.md) | A demo path re-run against the current flow |
-| [`PROGRESS.md`](PROGRESS.md) | Dated log; the newest entry is the current state |
-| [`../deploy/RUNBOOK.md`](../deploy/RUNBOOK.md) | How the live host is built, updated and checked |
-| [`audit-evidence/`](audit-evidence/README.md) | The documents each scheme signature was checked against |
+| [`../README.md`](../README.md) | What it does, how to run it, what it doesn't claim |
+| [`PROGRESS.md`](PROGRESS.md) | Where things stand today, then a dated log |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | How it's built, and the decisions to know before a change |
+| [`IMPACT.md`](IMPACT.md) | What each number counts — and doesn't claim |
+| [`PILOT_PLAN.md`](PILOT_PLAN.md) | How the field pilot runs, and its `?start=csc` link |
+| [`SCHEME_AUTHORING.md`](SCHEME_AUTHORING.md) | How to write, correct or sign a scheme file |
+| [`DEMO_SCRIPT.md`](DEMO_SCRIPT.md) | A demo path, re-run against the current flow |
+| [`LESSONS.md`](LESSONS.md) | What building it taught, including what it cost |
+| [`../AUDIT.md`](../AUDIT.md) | The latest audit, its re-check, and the fixes |
+| [`../deploy/RUNBOOK.md`](../deploy/RUNBOOK.md) | How the live server is built, updated and checked |
+| [`audit-evidence/`](audit-evidence/README.md) | The documents each signature was checked against |
+| [`design/apple/DESIGN.md`](design/apple/DESIGN.md) | The design language for the chat, the sheet and the site |
 
-## Submission working notes
+<br>
 
-[`SUBMISSION_DRAFT.md`](SUBMISSION_DRAFT.md),
-[`HACKATHON_REQUIREMENTS.md`](HACKATHON_REQUIREMENTS.md) and
-[`AGENTFOUNDRY_MIGRATION.md`](AGENTFOUNDRY_MIGRATION.md) are drafts and research
-for the Code for a Billion form. They record open questions (AgentFoundry
-eligibility, track mapping) that are not settled by anything in this repository.
+## Submission drafts.
 
-## Historical snapshots — read as "what was true on that date"
+Working notes for the Code for a Billion form. They hold open questions — AgentFoundry eligibility, track mapping — that nothing in this repository settles.
 
-| File | Date |
+| Read | For |
 |---|---|
-| [`assessment/README.md`](assessment/README.md) | Early September: three schemes, nothing signed. Its self-scores are superseded by `AUDIT.md`. |
-| [`CHECKPOINT_2026-09-09.md`](CHECKPOINT_2026-09-09.md) | 9 September |
-| [`SOURCE_REVIEW_2026-09-09.md`](SOURCE_REVIEW_2026-09-09.md) | 9 September — still the fullest source comparison |
-| [`PRE_DEPLOY_AUDIT_2026-09-10.md`](PRE_DEPLOY_AUDIT_2026-09-10.md) | 10 September |
-| [`HANDOFF_2026-09-14.md`](HANDOFF_2026-09-14.md) | 14 September |
-| [`SELECTED_SCHEME_REDESIGN.md`](SELECTED_SCHEME_REDESIGN.md) | 14 September design notes |
-| [`AUDIT_PLAN.md`](AUDIT_PLAN.md), [`AUDIT_RESUME.md`](AUDIT_RESUME.md), [`CHANGE_REVIEW.md`](CHANGE_REVIEW.md) | Early September process notes |
-| [`SCHEME_AUDIT.md`](SCHEME_AUDIT.md), [`SCHEME_CANDIDATES.md`](SCHEME_CANDIDATES.md), [`SCHEME_EXPANSION.md`](SCHEME_EXPANSION.md) | Research notes behind the scheme files |
-| [`VERIFICATION.md`](VERIFICATION.md), [`HUMAN_REVIEW_CHECKLIST.md`](HUMAN_REVIEW_CHECKLIST.md) | Review checklists as they stood |
-| [`BUILD_LOG.md`](BUILD_LOG.md), [`LESSONS.md`](LESSONS.md) | How it was built, including the mistakes |
+| [`submission/SUBMISSION_DRAFT.md`](submission/SUBMISSION_DRAFT.md) | The form answers, in draft |
+| [`submission/HACKATHON_REQUIREMENTS.md`](submission/HACKATHON_REQUIREMENTS.md) | What the hackathon asks for |
+| [`submission/AGENTFOUNDRY_MIGRATION.md`](submission/AGENTFOUNDRY_MIGRATION.md) | The unresolved AgentFoundry question |
+
+<br>
+
+## History.
+
+Dated records, kept word for word. Read each as "what was true on that date" — not as the project today.
+
+| Read | Date |
+|---|---|
+| [`history/assessment/`](history/assessment/README.md) | Early September: three schemes, nothing signed. Superseded by `AUDIT.md`. |
+| [`history/CHECKPOINT_2026-09-09.md`](history/CHECKPOINT_2026-09-09.md) | 9 September |
+| [`history/SOURCE_REVIEW_2026-09-09.md`](history/SOURCE_REVIEW_2026-09-09.md) | 9 September — still the fullest source comparison |
+| [`history/PRE_DEPLOY_AUDIT_2026-09-10.md`](history/PRE_DEPLOY_AUDIT_2026-09-10.md) | 10 September |
+| [`history/HANDOFF_2026-09-14.md`](history/HANDOFF_2026-09-14.md) | 14 September |
+| [`history/SELECTED_SCHEME_REDESIGN.md`](history/SELECTED_SCHEME_REDESIGN.md) | 14 September design notes |
+| [`history/BUILD_LOG.md`](history/BUILD_LOG.md) | The build, unedited: every bug and every wrong number |
+| [`history/AUDIT_PLAN.md`](history/AUDIT_PLAN.md) · [`AUDIT_RESUME.md`](history/AUDIT_RESUME.md) · [`CHANGE_REVIEW.md`](history/CHANGE_REVIEW.md) | Early September process notes |
+| [`history/SCHEME_AUDIT.md`](history/SCHEME_AUDIT.md) · [`SCHEME_CANDIDATES.md`](history/SCHEME_CANDIDATES.md) · [`SCHEME_EXPANSION.md`](history/SCHEME_EXPANSION.md) | Research behind the scheme files |
+| [`history/VERIFICATION.md`](history/VERIFICATION.md) · [`HUMAN_REVIEW_CHECKLIST.md`](history/HUMAN_REVIEW_CHECKLIST.md) | Review checklists as they stood |

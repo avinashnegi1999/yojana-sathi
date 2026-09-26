@@ -4,8 +4,8 @@
 > audit trail showing what was wrong and when is worth more than a tidy
 > repository, but do not read it as current state.
 >
-> For current state: [`README.md`](../../README.md) at the repository root, and
-> [`ARCHITECTURE.md`](../ARCHITECTURE.md).
+> For current state: [`README.md`](../../../README.md) at the repository root, and
+> [`ARCHITECTURE.md`](../../ARCHITECTURE.md).
 
 # Assessment
 

@@ -1,187 +1,151 @@
-# Pilot plan — 20–50 consenting adult workers
+# Pilot plan.
 
-Prepared **8 September 2026**. Recruitment, consent, worker testing and outcomes
-have **not** been established by this audit. This is a practical protocol, not
-evidence that a pilot has happened.
+20–50 consenting adult workers. A protocol — not evidence that a pilot has happened.
 
-## Purpose and entry gates
+> Prepared 8 September 2026. Recruitment, consent, worker testing and outcomes have **not** happened yet.
 
-Find whether workers can complete a screening, understand its uncertainty, and
-use a source-checked next-step sheet without being misled about benefit approval.
+<br>
 
-Priorities:
+## The question.
 
-1. ~~Finish [scheme verification](VERIFICATION.md)~~ — **done 9–10 September
-   2026, extended to ten schemes by 15 September.** Each signed file is checked
-   against its official page and the bot returns real verdicts for it; the five
-   unsigned drafts return UNKNOWN. This gate is cleared.
+Can workers finish a screening, understand its uncertainty, and use a source-checked sheet — without being misled into thinking a benefit is approved?
 
-   **The remaining gate is [Hindi review](HUMAN_REVIEW_CHECKLIST.md), and it is
-   not cleared.** Every Hindi string in this bot was drafted by a language model
-   and has never been read by a native speaker. A worker acting on a mistranslated
-   eligibility line loses a day's wages exactly as surely as she would on a wrong
-   threshold, and the signature process that protects the numbers protects none
-   of the words. Read the safety-critical strings aloud before the first real
-   participant, not after.
-2. Find one willing CSC/community organization that can explain the purpose
-   without promising government endorsement. Recruit approximately 20–50 adults
-   from construction, domestic work, vending, transport and other informal work.
-   Include Hindi-preferring participants and people unfamiliar with chat buttons;
-   record recruitment limitations rather than claiming representativeness.
-3. Rehearse on a low-cost Android phone. Confirm the selected live channel works
-   and its stored scheme version matches the reviewed version. Public WhatsApp
-   requires its own approval/setup; Telegram or a supervised local interface is
-   sufficient for an initial pilot.
-4. Run voluntary screenings, fix serious failures before continuing, and ask
-   participants to explain the result in their own words.
-5. Invite voluntary return visits for next-step feedback; report observations
-   with their limitations and denominators.
+<br>
 
-Participation must not affect employment, CSC service, access to benefits or
-payment. Recruit away from employer pressure and service queues. Declining must
-be as easy as accepting. Do not tie incentives to successful screening, sharing
-personal data, giving positive feedback or applying for a scheme.
+## Before the first participant.
 
-## Consent to read aloud
+1. ~~**Scheme verification.**~~ Done 9–10 September 2026, extended to ten schemes by 15 September. The five unsigned drafts return `UNKNOWN`. [How](history/VERIFICATION.md).
+2. **Hindi review — not done.** Every Hindi string was drafted by a language model and has never been read by a native speaker. A mistranslated eligibility line costs a worker a day's wage just as surely as a wrong threshold, and the signature protects the numbers, not the words. Read the safety-critical strings aloud **before** the first participant. [Checklist](history/HUMAN_REVIEW_CHECKLIST.md).
+3. **One partner.** A willing CSC or community organisation that can explain the purpose without promising government endorsement. Recruit about 20–50 adults from construction, domestic work, vending, transport and other informal work. Include Hindi speakers and people new to chat buttons. Record recruitment limits; don't claim the group is representative.
+4. **Rehearse on a low-cost Android phone.** Confirm the live channel works and runs the reviewed scheme version. Telegram, the browser version, or a supervised local interface is enough for a first pilot; public WhatsApp needs its own approval.
+5. **Run, fix, repeat.** Stop to fix serious failures. Ask participants to explain the result in their own words.
+6. **Invite return visits** for next-step feedback. Report what was seen, with its limits and denominators.
 
-English draft:
+**Participation must never affect** work, CSC service, benefits or payment. Recruit away from employers and queues. Declining must be as easy as agreeing. Never tie an incentive to a match, to sharing data, to positive feedback, or to applying.
 
-“We are testing an independent tool that explains some government schemes. It
-does not approve benefits or submit an application. Taking part is your choice;
-you can stop without losing any service. Do not give us your name, Aadhaar,
-account number or copies of documents. With your agreement, the tool records
-anonymous session events and broad categories such as age band and occupation.
-Telegram or WhatsApp still handles messages and account identifiers under its
-own policies. We may note where the instructions were unclear, without recording
-your words or identity. Is it okay to continue?”
+<br>
 
-Hindi draft — **requires human review before use**:
+## Consent, read aloud.
 
-“हम एक अलग संस्था का बनाया साधन जाँच रहे हैं, जो कुछ सरकारी योजनाएँ समझाता है।
-यह सरकारी सेवा नहीं है। यह लाभ मंज़ूर नहीं करता और आवेदन जमा नहीं करता। भाग लेना
-आपकी इच्छा है। आप कभी भी रुक सकते हैं; इससे किसी सेवा पर असर नहीं पड़ेगा। हमें
-अपना नाम, आधार नंबर, खाता नंबर या काग़ज़ों की फोटो न दें। आपकी सहमति पर इसमें
-बिना पहचान वाली बातचीत की गिनती और उम्र का समूह तथा काम जैसी मोटी जानकारी
-दर्ज होगी। टेलीग्राम या व्हाट्सऐप अपने नियमों के अनुसार संदेश और खाते की जानकारी
-रखते हैं। हम बिना नाम लिखे यह नोट कर सकते हैं कि कौन-सी बात समझने में कठिन लगी।
-क्या हम आगे बढ़ें?”
+> "We are testing an independent tool that explains some government schemes. It does not approve benefits or submit an application. Taking part is your choice; you can stop without losing any service. Do not give us your name, Aadhaar, account number or copies of documents. With your agreement, the tool records anonymous session events and broad categories such as age band and occupation. Telegram or WhatsApp still handles messages and account identifiers under its own policies. We may note where the instructions were unclear, without recording your words or identity. Is it okay to continue?"
 
-Explain that the application records minimal session-start/consent events even
-when consent is declined; it does not then store profile answers. Offer a
-`--no-db` supervised demonstration if the person only wants to see the tool.
-The current consent flow does not offer a complete screening after declining
-its logging consent. Do not claim that it does.
+<details>
+<summary><b>Hindi version — needs human review before use</b></summary>
 
-## Information never collected for this pilot
+<br>
 
-No names, Aadhaar/UAN numbers, phone numbers, messaging handles, exact address,
-bank details, document images, recordings, personal screenshots, or raw chat
-exports. Do not ask to see Aadhaar to establish age. The app asks age for rules;
-the event log should retain only its band. Do not copy the transient profile
-into facilitator notes. Keep `FOLLOWUP_SALT` unset for the pilot unless a
-separately explained and approved follow-up design is adopted.
+> "हम एक अलग संस्था का बनाया साधन जाँच रहे हैं, जो कुछ सरकारी योजनाएँ समझाता है।
+> यह सरकारी सेवा नहीं है। यह लाभ मंज़ूर नहीं करता और आवेदन जमा नहीं करता। भाग लेना
+> आपकी इच्छा है। आप कभी भी रुक सकते हैं; इससे किसी सेवा पर असर नहीं पड़ेगा। हमें
+> अपना नाम, आधार नंबर, खाता नंबर या काग़ज़ों की फोटो न दें। आपकी सहमति पर इसमें
+> बिना पहचान वाली बातचीत की गिनती और उम्र का समूह तथा काम जैसी मोटी जानकारी
+> दर्ज होगी। टेलीग्राम या व्हाट्सऐप अपने नियमों के अनुसार संदेश और खाते की जानकारी
+> रखते हैं। हम बिना नाम लिखे यह नोट कर सकते हैं कि कौन-सी बात समझने में कठिन लगी।
+> क्या हम आगे बढ़ें?"
 
-At the end, the bot optionally asks how it is being used: checking for oneself,
-helping someone else, or testing as a developer/reviewer. This is anonymous
-self-report, not proof of occupation. Treat developer/reviewer replies as
-technical testing, never worker-pilot evidence. That answer is stored without a
-session id, so it **cannot** be used to filter screenings out of the numbers.
+</details>
 
-**Use the pilot link, every time.** Hand participants
-`t.me/YojanaSathiBot?start=csc` (or `https://sathi.avinashnegi.com/?start=csc`),
-never the plain link. After consent, the session's events carry cohort `csc`,
-and the pilot is reported on its own with:
+- **Even after a "no",** the app records a minimal session-start and consent event. It stores no answers.
+- **The app can't screen someone who declines logging.** Don't claim it can. If a person only wants to see the tool, offer a supervised `--no-db` demo.
 
-    python3 -m sathi.metrics.report --cohort csc --since <pilot start date> --out pilot.html
+<br>
 
-Maintainer testing through the plain link has no cohort and never appears in
-that report; terminal (`cli`) runs are excluded from every report by default.
-Use `?start=pilot` instead if a second, non-CSC partner is added, so the two
-can be reported separately.
+## Never collected.
 
-A participant may hold their own sheet; facilitators do not retain copies. A
-sheet still includes sensitive answers even when it has no name. On shared
-devices, clear the previous conversation before another person starts and
-explain that channel-side deletion may be incomplete. Do not promise erasure
-of Telegram/Meta records.
+- **No** names, Aadhaar or UAN numbers, phone numbers, messaging handles, addresses, bank details, document images, recordings, personal screenshots or chat exports.
+- **Don't ask to see Aadhaar** to check age. The app asks age for the rules; the log keeps only the band.
+- **Don't copy answers** into facilitator notes.
+- **Keep `FOLLOWUP_SALT` unset**, unless a follow-up design is separately explained and approved.
+- **The end-of-chat "who is this for?"** (self, someone else, developer/reviewer) is anonymous self-report, not proof of occupation. Treat developer answers as testing. It is stored without a session id, so it **can't** filter screenings.
 
-## Procedure and completion definition
+<br>
 
-1. Explain consent, choose language, then let the participant operate the phone.
-   If requested, read the visible text neutrally; record “assisted”, not failure.
-2. Ask them to use their own answers, including “don't know” where offered.
-   Do not coach an answer that makes a scheme match. Let them correct mistakes
-   or restart. No real application or payment is performed by the bot.
-3. At the answer recap, ask whether the recorded answers are correct. At the
-   result, ask: “Does this mean the government has approved money?” and “What
-   would you do next?” Record only correct/unclear/incorrect understanding.
-4. Offer the sheet and explain its source/verification limits. Record whether
-   it was accepted, declined or could not be opened. Ask which question needs
-   simpler language, using the question key rather than their personal answer.
+## Use the pilot link. Every time.
 
-A **completed screening session** has affirmative consent, finishes intake and
-the result recap, and reaches the closing state after accepting or declining
-the sheet. An all-UNKNOWN result can complete the interaction; count it
-separately from an **actionable screening**, which has at least one result from
-a human-verified scheme with a usable next step. Missing data is not a failed
-rule evaluation. Database `eligibility_evaluated` events alone do not prove the
-participant read or understood the result.
+Hand out `t.me/YojanaSathiBot?start=csc` or `https://sathi.avinashnegi.com/?start=csc` — never the plain link. After consent, the session carries cohort `csc`:
 
-## Minimal observation sheet
+```bash
+python3 -m sathi.metrics.report --cohort csc --since <pilot start date> --out pilot.html
+```
 
-Keep an access-restricted local tally outside Git. One row per observed visit:
+- Maintainer testing through the plain link has no cohort and never appears here.
+- Terminal runs are left out of every report by default.
+- A second, non-CSC partner uses `?start=pilot`, so the two are reported apart.
 
-| Language | Channel | Use type (self-report) | Assisted? | First/repeat visit (self-report) | Finished? | All UNKNOWN? | Understood no approval? | Next step understood? | Sheet usable? | Error code/question key |
-|---|---|---|---|---|---|---|---|---|---|
-| blank | blank | blank | blank | blank | blank | blank | blank | blank | blank | blank |
+<br>
 
-Do not include timestamps precise enough to match a person to a chat, free-text
-worker quotes, session IDs or contact fields. Use aggregate counts in the
-submission. Self-reported repeat visits are not reliable unique-user tracking;
-the app's random sessions cannot establish unique workers.
+## Sheets and shared phones.
 
-## Measures and stop conditions
+- The participant keeps their sheet. Facilitators keep no copies. A sheet without a name still holds sensitive answers.
+- On a shared phone, clear the previous conversation before the next person. Explain that deletion on the platform's side may be incomplete — never promise Telegram or Meta will erase anything.
 
-| Measure | Numerator / denominator or definition |
+<br>
+
+## During a session.
+
+1. **Consent, language, then hand over the phone.** Read the screen neutrally if asked, and record "assisted" — not failure.
+2. **Their own answers**, including "don't know". Never coach an answer that makes a scheme match. Let them correct or restart. The bot performs no real application or payment.
+3. **At the recap:** are these answers right? **At the result:** "Does this mean the government has approved money?" and "What would you do next?" Record only correct / unclear / incorrect.
+4. **Offer the sheet** and explain its limits. Record accepted, declined or couldn't open. Ask which question needs simpler words — note the question key, not their answer.
+
+- **Completed session:** consent, intake, the result recap, and the closing state after accepting or declining the sheet. An all-`UNKNOWN` result can complete.
+- **Actionable screening:** at least one result from a signed scheme, with a usable next step. Counted separately.
+- Missing data is not a failed rule. `eligibility_evaluated` events alone don't prove anyone read or understood the result.
+
+<br>
+
+## Observation sheet.
+
+A restricted local tally, outside Git. One row per observed visit.
+
+| Language | Channel | Use (self-report) | Assisted? | First or repeat (self-report) | Finished? | All `UNKNOWN`? | Understood "not approval"? | Next step understood? | Sheet usable? | Error / question key |
+|---|---|---|---|---|---|---|---|---|---|---|
+| | | | | | | | | | | |
+
+No precise timestamps, free-text quotes, session ids or contact fields. Report totals only. Self-reported repeat visits don't track unique people, and neither can the app's random sessions.
+
+<br>
+
+## Measures.
+
+| Measure | Definition |
 |---|---|
-| Completion | Completed observed sessions / consenting attempts |
-| Independent completion | Completed without operator assistance / consenting attempts |
-| Uncertainty understood | Correct explanation that screening is not approval / completed sessions asked |
-| Actionable screening | At least one reviewed scheme with a usable next step / completed sessions |
-| Usable sheet | Participant can open/read it or requests a usable assisted copy / sheets accepted |
-| Failures | Abandonment, repeated confusion, transport failure, wrong answer recap, privacy incident, misleading verdict; report each count separately |
+| Completion | Completed observed sessions ÷ consenting attempts |
+| Independent completion | Completed without help ÷ consenting attempts |
+| Uncertainty understood | Correctly says screening isn't approval ÷ completed sessions asked |
+| Actionable screening | At least one signed scheme with a usable next step ÷ completed sessions |
+| Usable sheet | Opens and reads it, or asks for a usable assisted copy ÷ sheets accepted |
+| Failures | Abandonment, repeated confusion, transport failure, wrong recap, privacy incident, misleading verdict — each counted separately |
 
-Proposed usability targets, **not achieved results**: at least 80% completion
-and 90% understanding that screening is not approval. These are pilot decision
-thresholds, not proof of effectiveness or statistical generalizability. Any
-invented benefit, gate bypass, leaked identifier or instruction likely to cause
-harm stops recruitment until investigated. UNKNOWN itself is not a bug.
+**Targets, not results:** at least 80% completion and 90% understanding that screening isn't approval. These are decision thresholds, not proof of effect.
 
-## Follow-up, bugs and reporting
+**Stop recruiting** on any invented benefit, gate bypass, leaked identifier, or instruction likely to cause harm — until it's investigated. `UNKNOWN` itself is not a bug.
 
-Invite participants to return voluntarily to the same partner or start a fresh
-session. Do not collect phone numbers or promise automated reminders. Ask only
-whether they attempted an application, submitted it, report approval, or report
-receipt. Record aggregate **self-reports** by stage; no claim is independently
-confirmed unless a separately consented verification process actually exists.
-Do not count non-returners as either successes or failures. Report the follow-up
-response denominator, duplicate uncertainty and selection bias.
+<br>
 
-A bug report contains version/commit, language, channel, question key, a
-fictional reproduction, expected/actual behavior and severity. No raw webhook,
-chat screenshot or database rows. For a privacy incident, stop collection and
-restrict access before writing a sanitized report.
+## Follow-up.
 
-Keep rehearsals out of the pilot database. Use `--no-db` for demos; start the
-pilot with a dedicated restricted DB path and record its start date/version.
-Generate a report with `python3 -m sathi.metrics.report --db /absolute/path/to/pilot.db --out /absolute/path/to/private-impact.html`.
-Review aggregates before publication and suppress groups below five. Never
-commit the database or event export. Keep monetary categories separate using
-[IMPACT.md](IMPACT.md); report observed visits, screened sessions, applications
-and outcomes as different things.
+- Invite a voluntary return to the same partner, or a fresh session. No phone numbers, no promised reminders.
+- Ask only: did you try to apply, did you submit, do you report approval, do you report receiving it. Record totals by stage, as **self-reports** — nothing is independently confirmed.
+- Count non-returners as neither success nor failure. Report the response rate, duplicate uncertainty and selection bias.
 
-Before collecting anything, the pilot owner records who has access and a
-retention period. Suggested pilot policy: delete event-level pilot data and
-observation rows once checked aggregates are prepared, within 30 days of pilot
-closure. This is a proposed operating policy, not a claim that software enforces
-automatic deletion. No separate research or legal approval is claimed here.
+<br>
+
+## Bugs and incidents.
+
+- **A bug report holds:** version or commit, language, channel, question key, a fictional reproduction, expected vs actual, severity. No raw webhooks, chat screenshots or database rows.
+- **A privacy incident:** stop collecting, restrict access, then write a sanitised report.
+
+<br>
+
+## Data.
+
+- **Keep rehearsals out.** Use `--no-db` for demos. Start the pilot on a dedicated, restricted database and record its start date and version:
+
+```bash
+python3 -m sathi.metrics.report --db /absolute/path/to/pilot.db --out /absolute/path/to/private-impact.html
+```
+
+- **Before publishing,** review the totals and suppress groups under five. Never commit the database or an event export.
+- **Keep money separate** as [`IMPACT.md`](IMPACT.md) sets out. Visits, screened sessions, applications and outcomes are different things.
+- **Access and retention.** Before collecting anything, the pilot owner records who has access and for how long. Suggested: delete event-level pilot data and observation rows once checked totals exist, within 30 days of closing. A proposed policy — the software doesn't enforce it. No research or legal approval is claimed.

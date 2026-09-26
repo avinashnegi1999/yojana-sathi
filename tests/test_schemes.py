@@ -310,7 +310,7 @@ def test_the_signed_list_matches_the_files():
     assert signed == tuple(sorted(SIGNED_OFF)), (
         f"signed schemes are {signed}, this list says {tuple(sorted(SIGNED_OFF))}. "
         f"That is a real change in what this bot tells people. Update README.md, "
-        f"docs/CHECKPOINT_2026-09-09.md and docs/SUBMISSION_DRAFT.md, then fix "
+        f"docs/history/CHECKPOINT_2026-09-09.md and docs/submission/SUBMISSION_DRAFT.md, then fix "
         f"this list."
     )
 

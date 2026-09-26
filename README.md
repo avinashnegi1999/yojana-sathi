@@ -1,342 +1,171 @@
-<h1 align="center">
-  <strong>
-    YOJANA SATHI<br>योजना साथी
-  </strong>
-</h1>
-
-<p align="center"><i>Know before you go — which schemes you qualify for, in your own language</i></p>
-
 <p align="center">
-  <img src="https://img.shields.io/github/last-commit/avinashnegi1999/yojana-sathi?style=for-the-badge&color=2d5016&logo=github" />
-  <img src="https://img.shields.io/badge/python-100.0%25-2d5016?style=for-the-badge&logo=python&logoColor=white" />
-  <img src="https://img.shields.io/badge/dependencies-0-2d5016?style=for-the-badge&logo=python&logoColor=white" />
+  <img src="livesite/assets/social-preview.jpg" width="88" alt="Yojana Sathi logo">
 </p>
 
----
+<h1 align="center">Yojana Sathi</h1>
 
-<div align="center">
-  <img src="https://img.shields.io/badge/Status-Live%20on%20web%20and%20Telegram-brightgreen" alt="Status">
-  <img src="https://img.shields.io/badge/Schemes-10%20signed%20and%20live-blue" alt="Schemes">
-  <img src="https://img.shields.io/badge/Field%20pilot-not%20yet-lightgrey" alt="Field pilot">
-  <img src="https://img.shields.io/badge/Licence-Apache--2.0-blue" alt="Licence">
-</div>
-
-<p align="center"><em>Code for a Billion 2026 · Livelihood for the Uneducated</em></p>
-
----
-
-<br/>
-
-<h3 align="center">
-  🌐 &nbsp;<a href="https://avinashnegi.com/yojana-sathi/"><strong>See it working →&nbsp; avinashnegi.com/yojana-sathi</strong></a>
-</h3>
+<h3 align="center">Know before you go.</h3>
 
 <p align="center">
-  A walkthrough video, real screenshots of both channels, the architecture,<br>
-  live numbers from the running bot, and what this does <em>not</em> claim.
+  A Hindi and English conversation that tells an unorganised worker<br>
+  which government schemes fit, what each is worth in ₹, and where to go to claim it.
 </p>
 
 <p align="center">
-  <a href="https://sathi.avinashnegi.com"><img src="https://img.shields.io/badge/Try%20it%20in%20the%20browser-sathi.avinashnegi.com-000000?style=for-the-badge&logo=googlechrome&logoColor=white" /></a>
-  <a href="https://t.me/YojanaSathiBot"><img src="https://img.shields.io/badge/Try%20it%20on%20Telegram-@YojanaSathiBot-229ED9?style=for-the-badge&logo=telegram&logoColor=white" /></a>
+  <a href="https://sathi.avinashnegi.com"><b>Try it in your browser</b></a>
+  &nbsp;&nbsp;·&nbsp;&nbsp;
+  <a href="https://t.me/YojanaSathiBot">Open on Telegram ›</a>
+  &nbsp;&nbsp;·&nbsp;&nbsp;
+  <a href="https://avinashnegi.com/yojana-sathi/">See the project ›</a>
 </p>
 
-<br/>
-
----
-
-<br/>
-
-<p align="center"><i>Built with the tools and technologies:</i></p>
+<br>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python%203.11-3776AB?style=for-the-badge&logo=python&logoColor=white" />
-  <img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" />
-  <img src="https://img.shields.io/badge/TOML-9C4121?style=for-the-badge&logo=toml&logoColor=white" />
-  <img src="https://img.shields.io/badge/Caddy-1F88C0?style=for-the-badge&logo=caddy&logoColor=white" />
-  <img src="https://img.shields.io/badge/AWS%20EC2-FF9900?style=for-the-badge&logo=amazonec2&logoColor=white" />
-  <img src="https://img.shields.io/badge/Telegram%20Bot%20API-229ED9?style=for-the-badge&logo=telegram&logoColor=white" />
+  <img src="livesite/assets/shot-verdict.jpg" width="280" alt="A real result screen: two schemes, each with what you get, why you qualify, and where to go.">
 </p>
 
-<br/>
+<p align="center"><sub>Code for a Billion 2026 · Livelihood for the Uneducated · Apache-2.0</sub></p>
 
-**A conversation, in Hindi or English, that tells an unorganised worker which
-government schemes they are entitled to, what each is worth in ₹, and where to
-walk to claim it.**
+<br>
 
-Live in the browser: [sathi.avinashnegi.com](https://sathi.avinashnegi.com)
-Live on Telegram: [@YojanaSathiBot](https://t.me/YojanaSathiBot)
+## One wrong trip costs a day's wage.
 
-The browser version is the same conversation and the same rule engine behind
-Caddy on the same small server. No account, no app; open the link and tap. It
-has no slash commands and does not count towards the unique-people number,
-because a browser cookie is a random routing key, not an identity.
+The schemes already exist. What a worker can't tell from outside is whether one will accept them.
 
-WhatsApp speaks the same conversation from the same rule engine. The channel is
-built and verified end to end against Meta's test number — a real phone, a full
-screening, the same Hindi — but it is not yet live on a public number.
+| | |
+|---|---|
+| **43.99 crore** | people in India's unorganised sector, 2019–20[^1] |
+| **31.48 crore** | registered on e-Shram, with 14 central schemes mapped to it[^2] |
+| **₹455 · ₹315** | a day, average earnings of a male · female casual labourer, 2025[^3] |
 
-Site source in [`livesite/`](livesite/), published by
-[`.github/workflows/pages.yml`](.github/workflows/pages.yml).
+A failed trip to a Common Service Centre costs that day's wage. Often, there is no second trip.
 
-> **Status — read before you use it on anyone.**
-> The software is complete, tested end to end, and **live**. Fifteen scheme
-> files are deployed, each with a deep link on every encoded value.
->
-> **Ten are signed off** and give real verdicts, real ₹ figures and a place to
-> walk to: PMJJBY and PMSBY (`financialservices.gov.in`), PM-SYM and
-> NPS-Traders (`maandhan.in`), e-Shram (`eshram.gov.in`), PMUY
-> (`pmuy.gov.in`), the Uttarakhand old-age pension
-> (`socialwelfare.uk.gov.in`), and the three National Social Assistance
-> Programme pensions (IGNOAPS, IGNWPS, IGNDPS). `verified_by` in each file
-> names Avinash Negi and records the review date.
->
-> **Five remain drafts and are not offered to workers:** APY, PM Vishwakarma,
-> PM-JAY 70+, PMJDY, and the Uttarakhand widow pension. They stay `UNKNOWN`
-> until human sign-off.
->
-> That signature is enforced, not merely recorded. Until a named human signs a
-> file, the rule engine returns `UNKNOWN` for that scheme to every worker,
-> contributes ₹0 to every number on the dashboard, and says so at startup — and
-> `tests/test_schemes.py` pins the signed list, so a signature added or
-> withdrawn without updating that test fails the build. A wrong threshold sends
-> someone on a day-long trip that costs them a day's wages.
->
-> **One file was withdrawn from service, and the repository says why.** The
-> Uttarakhand widow pension's department page states no amount at all. The
-> ₹1,500 comes from myScheme — whose own "Official Website" link for that scheme
-> points at a *different* scheme. It was signed on 10 September and the
-> signature was withdrawn on 15 September when its other-pension rule changed;
-> it stays `UNKNOWN` until the rate is settled at a primary source. `data/schemes/uk_widow.toml` records exactly that
-> in its header.
->
-> Pensions that sit on the same money are never added together. The Uttarakhand
-> pensions and the three NSAP pensions share one `exclusive_group`, as do PM-SYM
-> and NPS-Traders: a worker who qualifies for two routes to one pension is
-> shown the larger, once.
->
-> The full source comparison, including what could *not* be resolved, is in
-> [`docs/SOURCE_REVIEW_2026-09-09.md`](docs/SOURCE_REVIEW_2026-09-09.md); the
-> edge-case audit run before any of this reached a real person is in
-> [`docs/PRE_DEPLOY_AUDIT_2026-09-10.md`](docs/PRE_DEPLOY_AUDIT_2026-09-10.md).
->
-> **To sign or unsign a scheme:** `python3 -m sathi.review PMJJBY`. It prints
-> every value in the file next to the URL it came from, you open that page, and
-> if it all matches you type the scheme code and your name. It writes exactly two
-> lines and re-validates the file afterwards, so a signature can never carry a
-> data change in with it. `--unsign` puts it back. Nothing in that tool checks
-> anything for you; it puts the values and the source on one screen so you can.
+<br>
 
----
+## Not another myScheme. The last mile after it.
 
-## The problem
+myScheme and UMANG publish the schemes and match eligibility. myScheme is a form — available in Hindi, but still a form. It assumes literacy, a browser, and someone who knows what "land holding in hectares" means.
 
-India's unorganised sector is **43.99 crore workers** — the Economic Survey
-2021-22 figure for 2019-20, quoted by the Ministry of Labour & Employment in
-Parliament.[^1] The last full survey to split the workforce found **82.7% of it
-outside the organised sector** — 39.14 crore of 47.41 crore employed persons.[^2]
-Construction labourers, domestic workers, drivers, street vendors, farm labour,
-shop staff.
+Yojana Sathi is a conversation on a ₹6,000 phone that ends in a checklist and an address.
 
-What they earn sets the price of a wasted day. In the Government's own 2025
-labour force survey, a casual labourer earned **₹455 a day if male and ₹315 if
-female**; a self-employed worker earned **₹17,914 a month if male and ₹6,374 if
-female**.[^3]
+<br>
 
-The welfare infrastructure exists. **31.48 crore** unorganised workers were
-registered on e-Shram as on 26 January 2026, with **14 central schemes**
-integrated into it — PMSBY, PMJJBY, PM-SVANidhi, AB-PMJAY, PM-KISAN, ONORC and
-others.[^4] The Ministry reported the count had reached 31.78 crore by 14 July
-2026.[^5]
+## How it works.
 
-[^1]: Ministry of Labour & Employment, *Number of Workers In Unorganised Sector*,
-      Lok Sabha written reply, 24 July 2023 — "As per the Economic Survey,
-      2021-22, total number of people working in the unorganised sector is around
-      43.99 crores during 2019-20."
-      <https://www.pib.gov.in/PressReleasePage.aspx?PRID=1942079>
+1. **Choose.** Every signed scheme, or just the ones you care about.
+2. **Answer.** Only the questions those schemes need. Buttons for everything except age. "Don't know" is always allowed.
+3. **Decide.** Plain rule files with cited sources. Same answers, same verdict.
+4. **Walk in.** What you get, what it costs, what to carry, where to go — and a one-page sheet to show at the centre.
 
-[^2]: Ministry of Labour & Employment, *Workforce in Organised/ Unorganised
-      Sector*, 25 July 2016 — "the number of estimated employed persons in
-      2011-12 on usual status basis were 47.41 crore, of which 82.7% of workforce
-      (39.14 crore persons) was in unorganized sector." NSSO 2011-12 is the last
-      survey to publish this split; the PLFS series that replaced it does not
-      report the same organised/unorganised breakdown, which is why the year is
-      old and stated rather than hidden.
-      <https://www.pib.gov.in/newsite/PrintRelease.aspx?relid=147634&reg=48&lang=2>
+<p align="center">
+  <img src="livesite/assets/core-logic.png" width="760" alt="The core flow: open the bot, pick a language, consent, choose schemes, answer only the needed questions, get eligible, ineligible or unknown verdicts from human-signed rules, then an explanation, a checklist, a sheet and where to go.">
+</p>
 
-[^3]: National Statistical Office, MoSPI, *Press Note on Periodic Labour Force
-      Survey Annual Report, 2025* (January–December 2025), section 6 — casual
-      labour other than public works, ₹455 male / ₹315 female per day;
-      self-employment, ₹17,914 male / ₹6,374 female per month.
-      <https://www.mospi.gov.in/uploads/latestReleases/latest_release_1774607827733_3e8964a9-268b-4cc9-ad65-cfc8a9e32f08_Press_note_AR_PLFS_2025_23032025_V2.1_26032026_final.pdf>
+<p align="center"><sub>Every module and what it calls: <a href="livesite/assets/system-architecture.png">code map</a> · <a href="docs/ARCHITECTURE.md">architecture notes</a></sub></p>
 
-[^4]: Ministry of Labour & Employment, *e-Shram Cards for Unorganized Workers*,
-      2 February 2026 — "As on 26th January 2026, over 31.48 crore unorganised
-      workers have already been registered on eShram portal" and "fourteen (14)
-      schemes of different Central Ministries/ Departments have already been
-      integrated/ mapped with the eShram".
-      <https://www.pib.gov.in/PressReleasePage.aspx?PRID=2222263&reg=3&lang=2>
+<br>
 
-[^5]: Ministry of Labour & Employment, Lok Sabha written reply, 21 July 2026, as
-      reported by DD News — over 31.78 crore registered as on 14 July 2026, with
-      fifteen central schemes mapped. Cited from the broadcaster because the
-      corresponding PIB release page could not be located; treat the 31.48 crore
-      figure above as the primary one.
-      <https://ddnews.gov.in/en/over-31-78-crore-unorganised-workers-registered-on-e-shram-portal-government/>
+## The rules decide. A model never does.
 
-## The gap
+- **Rules are plain text.** One TOML file per scheme in [`data/schemes/`](data/schemes/), readable without knowing Python.
+- **Every value is cited.** Each links to the official page it came from, with the date it was checked.
+- **Gaps stay gaps.** An unresearched value is the string `"TODO"`, never `0`, and the engine answers `UNKNOWN` instead of guessing.
+- **Three verdicts.** `ELIGIBLE`, `INELIGIBLE`, `UNKNOWN`. Unknown says what's missing and what to ask at the centre.
+- **The model is optional.** It may suggest an occupation for the worker to confirm. No signed scheme asks occupation, so in normal use it is never called. It never sees a threshold, a ₹ figure or a verdict.
+- **No key, same answers.** With `LLM_API_KEY` unset, everything runs on buttons with identical results. That is tested, not degraded.
+- **Hindi and English agree.** Only the words change. A test asserts the verdicts are identical.
 
-It is not eligibility. Workers are already entitled. The blockers are:
+<br>
 
-1. They do not know which schemes exist or apply to them.
-2. Rules are scattered, in English, in bureaucratic language.
-3. The paperwork is confusing, and **a failed trip to a Common Service Centre
-   costs a day's wages** — ₹455 for a male casual labourer, ₹315 for a female
-   one[^3] — so the second attempt often never happens.
+## Ten schemes. Each signed by a person.
 
-A worker legally entitled to a pension or an accident cover simply never claims it.
+| Scheme | Stated benefit | Where to apply |
+|---|---|---|
+| PM Shram Yogi Maandhan | ₹36,000 a year from age 60 | Common Service Centre |
+| National Pension Scheme for Traders | ₹36,000 a year from age 60 | Common Service Centre |
+| Uttarakhand old-age pension | ₹18,000 a year | State portal |
+| Indira Gandhi National Old Age Pension | ₹2,400 a year central share; ₹6,000 from 80 | Common Service Centre |
+| Indira Gandhi National Widow Pension | ₹3,600 a year central share; ₹6,000 from 80 | Common Service Centre |
+| Indira Gandhi National Disability Pension | ₹3,600 a year central share; ₹6,000 from 80 | Common Service Centre |
+| PM Jeevan Jyoti Bima Yojana | ₹2,00,000 life cover | Bank branch |
+| PM Suraksha Bima Yojana | ₹2,00,000 accident cover | Bank branch |
+| PM Ujjwala Yojana | In-kind LPG support | Online or an LPG distributor |
+| e-Shram registration | Gateway — no payout of its own | e-Shram portal or a CSC |
 
-## What it does
+- **The signature is enforced.** Until a named person signs a file, every worker gets `UNKNOWN` for it and it adds ₹0 to every total. [`tests/test_schemes.py`](tests/test_schemes.py) pins the signed list.
+- **Five drafts are not served:** APY, PM Vishwakarma, PM-JAY 70+, PMJDY and the Uttarakhand widow pension. The widow pension's signature was withdrawn on 15 September; its department page states no rate. [Why](data/schemes/uk_widow.toml).
+- **Overlapping pensions are never added.** Two routes to the same pension show the larger, once.
 
-After consent, a worker can check all verified schemes or select only the
-scheme(s) they care about. It asks a short set of plain questions — every one
-has buttons except age, which is typed as a number — then runs the answers
-through a deterministic rule engine. It says which schemes they qualify for
-**and why**, what each one costs them, and when a pension actually starts, in
-their language.
-It produces a document checklist and a one-page sheet they can carry to a
-centre, then tells them exactly where to go.
+What could and could not be verified: [`docs/history/SOURCE_REVIEW_2026-09-09.md`](docs/history/SOURCE_REVIEW_2026-09-09.md).
 
-Where it cannot be sure, it says so and hands over a question to ask a human,
-instead of guessing.
+<br>
 
-## Why not just myScheme?
+## Where it runs.
 
-`myScheme.gov.in` and UMANG already publish scheme data and eligibility
-matching, and this project does not try to replace them. Scheme Sathi is
-**last-mile delivery on top of that work**:
+| | |
+|---|---|
+| **Browser** | Live at [sathi.avinashnegi.com](https://sathi.avinashnegi.com). No account, no app. |
+| **Telegram** | Live at [@YojanaSathiBot](https://t.me/YojanaSathiBot). |
+| **WhatsApp** | Built and verified end to end on Meta's test number. Not on a public number yet. |
 
-> myScheme is a web form — available in Hindi and other languages, but still a
-> form. It assumes literacy, a browser, and a user who knows what "land holding
-> in hectares" means. Scheme Sathi is a
-> conversation on a ₹6,000 phone that ends in a filled checklist and an address
-> to walk to.
+One small AWS server, one rule engine behind all three. The landing page is [`livesite/`](livesite/), published by GitHub Pages.
 
-## Impact
+<br>
+
+## Impact. None claimed yet.
 
 <!-- ! Populated from real deployment data only, by
      ! `python3 -m sathi.metrics.report`. No projections, no estimates, no
      ! "potential reach". If a number is not in the event log it does not go on
      ! this page. -->
 
-_Running since 3 September 2026 on a single small cloud instance, restarted
-under systemd and verified to survive a reboot. Ten signed schemes are
-deployed, so the engine returns real verdicts and the event log can record
-eligible results. Selected-scheme screening was deployed on 14 September 2026._
+No field pilot has run, so there are no impact numbers here. This section is filled from the event log after a real pilot — never from an estimate or a "potential reach".
 
-**There are still no impact numbers here, and that is the honest state.** The
-gate that produced zero results has been lifted; the field pilot that would
-produce real ones has not run. Nobody has been screened yet except the
-maintainer testing his own bot. This section stays empty until a real pilot
-happens, and it will be filled from `python3 -m sathi.metrics.report` — not
-from an estimate, a projection, or a "potential reach" figure.
+- **Pilot screenings are counted apart.** They arrive through `?start=csc` links and are reported with `python3 -m sathi.metrics.report --cohort csc`. Terminal test runs are left out by default.
+- **Two ₹ figures, never one.** A yearly pension and an insurance cover are different kinds of money. Adding them would overstate what a worker receives about six times.
+- **"Entitlement surfaced", never "money delivered".** A figure is what a scheme states it pays, not what anyone has received.
+- **Browser sessions are not counted as people.** A cookie is a routing key, not an identity.
 
-The plan for that pilot, including consent and what will be measured, is in
-[`docs/PILOT_PLAN.md`](docs/PILOT_PLAN.md).
+The pilot plan: [`docs/PILOT_PLAN.md`](docs/PILOT_PLAN.md). What each number does not claim: [`docs/IMPACT.md`](docs/IMPACT.md).
 
-Pilot screenings are kept apart from testing by the link they arrive through:
-`t.me/YojanaSathiBot?start=csc` or `sathi.avinashnegi.com/?start=csc`. That
-slug is recorded on the session after consent, and
-`python3 -m sathi.metrics.report --cohort csc` counts only those sessions.
-Terminal (`cli`) runs are never counted unless `--include-cli` is passed. Every
-screening in the log before the pilot link is used — including all of the
-maintainer's own testing — has no cohort.
+<br>
 
-Two ₹ figures are reported, never one. An annual pension (PM-SYM, ₹36,000/year)
-and an accident cover (PMSBY, ₹2,00,000 paid only on a claim) are different
-kinds of money; adding them would overstate what a worker actually receives by
-roughly six times. "Newly surfaced" rests on one intake question — which of
-the screened schemes the worker already holds — asked on every route,
-including a single-scheme check.
+## Private by design.
 
-Methodology, and what each number does **not** claim:
-[`docs/IMPACT.md`](docs/IMPACT.md).
+- **No name, phone or Aadhaar field exists**, so none can be stored by accident.
+- **The profile lives in memory for one session.** It is gone when the screening ends, on `/cancel`, or after 30 quiet minutes.
+- **The log keeps coarse bands only** — state, age band, income band, rarely occupation — plus the channel and, after consent, the arrival link's tag. All under a random session id that is not derived from any account. On the dashboard, breakdown rows under 5 sessions are hidden.
+- **The optional suggestion** is stored with digit runs removed, and with no session id.
 
-## How eligibility is decided
+[`tests/test_privacy.py`](tests/test_privacy.py) drives every event through the log and checks what survived, column by column.
 
-**Deterministically, never by a language model.**
+<br>
 
-- Rules live in [`data/schemes/*.toml`](data/schemes/) — plain text, one file
-  per scheme, readable and editable without knowing Python.
-- Every threshold carries a `source_url` deep-linking the official page it came
-  from, and a `verified_on` date. You can audit one rule in 30 seconds.
-- An unresearched value is the literal string `"TODO"`. The loader detects it
-  and the engine returns `UNKNOWN` — "we could not check this, ask at the
-  centre" — rather than guessing.
-- Absence is a finding too. The PMSBY draft had placeholders for an income
-  threshold and an income-tax exclusion; the official rules contain neither, so
-  both were **deleted rather than filled**. An unsourced exclusion turns
-  eligible people away, which is the same failure as a guessed threshold.
-- A language model is optional and stays outside the engine entirely. Its one
-  job is to suggest an occupation category for free text, which the worker
-  confirms before anything is recorded. No signed scheme has an occupation
-  rule, so the selected-scheme flow does not ask occupation and **in normal use
-  the model is never called**. It never sees a threshold and never produces a
-  ₹ figure or a verdict.
-- With no API key the whole thing works on buttons and templated text, with
-  identical results. That is a tested configuration, not a degraded one.
-
-Details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
-
-### System architecture
-
-![Scheme Sathi system architecture](livesite/assets/system-architecture.png)
-
-## Privacy
-
-No Aadhaar number. No name. No phone number. **Those fields do not exist in the
-profile**, so they cannot be stored by accident.
-
-The profile lives in process memory for one session and is discarded when the
-screening ends, on `/cancel`, or after 30 minutes without a reply. The event log
-holds counts and coarse bands only — state, age band, occupation (rarely asked;
-see above), income band — plus the channel and, after consent, the arrival-link
-slug (`?start=csc`), under a random per-session id that is not derived from any
-messaging account, so two sessions by the same worker are not linkable. On the
-dashboard, breakdown tables suppress any row covering fewer than 5 sessions;
-the headline totals are not suppressed.
-
-The one free-text field that is stored is the optional suggestion at the end:
-digit runs are removed before it is written, and it sits in a table with no
-session id.
-
-`tests/test_privacy.py` drives every event type through the log and then asserts,
-column by column, that nothing else survived.
-
-## Languages
-
-Hindi and English, chosen by the worker before anything else. The engine is not
-bilingual and never will be — verdicts are identical in both, only the words
-change, and a test asserts it. Scheme rules carry both languages with the same
-citation.
-
-## Run it yourself
+## Run it yourself.
 
 ```bash
 git clone https://github.com/avinashnegi1999/yojana-sathi && cd yojana-sathi
 
-python3 check.py                     # every self-check and test, nothing to install
-python3 -m sathi.main                # one screening in the terminal, buttons only
-python3 -m sathi.main --telegram     # the bot (needs TELEGRAM_TOKEN)
-python3 -m sathi.main --whatsapp     # the webhook (needs WHATSAPP_*, behind TLS)
-python3 -m sathi.main --preview whatsapp   # what the wire would carry — no token, nothing sent
-python3 -m sathi.local_web            # the browser version on http://127.0.0.1:8765, no database
-python3 -m sathi.metrics.report --out impact.html   # the impact dashboard (reads DB_PATH)
-python3 -m sathi.metrics.report --cohort csc --since 2026-10-01 --out pilot.html   # pilot only
+python3 check.py              # every check and test
+python3 -m sathi.local_web    # the browser version on http://127.0.0.1:8765
+python3 -m sathi.main         # one screening in the terminal
 ```
 
-Requires Python 3.11+ (uses stdlib `tomllib`). **There are no third-party
-dependencies** — not in the app, not in the tests, not in the image.
+Python 3.11 or newer. **Zero third-party dependencies** — not in the app, not in the tests.
+
+<details>
+<summary><b>More ways to run it</b></summary>
+
+<br>
+
+```bash
+python3 -m sathi.main --telegram            # the bot (needs TELEGRAM_TOKEN)
+python3 -m sathi.main --whatsapp            # the webhook (needs WHATSAPP_*, behind TLS)
+python3 -m sathi.main --preview whatsapp    # what the wire would carry; nothing is sent
+python3 -m sathi.metrics.report --out impact.html                              # impact dashboard (reads DB_PATH)
+python3 -m sathi.metrics.report --cohort csc --since 2026-10-01 --out pilot.html   # pilot only
+```
 
 As a container:
 
@@ -345,120 +174,93 @@ docker build -t scheme-sathi .
 docker run -e TELEGRAM_TOKEN=... -v sathi-data:/data scheme-sathi
 ```
 
-`DB_PATH` must point at a mounted volume. A free-tier container that loses its
-disk on restart loses the event log, and every impact number with it.
+`DB_PATH` must point at a mounted volume. A container that loses its disk loses the event log, and every impact number with it.
 
-Optional, all off by default and all tested in the off state:
+Optional settings, all off by default and all tested off:
 
-| Variable | Effect when set |
+| Variable | When set |
 |---|---|
-| `LLM_API_KEY` | Free-text occupation is mapped to a category, always confirmed by the worker. No signed scheme asks occupation today, so in normal use this is never called. Verdicts are unchanged. |
-| `TTS_CMD` | **Not wired yet.** `sathi/render/audio.py` can call a TTS command, but no channel sends its output; setting this only changes the startup line. There are no voice notes today. |
-| `FOLLOWUP_SALT` | Records opt-ins for a 14-day "did you get it?" follow-up as a salted hash in a table that cannot be joined to the event log. **The sender that would deliver the follow-up is not built**; a hash cannot be turned back into a chat id, so delivery needs a design of its own. Leave unset. |
+| `LLM_API_KEY` | Free-text occupation is mapped to a category, always confirmed by the worker. Verdicts are unchanged. |
+| `TTS_CMD` | **Not wired yet.** No channel sends audio; setting it only changes the startup line. |
+| `FOLLOWUP_SALT` | Records opt-ins for a 14-day follow-up as a salted hash. **The sender is not built.** Leave unset. |
 
-## Bot commands
+Deploying: [`deploy/RUNBOOK.md`](deploy/RUNBOOK.md).
+
+</details>
+
+<details>
+<summary><b>Bot commands</b></summary>
+
+<br>
 
 | Command | What it does |
 |---|---|
 | `/start` | Begin, or start over |
 | `/language` | Switch हिंदी ↔ English, keeping answers already given |
-| `/schemes` | Every scheme, its official source URL, and when it was checked |
+| `/schemes` | Every scheme, its official source, and when it was checked |
 | `/privacy` | What is stored, what is never asked |
-| `/about` | What this is — and plainly, that it is not a government service |
+| `/about` | What this is — and that it is not a government service |
 | `/help` | The command list |
 | `/clear` | Delete this conversation's messages |
 | `/clearall` | Delete everything reachable from the last 48 hours |
 | `/cancel` | Drop the profile now and end |
-| `/demo` | Fixed fictional people run through the real rules — labelled a demonstration on every reply, opens no session, logs nothing |
+| `/demo` | Fictional people run through the real rules. Labelled a demo, logs nothing. |
 
-## Tests
+</details>
 
-```bash
-python3 check.py
-```
+<br>
 
-22 module self-checks and 15 test files, no framework and nothing to install.
-They pass on Python 3.11 and 3.12, and CI also builds the Docker image.
-Worth knowing about three of them:
+## Tested like it matters.
 
-- `tests/test_privacy.py` — the reason the privacy claim above is defensible
-  rather than aspirational.
-- `tests/test_all_paths.py` — presses **every button at every reachable screen**
-  in both languages (9,860 paths, 2,290 completed sessions), opens every generated
-  sheet, runs every path through a real event log, drives every command through
-  the channel adapter, and fuzzes the typed questions. It asserts its own
-  coverage counters, because a green test that never reached the thing it checks
-  is worse than no test.
-- `tests/test_rule_boundaries.py` — asks whether the **answers** are right, not
-  whether the code runs. Each scheme's rules are re-encoded from the official
-  source text, separately from `data/schemes/`, and compared against the engine
-  in two sweeps: 1,377,810 verdicts over the shared fields (age, income, bank,
-  tax, EPFO/ESIC, NPS, unorganised work), and a per-scheme sweep over **every
-  combination of exactly the fields each signed scheme uses** — state, BPL,
-  widow, disability, trader and the rest included — which must reach ELIGIBLE
-  at least once for every signed scheme. Pressing every button cannot find a
-  wrong threshold; a wrong threshold renders a perfectly well-formed screen.
-  Both oracle and rules were written by the same project, so the sweep proves
-  the two encodings agree, not that either matches the law; the signature is
-  what covers that.
+`python3 check.py` runs 21 module self-checks and 15 test files. No framework, nothing to install.
 
-## Keeping the rules honest after they are written
+- **Every button.** [`tests/test_all_paths.py`](tests/test_all_paths.py) presses every button at every screen in both languages — 9,860 paths — and opens every sheet it produces.
+- **Every boundary.** [`tests/test_rule_boundaries.py`](tests/test_rule_boundaries.py) re-encodes each rule from the official text and compares 1,377,810 verdicts, plus 22,248 combinations of each signed scheme's own fields. It proves two encodings agree, not that either matches the law. The signature covers that.
+- **Every column.** [`tests/test_privacy.py`](tests/test_privacy.py), above.
 
-Two tools, both stdlib, neither of which the bot itself runs.
+<br>
+
+## Rules stay honest after they are written.
 
 ```bash
-python3 -m sathi.review PMJJBY     # sign a scheme off
-python3 -m sathi.sources           # has a ministry changed a number?
+python3 -m sathi.review PMJJBY    # sign a scheme off, value by value
+python3 -m sathi.sources          # has a ministry changed a number?
 ```
 
-`sathi/review.py` is the only supported way a name reaches `verified_by`. It
-prints every value the engine will use beside the URL it came from, one scheme
-per screen, then writes **exactly two lines** — a self-check signs a real copy
-and asserts precisely two lines differ, so a signature can never carry a changed
-threshold in with it. It refuses to run without a terminal, and refuses a name
-that looks automated. `--unsign` reverses it.
+**Review** shows every value beside the page it came from, then writes exactly two lines. A signature can never carry a changed threshold in with it. `--unsign` reverses it.
 
-`sathi/sources.py` answers the question a signature cannot: a person checked
-this in September, but is it still true? [`data/sources/`](data/sources/) holds a
-fingerprint of each official page plus **50 named claims across 8 pages**, and
-re-reads the live pages on demand. The three NSAP pensions cannot be watched
-this way (a JavaScript-only page, a PDF, and a ministry host that does not
-resolve); they need a monthly manual re-read, listed in
-[`data/sources/official-text/README.md`](data/sources/official-text/README.md). It also watches for things that
-must *not* reappear, like the "16–59" age limit e-Shram no longer states.
+**Sources** re-reads the official pages on demand and flags what changed. The three national pension pages can't be watched this way and need a monthly re-read by hand — [the list](data/sources/official-text/README.md).
 
-[`data/sources/official-text/`](data/sources/official-text/) keeps the pages
-themselves, so a rule can be audited without leaving the repository. That turned
-out to matter: one URL cited in the morning had 404'd by the afternoon, two of
-these hosts refuse an ordinary fetcher, and one official source is a 320 MB scan.
+<br>
 
-## How this was built
+## How it was built.
 
-[`docs/README.md`](docs/README.md) — which documents are current and which are
-dated snapshots. Start there before quoting any of them.
-[`docs/LESSONS.md`](docs/LESSONS.md) — ten lessons from building it, including
-the ones that cost something.
-[`docs/BUILD_LOG.md`](docs/BUILD_LOG.md) — the unedited version: every bug, the
-headline numbers that turned out to be wrong, what is still open, and what I
-would do differently.
-[`docs/assessment/`](docs/assessment/README.md) — a **historical** self-assessment
-from early September (three schemes, nothing signed), kept as an audit trail.
-The current, independent audit is [`AUDIT.md`](AUDIT.md).
+- [The build story](https://avinashnegi.com/blog/scheme-sathi/) — built with AI, checked by hand.
+- [`docs/README.md`](docs/README.md) — which documents are current. Start here before quoting any.
+- [`docs/LESSONS.md`](docs/LESSONS.md) — ten lessons, including the ones that cost something.
+- [`docs/history/BUILD_LOG.md`](docs/history/BUILD_LOG.md) — every bug, every number that turned out wrong.
+- [`AUDIT.md`](AUDIT.md) — the latest audit, and what was fixed.
 
-## Add a scheme
+<br>
 
-You do not need to write Python. Copy
-[`data/schemes/_TEMPLATE.toml`](data/schemes/_TEMPLATE.toml), fill it from
-official sources, and cite every value. See
-[`docs/SCHEME_AUTHORING.md`](docs/SCHEME_AUTHORING.md).
+## Add a scheme.
 
-**Contributions without a `source_url` and `verified_on` per value are closed.**
-That is not bureaucracy: an uncited threshold is indistinguishable from a
-guessed one, and a guess costs a worker a day's wages.
+No Python needed. Copy [`data/schemes/_TEMPLATE.toml`](data/schemes/_TEMPLATE.toml), fill it from official sources, and cite every value — see [`docs/SCHEME_AUTHORING.md`](docs/SCHEME_AUTHORING.md).
 
-## Licence
+Values without a `source_url` and `verified_on` are not merged. An uncited threshold looks exactly like a guessed one, and a guess costs a worker a day's wage.
 
-Apache-2.0. See [LICENSE](LICENSE).
+<br>
 
-Built for **Code for a Billion — Bharat Agentic-AI Hackathon 2026**
-(Code for India), track "Livelihood for the Uneducated".
+---
+
+<p align="center"><sub>
+  Apache-2.0 · <a href="LICENSE">Licence</a><br>
+  Built for Code for a Billion — Bharat Agentic-AI Hackathon 2026 (Code for India), track "Livelihood for the Uneducated".<br>
+  Independent project. Not a government service.
+</sub></p>
+
+[^1]: Ministry of Labour & Employment, Lok Sabha written reply, 24 July 2023, citing the Economic Survey 2021-22. <https://www.pib.gov.in/PressReleasePage.aspx?PRID=1942079>
+
+[^2]: Ministry of Labour & Employment, *e-Shram Cards for Unorganized Workers*, 2 February 2026 — registrations as on 26 January 2026. <https://www.pib.gov.in/PressReleasePage.aspx?PRID=2222263&reg=3&lang=2>
+
+[^3]: National Statistical Office, MoSPI, *Press Note on Periodic Labour Force Survey Annual Report, 2025*, section 6 — casual labour other than public works. <https://www.mospi.gov.in/uploads/latestReleases/latest_release_1774607827733_3e8964a9-268b-4cc9-ad65-cfc8a9e32f08_Press_note_AR_PLFS_2025_23032025_V2.1_26032026_final.pdf>

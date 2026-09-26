@@ -4,6 +4,18 @@ Short, factual local/deployment record. Update at the end of a working day or
 when Avinash asks to save progress. Do not include secrets, user data, or chat
 identifiers.
 
+## Now — 26 September 2026
+
+- **Live:** browser ([sathi.avinashnegi.com](https://sathi.avinashnegi.com)) and Telegram ([@YojanaSathiBot](https://t.me/YojanaSathiBot)). WhatsApp is verified on Meta's test number only.
+- **Schemes:** 10 signed and served. 5 drafts answer `UNKNOWN` — APY, PM Vishwakarma, PM-JAY 70+, PMJDY, Uttarakhand widow pension.
+- **Checks:** `python3 check.py` — 21 module self-checks and 15 test files, all passing.
+- **Not done:** native Hindi review, and the field pilot. No impact is claimed.
+- **Open, in order:** the widow-pension rate from a primary source · sign the four other drafts or leave them `UNKNOWN` · Hindi review · the AgentFoundry question · the pilot ([plan](PILOT_PLAN.md)).
+
+The log below runs oldest first. Each entry is what was true that day.
+
+---
+
 ## 2026-09-14
 
 - Read the handoff and audited scheme evidence locally. Added source copies and
@@ -244,3 +256,24 @@ copy before touching `/opt/sathi`.
 - Docs brought in line with the code: README, ARCHITECTURE, IMPACT,
   CONTRIBUTING, SUBMISSION_DRAFT, DEMO_SCRIPT (re-run end to end), RUNBOOK,
   PILOT_PLAN, `.env.example`, the landing page table and authorship line.
+
+## 2026-09-26
+
+- **Correction to 2026-09-25 above:** those fixes were committed and deployed
+  the same day. The server env gained `PACK_BASE_URL` and `BOT_URL`, and the
+  live Caddy block for the browser channel now redacts its log (checked with a
+  probe request).
+- Browser chat and sheet redesigned in one Apple-inspired style
+  (`docs/design/apple/DESIGN.md`). The browser opens in English with a हिंदी
+  switch; about sixty strings trimmed in both languages. The new Hindi is not
+  native-reviewed. Scheme rules, values and signatures untouched.
+- Landing page (`livesite/`) rebuilt in the same style. `intro.mp4` and
+  `thumbnail.png` are off the page: both are AI-generated mock-ups, and the
+  video is a 10-second clip the old page captioned "two minutes". The build
+  story links to the blog post instead of a separate page.
+- Committed and pushed (`77c216f`, `96319ed`, `c0c5d42`). Deployed to AWS at
+  05:14 UTC with `install-on-vm.sh`: server `check.py` passed, all three units
+  active, 15 schemes loaded, no restarts since.
+- Docs reorganised: dated records moved word for word to `docs/history/`,
+  submission notes to `docs/submission/`, every link updated. README and the
+  current guides rewritten short, with every fact kept.

@@ -1,7 +1,7 @@
 # Lessons
 
 The short version of how this was built and what I learned. The long version,
-including every bug and the things still unresolved, is in `BUILD_LOG.md`.
+including every bug and the things still unresolved, is in [`history/BUILD_LOG.md`](history/BUILD_LOG.md).
 
 ---
 

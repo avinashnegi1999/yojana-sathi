@@ -178,18 +178,18 @@ The dashboard carries the right caveat (`report.py:349` says "PM-SYM is a future
 
 > **Re-verification: CONFIRMED, as far as the repo can show.** No later doc records an answer. The most recent statements are `CLAUDE.md:111` ("still unresolved, still the top project risk") and `HANDOFF_2026-09-14.md:62`: `hello@codeforindia.org` hard-bounced, `partners@` and GitHub Discussion #13 unanswered. The organisers' actual current position cannot be verified from the repo.
 
-- `docs/SUBMISSION_DRAFT.md:27`
+- `docs/submission/SUBMISSION_DRAFT.md:27`
   ```
   1. **`Built using AgentFoundry (AF), the official IDE` is a REQUIRED checkbox.**
   ```
-- `docs/SUBMISSION_DRAFT.md:197`
+- `docs/submission/SUBMISSION_DRAFT.md:197`
   ```
   been established. **Do not check the required AF confirmation yet.**
   ```
 
 The repo's own docs say the form cannot be filed without this box, and that ticking it today would be false. This is not a code problem, but it can zero the entry regardless of code quality.
 
-**Fix:** get a written organiser answer this week. If AF work is required, do and record it as in `docs/AGENTFOUNDRY_MIGRATION.md` before building anything else.
+**Fix:** get a written organiser answer this week. If AF work is required, do and record it as in `docs/submission/AGENTFOUNDRY_MIGRATION.md` before building anything else.
 
 ---
 
@@ -440,7 +440,7 @@ It lists 10 variables. The code reads 22, including `REACH_HMAC_KEY` (`sathi/met
 (Replaces round 1's "3.11 is never tested". `check.py` now passes on 3.11.16, so that risk is gone, although CI still only runs 3.12.)
 
 **m5. Doc sprawl, with superseded docs presented as current.**
-There are 25 files under `docs/`, and many are dated snapshots (CHECKPOINT, HANDOFF, AUDIT_PLAN, AUDIT_RESUME, CHANGE_REVIEW, …). `README.md:412-413` sends judges to `docs/assessment/` as "a scored breakdown of where this stands". That file opens with `> **HISTORICAL SNAPSHOT — superseded.**` and self-scores 9–9.5/10.
+There are 25 files under `docs/`, and many are dated snapshots (CHECKPOINT, HANDOFF, AUDIT_PLAN, AUDIT_RESUME, CHANGE_REVIEW, …). `README.md:412-413` sends judges to `docs/history/assessment/` as "a scored breakdown of where this stands". That file opens with `> **HISTORICAL SNAPSHOT — superseded.**` and self-scores 9–9.5/10.
 **Fix:** move dated snapshots to `docs/archive/`, and keep README links to current docs only.
 
 ---
