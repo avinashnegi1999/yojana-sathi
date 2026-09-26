@@ -39,41 +39,77 @@ from sathi.core.schemes import Scheme, load_all
 from sathi.metrics.events import SOURCE_SLUGS, EventLog
 
 
-_PAGE = """<!doctype html><html lang="en"><head><meta charset="utf-8">
+_PAGE = r"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Yojana Sathi</title><link rel="icon" href="/logo.jpg"><style>
-/* Tokens from DESIGN.md (Figma design analysis): monochrome frame, one pastel block, pill buttons. */
-:root{--ink:#000;--canvas:#fff;--hairline:#e6e6e6;--soft:#f7f7f5;--block:#dceeb1;--block-2:#c5b0f4;--muted:#5c5c5c}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--canvas);color:var(--ink);font:400 17px/1.5 "Figma Sans",Inter,ui-sans-serif,system-ui,"Noto Sans Devanagari",sans-serif;-webkit-font-smoothing:antialiased}
-main{width:min(100%,46rem);margin:auto;padding:clamp(1.5rem,5vw,4rem) 1.1rem 4rem}
-.mast{display:grid;grid-template-columns:3.5rem 1fr;column-gap:1rem;align-items:center;padding:0 0 1.5rem;border-bottom:1px solid var(--ink)}
-.mast img{width:3.5rem;height:3.5rem;border-radius:9999px;grid-row:1/3}
-h1{margin:0;font-weight:700;font-size:clamp(1.6rem,5vw,2.4rem);line-height:1.05;letter-spacing:-.03em}
-.note{margin:.35rem 0 0;color:var(--muted);font-size:.95rem}
-.card{position:relative;margin-top:2rem;padding:clamp(1.25rem,4vw,2rem);background:var(--block);border-radius:24px;min-height:14rem}
-.message{margin:0 0 1.5rem;max-width:36rem;white-space:pre-wrap;font-size:clamp(1.05rem,2vw,1.2rem);font-weight:500;line-height:1.45}
-.choices{display:flex;flex-wrap:wrap;gap:.5rem}
-.choice,.send,.restart{appearance:none;cursor:pointer;font:600 1rem/1.2 inherit;font-family:inherit;transition:background .12s,color .12s}
-.choice{border:1px solid var(--ink);border-radius:50px;background:var(--canvas);color:var(--ink);padding:10px 20px;text-align:left}
-.choice:hover{background:var(--ink);color:var(--canvas)}
-.choice.scale{width:2.75rem;height:2.75rem;padding:0;text-align:center;border-radius:9999px;flex:0 0 auto}
-.choice:focus-visible,.send:focus-visible,.restart:focus-visible,.composer input:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
-.composer{display:flex;gap:.5rem;margin-top:1.5rem}
-.composer input{min-width:0;flex:1;border:1px solid var(--ink);border-radius:50px;background:var(--canvas);color:var(--ink);font:inherit;padding:10px 18px}
-.send{border:1px solid var(--ink);border-radius:50px;background:var(--ink);color:var(--canvas);padding:10px 20px}
-.send:hover{background:var(--canvas);color:var(--ink)}
-.restart{display:block;margin:1.5rem auto 0;border:0;background:transparent;color:var(--muted);font-size:.9rem;text-decoration:underline;text-underline-offset:3px}
-.restart:hover{color:var(--ink)}
-.download{display:inline-block;margin-top:1rem;padding:10px 20px;border-radius:50px;background:var(--ink);color:var(--canvas);font-weight:600;text-decoration:none}
+<meta name="theme-color" content="#f5f5f7">
+<title>Yojana Sathi · योजना साथी</title><link rel="icon" href="/logo.jpg"><style>
+/* Apple-inspired: parchment canvas, near-black ink, ONE blue for actions, system
+   fonts only (SF on Apple devices), no shadows, no gradients, pills and 18px cards.
+   Reference: getdesign "apple" DESIGN.md — design language only, no Apple assets. */
+:root{--ink:#1d1d1f;--body:#333333;--muted:#6e6e73;--blue:#0066cc;--focus:#0071e3;--canvas:#ffffff;--parchment:#f5f5f7;--hairline:#e0e0e0}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;background:var(--parchment);color:var(--ink);font:400 17px/1.47 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans Devanagari","Nirmala UI",sans-serif;-webkit-font-smoothing:antialiased}
+html:lang(en) body{letter-spacing:-.022em}
+html:lang(hi) body{line-height:1.6}
+.bar{position:sticky;top:0;z-index:2;background:rgba(245,245,247,.8);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(0,0,0,.08)}
+.bar-in{max-width:40rem;margin:0 auto;min-height:52px;display:flex;align-items:center;gap:10px;padding:0 16px}
+.bar img{width:28px;height:28px;border-radius:50%;flex:0 0 auto}
+.brand{font-weight:600;font-size:17px;letter-spacing:0;white-space:nowrap}
+.switch{margin-left:auto;appearance:none;border:1px solid var(--hairline);background:var(--canvas);color:var(--ink);font:inherit;font-size:14px;cursor:pointer;min-height:32px;padding:0 14px;border-radius:16px;white-space:nowrap}
+.switch:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.restart{appearance:none;border:0;background:none;color:var(--blue);font:inherit;font-size:14px;cursor:pointer;min-height:44px;padding:0 2px;white-space:nowrap}
+main{max-width:40rem;margin:0 auto;padding:40px 16px 96px}
+.q{margin:8px 0 24px;font-size:28px;font-weight:600;line-height:1.18;letter-spacing:-.01em;white-space:pre-wrap}
+html:lang(hi) .q{line-height:1.4;letter-spacing:0}
+.q:has(+ .lead){margin-bottom:10px}
+.q2{margin:32px 0 16px;font-size:22px;font-weight:600;line-height:1.3}
+.recap{margin:0 0 24px;border-bottom:1px solid var(--hairline);padding-bottom:12px}
+.recap summary{cursor:pointer;color:var(--blue);font-size:15px;min-height:44px;display:flex;align-items:center;list-style:none}
+.recap summary::-webkit-details-marker{display:none}
+.recap summary::after{content:"›";margin-left:6px;transition:transform .15s}
+.recap[open] summary::after{transform:rotate(90deg)}
+.recap .message{margin:4px 0 0;font-size:15px;color:var(--muted)}
+.lead{margin:0 0 24px;white-space:pre-wrap;color:var(--muted);font-size:19px;line-height:1.5}
+@media(min-width:736px){main{padding-top:64px}.q{font-size:34px}}
+
+.message{margin:0 0 16px;white-space:pre-wrap;color:var(--body)}
+.scheme{background:var(--canvas);border:1px solid var(--hairline);border-radius:18px;padding:20px 22px;margin:0 0 12px}
+.scheme-name{margin:0 0 6px;font-weight:600;color:var(--ink);line-height:1.35}
+.scheme-body{margin:0;white-space:pre-wrap;color:var(--body)}
+.choices{display:flex;flex-direction:column;gap:10px;margin:0 0 8px}
+.choice{appearance:none;display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:52px;padding:13px 22px;text-align:left;background:var(--canvas);color:var(--ink);border:1px solid var(--hairline);border-radius:26px;font:inherit;cursor:pointer;transition:transform .12s ease}
+.choice:active{transform:scale(.98)}
+.choice.primary{justify-content:center;background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+.choice.selected{border:2px solid var(--focus);padding:12px 21px}
+.choice .tick{color:var(--focus);font-weight:600}
+.choices:has(.scale){display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.choices:has(.scale) .choice:not(.scale){grid-column:1/-1;justify-content:center}
+.choice.scale{justify-content:center;min-height:52px;padding:0;border-radius:26px}
+.composer{display:flex;gap:10px;margin:0 0 8px}
+.composer input{flex:1;min-width:0;height:52px;border:1px solid var(--hairline);border-radius:26px;background:var(--canvas);color:var(--ink);font:inherit;padding:0 20px}
+.send{appearance:none;border:0;border-radius:26px;background:var(--blue);color:#fff;font:inherit;font-weight:600;padding:0 26px;height:52px;cursor:pointer}
+.send:active{transform:scale(.98)}
+.download{display:inline-flex;align-items:center;min-height:52px;margin:0 0 24px;padding:0 26px;border-radius:26px;background:var(--blue);color:#fff;font-weight:600;text-decoration:none}
+.choice:focus-visible,.send:focus-visible,.restart:focus-visible,.download:focus-visible,.composer input:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
-@media(max-width:34rem){.choices{flex-direction:column}.choice{text-align:center}.choices:has(.scale){flex-direction:row;flex-wrap:wrap}.composer{flex-direction:column}.send{text-align:center}}
-</style></head><body><main><header class="mast"><img src="/logo.jpg" alt="" width="640" height="640"><h1>योजना साथी<br>Yojana Sathi</h1><p class="note">Answer a few simple questions. Get a clear next step.</p></header><section id="screen" class="card" aria-live="polite"></section><button class="restart" type="button" onclick="restart()">Start again / फिर से शुरू करें</button></main><script>
+</style></head><body>
+<header class="bar"><div class="bar-in"><img src="/logo.jpg" alt="" width="28" height="28"><span class="brand" id="brand">Yojana Sathi</span><button class="switch" id="switch" type="button" onclick="switchLang()" lang="hi">हिंदी</button><button class="restart" id="restart" type="button" onclick="restart()">Start again</button></div></header>
+<main><section id="screen" aria-live="polite"></section></main>
+<script>
 const screen=document.querySelector('#screen');
-function text(value){return String(value||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
-function show(data){let out=data.replies.map(r=>`<p class="message">${text(r.text)}</p>${r.buttons?.length?`<div class="choices">${r.buttons.map(b=>`<button class="choice${b.scale?' scale':''}" data-value="${encodeURIComponent(b.value)}">${text(b.label)}</button>`).join('')}</div>`:''}${r.document?`<a class="download" href="${r.document}" download>Download application pack</a>`:''}`).join('');const last=data.replies[data.replies.length-1];const typed=!!(last&&last.typed);if(typed)out+=`<form class="composer"><input name="answer" aria-label="Type an answer" autocomplete="off" placeholder="Type an answer"><button class="send">Send</button></form>`;screen.innerHTML=out;screen.querySelectorAll('.choice').forEach(b=>b.onclick=()=>answer(decodeURIComponent(b.dataset.value)));const form=screen.querySelector('form');if(form){form.onsubmit=e=>{e.preventDefault();const input=e.currentTarget.answer;if(input.value.trim()){answer(input.value);input.value='';}};form.answer.focus();}}
+const UI={hi:{type:'यहाँ लिखें',send:'भेजें',download:'अपना काग़ज़ डाउनलोड करें',restart:'फिर से शुरू',other:'English',otherLang:'en',brand:'योजना साथी',answers:'आपके जवाब'},en:{type:'Type your answer',send:'Send',download:'Download your sheet',restart:'Start again',other:'हिंदी',otherLang:'hi',brand:'Yojana Sathi',answers:'Your answers'}};
+let current='en';
+// The one blue pill on a screen: the forward action, never an answer to a yes/no question.
+const PRIMARY=new Set(['consent_yes','pick:all','pick:done','next']);
+function text(value){return String(value||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function blocks(value,headline,cls){cls=cls||'q';return String(value||'').split(/\n\s*\n/).map((b,i)=>{if(headline&&i===0){const cut=b.indexOf('\n');return cut<0?`<h2 class="${cls}">${text(b)}</h2>`:`<h2 class="${cls}">${text(b.slice(0,cut))}</h2><p class="lead">${text(b.slice(cut+1))}</p>`;}const m=b.match(/^(\d+\.\s[^\n]*)\n([\s\S]*)$/);return m?`<div class="scheme"><p class="scheme-name">${text(m[1])}</p><p class="scheme-body">${text(m[2].replace(/^ +/gm,''))}</p></div>`:`<p class="message">${text(b)}</p>`;}).join('');}
+function button(b){const picked=b.label.startsWith('✅ ');const label=picked?b.label.slice(2):b.label;const cls=['choice',b.scale?'scale':'',PRIMARY.has(b.value)?'primary':'',picked?'selected':''].filter(Boolean).join(' ');return `<button class="${cls}" data-value="${encodeURIComponent(b.value)}"${picked?' aria-pressed="true"':''}><span>${text(label)}</span>${picked?'<span class="tick" aria-hidden="true">✓</span>':''}</button>`;}
+function show(data){const ui=UI[data.lang]||UI.hi;document.documentElement.lang=data.lang==='en'?'en':'hi';document.getElementById('restart').textContent=ui.restart;current=data.lang==='hi'?'hi':'en';const sw=document.getElementById('switch');sw.textContent=ui.other;sw.lang=ui.otherLang;document.getElementById('brand').textContent=ui.brand;const last=data.replies.length-1;const hasResult=data.replies.some(r=>r.kind==='result');let out=data.replies.map((r,i)=>{if(r.kind==='recap'){const body=r.text.split('\n').slice(1).join('\n');return `<details class="recap"><summary>${ui.answers}</summary><p class="message">${text(body)}</p></details>`;}const asks=i===last&&(r.buttons?.length||r.typed);return `${r.kind==='result'?blocks(r.text,true,'q'):blocks(r.text,asks,hasResult?'q2':'q')}${r.buttons?.length?`<div class="choices">${r.buttons.map(button).join('')}</div>`:''}${r.document?`<a class="download" href="${r.document}" download>${ui.download}</a>`:''}`;}).join('');const typed=!!(data.replies[last]&&data.replies[last].typed);if(typed)out+=`<form class="composer"><input name="answer" aria-label="${ui.type}" autocomplete="off" inputmode="text" placeholder="${ui.type}"><button class="send">${ui.send}</button></form>`;screen.innerHTML=out;window.scrollTo({top:0});screen.querySelectorAll('.choice').forEach(b=>b.onclick=()=>answer(decodeURIComponent(b.dataset.value)));const form=screen.querySelector('form');if(form){form.onsubmit=e=>{e.preventDefault();const input=e.currentTarget.answer;if(input.value.trim()){answer(input.value);input.value='';}};form.answer.focus();}}
 const START=(()=>{const src=new URLSearchParams(location.search).get('start')||'';return /^[a-z]{1,20}$/.test(src)?'/start '+src:'/start';})();
-function oops(){screen.innerHTML=`<p class="message">${text('Something went wrong. Tap “Start again” below.\\nकुछ गड़बड़ हो गई। नीचे “फिर से शुरू करें” दबाएँ।')}</p>`;}
+function oops(){screen.innerHTML=`<h2 class="q">${text('कुछ गड़बड़ हो गई।\nSomething went wrong.')}</h2><div class="choices"><button class="choice primary" onclick="restart()">फिर से शुरू · Start again</button></div>`;}
 async function answer(value){try{const r=await fetch('/answer',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({answer:value})});const data=await r.json().catch(()=>null);if(data&&Array.isArray(data.replies)){show(data);}else{oops();}}catch(e){oops();}}
+function switchLang(){answer('/lang '+(current==='en'?'hi':'en'))}
 function restart(){answer(START)}answer(START);
 </script></body></html>"""
 
@@ -107,6 +143,8 @@ class LocalWeb:
     # ! rating take typed input on Telegram, but here they have buttons for
     # ! every value, so they get none.
     TYPED_STATES = frozenset({State.AGE, State.OCCUPATION_FREE, State.SUGGESTION})
+    # * The language a new browser session opens in; see _turn().
+    DEFAULT_LANG = "en"
 
     def __init__(self, schemes: dict[str, Scheme], log: EventLog | None = None,
                  clock=time.monotonic) -> None:
@@ -183,9 +221,20 @@ class LocalWeb:
                 convo.person = self.log.feedback_id(session)
             self.sessions[session] = convo
             self._last_seen[session] = now
-            return convo.start()
+            # * The browser opens in English, straight at the consent screen:
+            # * most web visitors read English, and the language question was
+            # * one more tap before anything happened. Hindi is one tap away
+            # * in the top bar ("/lang hi" below). Telegram and WhatsApp keep
+            # * their bilingual language question as the first screen.
+            convo.start()
+            return convo.handle(f"lang:{self.DEFAULT_LANG}")
         self._last_seen[session] = now
-        return self.sessions[session].handle(answer)
+        convo = self.sessions[session]
+        if words[:1] == ["/lang"] and len(words) == 2 and words[1] in ("hi", "en"):
+            # * The top-bar switch. Keeps every answer and re-asks the current
+            # * question in the other language.
+            return [convo.set_language(words[1])[-1]]
+        return convo.handle(answer)
 
     def payload(self, session: str, answer: str, client: str = "local") -> tuple[int, bytes]:
         """(HTTP status, JSON body). A failed turn is a message, never a dropped socket."""
@@ -209,6 +258,11 @@ class LocalWeb:
         convo = self.sessions.get(session)
         typed = convo is not None and convo.state in self.TYPED_STATES
         body = []
+        # * Which reply is the answer recap and which is the result, so the page
+        # * can lead with the result and fold the recap away. Matched on the
+        # * recap's own header string, never guessed from layout.
+        recap_header = s("recap.header", convo.lang) if convo is not None else None
+        after_recap = False
         for reply in replies:
             buttons = [{"label": b.label, "value": b.value} for b in reply.buttons]
             # * A browser has room for a 1–10 row; a WhatsApp list does not (ten
@@ -219,6 +273,12 @@ class LocalWeb:
                 buttons = [{"label": str(n), "value": str(n), "scale": True}
                            for n in range(1, 11)] + buttons
             item = {"text": reply.text, "buttons": buttons, "typed": typed}
+            if recap_header and reply.text.startswith(recap_header):
+                item["kind"] = "recap"
+                after_recap = True
+            elif after_recap:
+                item["kind"] = "result"
+                after_recap = False
             if reply.document:
                 with self._lock:
                     while len(self.documents) >= self.MAX_DOCUMENTS:
@@ -229,7 +289,10 @@ class LocalWeb:
                     self.documents[token] = (name, blob, self.clock())
                 item["document"] = f"/document/{token}"
             body.append(item)
-        return 200, json.dumps({"replies": body}, ensure_ascii=False).encode("utf-8")
+        # * The page labels its own controls (Send, the text box, Download) in
+        # * the worker's language; they were English on a Hindi screen.
+        lang = convo.lang if convo is not None else DEFAULT_LANG
+        return 200, json.dumps({"replies": body, "lang": lang}, ensure_ascii=False).encode("utf-8")
 
     def document(self, token: str) -> tuple[str, bytes] | None:
         """A sheet by its token, or None once it has expired."""
@@ -411,10 +474,14 @@ def _self_check() -> None:
     app = LocalWeb(schemes)
     session = "test"
     start = body(app.payload(session, "/start"))
+    # * The browser opens in English at consent, not at the language question.
+    assert start["lang"] == "en" and app.sessions[session].state is State.CONSENT
     assert len(start["replies"][0]["buttons"]) == 2
-    hi = body(app.payload(session, "lang:hi"))
-    assert hi["replies"][0]["buttons"], hi
-    assert hi["replies"][0]["typed"] is False, "consent is buttons only"
+    assert start["replies"][0]["typed"] is False, "consent is buttons only"
+    # * The top-bar switch keeps the session and re-asks the same question.
+    hi = body(app.payload(session, "/lang hi"))
+    assert hi["lang"] == "hi" and app.sessions[session].state is State.CONSENT
+    assert hi["replies"][-1]["buttons"], hi
     app.sessions[session].state = State.RATING
     rating = body(app.payload(session, "noop"))["replies"][-1]
     assert rating["typed"] is False, "ten buttons and Skip: no text box"

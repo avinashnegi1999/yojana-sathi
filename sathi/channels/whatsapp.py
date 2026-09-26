@@ -268,7 +268,9 @@ class _PackText(html.parser.HTMLParser):
         self._skip = 0
 
     def handle_starttag(self, tag, attrs):
-        if tag in ("style", "script"):
+        # * <title> too: it is the browser tab's label and would print as a
+        # * duplicate first line above the sheet's own heading.
+        if tag in ("style", "script", "title"):
             self._skip += 1
         elif tag in self._BLOCK:
             self.out.append("\n")
@@ -276,7 +278,7 @@ class _PackText(html.parser.HTMLParser):
                 self.out.append("• ")
 
     def handle_endtag(self, tag):
-        if tag in ("style", "script"):
+        if tag in ("style", "script", "title"):
             self._skip = max(0, self._skip - 1)
         elif tag in self._BLOCK:
             self.out.append("\n")

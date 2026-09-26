@@ -16,8 +16,8 @@
 # =====================================================================
 [language]
 # =====================================================================
-ask = """नमस्ते / Hello 🙏
-अपनी भाषा चुनें — Choose your language"""
+ask = """नमस्ते / Hello
+अपनी भाषा चुनें · Choose your language"""
 hindi = "हिंदी"
 english = "English"
 changed = "Language set to English."
@@ -25,44 +25,42 @@ changed = "Language set to English."
 # =====================================================================
 [consent]
 # =====================================================================
-ask = """Hello! I am Yojana Sathi.
-
-I will ask you a few simple questions and tell you which government schemes you may be entitled to.
-
-I will not ask for your name, phone number or Aadhaar number, and I do not store them.
-Only counts are kept — which state, which kind of work — never a name.
-
-Shall we begin?"""
-yes = "Yes, let's start"
-no = "No"
-declined = "That's alright. Nothing has been saved. Send /start whenever you want to begin."
+ask = """Hi, I'm Yojana Sathi.
+A few quick questions, and I'll show which government schemes may be yours.
+I never ask for your name, phone or Aadhaar. Only anonymous counts are kept.
+Shall we start?"""
+yes = "Start"
+no = "Not now"
+declined = "No problem. Nothing was saved. Send /start any time."
 
 [scheme_picker]
-mode = "Would you like to find all verified schemes, or check selected schemes only?"
-choose = "Choose schemes to check, then press Done."
-all = "All verified schemes"
-done = "Done — check selected"
+mode = "Check all schemes, or pick a few?"
+choose = "Pick the schemes to check, then tap Done."
+all = "All schemes"
+done = "Done"
 
 # =====================================================================
+pick_some = "Pick a few"
+
 [questions]
-is_unorganised_worker = "Do you currently do paid or income-earning work in the unorganised sector, such as work from home, self-employment or casual wage work? A job title alone does not decide this. If you are unsure whether your work qualifies, choose Don't know."
+is_unorganised_worker = "Do you do unorganised work — home-based, self-employed or daily wage?"
 # =====================================================================
 state = "Which state do you live in?"
-state_retry = "I could not recognise that state. Pick one below, or type the name again."
-age = "How old are you? (numbers only, e.g. 34)"
-age_retry = "Please write your age in numbers, e.g. 34."
+state_retry = "I didn't recognise that state. Pick one below."
+age = "How old are you?"
+age_retry = "Please type your age as a number, like 34."
 occupation = "What work do you do?"
-occupation_free = "Tell me in your own words what work you do."
-income_band = "Roughly how much do you earn in a month?"
+occupation_free = "Tell me your work in a few words."
+income_band = "About how much do you earn a month?"
 land_holding_band = "How much land do you have?"
-family_size = "How many people live in your household?"
+family_size = "How many people live in your home?"
 has_bank_account = "Do you have a bank account?"
 is_income_tax_payer = "Do you pay income tax?"
-is_epfo_or_esic_member = """Does your work deduct PF (EPFO) or ESIC?"""
-nps_exclusion_applies = "Which describes your National Pension System (NPS) account? Other types need confirmation at the centre because official eligibility descriptions differ."
-is_woman = "Are you a woman? This only helps skip questions that cannot apply; choosing Don't know keeps them open."
+is_epfo_or_esic_member = "Is PF (EPFO) or ESIC cut from your pay?"
+nps_exclusion_applies = "Do you have an NPS pension account?"
+is_woman = "Are you a woman? (Only used to skip questions that don't apply.)"
 known_schemes = """Which of these do you already have?
-Tap the ones you already hold, then press 'Next'."""
+Tap all that apply, then Next."""
 
 # =====================================================================
 [buttons]
@@ -70,12 +68,12 @@ Tap the ones you already hold, then press 'Next'."""
 yes = "Yes"
 no = "No"
 dont_know = "Don't know"
-none_of_these = "None of these"
+none_of_these = "None"
 next = "Next"
 back = "Back"
 other = "Something else"
-correct = "Yes, that's right"
-wrong = "No, that's wrong"
+correct = "Correct"
+wrong = "Wrong"
 show_more = "Show more"
 # ! WhatsApp shows more than three options as a list behind a button, and
 # ! that button needs its own label. Telegram never asks for one.
@@ -132,47 +130,44 @@ known_schemes = "schemes already held"
 # =====================================================================
 [confirm]
 # =====================================================================
-occupation = """You said: “{said}”
-I am recording this as “{label}”. Is that right?"""
-rejected = "No problem. Please pick from the list below."
-tax = """You selected:
-Monthly income: {income}
+occupation = """You said “{said}”.
+Save it as “{label}”?"""
+rejected = "OK. Pick from the list."
+tax = """Income: {income}
 Income tax: Yes
-
-Keep these answers?"""
+Keep both?"""
 keep_both = "Keep both"
 change_income = "Change income"
-change_tax = "Change tax answer"
+change_tax = "Change tax"
 
 # =====================================================================
 [result]
 # =====================================================================
 evaluating = "One moment, I am checking…"
-eligible_header = """I found {count} scheme(s) for you.
-The one with the largest benefit is at the top."""
+eligible_header = "{count} scheme(s) for you"
 # ! One sentence of benefit and the place to go. The full description and the
 # ! "why you qualify" are on the sheet; on a phone, four schemes at a paragraph
 # ! each buried the next button under 600 words.
 scheme_line = """{index}. {name_hi} {new_badge}
    {benefit}
    Where to go: {where}"""
-new_badge = "🆕 (you do not have this yet)"
+new_badge = "· New for you"
 # ! Not "you could get this in a year". PM-SYM and NPS-Traders pay nothing
 # ! until 60, so that line told a 25-year-old ₹36,000 was a year away. The
 # ! total is still stated, with the start age pointed at every time.
-value_line = "Added up, the pensions above come to about ₹{total} a year — but each one is paid only from its own starting age, which may be years away. Read each line above."
+value_line = "Pensions added up: about ₹{total} a year — each starts only at the age on its own line."
 # * What the worker pays, under the scheme it belongs to. From premium_inr,
 # * which data/schemes/_TEMPLATE.toml defines as ₹/year the WORKER pays.
 premium_line = "   You pay: {premium}"
 premium_per_year = "₹{amount} a year"
 # * Used when the scheme's premium is written only in the other language.
 premium_ask = "a regular payment — ask at the centre for the exact amount"
-cover_line = "On top of that there is insurance cover of up to ₹{total} across the policies shown. Each policy pays only under its own terms."
-cover_only_line = "You can get insurance cover of up to ₹{total} across the policies shown. Each policy pays only under its own terms."
-value_caveat = "This is what you may be entitled to — the money has not been paid yet. You have to apply for it."
+cover_line = "Insurance cover: up to ₹{total} in total, each policy on its own terms."
+cover_only_line = "Insurance cover: up to ₹{total} in total, each policy on its own terms."
+value_caveat = "Not paid yet — you have to apply."
 
-unknown_header = """There are {count} scheme(s) I cannot be sure about.
-I will not guess — a wrong answer costs you a day's wages and the fare."""
+unknown_header = """{count} I can't be sure about.
+I won't guess — ask at the centre."""
 unknown_line = """• {name_hi} — what I could not check: {gap}
    Ask this at the centre: “Am I eligible for {name_hi}?”"""
 unknown_reason_data = "we have not yet checked this scheme's rules against an official source"
@@ -185,32 +180,34 @@ unknown_reason_profile = "you did not tell me: {fields}"
 # ! said once. Repeating a 27-word sentence per scheme buries the one thing
 # ! the worker has to act on — the question to ask at the centre.
 unknown_shared = "For all of them: {gap}."
-unknown_ask_all = "At the centre, ask about each one by name — “Am I eligible for this?”"
+unknown_ask_all = "At the centre, ask about each one: “Am I eligible?”"
 unknown_name_only = "• {name_hi}"
 # ! Still used when the schemes are unsure for DIFFERENT reasons.
 unknown_line_bare = "• {name_hi} — ask: “Am I eligible for {name_hi}?”"
 
-ineligible_header = "These schemes will not be available to you right now:"
+ineligible_header = "Not for you right now"
 ineligible_line = "• {name_hi} — {reason}"
+# * When something matched: names only on screen, the reasons go on the sheet.
+ineligible_brief = "Not for you now: {names}. Reasons are on your sheet."
 
 # ! Only for a real no. When every scheme came back UNKNOWN the worker did
 # ! not fail anything - we did not check - so the next line is used instead.
-no_match_header = """You did not fully qualify for any scheme right now. That is not the end of it."""
-nothing_checked_header = """I could not check any scheme for you yet. That is about my information, not about you.
-Your answers are saved, and I can still make you a sheet to take to the centre."""
+no_match_header = "No scheme fits you right now — but that's not the end."
+nothing_checked_header = """I couldn't check any scheme yet — that's my gap, not yours.
+I can still make you a sheet for the centre."""
 near_miss = "Closest: {name_hi} — {reason}"
-no_match_footer = """Still, talk to your nearest centre once. States run their own schemes too, and those are not in my list."""
+no_match_footer = "Still, visit your nearest centre once — states have their own schemes too."
 
 # =====================================================================
 [documents]
 # =====================================================================
 header = "For {name_hi} you need these papers:"
 line = "• {doc}"
-missing_header = "About the papers you do not have:"
+missing_header = "Papers you still need:"
 missing_line = "• {doc} — {how}"
-how_generic = "ask where and how to get this when you go"
-ask_which = "Which of these papers do you already have?"
-have_all = "You have the papers you need. You can apply now."
+how_generic = "ask at the centre how to get it"
+ask_which = "Which papers do you have?"
+have_all = "You have every paper you need."
 
 # =====================================================================
 [where]
@@ -224,19 +221,19 @@ unknown = "ask at your nearest Common Service Centre (CSC)"
 
 # =====================================================================
 [pack]
-at_a_glance = "Where to go — the short version"
+at_a_glance = "Where to go"
 at_a_glance_line = "{name_hi} → {where}"
 # =====================================================================
-offer = "Shall I make you a sheet you can show at the centre?"
+offer = "Want a sheet to show at the centre?"
 # ! Offered even when nothing qualified. That worker is the one walking in
 # ! with no idea what to ask, and the sheet carries their answers and the
 # ! questions — it is the only thing they can take away today.
-offer_no_match = "Shall I still make you a sheet — your answers, and what to ask at the centre?"
-your_answers = "What you told me"
+offer_no_match = "Want a sheet anyway — your answers and what to ask?"
+your_answers = "Your answers"
 ask_at_centre = "Ask: “Am I eligible for {name_hi}?”"
-ready = """Here is your sheet. Keep it on your phone or get it printed.
-It has no name and no Aadhaar on it — only what to ask for and what to carry."""
-title = "Yojana Sathi — your list"
+ready = """Your sheet is ready. Save it or print it.
+No name or Aadhaar on it."""
+title = "Your scheme sheet · Yojana Sathi"
 why = "Why"
 where = "Where"
 you_pay = "You pay"
@@ -246,10 +243,16 @@ disclaimer = """This is not a government document. It is only a list to make the
 The final decision rests with the concerned department."""
 
 # =====================================================================
+brand = "Yojana Sathi"
+heading = "Your scheme sheet"
+subtitle = "Show this at the centre. No name or Aadhaar on it."
+still_need = "Papers to get"
+still_need_how = "Ask at the centre how to get each one."
+
 [closing]
 # =====================================================================
-done = """That's all. Good luck!
-If it does not work out, send /start again."""
+done = """All done. Good luck!
+Send /start any time to check again."""
 followup = "May I ask you once in 14 days whether it worked out?"
 
 # =====================================================================
@@ -302,11 +305,11 @@ clear_unsupported = "This app does not let me delete messages from your phone, s
 # =====================================================================
 generic = "Something went wrong. Please send /start to begin again."
 no_schemes_loaded = "Scheme information is not ready yet. Please try again a little later."
-pick_from_list = "Please pick one of the options below."
+pick_from_list = "Please pick an option below."
 stale_button = "This button is no longer active. Use the latest question, or send /start to begin again."
 screening_stopped = "This screening stopped because something went wrong. Please send /start and answer the questions again."
 # * The browser has no /start to send; it has a "Start again" button.
-web_stopped = "This screening stopped because something went wrong. Tap “Start again” below to begin again."
+web_stopped = "Something went wrong. Tap “Start again” to begin again."
 # * Shown before a language is chosen, so the browser sends it in both.
 too_many_sessions = "Too many new screenings have started from this connection. Please wait a few minutes and try again."
 
@@ -316,9 +319,9 @@ too_many_sessions = "Too many new screenings have started from this connection. 
 # ! Buttons leave no trace in the chat: a tapped answer is a callback, not a
 # ! message. Without this block a worker cannot scroll up and check what was
 # ! recorded before walking to a centre on the strength of it.
-header = "This is what you told me:"
+header = "Your answers:"
 line = "• {label}: {value}"
-not_answered = "you did not say"
+not_answered = "not answered"
 none = "none"
 
 [nps_choices]
@@ -335,16 +338,14 @@ help = "/demo — Show fictional scheme examples (no personal screening)"
 # =====================================================================
 # ! Asked once, at the very end, after the sheet is already in her hands - so
 # ! skipping it costs her nothing and she knows it. Both are optional and say so.
-ask_rating = """One last thing, and you can skip it.
-How useful was this, from 1 to 10? Just send the number."""
-ask_suggestion = """Thank you. Is there anything I should improve, or any question that was confusing?
-Send it in a few words, or skip. Please do not include your name, phone number, address or Aadhaar number — this message is kept."""
-ask_participant_type = """One optional question for our pilot count.
-How are you using Yojana Sathi today?"""
-participant_self = "Checking for myself"
-participant_helping = "Helping someone else"
-participant_tester = "Testing as a developer/reviewer"
-thanks = "Thank you — that helps me make this better for the next person."
+ask_rating = "Optional: how useful was this, 1 to 10?"
+ask_suggestion = """Anything to improve? A few words, or skip.
+Please don't include your name, phone or Aadhaar — this is saved."""
+ask_participant_type = "Optional: who is this for?"
+participant_self = "Myself"
+participant_helping = "Someone I'm helping"
+participant_tester = "Testing it"
+thanks = "Thank you!"
 skip = "Skip"
 bad_rating = "Please send a number from 1 to 10, or skip."
 

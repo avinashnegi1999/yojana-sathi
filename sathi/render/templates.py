@@ -243,6 +243,23 @@ def unknown_block(results: tuple[Result, ...], schemes: dict[str, Scheme],
     )
 
 
+def ineligible_brief(results: tuple[Result, ...], schemes: dict[str, Scheme],
+                     lang: str = "hi") -> str:
+    """Names only, for the screen when something DID match.
+
+    # * The per-scheme reasons were the longest part of the result screen
+    # * (155 of 532 words on one test profile), placed after the good news.
+    # * They move to the sheet (pack.py), which is where a worker looks them
+    # * up at the counter. With no match at all the full reasons stay on
+    # * screen, because then they ARE the answer.
+    """
+    hits = [r for r in results if r.verdict is Verdict.INELIGIBLE]
+    if not hits:
+        return ""
+    names = ", ".join(schemes[r.scheme_code].name(lang) for r in hits)
+    return s("result.ineligible_brief", lang, count=len(hits), names=names)
+
+
 def ineligible_block(results: tuple[Result, ...], schemes: dict[str, Scheme],
                      lang: str = "hi") -> str:
     hits = [r for r in results if r.verdict is Verdict.INELIGIBLE]
@@ -303,8 +320,9 @@ def result_message(results: tuple[Result, ...], schemes: dict[str, Scheme],
         blocks.append(s("result.nothing_checked_header", lang))
     else:
         blocks.append(no_match_block(results, schemes, lang))
-    for block in (unknown_block(results, schemes, lang),
-                  ineligible_block(results, schemes, lang)):
+    not_for_you = (ineligible_brief(results, schemes, lang) if eligible
+                   else ineligible_block(results, schemes, lang))
+    for block in (unknown_block(results, schemes, lang), not_for_you):
         if block:
             blocks.append(block)
     return "\n\n".join(blocks)
@@ -389,7 +407,10 @@ def _self_check() -> None:
         assert f"योजना-{c}" in shared
     assert s("result.unknown_reason_data") not in text_unsigned, \
         "a researched scheme must not claim nobody checked its source"
-    assert "उम्र इस योजना के दायरे से बाहर" in text, "ineligible reason must be the authored one"
+    # * Something matched here, so the screen names the misses and the authored
+    # * reasons move to the sheet; the full block still carries them verbatim.
+    assert "उम्र इस योजना के दायरे से बाहर" not in text, "reasons belong on the sheet when something matched"
+    assert "उम्र इस योजना के दायरे से बाहर" in ineligible_block(results, schemes, "hi"),         "ineligible reason must be the authored one"
     assert "{" not in text, "unfilled placeholder reached the worker"
 
     # ! Insurance alone must not say "on top of that" with nothing above it —

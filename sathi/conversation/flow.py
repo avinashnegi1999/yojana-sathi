@@ -345,7 +345,8 @@ class Conversation:
     def _ask_scheme_mode(self) -> Reply:
         return Reply(text=self._s("scheme_picker.mode"), buttons=(
             Button(self._s("scheme_picker.all"), "pick:all"),
-            Button(self._s("scheme_picker.choose"), "pick:choose"),
+            # * A short label; "scheme_picker.choose" is the picker's instruction.
+            Button(self._s("scheme_picker.pick_some"), "pick:choose"),
         ))
 
     def _ask_scheme_picker(self) -> Reply:
