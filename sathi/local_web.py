@@ -110,8 +110,10 @@ const PRIMARY=new Set(['consent_yes','pick:all','pick:done','next']);
 function text(value){return String(value||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function blocks(value,headline,cls){cls=cls||'q';return String(value||'').split(/\n\s*\n/).map((b,i)=>{if(headline&&i===0){const cut=b.indexOf('\n');return cut<0?`<h2 class="${cls}">${text(b)}</h2>`:`<h2 class="${cls}">${text(b.slice(0,cut))}</h2><p class="lead">${text(b.slice(cut+1))}</p>`;}const m=b.match(/^(\d+\.\s[^\n]*)\n([\s\S]*)$/);return m?`<div class="scheme"><p class="scheme-name">${text(m[1])}</p><p class="scheme-body">${text(m[2].replace(/^ +/gm,''))}</p></div>`:`<p class="message">${text(b)}</p>`;}).join('');}
 function button(b){const picked=b.label.startsWith('✅ ');const label=picked?b.label.slice(2):b.label;const cls=['choice',b.scale?'scale':'',b.grid?'grid':'',PRIMARY.has(b.value)?'primary':'',picked?'selected':''].filter(Boolean).join(' ');return `<button class="${cls}" data-value="${encodeURIComponent(b.value)}"${picked?' aria-pressed="true"':''}><span>${text(label)}</span>${picked?'<span class="tick" aria-hidden="true">✓</span>':''}</button>`;}
-let mapData=null;
-async function mapLoad(){if(mapData!==null)return mapData;mapData=false;
+let mapPromise=null;
+// * One load, shared: the page starts it on open, and the state question reuses it.
+function mapLoad(){return mapPromise||(mapPromise=mapBuild());}
+async function mapBuild(){let mapData=false;
 try{const [meta,img]=await Promise.all([fetch('/map-seeds.json').then(r=>r.ok?r.json():null),new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src='/map.png';})]);
 if(!meta)return false;const [W,H]=meta.image,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');g.drawImage(img,0,0);
 const d=g.getImageData(0,0,W,H).data,[fr,fg,fb]=meta.fill,t=meta.tolerance,codes=Object.keys(meta.seeds),lab=new Uint8Array(W*H);
@@ -119,8 +121,10 @@ const inside=p=>{const i=p*4;return Math.abs(d[i]-fr)<=t&&Math.abs(d[i+1]-fg)<=t
 codes.forEach((code,k)=>{for(const [sx,sy] of meta.seeds[code]){const s=sy*W+sx;if(!inside(s)||lab[s])continue;lab[s]=k+1;const st=[s];
 while(st.length){const q=st.pop(),x=q%W;for(const n of [q-1,q+1,q-W,q+W]){if(n<0||n>=W*H||Math.abs(n%W-x)>1||lab[n]||!inside(n))continue;lab[n]=k+1;st.push(n);}}}});
 mapData={W,H,codes,lab};}catch(e){mapData=false;}return mapData;}
-async function drawMap(ui){const tab=document.getElementById('maptab');if(!tab)return;const m=await mapLoad();
-if(!m||!document.body.contains(tab)){tab.remove();return;}
+async function drawMap(ui){const tab=document.getElementById('maptab');if(!tab)return;document.querySelector('main').classList.add('wide');const m=await mapLoad();
+if(!document.body.contains(tab))return;
+// * No map (files missing, image blocked): fall back to the list, which was hidden to avoid a flash.
+if(!m){const l=screen.querySelector('.choices:has(.grid)');if(l)l.hidden=false;tab.remove();document.querySelector('main').classList.remove('wide');return;}
 // * Per-state pixel lists, built once, so painting a state is cheap on hover.
 if(!m.pixels){m.pixels=m.codes.map(()=>[]);for(let p=0;p<m.lab.length;p++)if(m.lab[p])m.pixels[m.lab[p]-1].push(p);}
 const list=screen.querySelector('.choices:has(.grid)');
@@ -146,12 +150,14 @@ tip.style.left=(e.clientX-r.left)+'px';tip.style.top=(e.clientY-r.top)+'px';};
 img.onmouseleave=()=>{hovered=0;paint(hover,0);tip.hidden=true;};
 img.onclick=e=>{const k=at(e);if(!k)return;const code=m.codes[k-1];paint(pick,k,[0,102,204,230]);
 go.innerHTML=`<button class="choice primary">${ui.mapGo}: ${text(nameOf(k))}</button>`;go.firstChild.onclick=()=>answer('state:'+code);};}
-function show(data){document.querySelector('main').classList.remove('wide');const ui=UI[data.lang]||UI.hi;document.documentElement.lang=data.lang==='en'?'en':'hi';document.getElementById('restart').textContent=ui.restart;current=data.lang==='hi'?'hi':'en';const sw=document.getElementById('switch');sw.textContent=ui.other;sw.lang=ui.otherLang;document.getElementById('brand').textContent=ui.brand;const last=data.replies.length-1;const hasResult=data.replies.some(r=>r.kind==='result');let out=data.replies.map((r,i)=>{if(r.kind==='recap'){const body=r.text.split('\n').slice(1).join('\n');return `<details class="recap"><summary>${ui.answers}</summary><p class="message">${text(body)}</p></details>`;}const asks=i===last&&(r.buttons?.length||r.typed);return `${r.kind==='result'?blocks(r.text,true,'q'):blocks(r.text,asks,hasResult?'q2':'q')}${r.map?`<div id="maptab"><div class="map" id="map"></div><p class="maphint">${ui.mapHint}</p><div id="mapgo"></div></div>`:''}${r.buttons?.length?`<div class="choices">${r.buttons.map(button).join('')}</div>`:''}${r.document?`<a class="download" href="${r.document}" download>${ui.download}</a>`:''}`;}).join('');const typed=!!(data.replies[last]&&data.replies[last].typed);if(typed)out+=`<form class="composer"><input name="answer" aria-label="${ui.type}" autocomplete="off" inputmode="text" placeholder="${ui.type}"><button class="send">${ui.send}</button></form>`;screen.innerHTML=out;window.scrollTo({top:0});screen.querySelectorAll('.choice').forEach(b=>b.onclick=()=>answer(decodeURIComponent(b.dataset.value)));drawMap(ui);const form=screen.querySelector('form');if(form){form.onsubmit=e=>{e.preventDefault();const input=e.currentTarget.answer;if(input.value.trim()){answer(input.value);input.value='';}};form.answer.focus();}}
+function show(data){document.querySelector('main').classList.remove('wide');const ui=UI[data.lang]||UI.hi;document.documentElement.lang=data.lang==='en'?'en':'hi';document.getElementById('restart').textContent=ui.restart;current=data.lang==='hi'?'hi':'en';const sw=document.getElementById('switch');sw.textContent=ui.other;sw.lang=ui.otherLang;document.getElementById('brand').textContent=ui.brand;const last=data.replies.length-1;const hasResult=data.replies.some(r=>r.kind==='result');let out=data.replies.map((r,i)=>{if(r.kind==='recap'){const body=r.text.split('\n').slice(1).join('\n');return `<details class="recap"><summary>${ui.answers}</summary><p class="message">${text(body)}</p></details>`;}const asks=i===last&&(r.buttons?.length||r.typed);return `${r.kind==='result'?blocks(r.text,true,'q'):blocks(r.text,asks,hasResult?'q2':'q')}${r.map?`<div id="maptab"><div class="map" id="map"></div><p class="maphint">${ui.mapHint}</p><div id="mapgo"></div></div>`:''}${r.buttons?.length?`<div class="choices"${r.map?' hidden':''}>${r.buttons.map(button).join('')}</div>`:''}${r.document?`<a class="download" href="${r.document}" download>${ui.download}</a>`:''}`;}).join('');const typed=!!(data.replies[last]&&data.replies[last].typed);if(typed)out+=`<form class="composer"><input name="answer" aria-label="${ui.type}" autocomplete="off" inputmode="text" placeholder="${ui.type}"><button class="send">${ui.send}</button></form>`;screen.innerHTML=out;window.scrollTo({top:0});screen.querySelectorAll('.choice').forEach(b=>b.onclick=()=>answer(decodeURIComponent(b.dataset.value)));drawMap(ui);const form=screen.querySelector('form');if(form){form.onsubmit=e=>{e.preventDefault();const input=e.currentTarget.answer;if(input.value.trim()){answer(input.value);input.value='';}};form.answer.focus();}}
 const START=(()=>{const src=new URLSearchParams(location.search).get('start')||'';return /^[a-z]{1,20}$/.test(src)?'/start '+src:'/start';})();
 function oops(){screen.innerHTML=`<h2 class="q">${text('कुछ गड़बड़ हो गई।\nSomething went wrong.')}</h2><div class="choices"><button class="choice primary" onclick="restart()">फिर से शुरू · Start again</button></div>`;}
 async function answer(value){try{const r=await fetch('/answer',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({answer:value})});const data=await r.json().catch(()=>null);if(data&&Array.isArray(data.replies)){show(data);}else{oops();}}catch(e){oops();}}
 function switchLang(){answer('/lang '+(current==='en'?'hi':'en'))}
 function restart(){answer(START)}answer(START);
+// * Start fetching the map now, so it is ready by the time the state is asked.
+mapLoad();
 </script></body></html>"""
 
 
