@@ -237,29 +237,36 @@ def provenance(schemes_dir: str | Path = "data/schemes", today: date | None = No
 # * ------------------------------------------------------------------ render
 
 _CSS = """
-body { font-family: system-ui, sans-serif; margin: 0; background: #f7f7f8; color: #16181d; }
-main { max-width: 60rem; margin: 0 auto; padding: 2rem 1rem 4rem; }
-h1 { margin: 0 0 .25rem; font-size: 1.6rem; }
-.sub { color: #5c6270; margin: 0 0 2rem; }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 1rem; }
-.card { background: #fff; border: 1px solid #e3e5ea; border-radius: .75rem; padding: 1rem 1.1rem; }
-.card .n { font-size: 1.9rem; font-weight: 650; letter-spacing: -.02em; }
-.card .l { color: #5c6270; font-size: .85rem; margin-top: .2rem; }
-.card.hero { background: #10281a; color: #fff; }
-.card.hero .l { color: #b7d4c2; }
-section { margin-top: 2.5rem; }
-h2 { font-size: 1.05rem; margin: 0 0 .75rem; }
-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e3e5ea;
-        border-radius: .75rem; overflow: hidden; }
-th, td { text-align: left; padding: .55rem .8rem; border-bottom: 1px solid #eef0f3; font-size: .9rem; }
-th { background: #fafbfc; font-weight: 600; }
-tr:last-child td { border-bottom: none; }
-.bar { height: .5rem; background: #2d5016; border-radius: 999px; }
-.warn { color: #8a5300; }
-.note { background: #fff8e1; border-left: 4px solid #e0a800; padding: .8rem 1rem;
-        border-radius: 0 .5rem .5rem 0; margin: 1rem 0; }
-footer { margin-top: 3rem; color: #5c6270; font-size: .82rem; line-height: 1.6; }
-code { background: #eef0f3; padding: .1rem .3rem; border-radius: .25rem; }
+/* * Apple design language (apple/DESIGN.md): parchment canvas, near-black ink,
+   * Action Blue as the only accent, 18px cards, system fonts, no shadows. */
+:root{--ink:#1d1d1f;--body:#333333;--muted:#6e6e73;--blue:#0066cc;--canvas:#ffffff;
+      --parchment:#f5f5f7;--hairline:#e0e0e0;--tile:#272729;--muted-dark:#a1a1a6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--parchment);color:var(--ink);
+     font:400 17px/1.47 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+     letter-spacing:-.022em;-webkit-font-smoothing:antialiased}
+main{max-width:60rem;margin:0 auto;padding:48px 16px 64px}
+h1{margin:0 0 6px;font-size:34px;font-weight:600;line-height:1.1;letter-spacing:0}
+.sub{margin:0 0 32px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:16px}
+.card{background:var(--canvas);border:1px solid var(--hairline);border-radius:18px;padding:20px 22px}
+.card .n{font-size:34px;font-weight:600;line-height:1.1;letter-spacing:0}
+.card .l{margin-top:6px;color:var(--muted);font-size:14px;line-height:1.43}
+.card.hero{background:var(--tile);border-color:var(--tile);color:#ffffff}
+.card.hero .l{color:var(--muted-dark)}
+section{margin-top:48px}
+h2{margin:0 0 12px;font-size:21px;font-weight:600;line-height:1.24}
+table{width:100%;border-collapse:separate;border-spacing:0;background:var(--canvas);
+      border:1px solid var(--hairline);border-radius:18px;overflow:hidden}
+th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--hairline);font-size:14px}
+th{font-weight:600;color:var(--muted)}
+tr:last-child td{border-bottom:none}
+.bar{height:6px;background:var(--blue);border-radius:980px}
+.warn{color:var(--ink);font-weight:600}
+.note{margin:16px 0;padding:16px 20px;background:var(--canvas);border:1px solid var(--hairline);
+      border-radius:18px;color:var(--body)}
+footer{margin-top:48px;color:var(--muted);font-size:12px;line-height:1.6}
+code{background:var(--canvas);padding:1px 6px;border-radius:8px;border:1px solid var(--hairline)}
 """
 
 _METHOD = [
@@ -289,7 +296,7 @@ def _sparkline(weeks: list[tuple[str, int]], w: int = 560, h: int = 60) -> str:
     return (
         f"<svg viewBox='0 0 {w} {h}' width='100%' height='{h}' role='img' "
         f"aria-label='sessions per week'>"
-        f"<polyline points='{pts}' fill='none' stroke='#2d5016' stroke-width='2'/></svg>"
+        f"<polyline points='{pts}' fill='none' stroke='#0066cc' stroke-width='2'/></svg>"
         f"<p class='sub'>{_e(weeks[0][0])} → {_e(weeks[-1][0])}, peak {top} sessions/week</p>"
     )
 
@@ -362,8 +369,8 @@ def render(conn: sqlite3.Connection, since: str = "",
     parts = [
         "<!doctype html><html lang='en'><head><meta charset='utf-8'>",
         "<meta name='viewport' content='width=device-width,initial-scale=1'>",
-        f"<title>Scheme Sathi — impact</title><style>{_CSS}</style></head><body><main>",
-        "<h1>Scheme Sathi — impact</h1>",
+        f"<title>Yojana Sathi — impact</title><style>{_CSS}</style></head><body><main>",
+        "<h1>Yojana Sathi — impact</h1>",
         f"<p class='sub'>{_e(since or 'all time')} → {_e(today.isoformat())} · "
         f"{n['sessions_total']} sessions opened · "
         f"{_e('cohort ' + cohort if cohort else 'all arrival links')} · "

@@ -45,7 +45,7 @@ One intake question: which of these schemes do you already have? Any match not i
 
 ## Pensions that start at 60.
 
-PM-SYM and NPS-Traders pay ₹3,000 a month **from age 60**, and the worker pays ₹55–₹200 a month until then. They count at their stated yearly value — but a 25-year-old receives nothing for 35 years. The worker is told: the result and the sheet show each scheme's cost, and the total says each pension starts at its own age.
+PM-SYM and NPS-Traders pay ₹3,000 a month **from age 60**; the worker pays ₹55–₹200 a month until then. APY pays from ₹1,000 a month at 60, for ₹42–₹291 a month by joining age. They count at their stated yearly value — but a 25-year-old receives nothing for 35 years. The worker is told: the result and the sheet show each scheme's cost, and the total says each pension starts at its own age.
 
 <br>
 
@@ -61,7 +61,7 @@ PM-SYM and NPS-Traders pay ₹3,000 a month **from age 60**, and the worker pays
 ## Privacy.
 
 - **Coarse bands only:** state, age band, occupation, income band — plus the channel and, after consent, the arrival-link tag.
-- **Occupation** is asked only when a screened scheme needs it. No signed scheme does today, so it is usually empty. **Income** is asked only when PM-SYM is screened.
+- **Occupation** is asked only when a screened scheme needs it. No signed scheme does today, so it is usually empty. **Income** is asked only when PM-SYM or the Punjab pension is screened.
 - **Never written:** name, phone, Aadhaar, village, exact income. Those fields don't exist in the profile.
 - **Each session gets a fresh random id**, not derived from any messaging account. Two sessions by the same worker can't be linked — which is why "workers screened" honestly means sessions.
 - **Breakdown rows under 5 sessions** show as `<5`. Headline totals are not suppressed, and the dashboard says so. This is not a guarantee of anonymity.

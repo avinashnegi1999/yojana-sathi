@@ -1,53 +1,42 @@
-# Contributing
+# Contributing.
 
-## Adding or correcting a scheme rule — the important one
+<br>
 
-This is the contribution that matters most, and it needs no programming.
+## Fix or add a scheme rule — the one that matters most.
 
-**Every value must be cited.** A pull request that changes a threshold, a ₹
-amount, an age band, or an exclusion must include, for that value:
+No programming needed. Every changed value — a threshold, a ₹ amount, an age band, an exclusion — needs:
 
-- a `source_url` deep-linking the **official** `.gov.in` page carrying it —
-  not the site root, not a news article, not an aggregator, not a chatbot
-- an updated `verified_on` date
-- and then a sign-off by a maintainer with `python3 -m sathi.review <CODE>` —
-  the only supported way a name reaches `verified_by`. A hand-edited signature
-  fails `tests/test_schemes.py`, which pins the signed list.
+- a `source_url` deep-linking the **official** `.gov.in` page that states it. Not a site root, a news article, an aggregator or a chatbot.
+- an updated `verified_on` date.
+- a maintainer's sign-off with `python3 -m sathi.review <CODE>`. A hand-edited signature fails `tests/test_schemes.py`.
 
-**PRs that change a rule without a source are closed.** This is not
-bureaucracy. A wrong threshold sends a worker on a day-long trip to a CSC that
-costs them a day's wages, and they usually do not come back for a second try.
+**A rule change without a source is closed.** A wrong threshold costs a worker a day's wage, and most don't come back.
 
-If you cannot find an official source for a value, leave it as `"TODO"`. The
-system reports "we could not check this" — which is honest and still useful.
-Guessing is the one thing it must never do.
+No official source? Leave `"TODO"`. The bot says "we couldn't check this" — honest, and still useful.
 
-Read [`docs/SCHEME_AUTHORING.md`](docs/SCHEME_AUTHORING.md) first.
+Start with [`docs/SCHEME_AUTHORING.md`](docs/SCHEME_AUTHORING.md).
 
-## Translations and Hindi wording
+<br>
 
-Every user-facing string is in the scheme files and `data/strings_hi.toml`.
-Corrections from native and regional speakers are welcome and needed — the
-whole project fails if the Hindi reads like a translated form. Say in the PR
-which region's usage you are writing for.
+## Hindi wording.
 
-## Code
+Worker-facing text is in the scheme files and `data/strings_hi.toml`. Corrections from native and regional speakers are needed — the project fails if the Hindi reads like a translated form. Say which region's usage you write for.
+
+<br>
+
+## Code.
 
 ```bash
-python3 check.py    # must pass before you open a PR
+python3 check.py    # must pass before a PR
 ```
 
-- Python 3.11+, standard library only. A new dependency needs a line in the PR
-  explaining what the stdlib could not do.
-- No language model may be imported from `sathi/rules/`. Eligibility is
-  deterministic; that boundary is the point of the project.
-- Comment tags in use: `# !` important, `# *` section, `# TODO` task,
-  `# ?` open question.
+- Python 3.11+, standard library only. A new dependency needs one line on what the stdlib couldn't do.
+- `sathi/rules/` may not import a language model. That boundary is the point of the project.
+- Comment tags: `# !` important · `# *` section · `# TODO` task · `# ?` open question.
+- Sign commits with `git commit -s` (DCO).
 
-Sign off commits with `git commit -s` (DCO).
+<br>
 
-## Reporting a wrong result
+## Report a wrong result.
 
-Open an issue with the profile answers that produced it (**no personal
-details** — ages and bands only) and what you expected. A wrong eligibility
-result is the highest-priority bug class in this repo.
+Open an issue with the answers that produced it — ages and bands only, **no personal details** — and what you expected. A wrong eligibility result is the highest-priority bug here.

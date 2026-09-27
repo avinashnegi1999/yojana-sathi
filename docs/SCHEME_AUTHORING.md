@@ -50,7 +50,7 @@ A deep link to the page that carries **that exact value**. Not the site root, no
 
 <br>
 
-`state` · `age` · `occupation` · `is_unorganised_worker` · `income_band` · `land_holding_band` · `family_size` · `has_bank_account` · `is_income_tax_payer` · `is_epfo_or_esic_member` · `nps_exclusion_applies` · `is_woman` · `is_widow` · `uk_pension_income_or_bpl` · `uk_pension_selected` · `receives_other_pension` · `household_has_lpg` · `pmuy_declaration_met` · `is_bpl` · `has_disability_80pct` · `is_small_trader` · `is_vishwakarma_artisan` · `took_business_loan_5yr` · `has_government_service_in_family` · `known_schemes`
+`state` · `age` · `occupation` · `is_unorganised_worker` · `income_band` · `land_holding_band` · `family_size` · `has_bank_account` · `is_income_tax_payer` · `is_epfo_or_esic_member` · `nps_exclusion_applies` · `is_woman` · `is_widow` · `uk_pension_income_or_bpl` · `uk_pension_selected` · `receives_other_pension` · `household_has_lpg` · `pmuy_declaration_met` · `is_bpl` · `has_disability_80pct` · `is_small_trader` · `is_vishwakarma_artisan` · `took_business_loan_5yr` · `has_government_service_in_family` · `has_job_or_business` · `pb_land_over_limit` · `known_schemes`
 
 - `is_unorganised_worker` is what the worker says. It is never inferred from a job title.
 - `nps_exclusion_applies` is a yes / no / not-sure finding about the exclusion, not a general claim of NPS membership. Other or uncertain NPS types stay unresolved.
@@ -67,11 +67,13 @@ A scheme that needs a field not on this list is a product decision, not a data o
 |---|---|
 | `annual_value_inr` | ₹ a year, as the scheme states it. For a cover, the cover amount. |
 | `value_basis` | `annual_payout` · `insurance_cover` · `one_time` · `subsidy` · `in_kind` · `gateway` |
-| `premium_inr` | ₹ a year the **worker** pays. `0` if free. |
+| `premium_inr` | ₹ a year the **worker** pays. `0` if free. A short sentence when it varies by age (PM-SYM, APY). |
 | `exclusive_group` | Optional. Alternative routes to one payment share a group, and are never added together. |
 | `annual_value_age_bands` | Optional. A different amount from a stated age, e.g. from 80. |
 
-Where to apply is one of `csc` · `bank_branch` · `post_office` · `eshram_centre` · `online`.
+Where to apply is one of `csc` · `bank_branch` · `post_office` · `eshram_centre` · `online` · `local_office` (panchayat, block or municipal office).
+
+**A state scheme** carries a `state` criterion (`op = "eq"`, the two-letter code). That alone keeps it off every other state's list. Its amount replaces the national central share, so give it the same `exclusive_group` as the national pension.
 
 <br>
 
@@ -107,6 +109,8 @@ A signature is a change in what workers are told, so two tests must change with 
 
 - **`SIGNED_OFF`** in [`tests/test_schemes.py`](../tests/test_schemes.py) pins the signed list.
 - **The hand-written rules** in [`tests/test_rule_boundaries.py`](../tests/test_rule_boundaries.py) must cover the scheme. Every signed scheme is swept against them.
+
+Save the official page you signed against in [`audit-evidence/`](audit-evidence/README.md), with its SHA-256 and the claims it confirms.
 
 <br>
 

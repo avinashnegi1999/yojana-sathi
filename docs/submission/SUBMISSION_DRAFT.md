@@ -5,19 +5,11 @@ Prepared **8 September 2026**. Official form and rubric rechecked **9 September
 karlmehta/code-for-a-billion. Not submitted. Replace the explicit evidence
 placeholders only with observed facts.
 
-## Sign-off status, 9 September 2026
+## Where it stands — 27 September 2026
 
-*(Heading kept for history; current state is the next paragraph.)* On 9
-September six schemes were signed: PMJJBY, PMSBY, PMUY, PM-SYM, e-Shram and the
-Uttarakhand old-age pension.
-
-Twenty-one scheme files now screen (as of 27 September 2026); two drafts stay UNKNOWN. Say
-so plainly, and say that the Uttarakhand widow pension was signed, withdrawn
-on 15 September because its rate rested on a single aggregator page, and
-re-signed on 27 September against the state's own Government Order 40 of
-21 April 2022. A judge who checks will find that, and finding it in your
-own documentation is very different from finding it themselves. That distinction has to survive into the demo video and the problem
-statement unchanged — a judge will try it.
+- **21 scheme files signed** by Avinash Negi against official evidence: 13 national, 8 state (Uttarakhand, Sikkim, Madhya Pradesh, Punjab). Two drafts (Tamil Nadu, Mizoram) stay `UNKNOWN` — no official page lists their documents.
+- **Say the history plainly.** The Uttarakhand widow pension was signed, withdrawn on 15 September because its rate rested on one aggregator page, and re-signed on 27 September against the state's own Government Order 40 of 21 April 2022. A judge who finds that in our own documentation reads it very differently from one who finds it alone.
+- **State first, on every channel.** Every state and UT is selectable; the browser adds a clickable map. The worker then picks national schemes, her state's, or both.
 
 ## What the official form actually asks for — rechecked 9 September 2026
 
@@ -93,7 +85,8 @@ worker is uneducated or unable to use government services.
 
 ## Solution
 
-Yojana Sathi asks a small set of questions, reads the answers back, evaluates
+Yojana Sathi asks her state, then which schemes to check, then only the
+questions those schemes need. It reads the answers back, evaluates
 source-backed Python rules, and explains what can and cannot be concluded.
 Where a human-verified scheme supports a result, it provides a document
 checklist and application directions. **Twenty-one scheme files were signed between
@@ -150,9 +143,10 @@ privately. See [VERIFICATION.md](../history/VERIFICATION.md) and [IMPACT.md](../
 The repository records AWS EC2 deployment and links
 [@YojanaSathiBot](https://t.me/YojanaSathiBot). WhatsApp code and a historical
 Meta test-number trial are documented; no public production WhatsApp number is
-established. On **8 September 2026**, a read-only SSH check confirmed that
-`sathi`, `sathi-whatsapp` and `caddy` were active; both application services
-reported running. This establishes process status, not successful message
+established. On **27 September 2026** the current code (commit `04b9b4a`) was deployed:
+the server's `check.py` passed, `sathi`, `sathi-whatsapp` and `sathi-web`
+restarted and were active, and a live browser walk returned the Punjab
+pensions. This establishes process status, not successful message
 delivery or independent judge access. No new phone test was performed.
 `python3 check.py` also passed locally at commit
 `e4a10e7be39b85a0ac3c2b19bbcfff96788812f0`. The current audit, including what

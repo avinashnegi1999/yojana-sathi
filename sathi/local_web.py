@@ -64,14 +64,14 @@ main{max-width:40rem;margin:0 auto;padding:40px 16px 96px}
 .q{margin:8px 0 24px;font-size:28px;font-weight:600;line-height:1.18;letter-spacing:-.01em;white-space:pre-wrap}
 html:lang(hi) .q{line-height:1.4;letter-spacing:0}
 .q:has(+ .lead){margin-bottom:10px}
-.q2{margin:32px 0 16px;font-size:22px;font-weight:600;line-height:1.3}
+.q2{margin:32px 0 16px;font-size:21px;font-weight:600;line-height:1.24}
 .recap{margin:0 0 24px;border-bottom:1px solid var(--hairline);padding-bottom:12px}
-.recap summary{cursor:pointer;color:var(--blue);font-size:15px;min-height:44px;display:flex;align-items:center;list-style:none}
+.recap summary{cursor:pointer;color:var(--blue);font-size:14px;min-height:44px;display:flex;align-items:center;list-style:none}
 .recap summary::-webkit-details-marker{display:none}
 .recap summary::after{content:"›";margin-left:6px;transition:transform .15s}
 .recap[open] summary::after{transform:rotate(90deg)}
-.recap .message{margin:4px 0 0;font-size:15px;color:var(--muted)}
-.lead{margin:0 0 24px;white-space:pre-wrap;color:var(--muted);font-size:19px;line-height:1.5}
+.recap .message{margin:4px 0 0;font-size:14px;color:var(--muted)}
+.lead{margin:0 0 24px;white-space:pre-wrap;color:var(--muted);font-size:21px;line-height:1.43}
 @media(min-width:736px){main{padding-top:64px}.q{font-size:34px}}
 
 .message{margin:0 0 16px;white-space:pre-wrap;color:var(--body)}
@@ -80,22 +80,22 @@ html:lang(hi) .q{line-height:1.4;letter-spacing:0}
 .scheme-body{margin:0;white-space:pre-wrap;color:var(--body)}
 .choices{display:flex;flex-direction:column;gap:10px;margin:0 0 8px}
 .choice{appearance:none;display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:52px;padding:13px 22px;text-align:left;background:var(--canvas);color:var(--ink);border:1px solid var(--hairline);border-radius:26px;font:inherit;cursor:pointer;transition:transform .12s ease}
-.choice:active{transform:scale(.98)}
-.choice.primary{justify-content:center;background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+.choice:active{transform:scale(.95)}
+.choice.primary{justify-content:center;background:var(--blue);border-color:var(--blue);color:#fff}
 .choice.selected{border:2px solid var(--focus);padding:12px 21px}
 .choice .tick{color:var(--focus);font-weight:600}
 .choices:has(.scale){display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
 .choices:has(.scale) .choice:not(.scale){grid-column:1/-1;justify-content:center}
-.map{display:flex;justify-content:center;margin:4px 0 6px}.mapbox{position:relative;display:inline-block;max-width:100%}.mapbox img{display:block;width:912px;height:auto;max-width:100%}.mapbox canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.maptip{position:absolute;transform:translate(-50%,calc(-100% - 12px));padding:5px 12px;border-radius:980px;background:var(--ink);color:#fff;font-size:14px;white-space:nowrap;pointer-events:none}.tabs{display:flex;gap:2px;width:max-content;margin:0 auto 14px;padding:3px;border-radius:980px;background:rgba(0,0,0,.06)}.tabs button{appearance:none;min-height:36px;padding:0 22px;border:0;border-radius:980px;background:transparent;color:var(--ink);font:inherit;font-size:15px;cursor:pointer}.tabs button[aria-selected=true]{background:var(--canvas);box-shadow:0 0 0 1px rgba(0,0,0,.06)}.tabs button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}.choices[hidden],#maptab[hidden]{display:none!important}.maphint{margin:0 0 12px;color:var(--muted);font-size:15px;text-align:center}#mapgo{position:sticky;bottom:12px;z-index:5;margin:0 0 14px}#mapgo:empty{display:none}main.wide{max-width:72rem}
+.map{display:flex;justify-content:center;margin:4px 0 6px}.mapbox{position:relative;display:inline-block;max-width:100%}.mapbox img{display:block;width:912px;height:auto;max-width:100%}.mapbox canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.maptip{position:absolute;transform:translate(-50%,calc(-100% - 12px));padding:5px 12px;border-radius:980px;background:var(--ink);color:#fff;font-size:14px;white-space:nowrap;pointer-events:none}.tabs{display:flex;gap:2px;width:max-content;margin:0 auto 14px;padding:3px;border-radius:980px;background:rgba(0,0,0,.06)}.tabs button{appearance:none;min-height:36px;padding:0 22px;border:0;border-radius:980px;background:transparent;color:var(--ink);font:inherit;font-size:14px;cursor:pointer}.tabs button[aria-selected=true]{background:var(--canvas);box-shadow:0 0 0 1px rgba(0,0,0,.06)}.tabs button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}.choices[hidden],#maptab[hidden]{display:none!important}.maphint{margin:0 0 10px;color:var(--ink);font-size:21px;font-weight:600;text-align:center}#mapgo{position:sticky;bottom:12px;z-index:5;margin:0 0 14px}#mapgo:empty{display:none}main.wide{max-width:72rem}
 .choices:has(.grid){display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.choices:has(.grid) .choice{min-height:48px;padding:10px 16px;font-size:15px;line-height:1.25}
+.choices:has(.grid) .choice{min-height:48px;padding:10px 16px;font-size:14px;line-height:1.29}
 @media(min-width:600px){.choices:has(.grid){grid-template-columns:repeat(3,1fr)}}
 .choice.scale{justify-content:center;min-height:52px;padding:0;border-radius:26px}
 .composer{display:flex;gap:10px;margin:0 0 8px}
 .composer input{flex:1;min-width:0;height:52px;border:1px solid var(--hairline);border-radius:26px;background:var(--canvas);color:var(--ink);font:inherit;padding:0 20px}
-.send{appearance:none;border:0;border-radius:26px;background:var(--blue);color:#fff;font:inherit;font-weight:600;padding:0 26px;height:52px;cursor:pointer}
-.send:active{transform:scale(.98)}
-.download{display:inline-flex;align-items:center;min-height:52px;margin:0 0 24px;padding:0 26px;border-radius:26px;background:var(--blue);color:#fff;font-weight:600;text-decoration:none}
+.send{appearance:none;border:0;border-radius:26px;background:var(--blue);color:#fff;font:inherit;padding:0 26px;height:52px;cursor:pointer;transition:transform .12s ease}
+.send:active,.download:active{transform:scale(.95)}
+.download{display:inline-flex;align-items:center;min-height:52px;margin:0 0 24px;padding:0 26px;border-radius:26px;background:var(--blue);color:#fff;text-decoration:none;transition:transform .12s ease}
 .choice:focus-visible,.send:focus-visible,.restart:focus-visible,.download:focus-visible,.composer input:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style></head><body>
@@ -103,7 +103,7 @@ html:lang(hi) .q{line-height:1.4;letter-spacing:0}
 <main><section id="screen" aria-live="polite"></section></main>
 <script>
 const screen=document.querySelector('#screen');
-const UI={hi:{type:'यहाँ लिखें',send:'भेजें',download:'अपना काग़ज़ डाउनलोड करें',restart:'फिर से शुरू',other:'English',otherLang:'en',brand:'योजना साथी',answers:'आपके जवाब',mapHint:'नक्शे पर अपना राज्य छुएँ।',mapGo:'आगे बढ़ें',tabMap:'नक्शा',tabList:'सूची'},en:{type:'Type your answer',send:'Send',download:'Download your sheet',restart:'Start again',other:'हिंदी',otherLang:'hi',brand:'Yojana Sathi',answers:'Your answers',mapHint:'Tap your state on the map.',mapGo:'Continue',tabMap:'Map',tabList:'List'}};
+const UI={hi:{type:'यहाँ लिखें',send:'भेजें',download:'अपना काग़ज़ डाउनलोड करें',restart:'फिर से शुरू',other:'English',otherLang:'en',brand:'योजना साथी',answers:'आपके जवाब',mapHint:'अपना राज्य चुनने के लिए नक्शे पर उसे छुएँ',mapGo:'आगे बढ़ें',tabMap:'नक्शा',tabList:'सूची'},en:{type:'Type your answer',send:'Send',download:'Download your sheet',restart:'Start again',other:'हिंदी',otherLang:'hi',brand:'Yojana Sathi',answers:'Your answers',mapHint:'Tap your state on the map to choose it',mapGo:'Continue',tabMap:'Map',tabList:'List'}};
 let current='en';
 // The one blue pill on a screen: the forward action, never an answer to a yes/no question.
 const PRIMARY=new Set(['consent_yes','pick:all','pick:done','next']);
@@ -150,7 +150,7 @@ tip.style.left=(e.clientX-r.left)+'px';tip.style.top=(e.clientY-r.top)+'px';};
 img.onmouseleave=()=>{hovered=0;paint(hover,0);tip.hidden=true;};
 img.onclick=e=>{const k=at(e);if(!k)return;const code=m.codes[k-1];paint(pick,k,[0,102,204,230]);
 go.innerHTML=`<button class="choice primary">${ui.mapGo}: ${text(nameOf(k))}</button>`;go.firstChild.onclick=()=>answer('state:'+code);};}
-function show(data){document.querySelector('main').classList.remove('wide');const ui=UI[data.lang]||UI.hi;document.documentElement.lang=data.lang==='en'?'en':'hi';document.getElementById('restart').textContent=ui.restart;current=data.lang==='hi'?'hi':'en';const sw=document.getElementById('switch');sw.textContent=ui.other;sw.lang=ui.otherLang;document.getElementById('brand').textContent=ui.brand;const last=data.replies.length-1;const hasResult=data.replies.some(r=>r.kind==='result');let out=data.replies.map((r,i)=>{if(r.kind==='recap'){const body=r.text.split('\n').slice(1).join('\n');return `<details class="recap"><summary>${ui.answers}</summary><p class="message">${text(body)}</p></details>`;}const asks=i===last&&(r.buttons?.length||r.typed);return `${r.kind==='result'?blocks(r.text,true,'q'):blocks(r.text,asks,hasResult?'q2':'q')}${r.map?`<div id="maptab"><div class="map" id="map"></div><p class="maphint">${ui.mapHint}</p><div id="mapgo"></div></div>`:''}${r.buttons?.length?`<div class="choices"${r.map?' hidden':''}>${r.buttons.map(button).join('')}</div>`:''}${r.document?`<a class="download" href="${r.document}" download>${ui.download}</a>`:''}`;}).join('');const typed=!!(data.replies[last]&&data.replies[last].typed);if(typed)out+=`<form class="composer"><input name="answer" aria-label="${ui.type}" autocomplete="off" inputmode="text" placeholder="${ui.type}"><button class="send">${ui.send}</button></form>`;screen.innerHTML=out;window.scrollTo({top:0});screen.querySelectorAll('.choice').forEach(b=>b.onclick=()=>answer(decodeURIComponent(b.dataset.value)));drawMap(ui);const form=screen.querySelector('form');if(form){form.onsubmit=e=>{e.preventDefault();const input=e.currentTarget.answer;if(input.value.trim()){answer(input.value);input.value='';}};form.answer.focus();}}
+function show(data){document.querySelector('main').classList.remove('wide');const ui=UI[data.lang]||UI.hi;document.documentElement.lang=data.lang==='en'?'en':'hi';document.getElementById('restart').textContent=ui.restart;current=data.lang==='hi'?'hi':'en';const sw=document.getElementById('switch');sw.textContent=ui.other;sw.lang=ui.otherLang;document.getElementById('brand').textContent=ui.brand;const last=data.replies.length-1;const hasResult=data.replies.some(r=>r.kind==='result');let out=data.replies.map((r,i)=>{if(r.kind==='recap'){const body=r.text.split('\n').slice(1).join('\n');return `<details class="recap"><summary>${ui.answers}</summary><p class="message">${text(body)}</p></details>`;}const asks=i===last&&(r.buttons?.length||r.typed);return `${r.kind==='result'?blocks(r.text,true,'q'):blocks(r.text,asks,hasResult?'q2':'q')}${r.map?`<div id="maptab"><p class="maphint">${ui.mapHint}</p><div class="map" id="map"></div><div id="mapgo"></div></div>`:''}${r.buttons?.length?`<div class="choices"${r.map?' hidden':''}>${r.buttons.map(button).join('')}</div>`:''}${r.document?`<a class="download" href="${r.document}" download>${ui.download}</a>`:''}`;}).join('');const typed=!!(data.replies[last]&&data.replies[last].typed);if(typed)out+=`<form class="composer"><input name="answer" aria-label="${ui.type}" autocomplete="off" inputmode="text" placeholder="${ui.type}"><button class="send">${ui.send}</button></form>`;screen.innerHTML=out;window.scrollTo({top:0});screen.querySelectorAll('.choice').forEach(b=>b.onclick=()=>answer(decodeURIComponent(b.dataset.value)));drawMap(ui);const form=screen.querySelector('form');if(form){form.onsubmit=e=>{e.preventDefault();const input=e.currentTarget.answer;if(input.value.trim()){answer(input.value);input.value='';}};form.answer.focus();}}
 const START=(()=>{const src=new URLSearchParams(location.search).get('start')||'';return /^[a-z]{1,20}$/.test(src)?'/start '+src:'/start';})();
 function oops(){screen.innerHTML=`<h2 class="q">${text('कुछ गड़बड़ हो गई।\nSomething went wrong.')}</h2><div class="choices"><button class="choice primary" onclick="restart()">फिर से शुरू · Start again</button></div>`;}
 async function answer(value){try{const r=await fetch('/answer',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({answer:value})});const data=await r.json().catch(()=>null);if(data&&Array.isArray(data.replies)){show(data);}else{oops();}}catch(e){oops();}}

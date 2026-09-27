@@ -19,14 +19,15 @@ No token, nothing sent. `--no-db` keeps these sessions out of the impact numbers
 
 ## The golden path.
 
-Type the number of the button. Only age is typed as a value. Re-run against the current flow on **26 September 2026**, in both languages — the same numbers work in each.
+Type the number of the button. Only age is typed as a value. Re-run against the current flow on **27 September 2026**.
 
 | Prompt | Type | Meaning |
 |---|---|---|
 | Language | `2` | English (`1` for Hindi) |
-| Consent | `1` | Agree, for this fictional demo |
-| All or choose | `1` | All signed schemes |
+| Consent | `1` | Start, for this fictional demo |
 | State | `1` | Uttarakhand |
+| Which schemes | `3` | Both — national and Uttarakhand |
+| Pick from list | `9` | All of these |
 | Age | `30` | Typed — the only question without buttons |
 | Income | `2` | Up to ₹5,000 a month |
 | Bank account | `1` | Yes |
@@ -37,8 +38,10 @@ Type the number of the button. Only age is typed as a value. Re-run against the 
 | Are you a woman? | `2` | No — skips the widow and Ujjwala questions |
 | BPL household | `2` | No |
 | Shop / trade | `2` | No |
+| Traditional trade | `2` | No |
+| State pension income | `2` | No |
 | Schemes already held | `9` | None |
-| Papers you have | `1`, `4`, `8` | Aadhaar, bank passbook, Next |
+| Papers you have | `1`, `4`, `10` | Aadhaar, bank passbook, Next |
 | Sheet | `1` | Yes |
 | Rating | `8` | Typed |
 | Suggestion | `1` | Skip |
@@ -48,18 +51,16 @@ Type the number of the button. Only age is typed as a value. Re-run against the 
 **Expect:**
 
 - A recap of only the questions that were asked.
-- **Four matches:** PMJJBY, PMSBY, PM-SYM, e-Shram.
-- **"You pay"** on each scheme that costs money: ₹436 a year, ₹20 a year, and for PM-SYM a line pointing to the centre (English) or ₹55–₹200 a month (Hindi).
-- A pension total that says each pension starts at its own age.
-- The schemes that don't fit, by name. Their reasons are on the sheet.
+- **Five matches:** PMJJBY, PMSBY, PM-SYM, APY, e-Shram.
+- **"You pay"** on each scheme that costs money: ₹436 a year, ₹20 a year, and for the two age-based pensions a line pointing to the centre (English) or the amount by age (Hindi).
+- Pensions together about ₹48,000 a year, each from the age on its line. Cover up to ₹4,00,000, on its own line.
+- "10 other schemes are not for you now" — names and reasons are on the sheet.
 
 <br>
 
 ## Show `UNKNOWN` on purpose.
 
-Answer **Don't know** (`3`) to income tax. e-Shram and PM-SYM come back as "can't be sure", with the missing fact named: *income tax*.
-
-**Don't type a state name** at the "all or choose" screen. It opens an old full route that screens the unsigned drafts as `UNKNOWN` and asks occupation, land and household size — which no button route does.
+Answer **Don't know** (`3`) to income tax. e-Shram, PM-SYM and APY come back as "can't be sure", with the missing fact named: *income tax*.
 
 <br>
 
@@ -68,7 +69,7 @@ Answer **Don't know** (`3`) to income tax. e-Shram and PM-SYM come back as "can'
 | Segment | Show | Say |
 |---|---|---|
 | Problem · 20 s | The README's problem figures | "India's unorganised sector had an estimated 43.99 crore workers in 2019–20. That is the population context, not our user count." |
-| The worker · 45 s | The Hindi golden path, repetitive steps sped up openly | "Hindi or English, consent, short questions. Buttons work without a language model. EPFO/ESIC and NPS are asked separately because schemes treat them differently. The recap shows what was recorded." |
+| The worker · 45 s | The Hindi golden path, repetitive steps sped up openly | "Hindi or English, consent, then her state and which schemes, then short questions. Buttons work without a language model. EPFO/ESIC and NPS are asked separately because schemes treat them differently. The recap shows what was recorded." |
 | Safety · 30 s | A "don't know" giving `UNKNOWN`, then `verified_by` in `data/schemes/` | "Compute first, narrate second. The rules decide, never the model. A missing answer stays unknown instead of becoming a guess. Until a named person signs a scheme, the engine won't say yes at all." |
 | Sources · 30 s | One official link from a scheme file, `data/sources/official-text/`, `python3 -m sathi.sources` | "Every value traces to an official page, and the page is in the repository. This command re-reads the live pages and tells us the day a ministry changes a number. The sheet helps an application; it is not an approved one." |
 | Channels and privacy · 25 s | The English WhatsApp preview, the architecture diagram | "Both channels run the same conversation and rules. Preview sends nothing and records nothing. Live metrics use coarse bands and random session ids — the platforms still see accounts and messages. This is not an anonymity claim." |

@@ -7,8 +7,8 @@
 <h3 align="center">Know before you go.</h3>
 
 <p align="center">
-  A Hindi and English conversation that tells an unorganised worker<br>
-  which government schemes fit, what each is worth in ₹, and where to go to claim it.
+  A Hindi and English chat that tells an unorganised worker<br>
+  which government schemes fit, what each is worth in ₹, and where to go.
 </p>
 
 <p align="center">
@@ -31,7 +31,7 @@
 
 ## One wrong trip costs a day's wage.
 
-The schemes already exist. What a worker can't tell from outside is whether one will accept them.
+The schemes exist. What a worker can't tell from outside is whether one will accept them.
 
 | | |
 |---|---|
@@ -39,77 +39,81 @@ The schemes already exist. What a worker can't tell from outside is whether one 
 | **31.48 crore** | registered on e-Shram, with 14 central schemes mapped to it[^2] |
 | **₹455 · ₹315** | a day, average earnings of a male · female casual labourer, 2025[^3] |
 
-A failed trip to a Common Service Centre costs that day's wage. Often, there is no second trip.
+A wasted trip to a Common Service Centre costs that day's wage. Often there is no second trip.
 
 <br>
 
 ## Not another myScheme. The last mile after it.
 
-myScheme and UMANG publish the schemes and match eligibility. myScheme is a form — available in Hindi, but still a form. It assumes literacy, a browser, and someone who knows what "land holding in hectares" means.
+myScheme is a form. It assumes literacy, a browser, and knowing what "land holding in hectares" means.
 
-Yojana Sathi is a conversation on a ₹6,000 phone that ends in a checklist and an address.
+Yojana Sathi is a chat on a ₹6,000 phone that ends in a checklist and an address.
 
 <br>
 
 ## How it works.
 
-1. **Where.** Your state first — any of the 36 states and union territories, on a clickable map in the browser or on buttons in chat.
-2. **Choose.** National schemes, your state's, or both. Then tick the ones you care about, or "All of these". Another state's pensions are never listed.
-3. **Answer.** Only the questions those schemes need. Buttons for everything except age. "Don't know" is always allowed.
+1. **Where.** Your state first — any of 36, on a map in the browser or buttons in chat.
+2. **Choose.** National schemes, your state's, or both. Tick some, or "All of these".
+3. **Answer.** Only what those schemes need. "Don't know" is always allowed.
 4. **Decide.** Plain rule files with cited sources. Same answers, same verdict.
-5. **Walk in.** What you get, what it costs, what to carry, where to go — and a one-page sheet to show at the centre.
+5. **Walk in.** What you get, what it costs, what to carry, where to go — and a one-page sheet.
 
 <p align="center">
   <img src="livesite/assets/core-logic.svg" width="760" alt="The core flow: open the bot, pick a language, consent, give your state, choose national, state or both, tick schemes or all, answer only the needed questions, get eligible, ineligible or unknown verdicts from human-signed rules, then the reasons, a checklist, a sheet and where to go.">
 </p>
 
-<p align="center"><sub>Every module and what it calls: <a href="livesite/assets/system-architecture.png">code map</a> · <a href="docs/ARCHITECTURE.md">architecture notes</a></sub></p>
+<p align="center"><sub><a href="livesite/assets/system-architecture.png">Code map</a> · <a href="docs/ARCHITECTURE.md">Architecture notes</a></sub></p>
 
 <br>
 
 ## The rules decide. A model never does.
 
-- **Rules are plain text.** One TOML file per scheme in [`data/schemes/`](data/schemes/), readable without knowing Python.
-- **Every value is cited.** Each links to the official page it came from, with the date it was checked.
-- **Gaps stay gaps.** An unresearched value is the string `"TODO"`, never `0`, and the engine answers `UNKNOWN` instead of guessing.
-- **Three verdicts.** `ELIGIBLE`, `INELIGIBLE`, `UNKNOWN`. Unknown says what's missing and what to ask at the centre.
-- **The model is optional.** It may suggest an occupation for the worker to confirm. No signed scheme asks occupation, so in normal use it is never called. It never sees a threshold, a ₹ figure or a verdict.
-- **No key, same answers.** With `LLM_API_KEY` unset, everything runs on buttons with identical results. That is tested, not degraded.
-- **Hindi and English agree.** Only the words change. A test asserts the verdicts are identical.
+- **Rules are plain text.** One TOML file per scheme in [`data/schemes/`](data/schemes/).
+- **Every value is cited** — the official page, and the date it was checked.
+- **Gaps stay gaps.** An unresearched value is `"TODO"`, never `0`. The answer is `UNKNOWN`, not a guess.
+- **Three verdicts.** `ELIGIBLE`, `INELIGIBLE`, `UNKNOWN`. Unknown says what's missing and what to ask.
+- **The model is optional.** It may suggest an occupation for the worker to confirm. It never sees a threshold, a ₹ figure or a verdict.
+- **No key, same answers.** Without `LLM_API_KEY` everything runs on buttons, with identical results. Tested.
+- **Hindi and English agree.** Only the words change. A test holds the verdicts identical.
 
 <br>
 
 ## Twenty-one schemes. Each signed by a person.
 
-| Scheme | Stated benefit | Where to apply |
+**National — every state (13)**
+
+| Scheme | Stated benefit | Where |
 |---|---|---|
-| PM Shram Yogi Maandhan | ₹36,000 a year from age 60 | Common Service Centre |
-| National Pension Scheme for Traders | ₹36,000 a year from age 60 | Common Service Centre |
-| Uttarakhand old-age pension | ₹18,000 a year | State portal |
-| Uttarakhand widow pension | ₹18,000 a year (GO 40, 21 April 2022) | State portal |
-| Sikkim old-age pension | ₹18,000 a year; ₹24,000 from 70; ₹30,000 from 80 | State pension portal |
-| Sikkim widow pension | ₹24,000 a year, from age 21 | State pension portal |
-| Sikkim disability pension | ₹24,000 a year | State pension portal |
-| Madhya Pradesh Kalyani (widow) pension | ₹7,200 a year, ages 18–79 | Panchayat or municipal office |
-| Punjab old-age pension (women 58+, men 65+; two rule files) | ₹18,000 a year | Panchayat, block or municipal office |
-| Indira Gandhi National Old Age Pension | ₹2,400 a year central share; ₹6,000 from 80 | Common Service Centre |
-| Indira Gandhi National Widow Pension | ₹3,600 a year central share; ₹6,000 from 80 | Common Service Centre |
-| Indira Gandhi National Disability Pension | ₹3,600 a year central share; ₹6,000 from 80 | Common Service Centre |
-| PM Jeevan Jyoti Bima Yojana | ₹2,00,000 life cover | Bank branch |
-| PM Suraksha Bima Yojana | ₹2,00,000 accident cover | Bank branch |
-| PM Ujjwala Yojana | In-kind LPG support | Online or an LPG distributor |
-| e-Shram registration | Gateway — no payout of its own | e-Shram portal or a CSC |
-| Jan Dhan bank account (PMJDY) | Gateway — free account, RuPay card with ₹2 lakh accident cover | Bank branch or Bank Mitra |
-| Ayushman Bharat PM-JAY, age 70+ | ₹5,00,000 hospital cover a year | Ayushman app, beneficiary portal or empanelled hospital |
-| PM Vishwakarma | Toolkit up to ₹15,000 (e-vouchers), training stipend ₹500 a day | Common Service Centre |
-| Atal Pension Yojana | ₹12,000 a year from 60 at the smallest tier (₹1,000–₹5,000 a month) | Bank branch |
+| PM Shram Yogi Maandhan | ₹36,000 a year from 60 | CSC |
+| National Pension Scheme for Traders | ₹36,000 a year from 60 | CSC |
+| Atal Pension Yojana | From ₹12,000 a year at 60 | Bank |
+| Indira Gandhi National Old Age Pension | ₹2,400 a year (central share); ₹6,000 from 80 | CSC |
+| Indira Gandhi National Widow Pension | ₹3,600 a year (central share); ₹6,000 from 80 | CSC |
+| Indira Gandhi National Disability Pension | ₹3,600 a year (central share); ₹6,000 from 80 | CSC |
+| PM Jeevan Jyoti Bima Yojana | ₹2,00,000 life cover | Bank |
+| PM Suraksha Bima Yojana | ₹2,00,000 accident cover | Bank |
+| Ayushman Bharat PM-JAY, 70+ | ₹5,00,000 hospital cover a year | Ayushman app or hospital |
+| PM Vishwakarma | Toolkit up to ₹15,000; ₹500 a day in training | CSC |
+| PM Ujjwala Yojana | LPG connection | Online or LPG distributor |
+| Jan Dhan account (PMJDY) | Free account, RuPay card | Bank or Bank Mitra |
+| e-Shram registration | Gateway to other schemes | e-Shram portal or CSC |
 
-- **Thirteen national, eight state.** The national schemes apply in every state. State pensions are listed only for people in that state, and each replaces the national central-share figure rather than being added to it.
-- **The signature is enforced.** Until a named person signs a file, every worker gets `UNKNOWN` for it and it adds ₹0 to every total. [`tests/test_schemes.py`](tests/test_schemes.py) pins the signed list.
-- **Two drafts are not served:** state-rate pensions for Tamil Nadu and Mizoram. No official page lists their documents. The Uttarakhand widow pension was withdrawn on 15 September, when its rate rested on myScheme alone. It was re-signed on 27 September against the state's own order. [Why](data/schemes/uk_widow.toml).
-- **Overlapping pensions are never added.** Two routes to the same pension show the larger, once.
+**State pensions — shown only in that state (8)**
 
-What could and could not be verified: [`docs/history/SOURCE_REVIEW_2026-09-09.md`](docs/history/SOURCE_REVIEW_2026-09-09.md). Every official page behind the 27 September additions, with its SHA-256: [`docs/audit-evidence/`](docs/audit-evidence/README.md). Research on all 36 states: [`docs/research/states/`](docs/research/states/README.md).
+| Scheme | Stated benefit | Where |
+|---|---|---|
+| Uttarakhand old-age / widow | ₹18,000 a year each | State portal |
+| Sikkim old-age | ₹18,000 a year; ₹24,000 from 70; ₹30,000 from 80 | State portal |
+| Sikkim widow / disability | ₹24,000 a year each | State portal |
+| Madhya Pradesh Kalyani (widows 18–79) | ₹7,200 a year | Panchayat or municipal office |
+| Punjab old-age (women 58+, men 65+) | ₹18,000 a year | Panchayat, block or municipal office |
+
+- **Never added twice.** A state pension replaces the national central share. Two routes to one pension show the larger, once.
+- **The signature is enforced.** An unsigned file answers `UNKNOWN` and adds ₹0. [`tests/test_schemes.py`](tests/test_schemes.py) pins the signed list.
+- **Not served:** Tamil Nadu and Mizoram drafts — no official page lists their documents.
+
+Evidence for every value, with SHA-256: [`docs/audit-evidence/`](docs/audit-evidence/README.md). Research on all 36 states: [`docs/research/states/`](docs/research/states/README.md).
 
 <br>
 
@@ -117,11 +121,11 @@ What could and could not be verified: [`docs/history/SOURCE_REVIEW_2026-09-09.md
 
 | | |
 |---|---|
-| **Browser** | Live at [sathi.avinashnegi.com](https://sathi.avinashnegi.com). No account, no app. |
-| **Telegram** | Live at [@YojanaSathiBot](https://t.me/YojanaSathiBot). |
-| **WhatsApp** | Built and verified end to end on Meta's test number. Not on a public number yet. |
+| **Browser** | [sathi.avinashnegi.com](https://sathi.avinashnegi.com). No account, no app. |
+| **Telegram** | [@YojanaSathiBot](https://t.me/YojanaSathiBot). |
+| **WhatsApp** | Verified end to end on Meta's test number. Not public yet. |
 
-One small AWS server, one rule engine behind all three. The landing page is [`livesite/`](livesite/), published by GitHub Pages.
+One small AWS server, one rule engine behind all three. The landing page is [`livesite/`](livesite/), on GitHub Pages.
 
 <br>
 
@@ -132,25 +136,25 @@ One small AWS server, one rule engine behind all three. The landing page is [`li
      ! "potential reach". If a number is not in the event log it does not go on
      ! this page. -->
 
-No field pilot has run, so there are no impact numbers here. This section is filled from the event log after a real pilot — never from an estimate or a "potential reach".
+No field pilot has run, so there are no numbers here. They come from the event log after a real pilot — never from an estimate.
 
-- **Pilot screenings are counted apart.** They arrive through `?start=csc` links and are reported with `python3 -m sathi.metrics.report --cohort csc`. Terminal test runs are left out by default.
-- **Two ₹ figures, never one.** A yearly pension and an insurance cover are different kinds of money. Adding them would overstate what a worker receives about six times.
-- **"Entitlement surfaced", never "money delivered".** A figure is what a scheme states it pays, not what anyone has received.
-- **Browser sessions are not counted as people.** A cookie is a routing key, not an identity.
+- **Pilot screenings are counted apart** — `?start=csc` links, reported with `python3 -m sathi.metrics.report --cohort csc`.
+- **Two ₹ figures, never one.** A pension and an insurance cover are different money. Adding them would overstate about six times.
+- **"Entitlement surfaced", never "money delivered".**
+- **A browser session is not a person.** A cookie is a routing key, not an identity.
 
-The pilot plan: [`docs/PILOT_PLAN.md`](docs/PILOT_PLAN.md). What each number does not claim: [`docs/IMPACT.md`](docs/IMPACT.md).
+[Pilot plan](docs/PILOT_PLAN.md) · [What each number does not claim](docs/IMPACT.md)
 
 <br>
 
 ## Private by design.
 
-- **No name, phone or Aadhaar field exists**, so none can be stored by accident.
-- **The profile lives in memory for one session.** It is gone when the screening ends, on `/cancel`, or after 30 quiet minutes.
-- **The log keeps coarse bands only** — state, age band, income band, rarely occupation — plus the channel and, after consent, the arrival link's tag. All under a random session id that is not derived from any account. On the dashboard, breakdown rows under 5 sessions are hidden.
+- **No name, phone or Aadhaar field exists**, so none can be stored.
+- **The profile lives in memory for one session** — gone at the end, on `/cancel`, or after 30 quiet minutes.
+- **The log keeps coarse bands only**, under a random session id not derived from any account. Dashboard rows under 5 sessions are hidden.
 - **The optional suggestion** is stored with digit runs removed, and with no session id.
 
-[`tests/test_privacy.py`](tests/test_privacy.py) drives every event through the log and checks what survived, column by column.
+[`tests/test_privacy.py`](tests/test_privacy.py) checks what reaches the log, column by column.
 
 <br>
 
@@ -164,7 +168,7 @@ python3 -m sathi.local_web    # the browser version on http://127.0.0.1:8765
 python3 -m sathi.main         # one screening in the terminal
 ```
 
-Python 3.11 or newer. **Zero third-party dependencies** — not in the app, not in the tests.
+Python 3.11+. **Zero third-party dependencies.**
 
 <details>
 <summary><b>More ways to run it</b></summary>
@@ -175,26 +179,24 @@ Python 3.11 or newer. **Zero third-party dependencies** — not in the app, not 
 python3 -m sathi.main --telegram            # the bot (needs TELEGRAM_TOKEN)
 python3 -m sathi.main --whatsapp            # the webhook (needs WHATSAPP_*, behind TLS)
 python3 -m sathi.main --preview whatsapp    # what the wire would carry; nothing is sent
-python3 -m sathi.metrics.report --out impact.html                              # impact dashboard (reads DB_PATH)
+python3 -m sathi.metrics.report --out impact.html                                  # impact dashboard
 python3 -m sathi.metrics.report --cohort csc --since 2026-10-01 --out pilot.html   # pilot only
 ```
 
-As a container:
+As a container — `DB_PATH` must be on a mounted volume, or the event log is lost:
 
 ```bash
 docker build -t scheme-sathi .
 docker run -e TELEGRAM_TOKEN=... -v sathi-data:/data scheme-sathi
 ```
 
-`DB_PATH` must point at a mounted volume. A container that loses its disk loses the event log, and every impact number with it.
-
-Optional settings, all off by default and all tested off:
+Optional, off by default, tested off:
 
 | Variable | When set |
 |---|---|
-| `LLM_API_KEY` | Free-text occupation is mapped to a category, always confirmed by the worker. Verdicts are unchanged. |
-| `TTS_CMD` | **Not wired yet.** No channel sends audio; setting it only changes the startup line. |
-| `FOLLOWUP_SALT` | Records opt-ins for a 14-day follow-up as a salted hash. **The sender is not built.** Leave unset. |
+| `LLM_API_KEY` | Free-text occupation mapped to a category, always confirmed. Verdicts unchanged. |
+| `TTS_CMD` | **Not wired yet.** No channel sends audio. |
+| `FOLLOWUP_SALT` | Records 14-day follow-up opt-ins as a salted hash. **No sender yet.** Leave unset. |
 
 Deploying: [`deploy/RUNBOOK.md`](deploy/RUNBOOK.md).
 
@@ -208,15 +210,14 @@ Deploying: [`deploy/RUNBOOK.md`](deploy/RUNBOOK.md).
 | Command | What it does |
 |---|---|
 | `/start` | Begin, or start over |
-| `/language` | Switch हिंदी ↔ English, keeping answers already given |
-| `/schemes` | Every scheme, its official source, and when it was checked |
-| `/privacy` | What is stored, what is never asked |
-| `/about` | What this is — and that it is not a government service |
+| `/language` | Switch हिंदी ↔ English, keeping answers |
+| `/schemes` | Every scheme, its source, when it was checked |
+| `/privacy` | What is kept, what is never asked |
+| `/about` | What this is — not a government service |
 | `/help` | The command list |
-| `/clear` | Delete this conversation's messages |
-| `/clearall` | Delete everything reachable from the last 48 hours |
-| `/cancel` | Drop the profile now and end |
-| `/demo` | Fictional people run through the real rules. Labelled a demo, logs nothing. |
+| `/clear` · `/clearall` | Delete this chat's messages · everything from 48 hours |
+| `/cancel` | Drop the profile and end |
+| `/demo` | Fictional people through the real rules. Logs nothing. |
 
 </details>
 
@@ -224,11 +225,11 @@ Deploying: [`deploy/RUNBOOK.md`](deploy/RUNBOOK.md).
 
 ## Tested like it matters.
 
-`python3 check.py` runs 21 module self-checks and 15 test files. No framework, nothing to install.
+`python3 check.py` — 21 module self-checks and 15 test files. No framework.
 
-- **Every button.** [`tests/test_all_paths.py`](tests/test_all_paths.py) presses every button at every screen in both languages — 9,860 paths — and opens every sheet it produces.
-- **Every boundary.** [`tests/test_rule_boundaries.py`](tests/test_rule_boundaries.py) re-encodes each rule from the official text and compares 1,377,810 verdicts, plus 22,248 combinations of each signed scheme's own fields. It proves two encodings agree, not that either matches the law. The signature covers that.
-- **Every column.** [`tests/test_privacy.py`](tests/test_privacy.py), above.
+- **Every button.** [`tests/test_all_paths.py`](tests/test_all_paths.py) presses every button on every screen in both languages — 9,840 paths — and opens every sheet.
+- **Every boundary.** [`tests/test_rule_boundaries.py`](tests/test_rule_boundaries.py) re-encodes each rule from the official text and checks 3,168,963 verdicts, plus 371,283 for each signed scheme's own fields. It proves two encodings agree; the signature covers the law.
+- **Every column.** [`tests/test_privacy.py`](tests/test_privacy.py).
 
 <br>
 
@@ -239,17 +240,17 @@ python3 -m sathi.review PMJJBY    # sign a scheme off, value by value
 python3 -m sathi.sources          # has a ministry changed a number?
 ```
 
-**Review** shows every value beside the page it came from, then writes exactly two lines. A signature can never carry a changed threshold in with it. `--unsign` reverses it.
+**Review** shows every value beside its source, then writes two lines. A signature can't carry a changed threshold in with it. `--unsign` reverses it.
 
-**Sources** re-reads the official pages on demand and flags what changed. The three national pension pages can't be watched this way and need a monthly re-read by hand — [the list](data/sources/official-text/README.md).
+**Sources** re-reads the official pages and flags changes. Three national pension pages need a monthly read by hand — [the list](data/sources/official-text/README.md).
 
 <br>
 
 ## How it was built.
 
 - [The build story](https://avinashnegi.com/blog/scheme-sathi/) — built with AI, checked by hand.
-- [`docs/README.md`](docs/README.md) — which documents are current. Start here before quoting any.
-- [`docs/LESSONS.md`](docs/LESSONS.md) — ten lessons, including the ones that cost something.
+- [`docs/README.md`](docs/README.md) — which documents are current.
+- [`docs/LESSONS.md`](docs/LESSONS.md) — ten lessons, including the costly ones.
 - [`docs/history/BUILD_LOG.md`](docs/history/BUILD_LOG.md) — every bug, every number that turned out wrong.
 - [`AUDIT.md`](AUDIT.md) — the latest audit, and what was fixed.
 
@@ -257,9 +258,9 @@ python3 -m sathi.sources          # has a ministry changed a number?
 
 ## Add a scheme.
 
-No Python needed. Copy [`data/schemes/_TEMPLATE.toml`](data/schemes/_TEMPLATE.toml), fill it from official sources, and cite every value — see [`docs/SCHEME_AUTHORING.md`](docs/SCHEME_AUTHORING.md).
+No Python needed. Copy [`data/schemes/_TEMPLATE.toml`](data/schemes/_TEMPLATE.toml), fill it from official sources, cite every value — see [`docs/SCHEME_AUTHORING.md`](docs/SCHEME_AUTHORING.md).
 
-Values without a `source_url` and `verified_on` are not merged. An uncited threshold looks exactly like a guessed one, and a guess costs a worker a day's wage.
+A value without `source_url` and `verified_on` is not merged. An uncited threshold looks exactly like a guess.
 
 <br>
 

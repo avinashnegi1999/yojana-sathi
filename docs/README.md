@@ -21,6 +21,7 @@ Kept in step with the code.
 | [`../AUDIT.md`](../AUDIT.md) | The latest audit, its re-check, and the fixes |
 | [`../deploy/RUNBOOK.md`](../deploy/RUNBOOK.md) | How the live server is built, updated and checked |
 | [`audit-evidence/`](audit-evidence/README.md) | The documents each signature was checked against |
+| [`research/states/`](research/states/README.md) | Official state schemes for all 36 states and UTs — notes, not signed |
 | [`design/apple/DESIGN.md`](design/apple/DESIGN.md) | The design language for the chat, the sheet and the site |
 
 <br>

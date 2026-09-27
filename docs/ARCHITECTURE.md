@@ -25,7 +25,7 @@ metrics/        SQLite event log — counts and coarse bands only
 
 - **`evaluate(profile, scheme)` is a pure function.** No I/O, no clock, no network. Same inputs, same output — testable with a plain table, and defensible when someone asks how a result was reached.
 - **The model has one job:** suggest an occupation category for free text, which the worker confirms before it's recorded. It doesn't drive the conversation or rephrase anything.
-- **In normal use it's never called.** No signed scheme has an occupation rule, so the selected-scheme flow never asks occupation. Only a typed state name at the "all or choose" screen reaches the old full route that does.
+- **In normal use it's never called.** No signed scheme asks occupation, and the state-first route never reaches the old full intake that does.
 - **It never sees** a threshold, a ₹ figure or a verdict.
 - **With `LLM_API_KEY` unset,** everything runs on buttons and templated text with identical results. A tested configuration, not a degraded one.
 
@@ -51,7 +51,8 @@ metrics/        SQLite event log — counts and coarse bands only
 - **Computed once, then narrated.** `flow.py` calls `evaluate_all()` once. The result text, checklist and sheet all read that same tuple. Nothing re-decides.
 - **"Don't know" is an answer.** It leaves the field unset, which gives `UNKNOWN` plus a question to ask at the centre. Forcing yes or no would manufacture a fact.
 - **Selection changes questions, never rules.** `flow.py` asks only the fields the chosen schemes' criteria and exclusions touch, then passes those schemes unchanged to the engine. A dependency may skip an irrelevant question; it never invents a fact.
-- **State first, then the group, then the list** (since 27 Sep 2026, every channel). After consent the worker picks her state — all 36 states and UTs; the browser adds a clickable map, chat channels page the list 8 at a time. She then picks national schemes, her state's, or both, and ticks schemes or "All of these". A state with no signed scheme skips the group question and shows the national list with a line saying so. Another state's schemes are never listed. The older scheme-first order (`Conversation(state_first=False)`) is kept only because it is the one route to the full intake — occupation, land, family — which no signed scheme needs; `tests/test_flow.py` walks it, `tests/test_all_paths.py` walks the default.
+- **State first, then the group, then the list** (every channel, since 27 Sep 2026). State: all 36, a map on the web, 8 per page in chat. Group: national, her state's, or both — skipped, with a line saying so, when her state has no signed scheme. List: tick some, or "All of these", numbered across pages. Another state's schemes are never listed.
+- **The scheme-first order survives only for restored chats** (`Conversation(state_first=False)`). It is the one route to the full intake — occupation, land, family — which no signed scheme needs. `tests/test_flow.py` walks it; `tests/test_all_paths.py` walks the default.
 - **A rejected model guess is discarded,** not softened. The confirmation step is the whole guard.
 - **Age is typed.** Every other question has buttons (state also accepts typing). A keypad beats 120 buttons, and a band would lose the exact boundary a rule needs — 40 versus 41.
 - **The recap shows only what was asked.** It used to print "you did not say" for every skipped question.
@@ -153,7 +154,7 @@ Handled in the adapter, not the flow. The flow exposes plain methods (`info`, `s
 
 | File | Proves |
 |---|---|
-| `tests/test_rule_boundaries.py` | The **answers** are right: a separately written version of each scheme's official rules, compared over 1,377,810 shared-field combinations, then per signed scheme over every combination of its own fields (each must reach `ELIGIBLE`), then each named threshold one per line. |
+| `tests/test_rule_boundaries.py` | The **answers** are right: a separately written version of each scheme's official rules, compared over 3,168,963 shared-field combinations, then per signed scheme over every combination of its own fields (each must reach `ELIGIBLE`), then each named threshold one per line. |
 | `tests/test_rules.py` | `(profile, scheme) → verdict` tables, every `UNKNOWN` path, and that importing `sathi.rules` pulls in no model and no HTTP client. |
 | `tests/test_privacy.py` | Every event type goes through the log; only coarse columns survive, nothing is written before consent, and one channel id gives unlinkable sessions. |
 | `tests/test_flow.py` | Full sessions with no model key: eligible, ineligible, excluded, "don't know", declined consent, the sheet, and a restart-survival check followed by a dashboard render. |
@@ -172,7 +173,7 @@ Handled in the adapter, not the flow. The flow exposes plain methods (`info`, `s
 | `sathi/rules/operators.py` | The eight operators, three-valued (`True` / `False` / `None`) |
 | `sathi/rules/engine.py` | `evaluate()` — the only place eligibility is decided |
 | `sathi/conversation/consent.py` | The consent screen |
-| `sathi/conversation/flow.py` | Intake state machine, selected-scheme planner, question order, `known_schemes` |
+| `sathi/conversation/flow.py` | Intake state machine: state first, scheme group and list, question order, `known_schemes` |
 | `sathi/render/templates.py` | Result → Hindi or English, from authored strings only |
 | `sathi/render/llm.py` | Optional: free text → occupation proposal (the only model call) |
 | `sathi/render/audio.py` | TTS through `TTS_CMD` — **not called by any channel yet** |

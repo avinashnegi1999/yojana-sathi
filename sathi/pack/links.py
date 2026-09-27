@@ -144,11 +144,15 @@ def _expired_page() -> bytes:
         "<meta name='viewport' content='width=device-width,initial-scale=1'>"
         "<meta name='robots' content='noindex'>"
         "<title>" + html.escape(_s("link.expired_title", "en")) + "</title><style>"
-        "body{font-family:system-ui,'Noto Sans Devanagari',sans-serif;line-height:1.7;"
-        "max-width:34rem;margin:2rem auto;padding:0 1rem;color:#111}"
-        "h1{font-size:1.25rem}section+section{border-top:1px solid #ccc;margin-top:2rem;"
-        "padding-top:1rem}a{color:#2d5016}"
-        "</style></head><body>" + "".join(blocks) + "</body></html>"
+        # * Apple design language, as on every other page: parchment, near-black
+        # * ink, Action Blue for the one action, system fonts.
+        "body{margin:0;background:#f5f5f7;color:#1d1d1f;font:400 17px/1.47 system-ui,"
+        "-apple-system,'Segoe UI',Roboto,'Noto Sans Devanagari',sans-serif}"
+        "main{max-width:34rem;margin:0 auto;padding:48px 16px}"
+        "section{background:#fff;border:1px solid #e0e0e0;border-radius:18px;padding:24px;"
+        "margin:0 0 16px}h1{margin:0 0 8px;font-size:21px;font-weight:600;line-height:1.24}"
+        "p{margin:0 0 12px;color:#333}a{color:#0066cc;text-decoration:none}"
+        "</style></head><body><main>" + "".join(blocks) + "</main></body></html>"
     ).encode("utf-8")
 
 

@@ -35,11 +35,11 @@ body{margin:0;background:var(--parchment);color:var(--ink);font:400 17px/1.47 sy
 html[lang=hi] body{line-height:1.6}
 main{max-width:44rem;margin:0 auto;padding:40px 16px 64px}
 .brand{margin:0;color:var(--muted);font-size:14px}
-h1{margin:6px 0 6px;font-size:32px;font-weight:600;line-height:1.2;letter-spacing:-.01em}
+h1{margin:6px 0 6px;font-size:34px;font-weight:600;line-height:1.1;letter-spacing:0}
 .sub{margin:0 0 28px;color:var(--muted)}
 .card{background:var(--canvas);border:1px solid var(--hairline);border-radius:18px;padding:20px 22px;margin:0 0 14px;break-inside:avoid}
 h2{margin:0 0 10px;font-size:19px;font-weight:600;line-height:1.35}
-.tag{display:inline-block;margin-left:6px;padding:1px 10px;border-radius:999px;background:#e8f1fb;color:var(--blue);font-size:13px;font-weight:600;vertical-align:middle}
+.tag{display:inline-block;margin-left:6px;padding:1px 10px;border-radius:980px;background:var(--parchment);color:var(--blue);font-size:12px;font-weight:600;vertical-align:middle}
 .glance{width:100%;border-collapse:collapse}
 .glance td{padding:10px 0;border-top:1px solid var(--hairline);vertical-align:top}
 .glance tr:first-child td{border-top:0}
@@ -49,24 +49,24 @@ h2{margin:0 0 10px;font-size:19px;font-weight:600;line-height:1.35}
 .money p{margin:0 0 4px}
 .money .caveat{margin-top:8px;font-weight:600}
 .lead{margin:0 0 6px;font-weight:600}
-.more{margin:0 0 14px;color:var(--muted);font-size:15px}
+.more{margin:0 0 14px;color:var(--muted);font-size:14px}
 .row{display:flex;gap:12px;padding:9px 0;border-top:1px solid var(--hairline)}
-.row .k{flex:0 0 7.5rem;color:var(--muted);font-size:15px}
+.row .k{flex:0 0 7.5rem;color:var(--muted);font-size:14px}
 .row .v{flex:1}
-.checks-title{margin:14px 0 4px;color:var(--muted);font-size:15px}
+.checks-title{margin:14px 0 4px;color:var(--muted);font-size:14px}
 .checks{list-style:none;margin:0;padding:0}
 .checks li{padding:5px 0}
 .box{display:inline-block;width:1.6em;color:var(--muted)}
 .have .box{color:var(--blue)}
 .section{margin:32px 0 12px;font-size:21px;font-weight:600;white-space:pre-line}
-.quiet{margin:0;padding:0;list-style:none;color:var(--body);font-size:15px}
+.quiet{margin:0;padding:0;list-style:none;color:var(--body);font-size:14px}
 .quiet li{padding:8px 0;border-top:1px solid var(--hairline)}
 .quiet li:first-child{border-top:0}
 .quiet .why{color:var(--muted)}
-.note{margin:0 0 10px;color:var(--muted);font-size:15px}
-.answers{margin:0;padding:0;list-style:none;columns:2;column-gap:28px;font-size:15px;color:var(--body)}
+.note{margin:0 0 10px;color:var(--muted);font-size:14px}
+.answers{margin:0;padding:0;list-style:none;columns:2;column-gap:28px;font-size:14px;color:var(--body)}
 .answers li{padding:3px 0;break-inside:avoid}
-.foot{margin-top:36px;color:var(--muted);font-size:13px}
+.foot{margin-top:36px;color:var(--muted);font-size:12px}
 @media(max-width:520px){h1{font-size:28px}.answers{columns:1}.row .k{flex-basis:6rem}.glance td{display:block}.glance td.where{padding:0 0 10px;border-top:0;text-align:left}}
 @media print{body{background:#fff;font-size:12pt}main{max-width:none;padding:0}.card{border-color:#cccccc}}
 """

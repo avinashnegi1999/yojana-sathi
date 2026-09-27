@@ -167,7 +167,8 @@ def eligible_block(results: tuple[Result, ...], schemes: dict[str, Scheme],
     hits = [r for r in results if r.verdict is Verdict.ELIGIBLE]
     if not hits:
         return ""
-    lines = [s("result.eligible_header", lang, count=len(hits))]
+    # * "1 scheme" / "5 schemes" — no bracketed "(s)", which reads like a form.
+    lines = [s("result.eligible_header" + ("_one" if len(hits) == 1 else ""), lang, count=len(hits))]
     for i, r in enumerate(hits, start=1):
         sc = schemes[r.scheme_code]
         entry = s(
@@ -228,7 +229,7 @@ def unknown_block(results: tuple[Result, ...], schemes: dict[str, Scheme],
     shared, items = unknown_parts(results, schemes, lang)
     if not items:
         return ""
-    head = [s("result.unknown_header", lang, count=len(items))]
+    head = [s("result.unknown_header" + ("_one" if len(items) == 1 else ""), lang, count=len(items))]
     if shared:
         head.append(s("result.unknown_shared", lang, gap=shared))
         # ! One instruction, then the names. This used to repeat "ask: Am I
@@ -256,6 +257,10 @@ def ineligible_brief(results: tuple[Result, ...], schemes: dict[str, Scheme],
     hits = [r for r in results if r.verdict is Verdict.INELIGIBLE]
     if not hits:
         return ""
+    # * More than three long names is a wall above the next button. The count
+    # * is enough on screen; every name and reason is on the sheet.
+    if len(hits) > 3:
+        return s("result.ineligible_count", lang, count=len(hits))
     names = ", ".join(schemes[r.scheme_code].name(lang) for r in hits)
     return s("result.ineligible_brief", lang, count=len(hits), names=names)
 

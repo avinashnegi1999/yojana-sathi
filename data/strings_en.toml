@@ -66,7 +66,7 @@ has_bank_account = "Do you have a bank account?"
 is_income_tax_payer = "Do you pay income tax?"
 is_epfo_or_esic_member = "Is PF (EPFO) or ESIC cut from your pay?"
 nps_exclusion_applies = "Do you have an NPS pension account?"
-is_woman = "Are you a woman? (Only used to skip questions that don't apply.)"
+is_woman = "Are you a woman? (Only to skip questions that don't apply.)"
 known_schemes = """Which of these do you already have?
 Tap all that apply, then Next."""
 
@@ -83,7 +83,7 @@ other = "Something else"
 correct = "Correct"
 wrong = "Wrong"
 show_more = "Show more"
-other_state = "My state isn't listed"
+other_state = "More states"
 # ! WhatsApp shows more than three options as a list behind a button, and
 # ! that button needs its own label. Telegram never asks for one.
 choose = "Choose"
@@ -155,7 +155,8 @@ change_tax = "Change tax"
 [result]
 # =====================================================================
 evaluating = "One moment, I am checking…"
-eligible_header = "{count} scheme(s) for you"
+eligible_header = "{count} schemes for you"
+eligible_header_one = "1 scheme for you"
 # ! One sentence of benefit and the place to go. The full description and the
 # ! "why you qualify" are on the sheet; on a phone, four schemes at a paragraph
 # ! each buried the next button under 600 words.
@@ -166,27 +167,29 @@ new_badge = "· New for you"
 # ! Not "you could get this in a year". PM-SYM and NPS-Traders pay nothing
 # ! until 60, so that line told a 25-year-old ₹36,000 was a year away. The
 # ! total is still stated, with the start age pointed at every time.
-value_line = "Pensions added up: about ₹{total} a year — each starts only at the age on its own line."
+value_line = "Pensions together: about ₹{total} a year. Each starts at the age on its line."
 # * What the worker pays, under the scheme it belongs to. From premium_inr,
 # * which data/schemes/_TEMPLATE.toml defines as ₹/year the WORKER pays.
 premium_line = "   You pay: {premium}"
 premium_per_year = "₹{amount} a year"
 # * Used when the scheme's premium is written only in the other language.
-premium_ask = "a regular payment — ask at the centre for the exact amount"
+premium_ask = "a regular amount — ask the centre for it"
 cover_line = "Insurance cover: up to ₹{total} in total, each policy on its own terms."
 cover_only_line = "Insurance cover: up to ₹{total} in total, each policy on its own terms."
 value_caveat = "Not paid yet — you have to apply."
 
-unknown_header = """{count} I can't be sure about.
+unknown_header_one = """1 scheme I can't be sure about.
 I won't guess — ask at the centre."""
-unknown_line = """• {name_hi} — what I could not check: {gap}
-   Ask this at the centre: “Am I eligible for {name_hi}?”"""
-unknown_reason_data = "we have not yet checked this scheme's rules against an official source"
+unknown_header = """{count} schemes I can't be sure about.
+I won't guess — ask at the centre."""
+unknown_line = """• {name_hi} — {gap}
+   Ask at the centre: “Am I eligible for {name_hi}?”"""
+unknown_reason_data = "its rules are not yet checked against an official source"
 # ! A researched-but-unsigned scheme is NOT an unresearched one. Saying "nobody
 # ! looked it up" when one person did, and is waiting on a second, understates
 # ! what is known and reads to a tester as a broken bot.
-unknown_reason_unsigned = "the rules are written down, but a person has not confirmed them yet — until they do I will not put a number on it"
-unknown_reason_profile = "you did not tell me: {fields}"
+unknown_reason_unsigned = "its rules are written, but a person has not confirmed them yet"
+unknown_reason_profile = "no answer on {fields}"
 # ! When every unsure scheme is unsure for the SAME reason, that reason is
 # ! said once. Repeating a 27-word sentence per scheme buries the one thing
 # ! the worker has to act on — the question to ask at the centre.
@@ -200,14 +203,15 @@ ineligible_header = "Not for you right now"
 ineligible_line = "• {name_hi} — {reason}"
 # * When something matched: names only on screen, the reasons go on the sheet.
 ineligible_brief = "Not for you now: {names}. Reasons are on your sheet."
+ineligible_count = "{count} other schemes are not for you now. Names and reasons are on your sheet."
 
 # ! Only for a real no. When every scheme came back UNKNOWN the worker did
 # ! not fail anything - we did not check - so the next line is used instead.
-no_match_header = "No scheme fits you right now — but that's not the end."
+no_match_header = "No scheme fits right now — but this isn't the end."
 nothing_checked_header = """I couldn't check any scheme yet — that's my gap, not yours.
 I can still make you a sheet for the centre."""
 near_miss = "Closest: {name_hi} — {reason}"
-no_match_footer = "Still, visit your nearest centre once — states have their own schemes too."
+no_match_footer = "Still, ask once at your nearest centre — states have their own schemes."
 
 # =====================================================================
 [documents]
@@ -270,47 +274,46 @@ followup = "May I ask you once in 14 days whether it worked out?"
 # =====================================================================
 [commands]
 # =====================================================================
-help = """I tell you which government schemes you may be entitled to.
+help = """I tell you which government schemes may be yours.
 
-/start — begin, or start again
-/language — switch between हिंदी and English
-/schemes — which schemes I know, and where their rules come from
-/privacy — what I store, and what I never ask for
-/about — what this is, and what it is not
-/clear — delete this conversation's messages
+/start — start, or start again
+/language — हिंदी or English
+/schemes — the schemes I check, and their sources
+/privacy — what I keep, and what I never ask
+/about — what this is, and isn't
+/clear — delete this chat's messages
 /clearall — delete everything from the last 48 hours
 /cancel — stop and forget this session
 
-Answer by tapping the buttons. You can also type your age or your state."""
-about = """Yojana Sathi is a free, open-source helper for workers in the unorganised sector.
+Tap the buttons to answer. You can also type your age or state."""
+about = """Yojana Sathi is a free, open-source helper for unorganised workers.
 
-It is NOT a government service and NOT an agent. It does not submit any application for you and it never asks for money.
+It is NOT a government service or an agent. It never submits an application for you and never asks for money.
 
-The government already publishes this information on myScheme.gov.in — but that is a web form that assumes you can read, use a browser and know what "land holding in hectares" means. This is the same information as a spoken conversation, ending in a list you can carry to a centre.
+The same information is on myScheme.gov.in, as a web form. Here it is a conversation that ends in a list you can carry to a centre.
 
-Eligibility here is decided by fixed rules taken from official government pages, not by an AI guessing. Where we have not checked a rule, we say so instead of guessing."""
-privacy = """What I never ask for: your name, your phone number, your Aadhaar number. Those fields do not exist anywhere in this system, so they cannot be stored by accident.
+Fixed rules from official government pages decide eligibility — not an AI. Where a rule is not checked, it says so."""
+privacy = """Never asked: your name, phone number or Aadhaar. There is no place to store them.
 
-What is kept: counts only — the state, an age band (like 26-40), the kind of work, and an income band. No exact age, no exact income, no village.
+Kept: counts only — state, an age band (like 26–40), kind of work, income band. Never your exact age, income or village.
 
-Your answers live in memory only while we talk, and are gone when the session ends. Each session gets a random number that is not linked to your account on this app, so two visits by you cannot be joined together.
+Your answers stay in memory only while we talk. Each session gets a random number, not linked to your account, so two visits can't be joined.
 
-The sheet I make for you is sent to you and never saved on our side."""
-schemes_header = """These are the schemes I check, and where their rules come from.
-Every rule has an official source you can check yourself:"""
+Your sheet is sent to you, never saved by us."""
+schemes_header = "The schemes I check, each with its official source:"
 schemes_line = """• {name} ({code})
    Source: {url}
    Rules checked on: {verified_on}"""
 schemes_unverified = "   ⚠ Not yet checked against an official source — I will say “I don't know” for this one."
-cancelled = "Stopped. Nothing was saved. Send /start to begin again."
+cancelled = "Stopped. Nothing saved. Send /start to begin again."
 # ! Telegram only lets a bot delete messages under 48 hours old. Say so.
-cleared = "Deleted {count} message(s) — the ones from this conversation I still had a record of. Send /clearall to also remove older ones."
-cleared_all = "Cleared everything I could reach from the last 48 hours. Telegram does not let a bot delete messages older than that, so anything older stays — you can remove those yourself."
+cleared = "Messages deleted from this chat: {count}. Send /clearall for older ones."
+cleared_all = "Deleted all I could from the last 48 hours. Telegram won't let a bot delete older messages — you can remove those yourself."
 clear_nothing = "There was nothing to delete."
 # ! Not every channel lets a bot delete its own messages — the WhatsApp
 # ! Cloud API has no delete endpoint at all. Say that plainly rather than
 # ! reporting a clear that did not happen.
-clear_unsupported = "This app does not let me delete messages from your phone, so I could not remove this conversation. You can delete it yourself: press and hold this chat in your chat list, then choose Delete."
+clear_unsupported = "This app doesn't let me delete messages. To remove this chat, press and hold it in your chat list, then tap Delete."
 
 # =====================================================================
 [errors]
@@ -318,12 +321,12 @@ clear_unsupported = "This app does not let me delete messages from your phone, s
 generic = "Something went wrong. Please send /start to begin again."
 no_schemes_loaded = "Scheme information is not ready yet. Please try again a little later."
 pick_from_list = "Please pick an option below."
-stale_button = "This button is no longer active. Use the latest question, or send /start to begin again."
-screening_stopped = "This screening stopped because something went wrong. Please send /start and answer the questions again."
+stale_button = "This button has expired. Answer the latest question, or send /start."
+screening_stopped = "Something went wrong, so this screening stopped. Send /start to try again."
 # * The browser has no /start to send; it has a "Start again" button.
 web_stopped = "Something went wrong. Tap “Start again” to begin again."
 # * Shown before a language is chosen, so the browser sends it in both.
-too_many_sessions = "Too many new screenings have started from this connection. Please wait a few minutes and try again."
+too_many_sessions = "Too many screenings started from this connection. Please wait a few minutes."
 
 # =====================================================================
 [recap]
@@ -364,12 +367,12 @@ bad_rating = "Please send a number from 1 to 10, or skip."
 # =====================================================================
 [link]
 # =====================================================================
-ready = """Your sheet opens at this link — for 1 hour:
+ready = """Your sheet opens here for 1 hour:
 {url}
 
-Open it and press "Print" to save it as a PDF on your phone."""
+Tap "Print" to save it as a PDF."""
 expired_title = "This link no longer works"
-expired_body = """The sheet is removed automatically after one hour. Nothing about you is kept.
+expired_body = """The sheet is deleted after one hour. Nothing about you is kept.
 
-Start the bot again to get a new sheet."""
+Start the bot again for a new sheet."""
 expired_cta = "Back to the bot"

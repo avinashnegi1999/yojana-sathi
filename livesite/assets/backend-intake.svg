@@ -1,14 +1,59 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc">
-  <title id="title">Scheme selection and adaptive questions</title>
-  <desc id="desc">A worker chooses a language, consents, picks all verified schemes or individual schemes, then answers only questions needed for that selection. A temporary profile is built without personal identifiers.</desc>
-  <defs><linearGradient id="b" x1="0" x2="1"><stop stop-color="#e6f5ff"/><stop offset="1" stop-color="#fafcff"/></linearGradient><linearGradient id="v" x1="0" x2="1"><stop stop-color="#efedff"/><stop offset="1" stop-color="#faf9ff"/></linearGradient><linearGradient id="g" x1="0" x2="1"><stop stop-color="#e4fbef"/><stop offset="1" stop-color="#f7fff9"/></linearGradient><marker id="a" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="9" markerHeight="8" orient="auto"><path d="M0 0 10 4 0 8z" fill="#3e6383"/></marker></defs>
-  <style>.bg{fill:#fafdff}.c{stroke:#bdd5e8;stroke-width:2}.l{fill:none;stroke:#3e6383;stroke-width:3;marker-end:url(#a)}.t{font:800 35px Arial,sans-serif;fill:#102c4b}.s{font:500 19px Arial,sans-serif;fill:#45617d}.h{font:800 23px Arial,sans-serif;fill:#102c4b}.p{font:500 17px Arial,sans-serif;fill:#385570}.n{font:800 18px Arial,sans-serif;fill:#fff}.tag{font:800 15px Arial,sans-serif;letter-spacing:1.8px;fill:#5a52c9}</style>
-  <rect class="bg" width="1200" height="650" rx="30"/><text class="tag" x="62" y="62">01 / INTAKE</text><text class="t" x="62" y="108">Pick a scope. Answer less.</text><text class="s" x="62" y="139">Every question must be relevant to a signed scheme the worker chose.</text>
-  <path class="l" d="M245 310H290"/><path class="l" d="M495 310H540"/><path class="l" d="M745 310H790"/><path class="l" d="M995 310H1040"/>
-  <g><rect class="c" fill="url(#b)" x="45" y="218" width="200" height="185" rx="20"/><circle fill="#4ca8de" cx="77" cy="250" r="18"/><text class="n" x="77" y="257" text-anchor="middle">1</text><text class="h" x="67" y="296">Open the bot</text><text class="p" x="67" y="329">Telegram · WhatsApp</text><text class="p" x="67" y="355">or local preview</text><text class="p" x="67" y="386">Hindi or English</text></g>
-  <g><rect class="c" fill="url(#g)" x="290" y="218" width="205" height="185" rx="20"/><circle fill="#35aa81" cx="322" cy="250" r="18"/><text class="n" x="322" y="257" text-anchor="middle">2</text><text class="h" x="312" y="296">Consent</text><text class="p" x="312" y="329">No name, phone,</text><text class="p" x="312" y="355">or Aadhaar asked</text><text class="p" x="312" y="386">coarse logs only</text></g>
-  <g><rect class="c" fill="url(#v)" x="540" y="218" width="205" height="185" rx="20"/><circle fill="#786de3" cx="572" cy="250" r="18"/><text class="n" x="572" y="257" text-anchor="middle">3</text><text class="h" x="562" y="296">Scheme mode</text><text class="p" x="562" y="329">All verified schemes</text><text class="p" x="562" y="355">or choose specific ones</text><text class="p" x="562" y="386">only signed rules</text></g>
-  <g><rect class="c" fill="url(#b)" x="790" y="218" width="205" height="185" rx="20"/><circle fill="#4ca8de" cx="822" cy="250" r="18"/><text class="n" x="822" y="257" text-anchor="middle">4</text><text class="h" x="812" y="296">Question flow</text><text class="p" x="812" y="329">Ask only what chosen</text><text class="p" x="812" y="355">schemes can change</text><text class="p" x="812" y="386">“Don’t know” stays</text></g>
-  <g><rect class="c" fill="url(#v)" x="1040" y="218" width="115" height="185" rx="20"/><circle fill="#786de3" cx="1072" cy="250" r="18"/><text class="n" x="1072" y="257" text-anchor="middle">5</text><text class="h" x="1097" y="296" text-anchor="middle">Profile</text><text class="p" x="1097" y="329" text-anchor="middle">in memory</text><text class="p" x="1097" y="355" text-anchor="middle">only</text></g>
-  <path class="l" d="M1097 405V510H880"/><rect x="300" y="476" width="580" height="112" rx="22" fill="#102c4b"/><text x="330" y="520" font-family="Arial,sans-serif" font-size="24" font-weight="800" fill="#fff">Temporary profile</text><text x="330" y="554" font-family="Arial,sans-serif" font-size="18" fill="#cce4f8">state · age · work · income band · required scheme facts</text><text x="330" y="578" font-family="Arial,sans-serif" font-size="17" fill="#b7d6ee">No identity inferred. No missing answer becomes “no”.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" role="img" aria-labelledby="title desc">
+<title id="title">Intake</title><desc id="desc">The worker consents, gives her state, chooses national schemes, her state's or both, ticks schemes or all of them, and answers only the questions those schemes need. The answers form a temporary profile in memory; nothing identifies her.</desc>
+<style>
+text{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.h{font-size:36px;font-weight:600;fill:#1d1d1f;letter-spacing:-0.28px}
+.eyebrow{font-size:14px;font-weight:600;fill:#0066cc;letter-spacing:0.5px}
+.sub{font-size:19px;fill:#6e6e73}
+.t{font-size:20px;font-weight:600;fill:#1d1d1f;letter-spacing:-0.2px}
+.s{font-size:16px;fill:#6e6e73}
+.td{font-size:20px;font-weight:600;fill:#ffffff;letter-spacing:-0.2px}
+.sd{font-size:16px;fill:#a1a1a6}
+.n{font-size:14px;font-weight:600;fill:#ffffff}
+.chip{font-size:18px;font-weight:600;fill:#1d1d1f}
+.foot{font-size:16px;fill:#1d1d1f}
+.arrow{stroke:#0066cc;stroke-width:2;fill:none;marker-end:url(#a)}
+.dash{stroke:#0066cc;stroke-width:2;fill:none;stroke-dasharray:6 6}
+</style>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0066cc"/></marker></defs>
+<rect width="1200" height="560" fill="#ffffff"/>
+<text x="60" y="64" class="eyebrow">01 · INTAKE</text>
+<text x="60" y="108" class="h">State first. Answer less.</text>
+<text x="60" y="142" class="sub">Every question belongs to a signed scheme the worker chose.</text>
+<rect x="60" y="190" width="200" height="170" rx="18" fill="#f5f5f7"/>
+<circle cx="92" cy="222" r="14" fill="#0066cc"/><text x="92" y="227" text-anchor="middle" class="n">1</text>
+<text x="82" y="272" class="t">Consent</text>
+<text x="82" y="300" class="s">Nothing that</text>
+<text x="82" y="322" class="s">identifies her</text>
+<rect x="280" y="190" width="200" height="170" rx="18" fill="#ffffff" stroke="#0066cc" stroke-width="2"/>
+<circle cx="312" cy="222" r="14" fill="#0066cc"/><text x="312" y="227" text-anchor="middle" class="n">2</text>
+<text x="302" y="272" class="t">Her state</text>
+<text x="302" y="300" class="s">All 36. A map on</text>
+<text x="302" y="322" class="s">the web, buttons</text>
+<text x="302" y="344" class="s">in chat</text>
+<path d="M260 275 H276" class="arrow"/>
+<rect x="500" y="190" width="200" height="170" rx="18" fill="#ffffff" stroke="#0066cc" stroke-width="2"/>
+<circle cx="532" cy="222" r="14" fill="#0066cc"/><text x="532" y="227" text-anchor="middle" class="n">3</text>
+<text x="522" y="272" class="t">Which schemes</text>
+<text x="522" y="300" class="s">National, her</text>
+<text x="522" y="322" class="s">state's, or both</text>
+<path d="M480 275 H496" class="arrow"/>
+<rect x="720" y="190" width="200" height="170" rx="18" fill="#ffffff" stroke="#0066cc" stroke-width="2"/>
+<circle cx="752" cy="222" r="14" fill="#0066cc"/><text x="752" y="227" text-anchor="middle" class="n">4</text>
+<text x="742" y="272" class="t">Pick from list</text>
+<text x="742" y="300" class="s">Tick some, or</text>
+<text x="742" y="322" class="s">"All of these"</text>
+<path d="M700 275 H716" class="arrow"/>
+<rect x="940" y="190" width="200" height="170" rx="18" fill="#f5f5f7"/>
+<circle cx="972" cy="222" r="14" fill="#0066cc"/><text x="972" y="227" text-anchor="middle" class="n">5</text>
+<text x="962" y="272" class="t">Questions</text>
+<text x="962" y="300" class="s">Only what those</text>
+<text x="962" y="322" class="s">schemes need.</text>
+<text x="962" y="344" class="s">"Don't know" ok</text>
+<path d="M920 275 H936" class="arrow"/>
+<path d="M1040 360 V430 H844" class="arrow"/>
+<rect x="356" y="400" width="480" height="110" rx="18" fill="#272729"/>
+<text x="378" y="434" class="td">Temporary profile</text>
+<text x="378" y="462" class="sd">State · age · income band · the facts those schemes need.</text>
+<text x="378" y="484" class="sd">No identity inferred. A missing answer never becomes "no".</text>
 </svg>

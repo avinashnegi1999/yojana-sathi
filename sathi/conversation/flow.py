@@ -454,8 +454,13 @@ class Conversation:
         page_count = max(1, (len(codes) + 6) // 7)
         self._picker_page %= page_count
         start = self._picker_page * 7
-        buttons = tuple(Button(("✅ " if code in self._selected else "") + self.schemes[code].name(self.lang),
-                               f"pick:{code}") for code in codes[start:start + 7])
+        # * Numbered across pages (1–7, then 8–14 after "show more"), so a
+        # * helper at a CSC can say "tick 3 and 9". A position, not a ranking:
+        # * the order is alphabetical by scheme code.
+        buttons = tuple(
+            Button(("✅ " if code in self._selected else "")
+                   + f"{number}. " + self.schemes[code].name(self.lang), f"pick:{code}")
+            for number, code in enumerate(codes[start:start + 7], start=start + 1))
         if page_count > 1:
             buttons += (Button(self._s("buttons.show_more"), "pick:more"),)
         text = self._s("scheme_picker.choose")
@@ -592,7 +597,12 @@ class Conversation:
     def _on_scheme_mode(self, answer: str) -> list[Reply]:
         # * Existing chats can have a state button in flight when this version
         # * deploys. Treat it as the legacy full-screening route, not an error.
-        if answer.startswith("state:") or content.match_state(answer):
+        # ! Only while the state is still unknown. In the state-first order a
+        # ! typed state name, or an old state button, here used to drop the
+        # ! worker into the full intake with every scheme selected — other
+        # ! states' and unsigned ones included. Now it re-asks this question.
+        if self.profile.state is None and (answer.startswith("state:")
+                                           or content.match_state(answer)):
             self._selected = set(self.schemes)
             self._legacy_full = True
             self.state = State.STATE
@@ -1209,6 +1219,13 @@ def _self_check() -> None:
     assert web.state is State.SCHEME_PICKER
     web.handle("pick:all")
     assert web._selected == {"A"} and web.state is State.AGE
+    # ! A state typed at the scheme question must not reopen the full intake.
+    again = Conversation({**schemes, "UKX": replace(schemes["A"], code="UKX", criteria=(
+        C("state", "eq", "UK", "u", pass_hi="ठीक", fail_hi="नहीं"),))})
+    again.handle(LANG_HI); again.handle(consent.YES); again.handle("state:UK")
+    assert again.state is State.SCHEME_MODE
+    again.handle("Punjab"); again.handle("state:PB")
+    assert again.state is State.SCHEME_MODE and not again._legacy_full, again.state
     c.handle("state:UK")
     c.handle("34")
     assert c.profile.age == 34 and c.profile.state == "UK"

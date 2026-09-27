@@ -43,22 +43,21 @@ h1,h2,h3,p{margin:0}
 .brand:hover{text-decoration:none}
 .brand img{width:26px;height:26px;border-radius:50%}
 .links{display:flex;gap:26px;margin-left:auto}
-.links a{color:var(--ink);font-size:13px;opacity:.8}
+.links a{color:var(--ink);font-size:12px;opacity:.8}
 .links a:hover{opacity:1;text-decoration:none}
 
 /* ── buttons: the pill is the action ── */
 .pill{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 22px;border-radius:980px;background:var(--blue);color:#fff;font-size:17px;font-weight:400;letter-spacing:-.01em;transition:transform .15s ease,background .15s ease}
-.pill:hover{background:#0077ed;text-decoration:none}
+.pill:hover{text-decoration:none}
 .pill:active{transform:scale(.95)}
 .pill-sm{min-height:30px;padding:0 14px;font-size:13px}
 .ghost{background:transparent;color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
-.ghost:hover{background:var(--blue);color:#fff}
 .more{font-size:17px}
 .more::after{content:" ›"}
 .nav .pill-sm{margin-left:0}
 
 /* ── tiles ── */
-.tile{padding:88px 0}
+.tile{padding:80px 0}
 .parchment{background:var(--parchment)}
 .dark{background:var(--tile);color:var(--on-dark)}
 .dark .tagline,.dark p{color:var(--muted-dark)}
@@ -66,8 +65,8 @@ h1,h2,h3,p{margin:0}
 .center{text-align:center}
 .eyebrow{margin-bottom:10px;color:var(--muted);font-size:17px;font-weight:600;letter-spacing:-.01em}
 .dark .eyebrow{color:var(--muted-dark)}
-h1{font-size:clamp(44px,7.4vw,80px);font-weight:600;line-height:1.05;letter-spacing:-.015em}
-h2{font-size:clamp(34px,5.4vw,56px);font-weight:600;line-height:1.07;letter-spacing:-.012em}
+h1{font-size:clamp(40px,6.4vw,56px);font-weight:600;line-height:1.07;letter-spacing:-.005em}
+h2{font-size:clamp(28px,4.6vw,40px);font-weight:600;line-height:1.1;letter-spacing:0}
 h3{font-size:21px;font-weight:600;line-height:1.24;letter-spacing:-.01em}
 h1,h2,.quote{text-wrap:balance}
 .tagline{text-wrap:balance;max-width:40ch;margin:18px auto 0;color:var(--muted);font-size:clamp(19px,2.2vw,24px);line-height:1.33;letter-spacing:-.01em}
@@ -84,7 +83,7 @@ h1,h2,.quote{text-wrap:balance}
 /* ── numbers ── */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:56px;text-align:left}
 .stat b{display:block;font-size:clamp(34px,4.4vw,48px);font-weight:600;line-height:1.05;letter-spacing:-.015em}
-.stat span{display:block;margin-top:10px;color:var(--muted);font-size:15px;line-height:1.4}
+.stat span{display:block;margin-top:10px;color:var(--muted);font-size:14px;line-height:1.43}
 .dark .stat span{color:var(--muted-dark)}
 sup{font-size:11px;margin-left:2px}
 
@@ -106,7 +105,7 @@ sup{font-size:11px;margin-left:2px}
 .card{background:var(--canvas);border:1px solid var(--hairline);border-radius:18px;overflow:hidden}
 .card-fig{width:min(620px,84vw)}
 .card-fig a{display:block;padding:18px;background:var(--canvas)}
-.shot figcaption{color:var(--muted);font-size:15px}
+.shot figcaption{color:var(--muted);font-size:14px}
 figure{margin:0}
 .shots{justify-content:center}
 .shot{width:min(280px,72vw);text-align:center}
@@ -133,11 +132,13 @@ figure{margin:0}
 .view{margin-top:36px}
 .view a{display:block;padding:18px;background:var(--canvas);border:1px solid var(--hairline);border-radius:18px}
 .view.code a{max-height:640px;overflow:auto;overscroll-behavior:contain}
-.view figcaption{margin-top:14px;color:var(--muted);font-size:15px;text-align:center}
+.view figcaption{margin-top:14px;color:var(--muted);font-size:14px;text-align:center}
 
 /* ── schemes ── */
 .schemes{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:56px;text-align:left}
 .scheme{padding:24px;background:var(--parchment);border-radius:18px}
+.schemes .group{grid-column:1/-1;margin:24px 0 0;color:var(--muted);font-size:14px;font-weight:600;letter-spacing:0}
+.schemes .group:first-child{margin-top:0}
 .scheme h3{font-size:19px}
 .scheme .benefit{margin-top:10px;color:var(--ink);font-size:17px}
 .scheme .where{margin-top:6px;color:var(--muted);font-size:14px}
@@ -189,6 +190,7 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
   .verdicts span{padding:10px 16px;font-size:15px}
   /* Twenty cards stacked run long; on a phone they become one list. */
   .schemes{gap:0;background:var(--parchment);border-radius:18px}
+  .schemes .group{margin:0;padding:18px 20px 6px}
   .scheme{padding:16px 20px;background:none;border-radius:0;border-top:1px solid var(--hairline)}
   .scheme:first-child{border-top:0}
   .scheme h3{font-size:17px}
@@ -254,7 +256,7 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
 <section class="tile center" id="how">
   <div class="wrap reveal">
     <h2>Ask less.<br>Decide by rule.</h2>
-    <p class="tagline">Each screening starts with your state, picks only schemes that can apply there, then runs the same cited rules on only the answers it needs.</p>
+    <p class="tagline">Start with your state. Answer only what matters. Let the rules decide.</p>
     <div class="steps">
       <div class="step"><span class="n">01</span><h3>Choose</h3><p>Your state — on a map or a list. Then national schemes, your state's, or both.</p></div>
       <div class="step"><span class="n">02</span><h3>Answer</h3><p>Only the questions those schemes need. “Don't know” is always allowed.</p></div>
@@ -265,9 +267,9 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
   <div class="wide">
     <div class="rail-head"><h3>Under the hood</h3><div class="arrows"><button class="arrow" type="button" data-rail="hood" data-dir="-1" aria-label="Previous">‹</button><button class="arrow" type="button" data-rail="hood" data-dir="1" aria-label="Next">›</button></div></div>
     <div class="rail" id="hood">
-      <figure class="card card-fig"><a href="assets/backend-intake.svg" target="_blank" rel="noopener"><img src="assets/backend-intake.svg" width="1200" height="650" loading="lazy" alt="Intake: a worker chooses a language, consents, picks all verified schemes or individual ones, then answers only the questions that selection needs. A temporary profile is built without personal identifiers."></a></figure>
-      <figure class="card card-fig"><a href="assets/backend-verdict.svg" target="_blank" rel="noopener"><img src="assets/backend-verdict.svg" width="1200" height="650" loading="lazy" alt="Rule engine: a temporary profile and human-signed scheme data enter the deterministic rule engine, which returns eligible, ineligible or unknown. No language model decides a verdict."></a></figure>
-      <figure class="card card-fig"><a href="assets/backend-privacy.svg" target="_blank" rel="noopener"><img src="assets/backend-privacy.svg" width="1200" height="650" loading="lazy" alt="Privacy: the temporary screening profile disappears. With consent, only coarse non-identifying events and an optional self-reported role become aggregate pilot numbers."></a></figure>
+      <figure class="card card-fig"><a href="assets/backend-intake.svg" target="_blank" rel="noopener"><img src="assets/backend-intake.svg" width="1200" height="560" loading="lazy" alt="Intake: after consent the worker gives her state, chooses national schemes, her state's or both, ticks schemes or all of them, and answers only the questions they need. The answers form a temporary profile in memory; nothing identifies her."></a></figure>
+      <figure class="card card-fig"><a href="assets/backend-verdict.svg" target="_blank" rel="noopener"><img src="assets/backend-verdict.svg" width="1200" height="630" loading="lazy" alt="Rule engine: the temporary profile and signed scheme files go into a deterministic rule engine, which returns eligible, ineligible or unknown. No language model decides a verdict."></a></figure>
+      <figure class="card card-fig"><a href="assets/backend-privacy.svg" target="_blank" rel="noopener"><img src="assets/backend-privacy.svg" width="1200" height="610" loading="lazy" alt="Privacy: exact answers stay in memory for the chat. With consent, only an event with a random session id, the channel, the state and coarse bands is logged, and only aggregates are reported. Name, phone, Aadhaar, exact income and exact location are never stored."></a></figure>
     </div>
   </div>
 </section>
@@ -327,7 +329,7 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
       <figcaption>The core flow, end to end. Tap to open full size.</figcaption>
     </figure>
     <figure class="view" data-view="map" hidden>
-      <a href="assets/system-map.svg" target="_blank" rel="noopener"><img src="assets/system-map.svg" width="1400" height="748" loading="lazy" alt="How Yojana Sathi works end to end: channels (Telegram, WhatsApp, terminal preview) feed one conversation and rule engine; outputs are the explanation and the sheet; measurement keeps only coarse consented events."></a>
+      <a href="assets/system-map.svg" target="_blank" rel="noopener"><img src="assets/system-map.svg" width="1410" height="690" loading="lazy" alt="System map: Telegram, WhatsApp and the web page feed one conversation, which asks the state first. A rule engine over signed scheme files returns the verdict; outputs are the explanation and a one-page sheet. An optional model may suggest an occupation to confirm, never a verdict. Measurement keeps only consented, coarse events."></a>
       <figcaption>Channels, the decision core, outputs, and the only measurement it keeps.</figcaption>
     </figure>
     <figure class="view code" data-view="code" hidden>
@@ -343,6 +345,7 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
     <h2>Twenty-one schemes.<br>Each signed by a person.</h2>
     <p class="tagline">A reviewed set of answers that hold up beats a broad directory of approximate ones.</p>
     <div class="schemes">
+      <h3 class="group">National · every state</h3>
       <div class="scheme"><h3>PM Shram Yogi Maandhan</h3><p class="benefit">₹36,000 per year from age&nbsp;60</p><p class="where">Common Service Centre</p></div>
       <div class="scheme"><h3>National Pension Scheme for Traders</h3><p class="benefit">₹36,000 per year from age&nbsp;60</p><p class="where">Common Service Centre</p></div>
       <div class="scheme"><h3>Atal Pension Yojana</h3><p class="benefit">From ₹12,000 per year at age&nbsp;60</p><p class="where">Bank branch</p></div>
@@ -356,6 +359,7 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
       <div class="scheme"><h3>Indira Gandhi National Old Age Pension</h3><p class="benefit">₹2,400 per year central share; ₹6,000 from age&nbsp;80</p><p class="where">Common Service Centre</p></div>
       <div class="scheme"><h3>Indira Gandhi National Widow Pension</h3><p class="benefit">₹3,600 per year central share; ₹6,000 from age&nbsp;80</p><p class="where">Common Service Centre</p></div>
       <div class="scheme"><h3>Indira Gandhi National Disability Pension</h3><p class="benefit">₹3,600 per year central share; ₹6,000 from age&nbsp;80</p><p class="where">Common Service Centre</p></div>
+      <h3 class="group">State pensions · only in that state</h3>
       <div class="scheme"><h3>Uttarakhand old-age pension</h3><p class="benefit">₹18,000 per year</p><p class="where">State portal</p></div>
       <div class="scheme"><h3>Uttarakhand widow pension</h3><p class="benefit">₹18,000 per year</p><p class="where">State portal</p></div>
       <div class="scheme"><h3>Sikkim old-age pension</h3><p class="benefit">₹18,000–₹30,000 per year by age</p><p class="where">State pension portal</p></div>
@@ -364,7 +368,7 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
       <div class="scheme"><h3>Madhya Pradesh Kalyani pension</h3><p class="benefit">₹7,200 per year, widows 18–79</p><p class="where">Panchayat or municipal office</p></div>
       <div class="scheme"><h3>Punjab old-age pension</h3><p class="benefit">₹18,000 per year, women 58+, men 65+</p><p class="where">Panchayat, block or municipal office</p></div>
     </div>
-    <p class="fine">Thirteen national schemes apply in every state; state pensions are shown only to people in that state. National pension figures are the stated central share; a state pension replaces it and is never added to it. The Punjab pension is two rule files (women and men), so 20 cards show 21 files.</p>
+    <p class="fine">National pension figures are the central share. A state pension replaces that figure; the two are never added. Punjab is two rule files, women and men.</p>
   </div>
 </section>
 

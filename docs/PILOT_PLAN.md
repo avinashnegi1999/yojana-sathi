@@ -14,7 +14,7 @@ Can workers finish a screening, understand its uncertainty, and use a source-che
 
 ## Before the first participant.
 
-1. ~~**Scheme verification.**~~ Done 9–10 September 2026, extended to ten schemes by 15 September. The five unsigned drafts return `UNKNOWN`. [How](history/VERIFICATION.md).
+1. ~~**Scheme verification.**~~ 21 schemes signed by 27 September 2026 — 13 national, 8 state. The two parked drafts (Tamil Nadu, Mizoram) return `UNKNOWN`. [Evidence](audit-evidence/README.md).
 2. **Hindi review — not done.** Every Hindi string was drafted by a language model and has never been read by a native speaker. A mistranslated eligibility line costs a worker a day's wage just as surely as a wrong threshold, and the signature protects the numbers, not the words. Read the safety-critical strings aloud **before** the first participant. [Checklist](history/HUMAN_REVIEW_CHECKLIST.md).
 3. **One partner.** A willing CSC or community organisation that can explain the purpose without promising government endorsement. Recruit about 20–50 adults from construction, domestic work, vending, transport and other informal work. Include Hindi speakers and people new to chat buttons. Record recruitment limits; don't claim the group is representative.
 4. **Rehearse on a low-cost Android phone.** Confirm the live channel works and runs the reviewed scheme version. Telegram, the browser version, or a supervised local interface is enough for a first pilot; public WhatsApp needs its own approval.
