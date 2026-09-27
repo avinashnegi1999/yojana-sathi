@@ -1,5 +1,7 @@
 # Checkpoint — 9 September 2026
 
+> **Update 2026-09-27.** The widow rate is now confirmed by Uttarakhand Government Order 40 of 21 April 2022 (₹1,500 a month) and the department's Hindi pension overview, and UK_WIDOW was re-signed that day. SK_IGNOAPS, SK_IGNDPS, SK_IGNWPS, MP_KALYANI, both Punjab old-age files, PMJAY_70, PMJDY, PM_VISHWAKARMA and APY were also signed: 21 of 23 files in total. Evidence: `docs/audit-evidence/README.md`. The table below is kept as it stood on 9 September.
+
 > **Historical snapshot, kept as evidence of what was checked and when.**
 > It is not the current production status — that lives in
 > [`README.md`](../../README.md). Do not read a scheme count here as today's.

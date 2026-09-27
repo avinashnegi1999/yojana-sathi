@@ -1,3 +1,29 @@
+# RE-SIGNED 27 September 2026 by Avinash Negi (see verified_by), against the
+# two primary sources below. The rate no longer rests on myScheme.
+#
+# ! Question (a), the rate, is answered by the state's own order:
+# !   Government Order 40/XVII-2/22-19(05)2019TC, Social Welfare Section-2,
+# !   Government of Uttarakhand, 21 April 2022 (Principal Secretary L. Fanai):
+# !   old-age, "निराश्रित विधवा भरण पोषण अनुदान" (destitute widow maintenance
+# !   grant — this pension) and disability pension rates raised by ₹100 to
+# !   "₹1500/- प्रतिमाह", with immediate effect; para 3: the raised rates
+# !   include the central share.
+# !   Copy: docs/audit-evidence/uk-go40-pension-rates-2022-04-21.pdf
+# !   https://cdnbbsr.s3waas.gov.in/s357bafb2c2dfeefba931bb03a835b1fa9/uploads/2025/02/202502041827311603.pdf
+# ! Question (b), the other-pension bar, and the rate AGAIN, from the
+# ! department's Hindi pension overview (read 2026-09-27), widow section:
+# !   "उन विधवाओं को हर महीने ₹1,500/- की पेंशन दी जाती है जिनकी पारिवारिक
+# !    आय ₹4,000/- प्रति माह से ज़्यादा नहीं है या जो बी० पी० एल० कैटेगरी की
+# !    हैं, और जिन्हें कोई दूसरी पेंशन का फायदा नहीं मिल रहा है।"
+# !   Copy: docs/audit-evidence/uk-pension-overview-hi-2026-09-27.html
+# ! The test oracle (tests/test_rule_boundaries.py) now encodes that exclusion
+# ! from the overview's own words, so the sweep checks it once signed.
+# ? GO 40 is from 2022. No later order was found raising it, and the overview
+# ? (live 2026-09-27) still says ₹1,500 — but confirm no newer GO exists.
+# ? The myScheme citation in the history below is superseded; the
+# ? source_url fields still point at the department's pages, which is right.
+#
+# * History, kept as written:
 # Source-researched draft, 8 September 2026. No human sign-off is claimed.
 # ! BENEFIT AMOUNT: withdrawn on 2026-09-09, then RESTORED the same day from a
 # ! different official source. The original citation
@@ -45,11 +71,11 @@ name_en = "Uttarakhand widow pension"
 name_hi = "उत्तराखंड विधवा पेंशन"
 authority = "Government of Uttarakhand"
 official_url = "https://socialwelfare.uk.gov.in/service/widow-pension/"
-verified_on = "2026-09-10"
-verified_by = "unconfirmed — PENDING HUMAN VERIFICATION"
+verified_on = "2026-09-27"
+verified_by = "Avinash Negi, checked 2026-09-27"
 
 [benefit]
-annual_value_inr = 18000   # ! Rs 1,500/month; see the source note above
+annual_value_inr = 18000   # ! Rs 1,500/month — GO 40 of 21 Apr 2022, see header
 value_basis = "annual_payout"
 # ! One state social pension, two routes. A widow aged 60+ satisfies both
 # ! files, but Uttarakhand pays one pension, so the ₹ total counts the
@@ -57,8 +83,8 @@ value_basis = "annual_payout"
 # ! holding both before either file is signed.
 exclusive_group = "uk_state_pension"
 premium_inr = 0
-summary_en = "₹1,500 monthly pension after approval, per the national scheme portal. The Uttarakhand department's pension overview says this route is for widows who are not receiving another pension. Apply through ssp.uk.gov.in or assisted services. Eligibility and documents are checked by the department. Do not add multiple pension routes together as guaranteed payments."
-summary_hi = "राष्ट्रीय योजना पोर्टल के अनुसार स्वीकृति के बाद ₹1,500 मासिक पेंशन। उत्तराखंड विभाग के पेंशन विवरण के अनुसार यह विधवाओं के लिए है जिन्हें कोई दूसरी पेंशन नहीं मिल रही है। ssp.uk.gov.in या सहायता केंद्र से आवेदन करें। विभाग पात्रता और दस्तावेज़ जाँचता है। अलग-अलग पेंशन विकल्पों को जोड़कर निश्चित भुगतान न मानें।"
+summary_en = "₹1,500 monthly pension after approval, set by Uttarakhand government order of 21 April 2022. The Uttarakhand department's pension overview says this route is for widows who are not receiving another pension. Apply through ssp.uk.gov.in or assisted services. Eligibility and documents are checked by the department. Do not add multiple pension routes together as guaranteed payments."
+summary_hi = "उत्तराखंड शासनादेश (21 अप्रैल 2022) के अनुसार स्वीकृति के बाद ₹1,500 मासिक पेंशन। उत्तराखंड विभाग के पेंशन विवरण के अनुसार यह विधवाओं के लिए है जिन्हें कोई दूसरी पेंशन नहीं मिल रही है। ssp.uk.gov.in या सहायता केंद्र से आवेदन करें। विभाग पात्रता और दस्तावेज़ जाँचता है। अलग-अलग पेंशन विकल्पों को जोड़कर निश्चित भुगतान न मानें।"
 
 [[criteria]]
 field = "state"

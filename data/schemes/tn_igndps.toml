@@ -1,0 +1,103 @@
+# DRAFT 27 September 2026 — NOT SIGNED. Served as UNKNOWN until a human signs
+# ! PARKED 27 September 2026: no official page lists the documents (see
+# ! docs/PROGRESS.md). Resume only from an official list or a recorded call.
+# it with `python3 -m sathi.review TN_IGNDPS`.
+#
+# * What this is: the national disability pension (IGNDPS) at Tamil Nadu's
+# * amount. The national file (igndps.toml) carries only the central share,
+# * ₹300 a month; Tamil Nadu adds ₹1,200, so a worker there receives ₹1,500.
+# * Both files share exclusive_group "uk_state_pension", so they are never
+# * added: the group keeps the larger, which is this one. The group name is
+# * historical — it is the "one social pension per person" group.
+#
+# ! Source: Commissionerate of Revenue Administration, Tamil Nadu, read
+# ! 2026-09-27 — https://cra.tn.gov.in/about_schemes_t.php (Tamil). Research
+# ! note with every quote: docs/research/states/TN.md, row 3.
+# ! Evidence copy (printed 2026-09-27, English translation):
+# ! docs/audit-evidence/tn-cra-social-security-schemes-2026-09-27.pdf
+#
+# Before signing, open the page and find:
+#   1. Eligibility (section "தகுதிகள்", central schemes table, row 3):
+#      "மாற்றுத் திறன் நிலை – 80 சதவிகிதம் அல்லது அதற்கு மேலும்,
+#       வறுமைக்கோட்டிற்கு கீழ் உள்ளவராகவும், வயது – 18 மற்றும் அதற்கு மேல்
+#       உள்ளவராகவும் இருத்தல் வேண்டும்."
+#      = disability 80%+, below poverty line, age 18+.
+#   2. Amount ("நிதி பங்களிப்பு" table, row 2): 300 (central) + 1200 (state)
+#      = 1500 a month. No separate rate from age 80 is listed for this scheme.
+#   3. Apply online at https://www.tnesevai.tn.gov.in; decided within 30 days
+#      ("30 தினங்களுக்குள் தீர்வு செய்யப்படுகின்றன").
+#
+# ? Documents are not listed on this page — `documents` stays "TODO" until
+# ? read from tnesevai or the Taluk office list. That stub keeps the scheme
+# ? UNKNOWN even after signing, which is correct until it is filled.
+# ? Hindi text below is machine-drafted; it joins the Hindi review.
+code = "TN_IGNDPS"
+name_en = "Indira Gandhi National Disability Pension (Tamil Nadu)"
+name_hi = "इंदिरा गांधी राष्ट्रीय दिव्यांगता पेंशन (तमिलनाडु)"
+authority = "Revenue Administration, Government of Tamil Nadu (NSAP)"
+official_url = "https://cra.tn.gov.in/about_schemes_t.php"
+verified_on = "2026-09-27"
+verified_by = "claude — AUTO-RESEARCHED, PENDING HUMAN VERIFICATION"
+
+[benefit]
+annual_value_inr = 18000
+value_basis = "annual_payout"
+exclusive_group = "uk_state_pension"
+premium_inr = 0
+summary_en = "A monthly pension of ₹1,500 in Tamil Nadu for people aged 18 and above with a disability certificate of 80% or more, in a below-poverty-line household: ₹300 from the central government and ₹1,200 from Tamil Nadu. You get one pension, not two. Apply online through Tamil Nadu e-Sevai; the office checks and decides within 30 days."
+summary_hi = "तमिलनाडु में बीपीएल परिवार के 18 साल या उससे ऊपर के उन लोगों के लिए ₹1,500 हर महीने की पेंशन जिनका दिव्यांगता प्रमाणपत्र 80% या अधिक है: ₹300 केंद्र सरकार से और ₹1,200 तमिलनाडु से। पेंशन एक ही मिलती है, दो नहीं। तमिलनाडु ई-सेवा से ऑनलाइन आवेदन करें; कार्यालय जाँच कर 30 दिन में फ़ैसला करता है।"
+
+[[criteria]]
+field = "state"
+op = "eq"
+value = "TN"
+ask_en = "Which state do you live in?"
+ask_hi = "आप किस राज्य में रहते हैं?"
+pass_en = "You reported living in Tamil Nadu; residence is checked when you apply."
+pass_hi = "आपने तमिलनाडु में रहना बताया; आवेदन के समय निवास जाँचा जाएगा।"
+fail_en = "This is Tamil Nadu's amount; in your state, ask about the disability pension there."
+fail_hi = "यह तमिलनाडु की रकम है; अपने राज्य में वहाँ की दिव्यांगता पेंशन के बारे में पूछें।"
+source_url = "https://cra.tn.gov.in/about_schemes_t.php"
+
+[[criteria]]
+field = "age"
+op = "gte"
+value = 18
+ask_en = "How old are you?"
+ask_hi = "आपकी उम्र कितनी है?"
+pass_en = "Your reported age meets the entry-age condition."
+pass_hi = "आपकी बताई उम्र प्रवेश की आयु-शर्त पूरी करती है।"
+fail_en = "This pension starts at age 18."
+fail_hi = "यह पेंशन 18 साल की उम्र से शुरू होती है।"
+source_url = "https://cra.tn.gov.in/about_schemes_t.php"
+
+[[criteria]]
+field = "has_disability_80pct"
+op = "eq"
+value = true
+ask_en = "Do you have a disability certificate that shows 80% or more?"
+ask_hi = "क्या आपके पास दिव्यांगता प्रमाणपत्र है जिसमें 80% या अधिक लिखा है?"
+pass_en = "You reported a certificate of 80% or more; the office verifies it."
+pass_hi = "आपने 80% या अधिक का प्रमाणपत्र बताया; कार्यालय उसे जाँचेगा।"
+fail_en = "This pension needs a certificate showing 80% or more. Tamil Nadu also has a separate state disability pension from 40% — ask at the Taluk office."
+fail_hi = "इस पेंशन के लिए 80% या अधिक का प्रमाणपत्र चाहिए। तमिलनाडु में 40% से एक अलग राज्य दिव्यांगता पेंशन भी है — तालुक कार्यालय में पूछें।"
+source_url = "https://cra.tn.gov.in/about_schemes_t.php"
+
+[[criteria]]
+field = "is_bpl"
+op = "eq"
+value = true
+ask_en = "Does your household have a BPL card, or is it listed as Below Poverty Line?"
+ask_hi = "क्या आपके परिवार के पास बीपीएल कार्ड है, या परिवार ग़रीबी रेखा से नीचे सूचीबद्ध है?"
+pass_en = "You reported a BPL household; the office checks the list."
+pass_hi = "आपने बीपीएल परिवार बताया; कार्यालय सूची जाँचेगा।"
+fail_en = "This scheme is for households below the poverty line. If you are unsure whether yours is listed, ask at the Taluk office — do not assume no."
+fail_hi = "यह योजना ग़रीबी रेखा से नीचे के परिवारों के लिए है। अगर पक्का नहीं है कि आपका परिवार सूची में है, तो तालुक कार्यालय में पूछें — न मान लें।"
+source_url = "https://cra.tn.gov.in/about_schemes_t.php"
+
+[paperwork]
+documents_en = ["TODO"]
+documents = ["TODO"]
+where_to_apply = "online"
+renewal_en = "Paid directly to your bank account (DBT). Tamil Nadu also gives pensioners a dhoti or saree at Pongal and Deepavali."
+renewal = "सीधे आपके बैंक खाते में आती है (DBT)। तमिलनाडु पेंशनधारकों को पोंगल और दीपावली पर धोती या साड़ी भी देता है।"

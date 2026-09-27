@@ -217,7 +217,10 @@ def interactive(text: str, buttons: tuple[Button, ...], lang: str) -> dict:
     if not buttons:
         return {"type": "text", "text": {"preview_url": False, "body": text[:_TEXT_MAX]}}
 
-    if len(buttons) <= _MAX_BUTTONS:
+    # ! A label longer than a button title would be cut off ("Madhya Pradesh
+    # ! sche…" on the scheme-choice screen). A list row holds it whole — its
+    # ! title is longer and the rest spills into the description — so use one.
+    if len(buttons) <= _MAX_BUTTONS and all(len(b.label) <= _BUTTON_TITLE for b in buttons):
         return {
             "type": "interactive",
             "interactive": {
@@ -809,6 +812,11 @@ def _self_check() -> None:
     # * tests/test_all_paths.py, which walks 486 paths per language. Doing it
     # * here as well would be a second, weaker copy of that gate.
 
+    # ! Three options with one label too long for a button become a list.
+    scope = interactive("Which schemes?", (Button("National schemes", "pick:national"),
+                                           Button("Madhya Pradesh schemes", "pick:state"),
+                                           Button("Both", "pick:all")), "en")
+    assert scope["interactive"]["type"] == "list", scope
     # ! A long label spills into the description instead of being cut off.
     long_label = ("Aadhaar-linked mobile number (if you have none, a centre can "
                   "register you by fingerprint)")

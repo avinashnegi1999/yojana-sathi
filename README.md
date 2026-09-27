@@ -53,13 +53,14 @@ Yojana Sathi is a conversation on a ₹6,000 phone that ends in a checklist and 
 
 ## How it works.
 
-1. **Choose.** Every signed scheme, or just the ones you care about.
-2. **Answer.** Only the questions those schemes need. Buttons for everything except age. "Don't know" is always allowed.
-3. **Decide.** Plain rule files with cited sources. Same answers, same verdict.
-4. **Walk in.** What you get, what it costs, what to carry, where to go — and a one-page sheet to show at the centre.
+1. **Where.** Your state first — any of the 36 states and union territories, on a clickable map in the browser or on buttons in chat.
+2. **Choose.** National schemes, your state's, or both. Then tick the ones you care about, or "All of these". Another state's pensions are never listed.
+3. **Answer.** Only the questions those schemes need. Buttons for everything except age. "Don't know" is always allowed.
+4. **Decide.** Plain rule files with cited sources. Same answers, same verdict.
+5. **Walk in.** What you get, what it costs, what to carry, where to go — and a one-page sheet to show at the centre.
 
 <p align="center">
-  <img src="livesite/assets/core-logic.png" width="760" alt="The core flow: open the bot, pick a language, consent, choose schemes, answer only the needed questions, get eligible, ineligible or unknown verdicts from human-signed rules, then an explanation, a checklist, a sheet and where to go.">
+  <img src="livesite/assets/core-logic.svg" width="760" alt="The core flow: open the bot, pick a language, consent, give your state, choose national, state or both, tick schemes or all, answer only the needed questions, get eligible, ineligible or unknown verdicts from human-signed rules, then the reasons, a checklist, a sheet and where to go.">
 </p>
 
 <p align="center"><sub>Every module and what it calls: <a href="livesite/assets/system-architecture.png">code map</a> · <a href="docs/ARCHITECTURE.md">architecture notes</a></sub></p>
@@ -78,13 +79,19 @@ Yojana Sathi is a conversation on a ₹6,000 phone that ends in a checklist and 
 
 <br>
 
-## Ten schemes. Each signed by a person.
+## Twenty-one schemes. Each signed by a person.
 
 | Scheme | Stated benefit | Where to apply |
 |---|---|---|
 | PM Shram Yogi Maandhan | ₹36,000 a year from age 60 | Common Service Centre |
 | National Pension Scheme for Traders | ₹36,000 a year from age 60 | Common Service Centre |
 | Uttarakhand old-age pension | ₹18,000 a year | State portal |
+| Uttarakhand widow pension | ₹18,000 a year (GO 40, 21 April 2022) | State portal |
+| Sikkim old-age pension | ₹18,000 a year; ₹24,000 from 70; ₹30,000 from 80 | State pension portal |
+| Sikkim widow pension | ₹24,000 a year, from age 21 | State pension portal |
+| Sikkim disability pension | ₹24,000 a year | State pension portal |
+| Madhya Pradesh Kalyani (widow) pension | ₹7,200 a year, ages 18–79 | Panchayat or municipal office |
+| Punjab old-age pension (women 58+, men 65+; two rule files) | ₹18,000 a year | Panchayat, block or municipal office |
 | Indira Gandhi National Old Age Pension | ₹2,400 a year central share; ₹6,000 from 80 | Common Service Centre |
 | Indira Gandhi National Widow Pension | ₹3,600 a year central share; ₹6,000 from 80 | Common Service Centre |
 | Indira Gandhi National Disability Pension | ₹3,600 a year central share; ₹6,000 from 80 | Common Service Centre |
@@ -92,12 +99,17 @@ Yojana Sathi is a conversation on a ₹6,000 phone that ends in a checklist and 
 | PM Suraksha Bima Yojana | ₹2,00,000 accident cover | Bank branch |
 | PM Ujjwala Yojana | In-kind LPG support | Online or an LPG distributor |
 | e-Shram registration | Gateway — no payout of its own | e-Shram portal or a CSC |
+| Jan Dhan bank account (PMJDY) | Gateway — free account, RuPay card with ₹2 lakh accident cover | Bank branch or Bank Mitra |
+| Ayushman Bharat PM-JAY, age 70+ | ₹5,00,000 hospital cover a year | Ayushman app, beneficiary portal or empanelled hospital |
+| PM Vishwakarma | Toolkit up to ₹15,000 (e-vouchers), training stipend ₹500 a day | Common Service Centre |
+| Atal Pension Yojana | ₹12,000 a year from 60 at the smallest tier (₹1,000–₹5,000 a month) | Bank branch |
 
+- **Thirteen national, eight state.** The national schemes apply in every state. State pensions are listed only for people in that state, and each replaces the national central-share figure rather than being added to it.
 - **The signature is enforced.** Until a named person signs a file, every worker gets `UNKNOWN` for it and it adds ₹0 to every total. [`tests/test_schemes.py`](tests/test_schemes.py) pins the signed list.
-- **Five drafts are not served:** APY, PM Vishwakarma, PM-JAY 70+, PMJDY and the Uttarakhand widow pension. The widow pension's signature was withdrawn on 15 September; its department page states no rate. [Why](data/schemes/uk_widow.toml).
+- **Two drafts are not served:** state-rate pensions for Tamil Nadu and Mizoram. No official page lists their documents. The Uttarakhand widow pension was withdrawn on 15 September, when its rate rested on myScheme alone. It was re-signed on 27 September against the state's own order. [Why](data/schemes/uk_widow.toml).
 - **Overlapping pensions are never added.** Two routes to the same pension show the larger, once.
 
-What could and could not be verified: [`docs/history/SOURCE_REVIEW_2026-09-09.md`](docs/history/SOURCE_REVIEW_2026-09-09.md).
+What could and could not be verified: [`docs/history/SOURCE_REVIEW_2026-09-09.md`](docs/history/SOURCE_REVIEW_2026-09-09.md). Every official page behind the 27 September additions, with its SHA-256: [`docs/audit-evidence/`](docs/audit-evidence/README.md). Research on all 36 states: [`docs/research/states/`](docs/research/states/README.md).
 
 <br>
 

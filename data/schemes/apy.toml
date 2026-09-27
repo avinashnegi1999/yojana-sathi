@@ -1,4 +1,15 @@
-# Source-researched draft, 12 September 2026. NO HUMAN SIGN-OFF IS CLAIMED.
+# SIGNED 27 September 2026 by Avinash Negi (see verified_by). Drafted
+# 12 September 2026.
+# ! Premium filled 27 September 2026 from the official "Atal Pension Yojana
+# ! (APY) - Details of the Scheme", Annex-1 (Department of Financial Services,
+# ! https://jansuraksha.gov.in/Files/APY/ENGLISH/APY.pdf; copy at
+# ! docs/audit-evidence/apy-details-jansuraksha.pdf). For the ₹1,000/month
+# ! tier — the tier annual_value_inr shows — the monthly contribution is ₹42
+# ! at entry age 18 and ₹291 at 40 (₹76 at 25, ₹116 at 30, ₹181 at 35).
+# ! Written as prose because it varies by age, the same way PM-SYM does.
+# ! Section 5.2 of the same document: a subscriber "found to have been an
+# ! income-tax payer on or before the date of application" has the account
+# ! closed — so the summary now warns about past tax, not only present.
 # Every value below was read from the PFRDA FAQ at
 # https://pfrda.org.in/w/faqs/atal-pension-yojana on 12 September 2026.
 # PFRDA is the statutory regulator that administers APY, so this is a primary
@@ -35,15 +46,15 @@ name_en = "Atal Pension Yojana"
 name_hi = "अटल पेंशन योजना"
 authority = "Pension Fund Regulatory and Development Authority (PFRDA)"
 official_url = "https://pfrda.org.in/schemes/atal-pension-yojana-apy"
-verified_on = "2026-09-12"
-verified_by = "claude — AUTO-RESEARCHED, PENDING HUMAN VERIFICATION"
+verified_on = "2026-09-27"
+verified_by = "Avinash Negi, checked 2026-09-27"
 
 [benefit]
 annual_value_inr = 12000
 value_basis = "annual_payout"
-premium_inr = "TODO"
-summary_en = "A pension every month from age 60, guaranteed by the Central Government, for life. You choose the amount when you join — ₹1,000, ₹2,000, ₹3,000, ₹4,000 or ₹5,000 a month — and the monthly contribution depends on the amount you pick and your age when you join. The younger you join, the less you pay. After your death your spouse receives the same pension for life. The figure shown here is the smallest tier; ask the bank what each tier would cost you. Open it at the bank or post office where you already have a savings account."
-summary_hi = "60 साल की उम्र से हर महीने पेंशन, केंद्र सरकार की गारंटी के साथ, जीवन भर। रकम आप जुड़ते समय चुनते हैं — ₹1,000, ₹2,000, ₹3,000, ₹4,000 या ₹5,000 हर महीने — और हर महीने कितना जमा करना होगा यह आपकी चुनी रकम और जुड़ने की उम्र पर निर्भर करता है। जितनी कम उम्र में जुड़ेंगे, उतना कम जमा करना होगा। आपके बाद यही पेंशन आपके पति या पत्नी को जीवन भर मिलती है। यहाँ दिखाई रकम सबसे छोटी है; बैंक से पूछें कि हर विकल्प में कितना जमा करना होगा। जिस बैंक या डाकघर में आपका बचत खाता है, वहीं खाता खुलवाएँ।"
+premium_inr = "₹1,000 पेंशन के लिए ₹42 से ₹291 प्रति माह — जुड़ने की उम्र पर निर्भर (18 साल = ₹42, 30 साल = ₹116, 40 साल = ₹291)। ज़्यादा पेंशन चुनने पर ज़्यादा जमा।"
+summary_en = "A pension every month from age 60, guaranteed by the Central Government, for life. You choose the amount when you join — ₹1,000, ₹2,000, ₹3,000, ₹4,000 or ₹5,000 a month — and the monthly contribution depends on the amount you pick and your age when you join. The younger you join, the less you pay. After your death your spouse receives the same pension for life. The figure shown here is the smallest tier: for it you pay ₹42 a month if you join at 18, ₹116 at 30, or ₹291 at 40. Not open to anyone who is, or has ever been, an income-tax payer. Open it at the bank or post office where you already have a savings account."
+summary_hi = "60 साल की उम्र से हर महीने पेंशन, केंद्र सरकार की गारंटी के साथ, जीवन भर। रकम आप जुड़ते समय चुनते हैं — ₹1,000, ₹2,000, ₹3,000, ₹4,000 या ₹5,000 हर महीने — और हर महीने कितना जमा करना होगा यह आपकी चुनी रकम और जुड़ने की उम्र पर निर्भर करता है। जितनी कम उम्र में जुड़ेंगे, उतना कम जमा करना होगा। आपके बाद यही पेंशन आपके पति या पत्नी को जीवन भर मिलती है। यहाँ दिखाई रकम सबसे छोटी है: इसके लिए 18 साल में जुड़ने पर ₹42 हर महीने, 30 में ₹116, या 40 में ₹291 जमा करने होते हैं। जो आयकरदाता है या कभी रहा है, वह नहीं जुड़ सकता। जिस बैंक या डाकघर में आपका बचत खाता है, वहीं खाता खुलवाएँ।"
 
 # ! "The age of an individual should be between 18 and 40 years." Two criteria
 # ! rather than a range operator, so a 45-year-old is told which end she missed

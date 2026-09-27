@@ -1,0 +1,1016 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1"><title>
+	Press Release Page | Press Information Bureau
+</title><link href="css/style.css" rel="stylesheet" type="text/css" /><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><link rel="alternate stylesheet" href="css/change.css" media="screen" title="change" /><link rel="alternate stylesheet" href="css/green.css" media="screen" title="green" /><link rel="alternate stylesheet" href="css/yellow.css" media="screen" title="yellow" /><link rel="stylesheet" type="text/css" href="css/prtint.css" media="print" /><link rel="stylesheet" href="css/style3.1.css" type="text/css" /><link id="pibA11yCss" rel="stylesheet" href="/css/accessibility.css?v=3" type="text/css" />
+      <script type="text/javascript">
+        /* Stamps the saved theme on <html> before the page paints. The
+           switcher in js/accessibility.js settles the rest, but on inner
+           pages it does not run until the end of the body and inside the
+           release frame it is a separate download - either way the reader
+           would otherwise watch a light page turn dark in front of them. */
+        (function (d) {
+            var t = "";
+            try {
+                t = window.localStorage.getItem("pibStyle") || "";
+            } catch (e) {
+                t = "";
+            }
+            if (t === "orange") {
+                t = "yellow";
+            }
+            var c = t === "change" ? " pib-hc"
+                : t === "green" ? " pib-theme-green"
+                : t === "yellow" ? " pib-theme-yellow" : "";
+            d.documentElement.className += c + " pib-a11y-content";
+        }(document));
+      </script>
+
+
+      <script src="js/jquery.min.js" type="text/javascript"></script>
+      <script type="text/javascript" src="/js/accessibility.js?v=7"></script>
+      <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="true" /><link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet" />
+
+      <script type="text/javascript">
+            $(document).ready(function () {
+                  function getParameterByName(name) {
+                        var url = window.location.href;
+                        name = name.replace(/[\[\]]/g, '\\$&');
+                        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+                              results = regex.exec(url);
+                        if (!results) return null;
+                        if (!results[2]) return '';
+                        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+                  }
+                  // Get the IDs from the current page's URL
+                  let prid = parseInt(getParameterByName('PRID'), 10);
+
+                  if (!isNaN(prid) && prid > 0) {
+                        $.ajax({
+                              type: "POST",
+                              url: "AjaxMethod.aspx/UpdatePRHitCount",
+                              async: false,
+                              data: JSON.stringify({ 'PermId': prid }),
+                              contentType: "application/json; charset=utf-8",
+                              dataType: "json",
+                              success: function (response) {
+                                    console.log(response);
+                              },
+                              error: function (error) {
+                                    console.log("Error in AJAX request", error);
+                              }
+                        });
+                  } else {
+                        console.log("Invalid parameters:", prid);
+                  }
+
+            });
+      </script>
+      <style type="text/css">
+            .table-responsive {
+                  width: 100%;
+                  overflow-x: auto;
+            }
+
+            .banner {
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  background-color: #000;
+                  color: #fff;
+                  padding: 20px;
+            }
+
+            full-width {
+                  width: 100%;
+            }
+
+            .logo-left, .logo-center, .countdown {
+                  display: flex;
+                  align-items: center;
+            }
+
+                  .logo-left img, .logo-center img {
+                        height: 70px;
+                  }
+
+            .countdown {
+                  text-align: center;
+                  background-color: #444;
+                  border-radius: 10px;
+                  padding: 10px;
+                  border: 2px solid grey;
+            }
+
+            .firstnumber {
+                  color: #000000;
+                  position: absolute;
+                  top: 50px;
+                  right: 90px;
+                  font-size: 30px;
+            }
+
+            .secondnumber {
+                  position: absolute;
+                  color: #000000;
+                  right: 45px;
+                  top: 50px;
+                  font-size: 30px;
+            }
+
+            .countdown .days {
+                  font-size: 35px;
+                  color: gold;
+            }
+
+            .countdown p {
+                  margin: 0;
+            }
+
+            .countdown .text {
+                  font-size: 16px;
+            }
+
+            a {
+                  word-break: break-all;
+            }
+
+            iframe, img {
+                  max-width: 100%;
+            }
+
+            @media(max-width:1199px) {
+                  .firstnumber {
+                        top: 40px;
+                        right: 72px;
+                        font-size: 30px;
+                  }
+
+                  .secondnumber {
+                        right: 35px;
+                        top: 40px;
+                        font-size: 30px;
+                  }
+            }
+
+            @media(max-width:990px) {
+                  .firstnumber {
+                        top: 25px;
+                        right: 54px;
+                        font-size: 30px;
+                  }
+
+                  .secondnumber {
+                        right: 25px;
+                        top: 25px;
+                        font-size: 30px;
+                  }
+            }
+
+            @media(max-width:768px) {
+                  .countdown, .days {
+                        font-size: 12px !important;
+                  }
+
+
+                  .firstnumber {
+                        top: 25%;
+                        right: 8%;
+                        font-size: 30px;
+                  }
+
+                  .secondnumber {
+                        right: 4.5%;
+                        top: 25%;
+                        font-size: 30px;
+                  }
+            }
+
+            @media(max-width:475px) {
+                  .countdown, .days {
+                        font-size: 10px !important;
+                        top: 20%;
+                  }
+
+                  .bannerimgdiv {
+                        padding: 0 !important;
+                  }
+
+                  .bannerimg {
+                        width: 108% !important;
+                  }
+            }
+      </style>
+      <script type="text/javascript">
+            $(function () {
+                  $("[id*=printPDF]").click(function () {
+                        $("[id*=hfGridHtml]").val($("#PdfDiv").html());
+                  });
+            });
+            $(function () {
+                  $("[id*=printPDFEvent]").click(function () {
+                        $("[id*=hfGridHtml]").val($("#PdfDiv").html());
+                  });
+            });
+      </script>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112591026-1"></script>
+      <script>
+
+            window.dataLayer = window.dataLayer || [];
+
+            function gtag() { dataLayer.push(arguments); }
+
+            gtag('js', new Date());
+
+
+
+            gtag('config', 'UA-112591026-1');
+
+      </script>
+
+<meta property="og:title" content="Update on Ayushman Bharat Vay Vandana Cards" /><meta property="og:url" content="www.pib.gov.in/Pressreleaseshare.aspx?PRID=2149693" /><meta property="og:description" content="On 29th October 2024, the Government of India expanded the scope of the Ayushman Bharat – Pradhan Ma" /><meta property="og:image" content="https:/pib.gov.in/images/indian-emblem.png" />
+                                <script>!function(e){var n="https://s.go-mpulse.net/boomerang/";if("False"=="True")e.BOOMR_config=e.BOOMR_config||{},e.BOOMR_config.PageParams=e.BOOMR_config.PageParams||{},e.BOOMR_config.PageParams.pci=!0,n="https://s2.go-mpulse.net/boomerang/";if(window.BOOMR_API_key="C4E7H-KSCMC-422L4-W3EM5-U36MF",function(){function e(){if(!i){var e=document.createElement("script");e.id="boomr-scr-as",e.src=window.BOOMR.url,e.async=!0,o.parentNode.appendChild(e),i=!0}}function t(e){i=!0;var n,t,a,r,d=document,O=window;if(window.BOOMR.snippetMethod=e?"if":"i",t=function(e,n){var t=d.createElement("script");t.id=n||"boomr-if-as",t.src=window.BOOMR.url,BOOMR_lstart=(new Date).getTime(),e=e||d.body,e.appendChild(t)},!window.addEventListener&&window.attachEvent&&navigator.userAgent.match(/MSIE [67]\./))return window.BOOMR.snippetMethod="s",void t(o.parentNode,"boomr-async");a=document.createElement("IFRAME"),a.src="about:blank",a.title="",a.role="presentation",a.loading="eager",r=(a.frameElement||a).style,r.width=0,r.height=0,r.border=0,r.display="none",o.parentNode.appendChild(a);try{O=a.contentWindow,d=O.document.open()}catch(_){n=document.domain,a.src="javascript:var d=document.open();d.domain='"+n+"';void(0);",O=a.contentWindow,d=O.document.open()}if(n)d._boomrl=function(){this.domain=n,t()},d.write("<bo"+"dy onload='document._boomrl();'>");else if(O._boomrl=function(){t()},O.addEventListener)O.addEventListener("load",O._boomrl,!1);else if(O.attachEvent)O.attachEvent("onload",O._boomrl);d.close()}function a(e){window.BOOMR_onload=e&&e.timeStamp||(new Date).getTime()}if(!window.BOOMR||!window.BOOMR.version&&!window.BOOMR.snippetExecuted){window.BOOMR=window.BOOMR||{},window.BOOMR.snippetStart=(new Date).getTime(),window.BOOMR.snippetExecuted=!0,window.BOOMR.snippetVersion=12,window.BOOMR.url=n+"C4E7H-KSCMC-422L4-W3EM5-U36MF";var o=document.currentScript||document.getElementsByTagName("script")[0],i=!1,r=document.createElement("link");if(r.relList&&"function"==typeof r.relList.supports&&r.relList.supports("preload")&&"as"in r)window.BOOMR.snippetMethod="p",r.href=window.BOOMR.url,r.rel="preload",r.as="script",r.addEventListener("load",e),r.addEventListener("error",function(){t(!0)}),setTimeout(function(){if(!i)t(!0)},3e3),BOOMR_lstart=(new Date).getTime(),o.parentNode.appendChild(r);else t(!1);if(window.addEventListener)window.addEventListener("load",a,!1);else if(window.attachEvent)window.attachEvent("onload",a)}}(),"".length>0)if(e&&"performance"in e&&e.performance&&"function"==typeof e.performance.setResourceTimingBufferSize)e.performance.setResourceTimingBufferSize();!function(){if(BOOMR=e.BOOMR||{},BOOMR.plugins=BOOMR.plugins||{},!BOOMR.plugins.AK){var n=""=="true"?1:0,t="",a="m5baqvaxynuua2vzc57q-f-b4693f1d4-clientnsv4-s.akamaihd.net",o="false"=="true"?2:1,i={"ak.v":"41","ak.cp":"1825201","ak.ai":parseInt("1215205",10),"ak.ol":"0","ak.cr":16,"ak.ipv":4,"ak.proto":"http/1.1","ak.rid":"707ca1a5","ak.r":49956,"ak.a2":n,"ak.m":"dscb","ak.n":"ff","ak.cport":54463,"ak.gh":"23.195.105.68","ak.quicv":"","ak.tlsv":"tls1.3","ak.0rtt":"","ak.0rtt.ed":"","ak.csrc":"-","ak.acc":"bbr","ak.t":"1790515071","ak.ak":"hOBiQwZUYzCg5VSAfCLimQ==d6GWtbd6f168HGK+0WdweOIBkWbHNiTByhH/CpoN/Yjsqbs6mrz6h8Jx+AAhPjO1bhjiROPxfYFbnXR/0MlLWE9NRKjDbyooRJF3vHiC8zXbthvJSePP0AXtbNqEg/WTqeonQl/dp1nENoi9NyJLp9nic+s1QZxc4BxQKuxTEINSegnjGWnwAGKhk9aimQz9OXF71lt42Fn8+vv7gDJS4F0txdMPQhV/b7pnUAJVJzDIAnaPq84kZ4gszGEMJN0Fx/Mz3/bFtxBAcMl7ErGppCVbw51feSiNogLxcIP1Joz6ii7FLXbl1UGDJNhlItI7ErKw4ud+S2QfTAxbCWYDIP1PYi5tdHS2mUwWlzRyptffLEMxmq3uxW3bApwj7gRevGNY9qi9qDdzG4ojd7lRaqgviEHvlga0UJaN1LGS8YY=","ak.pv":"9","ak.dpoabenc":"","ak.tf":o};if(""!==t)i["ak.ruds"]=t;var r={i:!1,av:function(n){var t="http.initiator";if(n&&(!n[t]||"spa_hard"===n[t]))i["ak.feo"]=void 0!==e.aFeoApplied?1:0,BOOMR.addVar(i)},rv:function(){var e=["ak.cport","ak.cr","ak.csrc","ak.gh","ak.ipv","ak.m","ak.n","ak.ol","ak.proto","ak.quicv","ak.tlsv","ak.0rtt","ak.0rtt.ed","ak.r","ak.acc","ak.t","ak.tf"];BOOMR.removeVar(e)}};BOOMR.plugins.AK={akVars:i,akDNSPreFetchDomain:a,init:function(){if(!r.i){var e=BOOMR.subscribe;e("before_beacon",r.av,null,null),e("onbeacon",r.rv,null,null),r.i=!0}return this},is_complete:function(){return!0}}}}()}(window);</script></head>
+<body>
+      <form method="post" action="./PressReleasePage.aspx?PRID=2149693&amp;reg=48&amp;lang=2" id="form1">
+<div class="aspNetHidden">
+<input type="hidden" name="sc_HiddenField" id="sc_HiddenField" value="" />
+<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="" />
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="" />
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="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" />
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['form1'];
+if (!theForm) {
+    theForm = document.form1;
+}
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+<script src="/WebResource.axd?d=pynGkmcFUV13He1Qd6_TZPQet1wIx1Q48y3xJY2k25Y7qxH5RrQ9qQcN-OiTC9guZtri9w2&amp;t=639246310404186790" type="text/javascript"></script>
+
+
+<script src="/ScriptResource.axd?d=x6wALODbMJK5e0eRC_p1LdIxBJXt0U_WW5GWfJqHAqo6frgCmGRfEywglicTersO2OKrFhK1gAIp0Wk2al2YrpdR3uWqH6f4nfjBsCyRUfTUUVmb0&amp;t=ffffffffecf8d3f2" type="text/javascript"></script>
+<script src="/ScriptResource.axd?d=P5lTttoqSeZXoYRLQMIScH645UK3RD852IErF2548Wz9Ssv0rLjB4fhVKnHcMpqkaMHpNAGOeWY02Lf4aBYN9-dVBme_SNK5KJwmFQNpMixYDZ7M0&amp;t=ffffffffecf8d3f2" type="text/javascript"></script>
+<script src="/PressReleasePage.aspx?_TSM_HiddenField_=sc_HiddenField&amp;_TSM_CombinedScripts_=%3b%3bAjaxControlToolkit%2c+Version%3d3.5.7.123%2c+Culture%3dneutral%2c+PublicKeyToken%3d28f01b0e84b6d53e%3aen-US%3a5a4df314-b4a2-4da2-a207-9284f1b1e96c%3ade1feab2%3af2c8e708%3a8613aea7%3af9cec9bc%3a3202a5a2%3aab09e3fe%3a87104b7c%3a720a52bf%3a589eaa30%3aa67c2700%3abe6fb298" type="text/javascript"></script>
+<div class="aspNetHidden">
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="59B53027" />
+	<input type="hidden" name="__VIEWSTATEENCRYPTED" id="__VIEWSTATEENCRYPTED" value="" />
+	<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="0q8QaQLZcyJ83pthY0Z1bIch+Yl+Etmsw4SJG2xIjuJeDxIrr2R1CxWZDqdlucliwQRewWPM74W6V2M+I7z/filw7Vwv0dPqJBT81UUGVnvz61pj5iSywCMfTGr0STsILKSZcRajCuzF46i0GAREv5FxnEPKHvAquOz/Wtu2zrTHZDpRL1t/qbLByBDRhHf6ojrrUcDqFrjqHwxHOD3duHIOgqWTaGjL1OBySk29mQEGvHW/9haOl8wSQBqM4U4QkKDIYTS02WE2+HWNCUTazonNMVI=" />
+</div>
+                              
+            <div id="templateCss"></div>
+            <script type="text/javascript">
+//<![CDATA[
+Sys.WebForms.PageRequestManager._initialize('sc', 'form1', ['tupdate12','update12'], [], [], 90, '');
+//]]>
+</script>
+
+            <input type="hidden" name="hfGridHtml" id="hfGridHtml" />
+            <div class="container" style='margin-bottom: 50px;'>
+                  <div id="accessories">
+
+                        
+                        <div class="pull-right" style="display: flex">
+                              <div id="voll"></div>
+                              <div id="vollDT"></div>
+                              
+                              
+<div class="print-icons">
+<input type="image" name="Print1$print" id="Print1_print" aria-label="Print" src="images/printer_icon.png" alt="print page button" style="padding: 5px 10px 5px 10px;" />
+</div>
+                        </div>
+                  </div>
+                  <input type="hidden" name="hydpermid" id="hydpermid" value="2149693" />
+                  
+
+
+
+                  <div class="innner-page-main-about-us-content-right-part">
+
+                        <div id="MinistryName" class="MinistryNameSubhead text-center">
+                              Ministry of Health and Family Welfare
+                        </div>
+                        
+                        <div id="lg_g"><div class='log_oo'>  <img src='https://static.pib.gov.in/WriteReadData/specificdocs/photo/2026/sep/ph_9768_20260902_10000501.png' alt='azadi ka amrit mahotsav' /> </div></div>
+
+
+
+
+
+                        <div class="text-center event-heading-background">
+                              
+                              <h2 id="Titleh2">
+                                    Update on Ayushman Bharat Vay Vandana Cards
+                              </h2>
+                              <h3 id="Subtitleh3">
+                                    <span id="ltrSubtitle"><br/>Under the portability feature of AB-PMJAY and Vay Vandana, Beneficiaries can access treatment at 31,466 hospitals nationwide<br/><br/>NHA issued comprehensive Hospital Empanelment and Management (HEM) guidelines for hospital empanelment under AB-PMJAY<br/><br/>Over 1.06 lakh claims settled under Ayushman Vay Vandana Scheme since its launch</span>
+                              </h3>
+                        </div>
+
+                        <div id="PrDateTime" class="ReleaseDateSubHeaddateTime text-center pt20">
+                              Posted On:
+                29 JUL 2025 3:55PM by PIB Delhi
+                        </div>
+                        
+                        <div class='pt20'>
+                        </div>
+                        <input type="hidden" name="hydphotoUrl" id="hydphotoUrl" />
+                        
+                        <p style="margin-right:.2pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">On 29th October 2024, the Government of India expanded the scope of the Ayushman Bharat &ndash; Pradhan Mantri Jan Arogya Yojana (AB-PMJAY) to include all senior citizens aged 70 years and above, irrespective of their socio-economic status. Under this initiative, beneficiaries will receive free treatment benefits of up to ₹5 lakh per year through Ayushman Vay Vandana cards.</span></span></span></p>
+
+<p style="margin-right:.2pt; text-align:justify"><span style="color:black; font-family:&quot;Times New Roman&quot;,Times,serif; font-size:16px">In addition, the portability feature of AB-PMJAY allows eligible beneficiaries&mdash;including those under the Vay Vandana scheme&mdash;to access healthcare services at any of the 31,466 empanelled hospitals across the country, regardless of their place of residence. This ensures seamless and equitable access to quality healthcare for the elderly population nationwide.</span></p>
+
+<p style="margin-right:.2pt; text-align:justify"><span style="color:black; font-family:&quot;Times New Roman&quot;,Times,serif; font-size:16px">Vay Vandana scheme beneficiaries can also avail treatment through a vast network of 14,194 private healthcare providers empanelled under the scheme. To ensure quality and consistency in service delivery, the National Health Authority (NHA) has issued comprehensive Hospital Empanelment and Management (HEM) Guidelines for the empanelment of hospitals under the Ayushman Bharat &ndash; Pradhan Mantri Jan Arogya Yojana (AB-PMJAY).</span></p>
+
+<p style="margin-right:.2pt; text-align:justify"><span style="color:black; font-family:&quot;Times New Roman&quot;,Times,serif; font-size:16px">As on date, over 1.06 lakh claims have been settled under Ayushman Vay Vandana scheme since its launch.</span></p>
+
+<p style="text-align:justify"><span style="font-family:&quot;Times New Roman&quot;,Times,serif; font-size:16px">The Union Minister of State for Health and Family Welfare, </span><span style="font-family:&quot;Times New Roman&quot;,Times,serif; font-size:16px">Shri Prataprao Jadhav stated this in a written reply in the Rajya Sabha today.</span></p>
+
+<p style="text-align:center"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px">****</span></span></p>
+
+<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong>MV</strong></span></span></p>
+
+<p><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong>HFW/ Update on Ayushman Bharat Vay Vandana Cards /29 July, 2025/1</strong></span></span></p>
+
+
+                        
+                        <div id="reel_pic">
+                        </div>
+
+
+
+                        
+                        <br />
+                        <span id="ReleaseId">(Release ID: 2149693)</span>
+                        <span id="lblViews">Visitor Counter : 929</span>
+                        <div>
+                              
+                        </div>
+                        
+
+                        <span id="lblRefPhoto"></span>
+
+                        <div class="BackgroundRelease">
+                              
+                        </div>
+                        <div>
+                              
+                        </div>
+                        <div class="ReleaseLang">Read this release in: 
+                        
+                                    
+                                    <a href='https://pib.gov.in/PressReleasePage.aspx?PRID=2149746' target="_blank">
+                                          Urdu </a>
+                              
+                                    ,
+                              
+                                    
+                                    <a href='https://pib.gov.in/PressReleasePage.aspx?PRID=2149764' target="_blank">
+                                          हिन्दी </a>
+                              
+                                    ,
+                              
+                                    
+                                    <a href='https://pib.gov.in/PressReleasePage.aspx?PRID=2150001' target="_blank">
+                                          Punjabi </a>
+                              
+                                    ,
+                              
+                                    
+                                    <a href='https://pib.gov.in/PressReleasePage.aspx?PRID=2149886' target="_blank">
+                                          Tamil </a>
+                              
+                                    ,
+                              
+                                    
+                                    <a href='https://pib.gov.in/PressReleasePage.aspx?PRID=2150004' target="_blank">
+                                          Telugu </a>
+                              
+                        </div>
+
+                        <div class="RelTag">
+                              <ul>
+                                    
+                              </ul>
+                        </div>
+                        <div class="clear">
+                        </div>
+                        <div id="RelLink" class="RelLink">
+                              <ul>
+                                    
+                                    
+                              </ul>
+                        </div>
+                        <center>
+                              
+                        </center>
+                  </div>
+
+                  <div id="update12">
+	
+                              
+                              <input type="hidden" name="Hidden" id="Hidden" />
+                              <div id="P_CategoryManagement" class="ModalWindow" style="border-width:0px;height:60%;width:60%;overflow:auto;display: none">
+		
+                                    <div>
+                                          <input type="image" name="btnClose" id="btnClose" src="images/close_flat_icon.png" />
+                                    </div>
+                                    <div id="description">
+                                    </div>
+                                    <div class="text-center">
+                                          <h2>
+                                                
+                                                <br>
+                                                
+                                          </h2>
+                                    </div>
+                                    <br />
+                                    <div class="clear">
+                                    </div>
+                                    
+                              
+	</div>
+                        
+</div>
+            </div>
+            
+            <div id="PdfDiv" style="display: none;">
+                  <table width="100%">
+                        <tr>
+                              <td style="font-weight: 200; text-align: center">
+                                    Ministry of Health and Family Welfare
+                                    <div style="height: 30px; width: 100%;">
+                                    </div>
+                                    <div style="font-weight: 200; text-align: center; font-size: 30px;">
+                                          Update on Ayushman Bharat Vay Vandana Cards
+                                    </div>
+                                    <div style="height: 30px; width: 100%;">
+                                    </div>
+                                    <div style="font-weight: 200; text-align: center; font-size: 30px;">
+                                          <div style='height:30px;width:100%;'></div>Under the portability feature of AB-PMJAY and Vay Vandana, Beneficiaries can access treatment at 31,466 hospitals nationwide<div style='height:30px;width:100%;'></div><div style='height:30px;width:100%;'></div>NHA issued comprehensive Hospital Empanelment and Management (HEM) guidelines for hospital empanelment under AB-PMJAY<div style='height:30px;width:100%;'></div><div style='height:30px;width:100%;'></div>Over 1.06 lakh claims settled under Ayushman Vay Vandana Scheme since its launch
+                                    </div>
+                                    <div style="height: 30px; width: 100%;">
+                                    </div>
+                                    <div style="text-align: center; font-size: 14px;">
+                                          Posted On:
+                        29 JUL 2025 3:55PM by PIB Delhi
+                                    </div>
+                                    <div style="height: 30px; width: 100%;">
+                                    </div>
+                                    <div style="font-weight: 200; text-align: left; font-size: 16px;">
+                                          <p style="margin-right:.2pt; text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><span style="color:black">On 29th October 2024, the Government of India expanded the scope of the Ayushman Bharat &ndash; Pradhan Mantri Jan Arogya Yojana (AB-PMJAY) to include all senior citizens aged 70 years and above, irrespective of their socio-economic status. Under this initiative, beneficiaries will receive free treatment benefits of up to ₹5 lakh per year through Ayushman Vay Vandana cards.</span></span></span></p>
+
+<p style="margin-right:.2pt; text-align:justify"><span style="color:black; font-family:&quot;Times New Roman&quot;,Times,serif; font-size:16px">In addition, the portability feature of AB-PMJAY allows eligible beneficiaries&mdash;including those under the Vay Vandana scheme&mdash;to access healthcare services at any of the 31,466 empanelled hospitals across the country, regardless of their place of residence. This ensures seamless and equitable access to quality healthcare for the elderly population nationwide.</span></p>
+
+<p style="margin-right:.2pt; text-align:justify"><span style="color:black; font-family:&quot;Times New Roman&quot;,Times,serif; font-size:16px">Vay Vandana scheme beneficiaries can also avail treatment through a vast network of 14,194 private healthcare providers empanelled under the scheme. To ensure quality and consistency in service delivery, the National Health Authority (NHA) has issued comprehensive Hospital Empanelment and Management (HEM) Guidelines for the empanelment of hospitals under the Ayushman Bharat &ndash; Pradhan Mantri Jan Arogya Yojana (AB-PMJAY).</span></p>
+
+<p style="margin-right:.2pt; text-align:justify"><span style="color:black; font-family:&quot;Times New Roman&quot;,Times,serif; font-size:16px">As on date, over 1.06 lakh claims have been settled under Ayushman Vay Vandana scheme since its launch.</span></p>
+
+<p style="text-align:justify"><span style="font-family:&quot;Times New Roman&quot;,Times,serif; font-size:16px">The Union Minister of State for Health and Family Welfare, </span><span style="font-family:&quot;Times New Roman&quot;,Times,serif; font-size:16px">Shri Prataprao Jadhav stated this in a written reply in the Rajya Sabha today.</span></p>
+
+<p style="text-align:center"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px">****</span></span></p>
+
+<p style="text-align:justify"><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong>MV</strong></span></span></p>
+
+<p><span style="font-family:Times New Roman,Times,serif"><span style="font-size:16px"><strong>HFW/ Update on Ayushman Bharat Vay Vandana Cards /29 July, 2025/1</strong></span></span></p>
+
+                                    </div>
+                                    <div style="height: 30px; width: 100%;">
+                                    </div>
+                                    <div style="height: 30px; width: 100%;">
+                                    </div>
+                                    <div style="font-weight: 100; text-align: left; font-size: 16px;">
+                                          (Release ID: 2149693)
+                                    </div>
+                                    <div style="height: 30px; width: 100%;">
+                                    </div>
+                              </td>
+                        </tr>
+                        <tr>
+                              <td style="font-weight: 200; text-align: center; font-size: 24px;"></td>
+                        </tr>
+                  </table>
+            </div>
+            <div class="clearfix">
+            </div>
+
+            
+
+            <div class="section1">
+                  <div id="frst_t">
+                        <div id="arr_rm"><div class='sticky-social_mb'><ul class='social_mb'><a href='http://www.facebook.com/share.php?u=https://pib.gov.in/PressReleasePage.aspx?PRID=2149693' target='_blank'><li class='fb_b'   ><img  src='https://static.pib.gov.in/WriteReadData/userfiles/socialmedianew/facebook.jpg' alt='Share on facebook'  width='40' /></li></a><a href='https://twitter.com/intent/tweet?url=https://pib.gov.in/PressReleasePage.aspx?PRID=2149693&text=Update on Ayushman Bharat Vay Vandana Cards' target='_blank'><li class='twitter_r'  ><img  src='https://static.pib.gov.in/WriteReadData/specificdocs/photo/2023/aug/ph2023818240601.jpg' alt='Share on twitter' width='40' /> </li></a><a href='https://api.whatsapp.com/send?text=https://pib.gov.in/PressReleasePage.aspx?PRID=2149693' target='_blank'><li class='whatsapp_r'  ><img  src='https://static.pib.gov.in/WriteReadData/userfiles/socialmedianew/whatsapp1.png' alt='Share on whatsapp' width='40' /></li></a><a href='https://mail.google.com/mail/?view=cm&fs=1&tf=1&to=&su=Update on Ayushman Bharat Vay Vandana Cards&body=https://pib.gov.in/PressReleasePage.aspx?PRID=2149693&ui=2&tf=1&pli=1' title='Share by Email' target='_blank'><li class='fa-envelope_r' ><img  src='https://static.pib.gov.in/WriteReadData/userfiles/socialmedianew/email1.png' alt='Share on email'  width='40' /></li></a><a href='https://www.linkedin.com/shareArticle?mini=true&url=https://pib.gov.in/PressReleasePage.aspx?PRID=2149693&title=Update on Ayushman Bharat Vay Vandana Cards&summary=My%20favorite%20developer%20program&source=LinkedIn' target='_blank'><li class='fa-linkedin_r'  ><img  src='https://static.pib.gov.in/WriteReadData/userfiles/socialmedianew/linkedin.png' alt='Share on linkedin' width='40' /></li></a></ul></div></div>
+                  </div>
+                  <div id="second_t">
+                        <div id="sndr_rm"><div class='sticky-social'><ul class='social'><a href='http://www.facebook.com/share.php?u=https://pib.gov.in/PressReleasePage.aspx?PRID=2149693' target='_blank'><li class='fb_b'   ><img  src='https://static.pib.gov.in/WriteReadData/userfiles/socialmedianew/facebook.jpg' alt='Share on facebook'  width='35' /></li></a><a href='https://twitter.com/intent/tweet?url=https://pib.gov.in/PressReleasePage.aspx?PRID=2149693&text=Update on Ayushman Bharat Vay Vandana Cards' target='_blank'><li class='twitter_r'  ><img  src='https://static.pib.gov.in/WriteReadData/specificdocs/photo/2023/aug/ph2023818240601.jpg' alt='Share on twitter' width='35' /> </li></a><a href='https://api.whatsapp.com/send?text=https://pib.gov.in/PressReleasePage.aspx?PRID=2149693' target='_blank'><li class='whatsapp_r'  ><img  src='https://static.pib.gov.in/WriteReadData/userfiles/socialmedianew/whatsapp1.png' alt='Share on whatsapp' width='35' /></li></a><a href='https://mail.google.com/mail/?view=cm&fs=1&tf=1&to=&su=Update on Ayushman Bharat Vay Vandana Cards&body=https://pib.gov.in/PressReleasePage.aspx?PRID=2149693&ui=2&tf=1&pli=1' title='Share by Email' target='_blank'><li class='fa-envelope_r' ><img  src='https://static.pib.gov.in/WriteReadData/userfiles/socialmedianew/email1.png' alt='Share on email'  width='35' /></li></a><a href='https://www.linkedin.com/shareArticle?mini=true&url=https://pib.gov.in/PressReleasePage.aspx?PRID=2149693&title=Update on Ayushman Bharat Vay Vandana Cards&summary=My%20favorite%20developer%20program&source=LinkedIn' target='_blank'><li class='fa-linkedin_r'  ><img  src='https://static.pib.gov.in/WriteReadData/userfiles/socialmedianew/linkedin.png' alt='Share on linkedin' width='35' /></li></a></ul></div></div>
+                  </div>
+            </div>
+            <input type="hidden" name="ltrTitlee" id="ltrTitlee" value="Update on Ayushman Bharat Vay Vandana Cards" />
+            <input type="hidden" name="ltrSubtitlee" id="ltrSubtitlee" value="&lt;br/>Under the portability feature of AB-PMJAY and Vay Vandana, Beneficiaries can access treatment at 31,466 hospitals nationwide&lt;br/>&lt;br/>NHA issued comprehensive Hospital Empanelment and Management (HEM) guidelines for hospital empanelment under AB-PMJAY&lt;br/>&lt;br/>Over 1.06 lakh claims settled under Ayushman Vay Vandana Scheme since its launch" />
+            <input type="hidden" name="ltrDescriptionn" id="ltrDescriptionn" value="&lt;p style=&quot;margin-right:.2pt; text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;span style=&quot;color:black&quot;>On 29th October 2024, the Government of India expanded the scope of the Ayushman Bharat &amp;ndash; Pradhan Mantri Jan Arogya Yojana (AB-PMJAY) to include all senior citizens aged 70 years and above, irrespective of their socio-economic status. Under this initiative, beneficiaries will receive free treatment benefits of up to ₹5 lakh per year through Ayushman Vay Vandana cards.&lt;/span>&lt;/span>&lt;/span>&lt;/p>
+
+&lt;p style=&quot;margin-right:.2pt; text-align:justify&quot;>&lt;span style=&quot;color:black; font-family:&amp;quot;Times New Roman&amp;quot;,Times,serif; font-size:16px&quot;>In addition, the portability feature of AB-PMJAY allows eligible beneficiaries&amp;mdash;including those under the Vay Vandana scheme&amp;mdash;to access healthcare services at any of the 31,466 empanelled hospitals across the country, regardless of their place of residence. This ensures seamless and equitable access to quality healthcare for the elderly population nationwide.&lt;/span>&lt;/p>
+
+&lt;p style=&quot;margin-right:.2pt; text-align:justify&quot;>&lt;span style=&quot;color:black; font-family:&amp;quot;Times New Roman&amp;quot;,Times,serif; font-size:16px&quot;>Vay Vandana scheme beneficiaries can also avail treatment through a vast network of 14,194 private healthcare providers empanelled under the scheme. To ensure quality and consistency in service delivery, the National Health Authority (NHA) has issued comprehensive Hospital Empanelment and Management (HEM) Guidelines for the empanelment of hospitals under the Ayushman Bharat &amp;ndash; Pradhan Mantri Jan Arogya Yojana (AB-PMJAY).&lt;/span>&lt;/p>
+
+&lt;p style=&quot;margin-right:.2pt; text-align:justify&quot;>&lt;span style=&quot;color:black; font-family:&amp;quot;Times New Roman&amp;quot;,Times,serif; font-size:16px&quot;>As on date, over 1.06 lakh claims have been settled under Ayushman Vay Vandana scheme since its launch.&lt;/span>&lt;/p>
+
+&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:&amp;quot;Times New Roman&amp;quot;,Times,serif; font-size:16px&quot;>The Union Minister of State for Health and Family Welfare, &lt;/span>&lt;span style=&quot;font-family:&amp;quot;Times New Roman&amp;quot;,Times,serif; font-size:16px&quot;>Shri Prataprao Jadhav stated this in a written reply in the Rajya Sabha today.&lt;/span>&lt;/p>
+
+&lt;p style=&quot;text-align:center&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>****&lt;/span>&lt;/span>&lt;/p>
+
+&lt;p style=&quot;text-align:justify&quot;>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;strong>MV&lt;/strong>&lt;/span>&lt;/span>&lt;/p>
+
+&lt;p>&lt;span style=&quot;font-family:Times New Roman,Times,serif&quot;>&lt;span style=&quot;font-size:16px&quot;>&lt;strong>HFW/ Update on Ayushman Bharat Vay Vandana Cards /29 July, 2025/1&lt;/strong>&lt;/span>&lt;/span>&lt;/p>
+" />
+            <script type="text/javascript">
+                  var mPlayer = document.getElementById("background_music");
+                  var mPlayAction = document.getElementById("playbutton");
+
+                  var isPlaying = false;
+
+                  function playAudio() {
+                        mPlayer.play();
+                        isPlaying = true;
+                        document.getElementById('stopA').style.display = "block";
+                        document.getElementById('playA').style.display = "none";
+                  }
+
+                  function pauseAudio() {
+                        mPlayer.pause();
+                        isPlaying = false;
+                        document.getElementById('playA').style.display = "block";
+                        document.getElementById('stopA').style.display = "none";
+                  }
+                  //function HandleAudio() {
+                  //    if (isPlaying == true) {
+                  //        //Playing already Pause it
+                  //        pauseAudio();
+                  //    } else {
+                  //        //Play the music
+                  //        playAudio();
+                  //    }
+                  //}
+            </script>
+            <script type="text/javascript">
+                  var synth = window.speechSynthesis;
+
+            
+                  function CleanHtml(html) {
+
+                        html = html.replace(/<script[\s\S]*?<\/script>/gi, '');
+
+                        return html;
+                  }
+                  function stripHtml(html) {
+                        let tmp = document.createElement("DIV");
+                        tmp.innerHTML = CleanHtml(html);
+                        return tmp.textContent || tmp.innerText || "";
+                  }
+            </script>
+            <script type="text/javascript">
+                  $(document).ready(function () {
+                        //for responsive tables
+                        $("table").each(function () {
+                              if (!$(this).closest(".table-responsive").length) {
+                                    $(this).wrap("<div class='table-responsive'></div>");
+                              }
+                        });
+
+                        var width = $(window).width();
+                        if (width < 768) {
+
+                              // Extra Small Device
+                              document.getElementById('frst_t').style.display = "block";
+                              document.getElementById('second_t').style.display = "none";
+
+                        } else if (width < 991) {
+                              document.getElementById('frst_t').style.display = "block";
+                              document.getElementById('second_t').style.display = "none";
+                              // Small Device
+
+                        } else if (width < 1199) {
+                              document.getElementById('frst_t').style.display = "none";
+                              document.getElementById('second_t').style.display = "block";
+                              // Medium Device
+
+                        } else {
+                              document.getElementById('frst_t').style.display = "none";
+                              document.getElementById('second_t').style.display = "block";
+                              // Large Device
+
+                        }
+                  });
+            </script>
+            <script type="text/javascript">
+                  $(document).ready(function () {
+                        var width = $(window).width();
+                        if (width < 768) {
+
+                              // Extra Small Device
+                              document.getElementById('frst_t').style.display = "block";
+                              document.getElementById('second_t').style.display = "none";
+
+                        } else if (width < 991) {
+                              document.getElementById('frst_t').style.display = "block";
+                              document.getElementById('second_t').style.display = "none";
+                              // Small Device
+
+                        } else if (width < 1199) {
+                              document.getElementById('frst_t').style.display = "none";
+                              document.getElementById('second_t').style.display = "block";
+                              // Medium Device
+
+                        } else {
+                              document.getElementById('frst_t').style.display = "none";
+                              document.getElementById('second_t').style.display = "block";
+                              // Large Device
+
+                        }
+                  });
+            </script>
+            
+            <style type="text/css">
+                  @media print {
+                        .sticky-social, .sticky-social_mb, .pull-right, #printPDF {
+                              display: none !important;
+                        }
+                  }
+
+                  .f_vl {
+                        padding-right: 30px;
+                        font-size: 17px;
+                        cursor: pointer;
+                  }
+
+                  .log_oo {
+                        // width: 20%;
+                        display: flex;
+                        justify-content: space-between;
+                  }
+
+                        .log_oo img {
+                              width: 150px;
+                              /*width: 100%;
+                    height: auto;*/
+                        }
+
+                  .sticky-social_mb {
+                        position: fixed;
+                        bottom: 0px;
+                        padding: 0px;
+                        margin: 0px;
+                        width: 100%;
+                  }
+
+                  .social_mb {
+                        list-style: none;
+                        display: flex;
+                        width: 100%;
+                        margin-bottom: -8px;
+                  }
+
+                        .social_mb a {
+                              padding: 8px 0px;
+                              font-size: 30px;
+                              transition: all 0.8s ease-in-out;
+                              width: 20% !important;
+                              text-align: center;
+                        }
+            </style>
+            <style type="text/css">
+                  .section1 {
+                        position: relative;
+                        padding: 10px 0px;
+                        width: 100%;
+                  }
+
+
+
+                  .sticky-social {
+                        position: fixed;
+                        top: 20px;
+                        left: 0px;
+                        padding: 0px;
+                        margin: 0px;
+                  }
+
+                  .social {
+                        list-style: none;
+                  }
+
+                        .social a li {
+                              padding: 8px 12px;
+                              font-size: 25px;
+                              transition: all 0.8s ease-in-out;
+                        }
+
+                              .social a li:hover {
+                                    margin-right: -30px;
+                                    box-shadow: 2px 5px 10px grey;
+                              }
+
+                                    .social a li:hover .fa {
+                                          margin-left: 20px;
+                                    }
+
+                  .fb_b {
+                        /* background-color: rgb(59, 89, 152);*/
+                        background-color: rgba(65,103,178,255);
+                  }
+
+                  .twitter_r {
+                        /* background-color: rgb(29, 161, 242);*/
+                        background-color: #000000;
+                  }
+
+                  .whatsapp_r {
+                        /* background-color: rgb(77, 194, 71);*/
+                        background-color: rgba(13,191,67,255);
+                  }
+
+                  .fa-envelope_r {
+                        /* background-color: rgb(219, 68, 55);*/
+                        background-color: #e2123d;
+                  }
+
+                  .fa-linkedin_r {
+                        background-color: rgb(0, 119, 181);
+                  }
+            </style>
+            <style type="text/css">
+                  @media only screen and (max-device-width: 767px) {
+                        p span img {
+                              max-width: 90% !important;
+                              height: auto !important;
+                        }
+
+                        p img {
+                              max-width: 90% !important;
+                              height: auto !important;
+                        }
+
+                        h2 {
+                              font-size: 20px !important;
+                              font-weight: 600 !important;
+                        }
+
+                        h3 {
+                              font-size: 18px !important;
+                              font-weight: 600 !important;
+                        }
+                  }
+            </style>
+            <style type="text/css">
+                  /* === Film Roll Badge Styling(IFFI2025 countdown) === */
+                  .film-roll-badge {
+                        position: absolute;
+                        top:82%;
+                        right: 20px;
+                        width: 230px;
+                        height: 70px;
+                        background: repeating-linear-gradient( to right, #9a2375 0px, #9a2375 18px, #6e2b8b 18px, #6e2b8b 36px );
+                        border-top: 8px solid #9a2375;
+                        border-bottom: 8px solid #9a2375;
+                        border-radius: 8px;
+                        overflow: hidden;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+                        animation: moveFilm 8s linear infinite;
+                        z-index: 10;
+                  }
+
+                        /* film sprocket holes */
+                        .film-roll-badge::before,
+                        .film-roll-badge::after {
+                              content: "";
+                              position: absolute;
+                              width: 100%;
+                              height: 10px;
+                              background: repeating-linear-gradient( to right, #9a2375 0px, #9a2375 10px, #fff 10px, #fff 20px );
+                              left: 0;
+                              z-index: 2;
+                        }
+
+                        .film-roll-badge::before {
+                              top: -4px;
+                        }
+
+                        .film-roll-badge::after {
+                              bottom: -4px;
+                        }
+
+                  .film-roll-inner {
+                        position: relative;
+                        height: 100%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        animation: flicker 2s infinite ease-in-out;
+                  }
+
+                  .countdown-text {
+                        font-size: 1.3rem;
+                        font-weight: 700;
+                        color: #fff;
+                        text-shadow: 0 0 6px rgba(255, 255, 255, 0.4), 0 0 10px #000;
+                        white-space: nowrap;
+                  }
+
+                  /* === Animations === */
+                  @keyframes moveFilm {
+                        0% {
+                              background-position: 0 0;
+                        }
+
+                        100% {
+                              background-position: 120px 0;
+                        }
+                  }
+
+                  @keyframes flicker {
+                        0%, 100% {
+                              opacity: 1;
+                        }
+
+                        50% {
+                              opacity: 0.9;
+                        }
+
+                        25% {
+                              opacity: 0.95;
+                        }
+
+                        75% {
+                              opacity: 0.85;
+                        }
+                  }
+
+                  /* === Responsive Adjustments === */
+                  @media (max-width: 1500px) {
+                        .film-roll-badge {
+                              top: 68%;
+                              right: 18px;
+                              /* width: 220px; */
+                              height: 65px;
+                              font-size: 0.85rem;
+                        }
+
+                        .press-section {
+                              margin-top: 35px;
+                        }
+                  }
+
+                  @media (max-width: 992px) {
+                        .film-roll-badge {
+                              top: 52%;
+                              right: 10px;
+                               width: 200px; 
+                              height: 60px;
+                        }
+                  }
+
+                  @media (max-width: 768px) {
+                        .film-roll-badge {
+                              top: 56%;
+                              right: 10px;
+                               width: 124px; 
+                              height: 55px;
+                        }
+
+                        .countdown-text {
+                              font-size: 0.9rem;
+                        }
+                  }
+
+                  @media (max-width: 576px) {
+                        .film-roll-badge {
+                              top: 59%;
+                              right: 5px;
+                              /* width: 160px; */
+                              height: 50px;
+                        }
+
+                        .countdown-text {
+                              font-size: 0.85rem;
+                        }
+                  }
+            </style>
+          <script type="text/javascript">
+                const festivalStart = new Date("2025-11-20T00:00:00").getTime();
+                const festivalEnd = new Date("2025-11-28T23:59:59").getTime();
+
+                const countdownElement = document.getElementById("countdown");
+
+                const interval = setInterval(() => {
+                      const now = new Date().getTime();
+
+                      // BEFORE FESTIVAL — show days + hours left
+                      if (now < festivalStart) {
+                            const diff = festivalStart - now;
+                            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+                            countdownElement.innerHTML = `
+              ${days} Day${days !== 1 ? 's' : ''} 
+              ${hours} Hour${hours !== 1 ? 's' : ''} to go
+          `;
+
+                      }
+
+                      // DURING FESTIVAL — show 56th IFFI - Day X
+                      else if (now >= festivalStart && now <= festivalEnd) {
+                            const dayNumber = Math.floor((now - festivalStart) / (1000 * 60 * 60 * 24)) + 1;
+                            countdownElement.innerHTML = `56th IFFI - Day ${dayNumber}`;
+                      }
+
+                      // AFTER FESTIVAL — new message
+                      else {
+                            countdownElement.innerHTML = `✨ IFFI closes but never ends…`;
+
+                            // Width change logic
+                            const elements = document.querySelectorAll('.film-roll-badge');
+                            elements.forEach(el => el.style.width = "350px");
+
+                            clearInterval(interval);
+                      }
+
+                }, 1000);
+          </script>
+ <script type="text/javascript">
+
+               const miffStart = new Date("2026-06-15T00:00:00").getTime();
+               const miffEnd = new Date("2026-06-15T23:59:59").getTime();
+
+               const miffElement = document.getElementById("miff");
+
+               if (miffElement) {
+
+                   const miffInterval = setInterval(() => {
+
+                       const now = new Date().getTime();
+
+                       // Before MIFF
+                       if (now < miffStart) {
+
+                           const diff = miffStart - now;
+                           const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                           const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+        
+
+                   /*  miffElement.innerHTML = `${days} Day${days !== 1 ? 's' : ''} ${hours} Hour${hours !== 1 ? 's' : ''} to MIFF`;*/
+                           miffElement.innerHTML = `${days} Day${days === 1 ? '' : 's'} to MIFF ...`;
+
+
+                     }
+
+                       // During MIFF
+                       else if (now >= miffStart && now <= miffEnd) {
+
+                           const dayNumber =
+                               Math.floor((now - miffStart) / (1000 * 60 * 60 * 24)) + 1;
+
+                           miffElement.innerHTML = `19th MIFF - Day ${dayNumber}`;
+                       }
+
+                       // After MIFF
+                       else {
+
+                           miffElement.innerHTML = `✨ MIFF concludes, cinema lives on...`;
+
+                           document.querySelectorAll('.film-roll-badge')
+                               .forEach(el => el.style.width = "350px");
+
+                           clearInterval(miffInterval);
+                       }
+
+                   }, 1000);
+               }
+
+</script>
+
+      
+
+<script type="text/javascript">
+//<![CDATA[
+(function() {var fn = function() {$get("sc_HiddenField").value = '';Sys.Application.remove_init(fn);};Sys.Application.add_init(fn);})();Sys.Application.add_init(function() {
+    $create(Sys.Extended.UI.ModalPopupBehavior, {"BackgroundCssClass":"modalBackground","PopupControlID":"P_CategoryManagement","dynamicServicePath":"/PressReleasePage.aspx","id":"mpe"}, null, null, $get("Hidden"));
+});
+//]]>
+</script>
+<input type="hidden" name="__ncforminfo" value="foWqC6nRe7rkQo2SHwxvoY9t2f6acT-2YbbXFjdrunKkUU5xb1svos6V1zI0QwS54A6nkTOSB2EsviTNwrKiJ1kCIUnNoBvcj1l1VU2wZUPo0lD4ctZoyg=="/></form>
+</body>
+</html>
+

@@ -119,6 +119,14 @@ def states() -> tuple[State, ...]:
     )
 
 
+def state_label(code: str, lang: str = "hi") -> str:
+    """The state's name in the worker's language; the code if unknown."""
+    for st in states():
+        if st.code == code:
+            return st.label(lang)
+    return code
+
+
 def match_state(text: str) -> State | None:
     """Match typed text to a state. Plain string work — no LLM, no network.
 

@@ -1,0 +1,99 @@
+# SIGNED 27 September 2026 by Avinash Negi (see verified_by), against
+# docs/audit-evidence/sk-pension-schemes-2026-09-27.pdf. Drafted the same day;
+# the checklist below is what was checked.
+#
+# * What this is: the national old-age pension (IGNOAPS) at Sikkim's amount.
+# * The national file (ignoaps.toml) carries only the central share, ₹200 a
+# * month (₹500 from 80); Sikkim's page gives the full amount including the
+# * state share. Both files share exclusive_group "uk_state_pension", so they
+# * are never added: the group keeps the larger, which is this one. The group
+# * name is historical — it is the "one social pension per person" group.
+#
+# ! Source: Social Justice & Welfare / Women & Child Welfare Department,
+# ! Sikkim — pension registration portal, read 2026-09-27:
+# ! https://pensionscheme.sikkim.gov.in/
+# ! Research note with every quote: docs/research/states/SK.md, row 1.
+# ! Evidence copy (printed 2026-09-27, 3 pages):
+# ! docs/audit-evidence/sk-pension-schemes-2026-09-27.pdf
+#
+# Before signing, open the page and find:
+#   1. "Eligibility Criterias" (page 1), four conditions for every scheme:
+#      SSC/COI/Residential Certificate; "Should belong to BPL household and in
+#      possession of Antodaya Anna Yozana of Priority Household Ration Card";
+#      Aadhaar; a Pradhan Mantri Jan Dhan Yojana bank account.
+#   2. IGNOAPS card (page 2): "Should Have Attained the age of 60 years".
+#   3. "Incentives/Financial Assistance" table (page 2), IGNOAPS row:
+#      "Rs. 1500/- pm ... 60 years - 69years", "Rs. 2000/- pm ... 70 years+
+#      and above", "Rs. 2500/- pm ... 80 years and above".
+#      = 18,000 a year from 60, 24,000 from 70, 30,000 from 80.
+#
+# ? The 70 row says "70 years+ and above" and the 80 row overlaps it. Read as
+# ? 70–79, because the 80 row gives a separate, higher amount. Confirm.
+# ? The IGNOAPS row does not say "consists of Central and State Share" as the
+# ? widow and disability rows do. Treated as the full amount paid; confirm.
+# ? `is_bpl` stands in for "AAY or Priority Household ration card". A worker
+# ? with a BPL card but neither ration card would be told ELIGIBLE here; the
+# ? office decides. Adding a ration-card question is a product decision.
+# ? Hindi text below is machine-drafted; it joins the Hindi review.
+code = "SK_IGNOAPS"
+name_en = "Indira Gandhi National Old Age Pension (Sikkim)"
+name_hi = "इंदिरा गांधी राष्ट्रीय वृद्धावस्था पेंशन (सिक्किम)"
+authority = "Social Justice & Welfare Department, Government of Sikkim (NSAP)"
+official_url = "https://pensionscheme.sikkim.gov.in/"
+verified_on = "2026-09-27"
+verified_by = "Avinash Negi, checked 2026-09-27"
+
+[benefit]
+annual_value_inr = 18000
+annual_value_age_bands = [
+    { min_age = 70, annual_value_inr = 24000 },
+    { min_age = 80, annual_value_inr = 30000 },
+]
+value_basis = "annual_payout"
+exclusive_group = "uk_state_pension"
+premium_inr = 0
+summary_en = "A monthly pension in Sikkim for people aged 60 and above in a BPL household with an Antyodaya or Priority Household ration card: ₹1,500 a month from 60, ₹2,000 from 70 and ₹2,500 from 80. You get one pension, not two. Register on Sikkim's online pension portal."
+summary_hi = "सिक्किम में अंत्योदय या प्राथमिकता परिवार राशन कार्ड वाले बीपीएल परिवार के 60 साल या उससे ऊपर के लोगों के लिए मासिक पेंशन: 60 से ₹1,500 हर महीने, 70 से ₹2,000 और 80 से ₹2,500। पेंशन एक ही मिलती है, दो नहीं। सिक्किम के ऑनलाइन पेंशन पोर्टल पर पंजीकरण करें।"
+
+[[criteria]]
+field = "state"
+op = "eq"
+value = "SK"
+ask_en = "Which state do you live in?"
+ask_hi = "आप किस राज्य में रहते हैं?"
+pass_en = "You reported living in Sikkim; your SSC, COI or residential certificate is checked when you apply."
+pass_hi = "आपने सिक्किम में रहना बताया; आवेदन के समय आपका SSC, COI या निवास प्रमाणपत्र जाँचा जाएगा।"
+fail_en = "This is Sikkim's amount; in your state, ask about the old-age pension there."
+fail_hi = "यह सिक्किम की रकम है; अपने राज्य में वहाँ की वृद्धावस्था पेंशन के बारे में पूछें।"
+source_url = "https://pensionscheme.sikkim.gov.in/"
+
+[[criteria]]
+field = "age"
+op = "gte"
+value = 60
+ask_en = "How old are you?"
+ask_hi = "आपकी उम्र कितनी है?"
+pass_en = "Your reported age meets the entry-age condition."
+pass_hi = "आपकी बताई उम्र प्रवेश की आयु-शर्त पूरी करती है।"
+fail_en = "This pension starts at age 60."
+fail_hi = "यह पेंशन 60 साल की उम्र से शुरू होती है।"
+source_url = "https://pensionscheme.sikkim.gov.in/"
+
+[[criteria]]
+field = "is_bpl"
+op = "eq"
+value = true
+ask_en = "Does your household have a BPL card, or is it listed as Below Poverty Line?"
+ask_hi = "क्या आपके परिवार के पास बीपीएल कार्ड है, या परिवार ग़रीबी रेखा से नीचे सूचीबद्ध है?"
+pass_en = "You reported a BPL household; the office checks for an Antyodaya or Priority Household ration card."
+pass_hi = "आपने बीपीएल परिवार बताया; कार्यालय अंत्योदय या प्राथमिकता परिवार राशन कार्ड जाँचेगा।"
+fail_en = "This scheme is for BPL households with an Antyodaya or Priority Household ration card. If you are unsure which card you hold, check it before you register — do not assume no."
+fail_hi = "यह योजना अंत्योदय या प्राथमिकता परिवार राशन कार्ड वाले बीपीएल परिवारों के लिए है। अगर पक्का नहीं है कि आपके पास कौन-सा कार्ड है, तो पंजीकरण से पहले देख लें — न मान लें।"
+source_url = "https://pensionscheme.sikkim.gov.in/"
+
+[paperwork]
+documents_en = ["SSC, COI or residential certificate", "Antyodaya (AAY) or Priority Household ration card", "Aadhaar card", "Jan Dhan bank account passbook"]
+documents = ["SSC, COI या निवास प्रमाणपत्र", "अंत्योदय (AAY) या प्राथमिकता परिवार राशन कार्ड", "आधार कार्ड", "जन धन बैंक खाते की पासबुक"]
+where_to_apply = "online"
+renewal_en = "The amount rises at 70 and again at 80."
+renewal = "70 साल पर और फिर 80 साल पर रकम बढ़ती है।"

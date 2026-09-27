@@ -162,13 +162,16 @@ def test_rejects_empty_documents():
 # ! is a deliberate act with a reason attached; the test above refuses any stub
 # ! that is not on this list.
 KNOWN_STUBS = (
-    # ! APY guarantees ₹1,000-₹5,000 a month from 60, and the monthly
-    # ! contribution depends on BOTH the tier chosen and the age at entry -
-    # ! PFRDA publishes it as a chart, not a figure. A single integer would be
-    # ! wrong for almost everyone, so premium_inr stays "TODO" and the summary
-    # ! tells her to ask the bank what each tier costs at her age. Resolve it by
-    # ! encoding the chart, never by picking one row of it.
-    ("APY", "benefit.premium_inr"),
+    # ! Tamil Nadu's pension page (cra.tn.gov.in) gives rules and amounts but no
+    # ! document list. Resolve from tnesevai or the Taluk office list at sign-off.
+    ("TN_IGNDPS", "paperwork.documents[0]"),
+    ("TN_IGNDPS", "paperwork.documents_en[0]"),
+    # ! Mizoram's old-age pension page gives the amount and age only: no
+    # ! documents and no way to apply. Resolve from the Directorate of Social
+    # ! Welfare at sign-off.
+    ("MZ_IGNOAPS", "paperwork.documents[0]"),
+    ("MZ_IGNOAPS", "paperwork.documents_en[0]"),
+    ("MZ_IGNOAPS", "paperwork.where_to_apply"),
 )  # ! add a line here with its reason, never a bare TODO
 
 
@@ -196,6 +199,23 @@ def test_real_scheme_files_are_structurally_valid():
         "APY", "PMJAY_70",
         # Drafted 12 September 2026 (second batch), unsigned, same gate.
         "IGNOAPS", "IGNWPS", "IGNDPS", "NPS_TRADERS", "PM_VISHWAKARMA", "PMJDY",
+        # Drafted 27 September 2026, unsigned: IGNDPS at Tamil Nadu's amount
+        # (docs/research/states/TN.md, row 3).
+        "TN_IGNDPS",
+        # Drafted 27 September 2026, unsigned: IGNOAPS at Sikkim's amount
+        # (docs/research/states/SK.md, row 1).
+        "SK_IGNOAPS",
+        # IGNWPS at Sikkim's amount (docs/research/states/SK.md, row 2).
+        "SK_IGNWPS",
+        # IGNDPS at Sikkim's amount (docs/research/states/SK.md, row 3).
+        "SK_IGNDPS",
+        # IGNOAPS at Mizoram's amount (docs/research/states/MZ.md, row 1).
+        "MZ_IGNOAPS",
+        # MP's own widow pension (docs/research/states/MP.md, row 3).
+        "MP_KALYANI",
+        # Punjab's old-age pension, split by the source's 58 (women) / 65 (men)
+        # ages (docs/research/states/PB.md, row 1).
+        "PB_OLD_AGE_WOMEN", "PB_OLD_AGE_MEN",
     }, sorted(schemes)
     for code, s in schemes.items():
         assert s.source_path.endswith(".toml")
@@ -293,7 +313,7 @@ def test_every_shipped_signature_is_a_real_person_or_no_signature_at_all():
 # ! Which schemes a named human has signed off, and therefore which ones give
 # ! real verdicts to real people. Adding a line here is a claim the README, the
 # ! checkpoint and the submission draft all repeat, so they change together.
-SIGNED_OFF = ("ESHRAM", "IGNDPS", "IGNOAPS", "IGNWPS", "NPS_TRADERS", "PMJJBY", "PMSBY", "PMUY", "PM_SYM", "UK_OLD_AGE")  # Avinash Negi, 2026-09-09/10 and 2026-09-14/15
+SIGNED_OFF = ("APY", "ESHRAM", "IGNDPS", "IGNOAPS", "IGNWPS", "MP_KALYANI", "NPS_TRADERS", "PB_OLD_AGE_MEN", "PB_OLD_AGE_WOMEN", "PMJAY_70", "PMJDY", "PMJJBY", "PMSBY", "PMUY", "PM_SYM", "PM_VISHWAKARMA", "SK_IGNDPS", "SK_IGNOAPS", "SK_IGNWPS", "UK_OLD_AGE", "UK_WIDOW")  # Avinash Negi, 2026-09-09/10, 2026-09-14/15 and 2026-09-27
 
 
 def test_the_signed_list_matches_the_files():

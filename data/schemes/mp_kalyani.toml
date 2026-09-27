@@ -1,0 +1,132 @@
+# SIGNED 27 September 2026 by Avinash Negi (see verified_by). Drafted the
+# same day; the checklist below is what was checked.
+#
+# * What this is: Madhya Pradesh's own widow pension, Mukhyamantri Kalyani
+# * Pension ("Kalyani" is the state's word for a widow). ₹600 a month, paid
+# * wholly by the state, for widows aged 18–79. BPL is explicitly NOT needed.
+# * It sits in exclusive_group "uk_state_pension" with the national widow
+# * pension: the page bars anyone "receiving any other pension scheme
+# * benefits", so she gets one or the other, never both added.
+#
+# ! Source: District Dhar, Government of Madhya Pradesh (NIC-hosted district
+# ! site), scheme page, last updated 16 Sep 2026, read 2026-09-27:
+# ! https://dhar.nic.in/en/scheme/chief-minister-kalyani-pension-scheme/
+# ! A DISTRICT page, not the state department's. The state portal
+# ! (socialsecurity.mp.gov.in) was not readable. Prefer a state order.
+# ! Research note: docs/research/states/MP.md, row 3.
+# ! Evidence copy (printed 2026-09-27, 3 pages):
+# ! docs/audit-evidence/mp-kalyani-dhar-2026-09-27.pdf
+#
+# Before signing, open the page and find (table, page 1–2):
+#   1. "Plan Commencement Date 1 April 2018".
+#   2. Beneficiary: "1. Age of Kalyani (widow) between 18 to 79 years.
+#      2. Beneficiary should not be income tax payer. 3. Not a government
+#      employee / officer 4. Kalyani is not receiving family pension
+#      5. Not required BPL. 6. Kalyani is not receiving any other pension
+#      scheme benefits"
+#   3. Benefits: "600 / – Per month by the state government to Kalyani
+#      (widow) of 18 years and 79 years." = 7,200 a year.
+#   4. Documents 1–13, and "submitted to the District Panchayat in the rural
+#      area and the Municipality / Municipal Council in the urban area ... or
+#      ... by applying in the Public Service Guarantee." (page 3)
+#
+# ? Condition 3, "Not a government employee / officer", is NOT encoded. The
+# ? only related field, has_government_service_in_family, also covers an
+# ? unmarried child, which would wrongly refuse her. A widow who is herself a
+# ? government employee is told ELIGIBLE here; the declaration form (document
+# ? 10) catches it at the office. Adding a self-only question is a product call.
+# ? Condition 4 (family pension) is folded into receives_other_pension —
+# ? a family pension is a pension, and the question asks about "any other".
+# ? where_to_apply is "local_office" (added 2026-09-27): the page names the
+# ? District Panchayat (rural) or Municipality (urban). The Public Service
+# ? Guarantee (Lok Seva) route it also names is in the summary, not a location.
+# ? No age-80 rule is given; the pension simply ends at 79 on this page.
+# ? Hindi text below is machine-drafted; it joins the Hindi review.
+code = "MP_KALYANI"
+name_en = "Mukhyamantri Kalyani Pension (Madhya Pradesh)"
+name_hi = "मुख्यमंत्री कल्याणी पेंशन (मध्य प्रदेश)"
+authority = "Social Justice Department, Government of Madhya Pradesh"
+official_url = "https://dhar.nic.in/en/scheme/chief-minister-kalyani-pension-scheme/"
+verified_on = "2026-09-27"
+verified_by = "Avinash Negi, checked 2026-09-27"
+
+[benefit]
+annual_value_inr = 7200
+value_basis = "annual_payout"
+exclusive_group = "uk_state_pension"
+premium_inr = 0
+summary_en = "A monthly pension of ₹600 from the Madhya Pradesh government for widows aged 18 to 79 who are native to the state. You do not need a BPL card. You must not pay income tax, be a government employee, or already get a family pension or any other pension. Apply at the District Panchayat (village) or the Municipality (town), or through Public Service Guarantee."
+summary_hi = "मध्य प्रदेश सरकार की ओर से राज्य की मूल निवासी 18 से 79 साल की कल्याणी (विधवा) बहनों के लिए ₹600 हर महीने की पेंशन। बीपीएल कार्ड ज़रूरी नहीं है। आप आयकरदाता, सरकारी कर्मचारी न हों, और पहले से परिवार पेंशन या कोई दूसरी पेंशन न मिल रही हो। गाँव में जिला पंचायत या शहर में नगरपालिका में, या लोक सेवा गारंटी से आवेदन करें।"
+
+[[criteria]]
+field = "state"
+op = "eq"
+value = "MP"
+ask_en = "Which state do you live in?"
+ask_hi = "आप किस राज्य में रहते हैं?"
+pass_en = "You reported living in Madhya Pradesh; the page says you must be a native of the state, which is checked when you apply."
+pass_hi = "आपने मध्य प्रदेश में रहना बताया; पेज के अनुसार आपको राज्य का मूल निवासी होना चाहिए, जो आवेदन के समय जाँचा जाएगा।"
+fail_en = "This is Madhya Pradesh's own widow pension; in your state, ask about the widow pension there."
+fail_hi = "यह मध्य प्रदेश की अपनी विधवा पेंशन है; अपने राज्य में वहाँ की विधवा पेंशन के बारे में पूछें।"
+source_url = "https://dhar.nic.in/en/scheme/chief-minister-kalyani-pension-scheme/"
+
+[[criteria]]
+field = "is_widow"
+op = "eq"
+value = true
+ask_en = "Are you a widow?"
+ask_hi = "क्या आप विधवा हैं?"
+pass_en = "You reported being a widow; the office checks your husband's death certificate."
+pass_hi = "आपने विधवा होना बताया; कार्यालय पति का मृत्यु प्रमाणपत्र जाँचेगा।"
+fail_en = "This pension is for widows."
+fail_hi = "यह पेंशन विधवाओं के लिए है।"
+source_url = "https://dhar.nic.in/en/scheme/chief-minister-kalyani-pension-scheme/"
+
+[[criteria]]
+field = "age"
+op = "gte"
+value = 18
+ask_en = "How old are you?"
+ask_hi = "आपकी उम्र कितनी है?"
+pass_en = "Your reported age meets the entry-age condition."
+pass_hi = "आपकी बताई उम्र प्रवेश की आयु-शर्त पूरी करती है।"
+fail_en = "This pension starts at age 18."
+fail_hi = "यह पेंशन 18 साल की उम्र से शुरू होती है।"
+source_url = "https://dhar.nic.in/en/scheme/chief-minister-kalyani-pension-scheme/"
+
+[[criteria]]
+field = "age"
+op = "lte"
+value = 79
+ask_en = "How old are you?"
+ask_hi = "आपकी उम्र कितनी है?"
+pass_en = "Your reported age is within the 18–79 limit."
+pass_hi = "आपकी बताई उम्र 18–79 की सीमा के भीतर है।"
+fail_en = "This pension is for widows aged 18 to 79."
+fail_hi = "यह पेंशन 18 से 79 साल की विधवाओं के लिए है।"
+source_url = "https://dhar.nic.in/en/scheme/chief-minister-kalyani-pension-scheme/"
+
+[[exclusions]]
+field = "is_income_tax_payer"
+op = "eq"
+value = true
+reason_en = "You reported paying income tax. This pension is only for widows who are not income-tax payers."
+reason_hi = "आपने आयकर भरना बताया। यह पेंशन केवल उन विधवाओं के लिए है जो आयकरदाता नहीं हैं।"
+source_url = "https://dhar.nic.in/en/scheme/chief-minister-kalyani-pension-scheme/"
+
+[[exclusions]]
+field = "receives_other_pension"
+op = "eq"
+value = true
+ask_en = "Are you already receiving any other pension? If you are unsure, choose Don't know."
+ask_hi = "क्या आपको पहले से कोई दूसरी पेंशन मिल रही है? पक्का न हो तो पता नहीं चुनें।"
+reason_en = "You reported receiving another pension. This pension is only for widows not receiving a family pension or any other pension."
+reason_hi = "आपने दूसरी पेंशन मिलना बताया है। यह पेंशन केवल उन विधवाओं के लिए है जिन्हें परिवार पेंशन या कोई दूसरी पेंशन नहीं मिल रही है।"
+source_url = "https://dhar.nic.in/en/scheme/chief-minister-kalyani-pension-scheme/"
+
+[paperwork]
+documents_en = ["Prescribed application form", "Two photographs", "Samagra ID", "Aadhaar number", "Mobile number", "Bank passbook", "Age proof certificate", "Husband's death certificate", "Self-attested declaration: not an income-tax payer", "Self-certified declaration: not a government employee or officer", "Self-attested declaration: not receiving a family pension", "Self-certified declaration: not receiving any other pension", "Proof of being a native of Madhya Pradesh"]
+documents = ["निर्धारित आवेदन पत्र", "दो फोटो", "समग्र आईडी", "आधार नंबर", "मोबाइल नंबर", "बैंक पासबुक", "उम्र का प्रमाणपत्र", "पति का मृत्यु प्रमाणपत्र", "स्व-प्रमाणित घोषणा: आयकरदाता नहीं", "स्व-प्रमाणित घोषणा: सरकारी कर्मचारी या अधिकारी नहीं", "स्व-प्रमाणित घोषणा: परिवार पेंशन नहीं मिल रही", "स्व-प्रमाणित घोषणा: कोई दूसरी पेंशन नहीं मिल रही", "मध्य प्रदेश का मूल निवासी होने का प्रमाण"]
+where_to_apply = "local_office"
+renewal_en = "₹600 every month from the state government, up to age 79."
+renewal = "राज्य सरकार से हर महीने ₹600, 79 साल की उम्र तक।"

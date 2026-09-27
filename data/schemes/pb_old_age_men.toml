@@ -1,0 +1,145 @@
+# SIGNED 27 September 2026 by Avinash Negi (see verified_by). Drafted the
+# same day; the checklist below is what was checked.
+#
+# * What this is: Punjab's own old-age pension, ₹1,500 a month, for men aged 65 and above.
+# * The source sets a different age for women (58) and men (65). The rule
+# * engine ANDs criteria and cannot say "58 if a woman, else 65", so the one
+# * scheme is TWO files: PB_OLD_AGE_WOMEN and PB_OLD_AGE_MEN. Both sit in
+# * exclusive_group "uk_state_pension" with IGNOAPS, so nothing is ever added
+# * twice — the page does not say how the state pension and NSAP combine.
+#
+# ! Source: Department of Social Security and Women & Child Development,
+# ! Punjab, page "Pensions/Financial Assistance", last updated 14-09-2026,
+# ! read 2026-09-27: https://sswcd.punjab.gov.in/en/social-security/pensionsfinancial-assistance
+# ! Research note: docs/research/states/PB.md, row 1.
+# ! Evidence copy (printed 2026-09-27, 3 pages):
+# ! docs/audit-evidence/pb-pensions-2026-09-27.pdf
+#
+# Before signing, open the page and find:
+#   1. "i) Old Age Pension": "pension is granted to women of 58 years of age
+#      and above and to men of 65 years of age and above. Total annual Income
+#      should not be more than Rs. 60,000/- including business or rental or
+#      interest income. The Applicant having maximum 2.5 Acre Nehri/Chahi
+#      land or maximum 5 Acre Barani land ownership and 5 Acre land in
+#      waterlogged area (including husband & wife) is also eligible".
+#   2. "6) Rate of Pension": "increased from Rs.750/- to Rs. 1500/- per month
+#      w.e.f 1st July, 2021." = 18,000 a year.
+#   3. "3) ... A self declaration saying that: i) I am not in Govt. or private
+#      employment. ii) I am not a self employed. ... vii) I am not an Income
+#      Tax Payee."
+#   4. "2) Required Documents" and "4) Procedure for Sanction".
+#
+# ? Income: the app asks what the worker EARNS a month; the page counts total
+# ? income "from any source including interest/rental". ₹60,000 a year is
+# ? exactly ₹5,000 a month, the top of the "Up to ₹5,000" band. Someone with
+# ? rent or interest on top of low earnings is told ELIGIBLE; the declaration
+# ? and the Patwari/EO check catch it.
+# ? Declaration items NOT encoded (no question for them): commercial property,
+# ? a house over 200 sq m in a town, VAT registration, professional tax. The
+# ? summary says they are on the declaration.
+# ? is_woman is shared with PM Ujjwala, whose wording is "a woman applying in
+# ? your own name". A woman who answers "no" there is sent to the men's rule.
+# ? Hindi text below is machine-drafted; it joins the Hindi review.
+code = "PB_OLD_AGE_MEN"
+name_en = "Punjab old-age pension (men, 65+)"
+name_hi = "पंजाब वृद्धावस्था पेंशन (पुरुष, 65+)"
+authority = "Department of Social Security and Women & Child Development, Government of Punjab"
+official_url = "https://sswcd.punjab.gov.in/en/social-security/pensionsfinancial-assistance"
+verified_on = "2026-09-27"
+verified_by = "Avinash Negi, checked 2026-09-27"
+
+[benefit]
+annual_value_inr = 18000
+value_basis = "annual_payout"
+exclusive_group = "uk_state_pension"
+premium_inr = 0
+summary_en = "₹1,500 a month from the Punjab government for men aged 65 and above, with total income of ₹60,000 a year or less, not in a job or self-employed, and land within the limit. You will sign a declaration that you have no commercial property, no house over 200 sq m in a town, and pay no income tax, VAT or professional tax. You get one pension, not two. Get the form at your panchayat, block (BDPO), Sewa Kendra, Anganwadi or the District Social Security Officer."
+summary_hi = "पंजाब सरकार की ओर से 65 साल या उससे ऊपर के पुरुषों के लिए ₹1,500 हर महीने, जिनकी कुल आय साल में ₹60,000 या कम हो, जो नौकरी या अपना काम न करते हों, और जिनकी ज़मीन सीमा के भीतर हो। आपको घोषणा देनी होगी कि आपके पास कोई व्यावसायिक संपत्ति नहीं, शहर में 200 वर्ग मीटर से बड़ा घर नहीं, और आप आयकर, वैट या प्रोफ़ेशनल टैक्स नहीं भरते। पेंशन एक ही मिलती है, दो नहीं। फ़ॉर्म पंचायत, ब्लॉक (BDPO), सेवा केंद्र, आंगनवाड़ी या ज़िला सामाजिक सुरक्षा अधिकारी से लें।"
+
+[[criteria]]
+field = "state"
+op = "eq"
+value = "PB"
+ask_en = "Which state do you live in?"
+ask_hi = "आप किस राज्य में रहते हैं?"
+pass_en = "You reported living in Punjab; the Patwari (village) or EO (town) checks residence."
+pass_hi = "आपने पंजाब में रहना बताया; पटवारी (गाँव) या ईओ (शहर) निवास जाँचेगा।"
+fail_en = "This is Punjab's own pension; in your state, ask about the old-age pension there."
+fail_hi = "यह पंजाब की अपनी पेंशन है; अपने राज्य में वहाँ की वृद्धावस्था पेंशन के बारे में पूछें।"
+source_url = "https://sswcd.punjab.gov.in/en/social-security/pensionsfinancial-assistance"
+
+[[criteria]]
+field = "is_woman"
+op = "eq"
+value = false
+ask_en = "Are you a woman?"
+ask_hi = "क्या आप महिला हैं?"
+pass_en = "You reported being a man; for men this pension starts at 65."
+pass_hi = "आपने पुरुष होना बताया; पुरुषों के लिए यह पेंशन 65 से शुरू होती है।"
+fail_en = "This rule is for men (from 65). Women qualify from 58 — see the women's rule."
+fail_hi = "यह नियम पुरुषों के लिए है (65 से)। महिलाएँ 58 से पात्र हैं — महिलाओं वाला नियम देखें।"
+source_url = "https://sswcd.punjab.gov.in/en/social-security/pensionsfinancial-assistance"
+
+[[criteria]]
+field = "age"
+op = "gte"
+value = 65
+ask_en = "How old are you?"
+ask_hi = "आपकी उम्र कितनी है?"
+pass_en = "Your reported age meets the entry-age condition."
+pass_hi = "आपकी बताई उम्र प्रवेश की आयु-शर्त पूरी करती है।"
+fail_en = "For men this pension starts at 65."
+fail_hi = "पुरुषों के लिए यह पेंशन 65 साल से शुरू होती है।"
+source_url = "https://sswcd.punjab.gov.in/en/social-security/pensionsfinancial-assistance"
+
+[[criteria]]
+field = "income_band"
+op = "in"
+# ! ₹60,000 a year = ₹5,000 a month: "no_income" and "upto_5000" only.
+value = ["no_income", "upto_5000"]
+ask_en = "Roughly how much do you earn in a month?"
+ask_hi = "महीने की कमाई लगभग कितनी है?"
+pass_en = "Your reported income is within ₹5,000 a month (₹60,000 a year). The page counts all income, including rent and interest."
+pass_hi = "आपकी बताई आय ₹5,000 महीना (₹60,000 साल) के भीतर है। पेज पर किराया और ब्याज समेत पूरी आय गिनी जाती है।"
+fail_en = "This pension is for total income of ₹60,000 a year (₹5,000 a month) or less."
+fail_hi = "यह पेंशन साल में ₹60,000 (₹5,000 महीना) या कम कुल आय वालों के लिए है।"
+source_url = "https://sswcd.punjab.gov.in/en/social-security/pensionsfinancial-assistance"
+
+[[criteria]]
+field = "has_job_or_business"
+op = "eq"
+value = false
+ask_en = "Do you have a job (government or private), or run your own work or business?"
+ask_hi = "क्या आपकी कोई नौकरी (सरकारी या निजी) है, या आप अपना कोई काम/व्यापार करते हैं?"
+pass_en = "You reported no job and no own work; you will declare this on the form."
+pass_hi = "आपने बताया कि न नौकरी है न अपना काम; फ़ॉर्म पर आप यही घोषणा करेंगे।"
+fail_en = "The form asks you to declare that you are not in a government or private job and not self-employed."
+fail_hi = "फ़ॉर्म पर घोषणा करनी होती है कि आप सरकारी या निजी नौकरी में नहीं हैं और अपना काम नहीं करते।"
+source_url = "https://sswcd.punjab.gov.in/en/social-security/pensionsfinancial-assistance"
+
+[[criteria]]
+field = "pb_land_over_limit"
+op = "eq"
+value = false
+ask_en = "Together with your spouse, do you own more than 2.5 acres of irrigated (nehri/chahi) land, or more than 5 acres of dry (barani) or waterlogged land?"
+ask_hi = "क्या आपके और आपके पति/पत्नी के नाम मिलाकर 2.5 एकड़ से अधिक सिंचित (नहरी/चाही) ज़मीन, या 5 एकड़ से अधिक बरानी या जलभराव वाली ज़मीन है?"
+pass_en = "You reported land within the limit; the Patwari or EO checks it."
+pass_hi = "आपने सीमा के भीतर ज़मीन बताई; पटवारी या ईओ इसे जाँचेगा।"
+fail_en = "This pension allows at most 2.5 acres of irrigated land or 5 acres of dry or waterlogged land, husband and wife together."
+fail_hi = "इस पेंशन में पति-पत्नी मिलाकर अधिकतम 2.5 एकड़ सिंचित या 5 एकड़ बरानी/जलभराव वाली ज़मीन हो सकती है।"
+source_url = "https://sswcd.punjab.gov.in/en/social-security/pensionsfinancial-assistance"
+
+[[exclusions]]
+field = "is_income_tax_payer"
+op = "eq"
+value = true
+reason_en = "You reported paying income tax. The form asks you to declare that you are not an income-tax payer."
+reason_hi = "आपने आयकर भरना बताया। फ़ॉर्म पर घोषणा करनी होती है कि आप आयकरदाता नहीं हैं।"
+source_url = "https://sswcd.punjab.gov.in/en/social-security/pensionsfinancial-assistance"
+
+[paperwork]
+documents_en = ["One proof of age: Aadhaar card, voter card, voter-list entry, matriculation certificate or birth certificate", "Signed self-declaration (no job, not self-employed, land, income, property, taxes)", "Aadhaar number, mobile number and bank account number", "Application form"]
+documents = ["उम्र का एक प्रमाण: आधार कार्ड, वोटर कार्ड, मतदाता सूची में नाम, मैट्रिक प्रमाणपत्र या जन्म प्रमाणपत्र", "हस्ताक्षरित स्व-घोषणा (नौकरी नहीं, अपना काम नहीं, ज़मीन, आय, संपत्ति, टैक्स)", "आधार नंबर, मोबाइल नंबर और बैंक खाता नंबर", "आवेदन पत्र"]
+where_to_apply = "local_office"
+renewal_en = "The CDPO verifies within a month and the District Social Security Officer sanctions it. Paid through your bank."
+renewal = "सीडीपीओ एक महीने में जाँच करता है और ज़िला सामाजिक सुरक्षा अधिकारी मंज़ूरी देता है। भुगतान बैंक से होता है।"

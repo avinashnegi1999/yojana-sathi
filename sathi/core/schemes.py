@@ -44,8 +44,11 @@ VALUE_BASES = frozenset(
     {"annual_payout", "insurance_cover", "one_time", "subsidy", "gateway", "in_kind"}
 )
 
+# ! "local_office" added 2026-09-27 for state pensions whose source names a
+# ! panchayat, block, municipal or district office rather than a CSC (MP
+# ! Kalyani, Punjab). Using "csc" there would send her to the wrong door.
 APPLY_LOCATIONS = frozenset(
-    {"csc", "bank_branch", "post_office", "eshram_centre", "online"}
+    {"csc", "bank_branch", "post_office", "eshram_centre", "online", "local_office"}
 )
 
 _TOP_KEYS = frozenset(

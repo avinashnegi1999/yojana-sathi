@@ -4,13 +4,14 @@ Short, factual local/deployment record. Update at the end of a working day or
 when Avinash asks to save progress. Do not include secrets, user data, or chat
 identifiers.
 
-## Now — 26 September 2026
+## Now — 27 September 2026
 
 - **Live:** browser ([sathi.avinashnegi.com](https://sathi.avinashnegi.com)) and Telegram ([@YojanaSathiBot](https://t.me/YojanaSathiBot)). WhatsApp is verified on Meta's test number only.
-- **Schemes:** 10 signed and served. 5 drafts answer `UNKNOWN` — APY, PM Vishwakarma, PM-JAY 70+, PMJDY, Uttarakhand widow pension.
-- **Checks:** `python3 check.py` — 21 module self-checks and 15 test files, all passing.
-- **Not done:** native Hindi review, and the field pilot. No impact is claimed.
-- **Open, in order:** the widow-pension rate from a primary source · sign the four other drafts or leave them `UNKNOWN` · Hindi review · the AgentFoundry question · the pilot ([plan](PILOT_PLAN.md)).
+- **Schemes:** 21 signed (10 live; UK widow, Sikkim old-age / widow / disability, MP Kalyani, Punjab old-age women / men, PM-JAY 70+, PMJDY, PM Vishwakarma and APY signed 27 Sep, local until deployed). 2 drafts answer `UNKNOWN` — Tamil Nadu disability, Mizoram old-age (no official document list found).
+- **Flow, every channel:** language → consent → state (all 36; map on the web, buttons in chat) → national / state / both → tick schemes or "All of these" → only the needed questions → verdicts.
+- **Checks:** `python3 check.py` — all module self-checks and test files passing.
+- **Not done:** native Hindi review (much 27 Sep text is machine-drafted), and the field pilot. No impact is claimed.
+- **Open, in order:** Hindi review · the AgentFoundry question · the pilot ([plan](PILOT_PLAN.md)) · Tamil Nadu and Mizoram document lists (parked).
 
 The log below runs oldest first. Each entry is what was true that day.
 
@@ -277,3 +278,18 @@ copy before touching `/opt/sathi`.
 - Docs reorganised: dated records moved word for word to `docs/history/`,
   submission notes to `docs/submission/`, every link updated. README and the
   current guides rewritten short, with every fact kept.
+
+## 2026-09-27
+
+- **Tamil Nadu feedback:** a Coimbatore visitor could not pick Tamil Nadu. Every state and UT is now selectable: paged buttons on chat, a grid plus a clickable India map (MapChart export, credit kept) on the web.
+- **State research:** 36 notes in `docs/research/states/`, from official pages only: 11 confirmed, 11 partial, 14 unconfirmed.
+- **Six new drafts** from official evidence, each in `docs/audit-evidence/` with its SHA-256: TN_IGNDPS, SK_IGNOAPS, SK_IGNWPS, SK_IGNDPS, MZ_IGNOAPS, MP_KALYANI. Each has its own rule oracle in `tests/test_rule_boundaries.py`.
+- **UK widow rate settled:** GO 40 of 21 April 2022 (₹1,500 a month) and the department's Hindi overview, which also states the no-other-pension bar. The oracle now encodes that exclusion from the overview's own wording.
+- **Signed by Avinash:** UK_WIDOW (re-sign), SK_IGNOAPS, SK_IGNDPS, SK_IGNWPS, MP_KALYANI, PB_OLD_AGE_WOMEN, PB_OLD_AGE_MEN, PMJAY_70, PMJDY, PM_VISHWAKARMA, APY. `SIGNED_OFF` updated; the landing page's "One rate needs confirming" card removed.
+- **Not drafted:** the Tamil Nadu integrated insurance. It covers the family head only, and enrolment happens through a field survey. Reasons are in `docs/research/states/TN.md`.
+- `python3 check.py`: all checks passed.
+- **Punjab old-age pension** drafted as two files (women 58+, men 65+), using the existing income question (₹60,000 a year = the "Up to ₹5,000" band). Two new yes/no follow-ups: `has_job_or_business` and `pb_land_over_limit`. New apply location `local_office` (panchayat, block or municipal office), which also fills MP Kalyani's `where_to_apply`.
+- **Parked:** TN_IGNDPS and MZ_IGNOAPS stay unsigned. Their amounts and rules are sourced, but no official page lists the documents (CRA, e-Sevai, tn.gov.in, Mizoram Social Welfare and NSAP were all checked). They are never offered in the scheme list; resume only with an official list or a recorded call to the office.
+- **State first on every channel.** The website order (state, then national / state / both, then the list) is now the default for Telegram and WhatsApp too. A state with no signed scheme goes straight to the national list. WhatsApp shows a list instead of buttons when a label is too long for a 20-character button ("Madhya Pradesh schemes").
+- Landing page and README: 21 schemes listed, the new order in "How it works", and a new hand-written core-flow diagram (`livesite/assets/core-logic.svg`) replacing the old PNG, which showed the scheme choice before the state.
+

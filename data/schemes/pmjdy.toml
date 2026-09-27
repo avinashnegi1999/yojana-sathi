@@ -1,25 +1,42 @@
-# Source-researched draft, 12 September 2026. NO HUMAN SIGN-OFF IS CLAIMED.
+# SIGNED 27 September 2026 by Avinash Negi (see verified_by), against the
+# evidence named below. Drafted 12 September 2026.
 # ! A GATEWAY, like e-Shram: no ₹ of its own. A savings account is a
 # ! prerequisite for PMJJBY, PMSBY, APY and every pension here, so the most
 # ! useful thing this bot can tell someone with no account is where to open
 # ! one for free. The criterion is deliberately inverted - it is surfaced to
 # ! the worker who does NOT have an account, which is the only person it helps.
-# ? Sign-off: confirm on pmjdy.gov.in that the account still needs no minimum
-# ? balance and that the RuPay card carries the accident cover.
+# ! Evidence (27 Sep 2026): docs/audit-evidence/pmjdy-scheme-details-2026-09-27.pdf,
+# ! https://pmjdy.gov.in/scheme — confirms the free BSBD account at any bank
+# ! branch or Bank Mitra "by persons not having any other account", no minimum
+# ! balance, RuPay card, and ₹2 lakh accident cover on accounts opened after
+# ! 28.8.2018.
+# ! Paperwork (27 Sep 2026) from the official account-opening form,
+# ! docs/audit-evidence/pmjdy-account-opening-form-en.pdf
+# ! (https://pmjdy.gov.in/files/forms/account-opening/English.pdf): it asks for
+# ! an "Aadhaar/ EID No." and a photograph "captured through system or ...
+# ! not older than six month". No other document is named.
+# ! REMOVED the same day, because no official page read states them: "if you
+# ! have no Aadhaar, the branch can still open a small account with another
+# ! ID", and "keep the account active or it may be marked dormant". The 2014
+# ! mission brochure (pmjdy-brochure-2014-en.pdf) was checked and states
+# ! neither for a worker.
+# ? The form (older) offers an overdraft of ₹5,000 after six months, one per
+# ? household; the scheme page says "up to Rs. 10,000". The renewal line uses
+# ? the scheme page, which is the current one.
 code = "PMJDY"
 name_en = "Jan Dhan bank account (PMJDY)"
 name_hi = "जन धन बैंक खाता (PMJDY)"
 authority = "Department of Financial Services, Ministry of Finance"
 official_url = "https://pmjdy.gov.in/"
-verified_on = "2026-09-12"
-verified_by = "claude — AUTO-RESEARCHED, PENDING HUMAN VERIFICATION"
+verified_on = "2026-09-27"
+verified_by = "Avinash Negi, checked 2026-09-27"
 
 [benefit]
 annual_value_inr = 0
 value_basis = "gateway"
 premium_inr = 0
-summary_en = "A free basic savings account at any bank, with no minimum balance, for anyone who does not have one. It comes with a RuPay debit card. Almost every scheme on this list — the insurance covers, the pensions — needs a bank account to pay into, so this is the first door. Open it at any bank branch or a Bank Mitra with your Aadhaar; if you have no Aadhaar, the branch can still open a small account with another ID."
-summary_hi = "किसी भी बैंक में मुफ़्त बुनियादी बचत खाता, बिना न्यूनतम राशि के, हर उस व्यक्ति के लिए जिसका खाता नहीं है। इसके साथ RuPay डेबिट कार्ड मिलता है। इस सूची की लगभग हर योजना — बीमा, पेंशन — का पैसा बैंक खाते में आता है, इसलिए यह पहला दरवाज़ा है। आधार लेकर किसी भी बैंक शाखा या बैंक मित्र के पास खुलवाएँ; आधार न हो तो शाखा दूसरी पहचान से छोटा खाता खोल सकती है।"
+summary_en = "A free basic savings account at any bank, with no minimum balance, for anyone who does not have any other account. It comes with a RuPay debit card, which carries ₹2 lakh accident insurance. Almost every scheme on this list — the insurance covers, the pensions — needs a bank account to pay into, so this is the first door. Open it at any bank branch or a Bank Mitra with your Aadhaar number (or Aadhaar enrolment ID) and a photograph."
+summary_hi = "किसी भी बैंक में मुफ़्त बुनियादी बचत खाता, बिना न्यूनतम राशि के, हर उस व्यक्ति के लिए जिसका कोई दूसरा खाता नहीं है। इसके साथ RuPay डेबिट कार्ड मिलता है, जिस पर ₹2 लाख का दुर्घटना बीमा है। इस सूची की लगभग हर योजना — बीमा, पेंशन — का पैसा बैंक खाते में आता है, इसलिए यह पहला दरवाज़ा है। आधार नंबर (या आधार नामांकन आईडी) और एक फोटो लेकर किसी भी बैंक शाखा या बैंक मित्र के पास खुलवाएँ।"
 
 [[criteria]]
 field = "has_bank_account"
@@ -31,11 +48,11 @@ pass_en = "You reported having no account yet — this is where to get one."
 pass_hi = "आपने खाता न होना बताया — खाता यहीं खुलवाएँ।"
 fail_en = "You already have an account, so this does not apply to you."
 fail_hi = "आपके पास पहले से खाता है, इसलिए यह आपके लिए नहीं है।"
-source_url = "https://pmjdy.gov.in/"
+source_url = "https://pmjdy.gov.in/scheme"
 
 [paperwork]
-documents_en = ["Aadhaar card (or another photo ID)", "Passport-size photograph"]
-documents = ["आधार कार्ड (या कोई अन्य फोटो पहचान)", "पासपोर्ट साइज़ फोटो"]
+documents_en = ["Aadhaar number, or Aadhaar enrolment ID (EID)", "Recent photograph (not older than six months), or the bank takes one"]
+documents = ["आधार नंबर, या आधार नामांकन आईडी (EID)", "हाल की फोटो (छह महीने से पुरानी नहीं), या बैंक खुद फोटो लेगा"]
 where_to_apply = "bank_branch"
-renewal_en = "No minimum balance. Keep the account active with a transaction every few months, or it may be marked dormant."
-renewal = "कोई न्यूनतम राशि नहीं। हर कुछ महीने में एक लेन-देन करके खाता चालू रखें, नहीं तो निष्क्रिय हो सकता है।"
+renewal_en = "No minimum balance, and the deposit earns interest. Eligible account holders can get an overdraft of up to ₹10,000."
+renewal = "कोई न्यूनतम राशि नहीं, और जमा पर ब्याज मिलता है। पात्र खाताधारकों को ₹10,000 तक का ओवरड्राफ्ट मिल सकता है।"

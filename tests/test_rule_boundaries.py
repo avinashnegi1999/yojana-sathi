@@ -34,7 +34,7 @@ from sathi.rules.engine import Verdict, evaluate
 
 # * Boundaries, not a range: one either side of every threshold in every file,
 # * plus None for "not asked yet".
-AGES = [None, 15, 16, 17, 18, 19, 25, 39, 40, 41, 58, 59, 60, 61, 69, 70, 71, 99]
+AGES = [None, 15, 16, 17, 18, 19, 20, 21, 22, 25, 39, 40, 41, 58, 59, 60, 61, 64, 65, 66, 69, 70, 71, 79, 80, 81, 99]
 INCOME = [None, "no_income", "upto_5000", "5001_10000", "10001_15000",
           "15001_25000", "above_25000"]
 TRI = [None, True, False]
@@ -118,14 +118,12 @@ def _oracle(code: str, p: Profile) -> bool | None:
         criterion(p.uk_pension_selected)
         if code == "UK_WIDOW":
             criterion(p.is_widow)
-            # ! OUT OF DATE, and deliberately not "fixed" from the TOML. Since
-            # ! 2026-09-15 uk_widow.toml carries an other-pension EXCLUSION
-            # ! sourced to the department's Hindi pension overview, and that
-            # ! file is unsigned. Encoding it here by copying the TOML would make
-            # ! the oracle agree with the file by construction. Before UK_WIDOW
-            # ! is re-signed, read that overview and write the exclusion here
-            # ! from it. Until then the per-scheme sweep below skips unsigned
-            # ! files, and the old sweep never varies receives_other_pension.
+            # ! Written 2026-09-27 from the department's Hindi pension overview
+            # ! itself, not from the TOML (copy kept at docs/audit-evidence/
+            # ! uk-pension-overview-hi-2026-09-27.html), widow section: "उन
+            # ! विधवाओं को ... जिन्हें कोई दूसरी पेंशन का फायदा नहीं मिल रहा है"
+            # ! — only widows not receiving any other pension benefit.
+            exclusion(p.receives_other_pension)
     elif code == "APY":
         # pfrda.org.in/w/faqs/atal-pension-yojana, read 12 September 2026:
         # "(i) The age of an individual should be between 18 and 40 years.
@@ -166,6 +164,67 @@ def _oracle(code: str, p: Profile) -> bool | None:
         else:
             criterion(None if age is None else age >= 18)
             criterion(p.has_disability_80pct)
+    elif code == "TN_IGNDPS":
+        # cra.tn.gov.in/about_schemes_t.php, central schemes table, row 3:
+        # disability 80% or more, below poverty line, age 18 and above. The
+        # state amount applies only to someone living in Tamil Nadu.
+        criterion(None if p.state is None else p.state == "TN")
+        criterion(None if age is None else age >= 18)
+        criterion(p.has_disability_80pct)
+        criterion(p.is_bpl)
+    elif code == "SK_IGNOAPS":
+        # pensionscheme.sikkim.gov.in: every scheme needs a BPL household (AAY
+        # or priority ration card); IGNOAPS "Should Have Attained the age of
+        # 60 years". Sikkim residents only.
+        criterion(None if p.state is None else p.state == "SK")
+        criterion(None if age is None else age >= 60)
+        criterion(p.is_bpl)
+    elif code == "SK_IGNWPS":
+        # pensionscheme.sikkim.gov.in: BPL household (as above); widow card
+        # "Should Have Attained the age of 21 and above" — 21, not NSAP's 40.
+        criterion(None if p.state is None else p.state == "SK")
+        criterion(p.is_widow)
+        criterion(None if age is None else age >= 21)
+        criterion(p.is_bpl)
+    elif code == "SK_IGNDPS":
+        # pensionscheme.sikkim.gov.in: BPL household (as above); disability
+        # card "age of 18 years", certificate "more than 80%". The profile
+        # only records "80% or more", so the exact-80 edge is not testable.
+        criterion(None if p.state is None else p.state == "SK")
+        criterion(None if age is None else age >= 18)
+        criterion(p.has_disability_80pct)
+        criterion(p.is_bpl)
+    elif code == "MZ_IGNOAPS":
+        # socialwelfare.mizoram.gov.in: "The eligible age for IGNOAPS is 60
+        # years." BPL is the national IGNOAPS rule (PIB PRID=2226202); the
+        # Mizoram page does not restate it. Mizoram residents only.
+        criterion(None if p.state is None else p.state == "MZ")
+        criterion(None if age is None else age >= 60)
+        criterion(p.is_bpl)
+    elif code == "MP_KALYANI":
+        # dhar.nic.in Kalyani page: widow "between 18 to 79 years"; "should
+        # not be income tax payer"; not receiving family pension or "any other
+        # pension scheme benefits"; "Not required BPL" — so no is_bpl here.
+        # "Not a government employee" has no self-only field; not encoded.
+        criterion(None if p.state is None else p.state == "MP")
+        criterion(p.is_widow)
+        criterion(None if age is None else 18 <= age <= 79)
+        exclusion(tax)
+        exclusion(p.receives_other_pension)
+    elif code in ("PB_OLD_AGE_WOMEN", "PB_OLD_AGE_MEN"):
+        # sswcd.punjab.gov.in: "women of 58 years of age and above and ... men
+        # of 65 years of age and above. Total annual Income should not be more
+        # than Rs. 60,000/-" (= ₹5,000 a month); land within 2.5 acres irrigated
+        # / 5 acres dry; declaration "I am not in Govt. or private employment.
+        # I am not a self employed. ... I am not an Income Tax Payee."
+        women = code == "PB_OLD_AGE_WOMEN"
+        criterion(None if p.state is None else p.state == "PB")
+        criterion(None if p.is_woman is None else p.is_woman == women)
+        criterion(None if age is None else age >= (58 if women else 65))
+        criterion(None if income is None else income in {"no_income", "upto_5000"})
+        criterion(None if p.has_job_or_business is None else not p.has_job_or_business)
+        criterion(None if p.pb_land_over_limit is None else not p.pb_land_over_limit)
+        exclusion(tax)
     elif code == "NPS_TRADERS":
         # maandhan.in FAQ Q2: trader/shopkeeper/self-employed, turnover <= 1.5
         # crore, 18-40, not an income-tax payer, not NPS(govt)/ESIC/EPFO.
@@ -180,9 +239,9 @@ def _oracle(code: str, p: Profile) -> bool | None:
         # ! The old sweep never varied known_schemes, so the gap was invisible.
         exclusion("PM_SYM" in p.known_schemes)
     elif code == "PM_VISHWAKARMA":
-        # PIB PRID=1989108: one of 18 trades, 18+, no unpaid PMEGP/MUDRA/
-        # SVANidhi loan in 5 years, and no government service in the immediate
-        # family. These are criteria (eq false) so the intake asks them; a
+        # PIB PRID=1989108 and the Guidelines, para 4: one of 18 trades, 18+,
+        # no PMEGP loan in 5 years and no unrepaid MUDRA/SVANidhi loan (one
+        # yes/no field covers both), and no government service in the family. These are criteria (eq false) so the intake asks them; a
         # field used only by an exclusion would never be collected.
         criterion(p.is_vishwakarma_artisan)
         criterion(None if age is None else age >= 18)
@@ -233,7 +292,10 @@ def test_every_combination_matches_the_encoded_source_interpretation():
     missing = set(schemes) - {"ESHRAM", "PM_SYM", "PMSBY", "PMJJBY", "UK_OLD_AGE",
                               "UK_WIDOW", "PMUY", "APY", "PMJAY_70",
                               "IGNOAPS", "IGNWPS", "IGNDPS", "NPS_TRADERS",
-                              "PM_VISHWAKARMA", "PMJDY"}
+                              "PM_VISHWAKARMA", "PMJDY", "TN_IGNDPS", "SK_IGNOAPS",
+                              "SK_IGNWPS", "SK_IGNDPS",
+                              "MZ_IGNOAPS", "MP_KALYANI",
+                              "PB_OLD_AGE_WOMEN", "PB_OLD_AGE_MEN"}
     assert not missing, f"a scheme was added with no oracle: {sorted(missing)}"
 
     checked = 0
@@ -267,7 +329,9 @@ def test_every_combination_matches_the_encoded_source_interpretation():
 SWEEP_VALUES = {
     "age": sorted(set(a for a in AGES if a is not None) | {49, 50, 51, 79, 80, 81}) + [None],
     "income_band": INCOME,
-    "state": [None, "UK", "UP", "BR"],
+    # ! Every state with a scheme file, plus one without. A state scheme
+    # ! can only reach ELIGIBLE in its own state.
+    "state": [None, "UK", "UP", "BR", "TN", "SK", "MZ", "MP", "PB"],
     "known_schemes": [frozenset(), frozenset({"PM_SYM"}), frozenset({"PMSBY"})],
 }
 NON_BOOLEAN_FIELDS = {"age", "income_band", "state", "known_schemes", "occupation",

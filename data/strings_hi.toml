@@ -47,6 +47,14 @@ done = "पूरा"
 
 # =====================================================================
 pick_some = "कुछ चुनें"
+# * राज्य के बाद पूछा जाता है (27 सितंबर 2026 से)।
+mode_scope = "कौन-सी योजनाएँ जाँचूँ?"
+none_for_state = "{state} की कोई योजना अभी जाँची नहीं गई है। ये राष्ट्रीय योजनाएँ हैं।"
+both = "दोनों"
+national = "राष्ट्रीय योजनाएँ"
+state_only = "{state} की योजनाएँ"
+all_of_these = "ये सभी"
+pick_one = "कम से कम एक योजना चुनें, या \"ये सभी\" दबाएँ।"
 
 [questions]
 is_unorganised_worker = "क्या आप असंगठित काम करते हैं — घर से, अपना काम या दिहाड़ी?"
@@ -86,6 +94,7 @@ other = "कोई और"
 correct = "सही है"
 wrong = "ग़लत है"
 show_more = "और दिखाएँ"
+other_state = "मेरा राज्य इसमें नहीं है"
 # ! WhatsApp shows more than three options as a list behind a button, and
 # ! that button needs its own label. Telegram never asks for one.
 choose = "चुनें"
@@ -125,6 +134,8 @@ is_small_trader = "छोटे व्यापारी / दुकानदा
 is_vishwakarma_artisan = "पारंपरिक कारीगर का काम"
 took_business_loan_5yr = "हाल का सरकारी व्यापार ऋण"
 has_government_service_in_family = "परिवार में सरकारी नौकरी"
+has_job_or_business = "नौकरी या अपना काम"
+pb_land_over_limit = "पंजाब की सीमा से अधिक ज़मीन"
 
 is_unorganised_worker = "असंगठित काम (आपका जवाब)"
 # =====================================================================
@@ -244,6 +255,7 @@ bank_branch = "अपने बैंक की शाखा"
 post_office = "नज़दीकी डाकघर"
 eshram_centre = "ई-श्रम केंद्र या CSC"
 online = "ऑनलाइन पोर्टल पर"
+local_office = "आपका पंचायत, ब्लॉक या नगरपालिका कार्यालय"
 unknown = "नज़दीकी जन सेवा केंद्र (CSC) पर पूछें"
 
 # =====================================================================

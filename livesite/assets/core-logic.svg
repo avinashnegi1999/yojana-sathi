@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 760" role="img" aria-labelledby="title desc">
+  <title id="title">Yojana Sathi core flow</title>
+  <desc id="desc">A worker opens the bot on Telegram, WhatsApp or the web, picks a language and consents. She gives her state first, then chooses national schemes, her state's schemes, or both, and ticks the schemes to check or all of them. Only the questions those schemes need are asked. The answers form a temporary profile in memory. A deterministic rule engine applies human-signed scheme files and returns eligible, ineligible or unknown. She then gets the reasons, a document checklist, a one-page sheet and where to go. Metrics keep only coarse, consented events. No language model decides a verdict.</desc>
+  <style>
+    .t{font:600 19px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;fill:#1d1d1f}
+    .s{font:400 15px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;fill:#6e6e73}
+    .n{font:600 14px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;fill:#ffffff}
+    .h{font:600 34px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;fill:#1d1d1f}
+    .sub{font:400 18px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;fill:#6e6e73}
+    .card{fill:#f5f5f7}
+    .key{fill:#ffffff;stroke:#0066cc;stroke-width:2}
+    .dot{fill:#0066cc}
+    .arrow{stroke:#0066cc;stroke-width:2;fill:none;marker-end:url(#a)}
+    .ok{fill:#e8f5ec}.no{fill:#fdeceb}.unk{fill:#fff6e0}
+  </style>
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0066cc"/></marker></defs>
+  <rect width="1400" height="760" fill="#ffffff"/>
+  <text x="700" y="58" text-anchor="middle" class="h">Yojana Sathi — core flow</text>
+  <text x="700" y="90" text-anchor="middle" class="sub">State first, then only the schemes and questions that apply.</text>
+
+  <!-- row 1 -->
+  <g>
+    <rect x="30" y="130" width="176" height="170" rx="18" class="card"/><circle cx="58" cy="158" r="14" class="dot"/><text x="58" y="163" text-anchor="middle" class="n">1</text>
+    <text x="48" y="210" class="t">Open the bot</text><text x="48" y="238" class="s">Telegram, WhatsApp</text><text x="48" y="258" class="s">or the web page</text>
+
+    <rect x="226" y="130" width="176" height="170" rx="18" class="card"/><circle cx="254" cy="158" r="14" class="dot"/><text x="254" y="163" text-anchor="middle" class="n">2</text>
+    <text x="244" y="210" class="t">Language</text><text x="244" y="238" class="s">Hindi or English</text>
+
+    <rect x="422" y="130" width="176" height="170" rx="18" class="card"/><circle cx="450" cy="158" r="14" class="dot"/><text x="450" y="163" text-anchor="middle" class="n">3</text>
+    <text x="440" y="210" class="t">Consent</text><text x="440" y="238" class="s">Anonymous</text><text x="440" y="258" class="s">screening</text>
+
+    <rect x="618" y="130" width="176" height="170" rx="18" class="key"/><circle cx="646" cy="158" r="14" class="dot"/><text x="646" y="163" text-anchor="middle" class="n">4</text>
+    <text x="636" y="210" class="t">Her state</text><text x="636" y="238" class="s">All 36 states and UTs</text><text x="636" y="258" class="s">Map on the web,</text><text x="636" y="278" class="s">buttons in chat</text>
+
+    <rect x="814" y="130" width="176" height="170" rx="18" class="key"/><circle cx="842" cy="158" r="14" class="dot"/><text x="842" y="163" text-anchor="middle" class="n">5</text>
+    <text x="832" y="210" class="t">Which schemes</text><text x="832" y="238" class="s">National, her</text><text x="832" y="258" class="s">state's, or both</text>
+
+    <rect x="1010" y="130" width="176" height="170" rx="18" class="key"/><circle cx="1038" cy="158" r="14" class="dot"/><text x="1038" y="163" text-anchor="middle" class="n">6</text>
+    <text x="1028" y="210" class="t">Pick from list</text><text x="1028" y="238" class="s">Tick at least one,</text><text x="1028" y="258" class="s">or "All of these"</text>
+
+    <rect x="1206" y="130" width="164" height="170" rx="18" class="card"/><circle cx="1234" cy="158" r="14" class="dot"/><text x="1234" y="163" text-anchor="middle" class="n">7</text>
+    <text x="1224" y="210" class="t">Questions</text><text x="1224" y="238" class="s">Only what those</text><text x="1224" y="258" class="s">schemes need.</text><text x="1224" y="278" class="s">"Don't know" ok</text>
+
+    <path d="M206 215 H222" class="arrow"/><path d="M402 215 H418" class="arrow"/><path d="M598 215 H614" class="arrow"/>
+    <path d="M794 215 H810" class="arrow"/><path d="M990 215 H1006" class="arrow"/><path d="M1186 215 H1202" class="arrow"/>
+  </g>
+
+  <path d="M1288 300 V340 H118 V366" class="arrow"/>
+
+  <!-- row 2 -->
+  <g>
+    <rect x="30" y="370" width="176" height="170" rx="18" class="card"/><circle cx="58" cy="398" r="14" class="dot"/><text x="58" y="403" text-anchor="middle" class="n">8</text>
+    <text x="48" y="450" class="t">Profile</text><text x="48" y="478" class="s">In memory only.</text><text x="48" y="498" class="s">No name, phone</text><text x="48" y="518" class="s">or Aadhaar</text>
+
+    <rect x="226" y="370" width="200" height="170" rx="18" class="key"/><circle cx="254" cy="398" r="14" class="dot"/><text x="254" y="403" text-anchor="middle" class="n">9</text>
+    <text x="244" y="450" class="t">Rule engine</text><text x="244" y="478" class="s">Human-signed scheme</text><text x="244" y="498" class="s">files, cited sources.</text><text x="244" y="518" class="s">No model decides.</text>
+
+    <rect x="446" y="370" width="176" height="50" rx="12" class="ok"/><text x="534" y="402" text-anchor="middle" class="t">Eligible</text>
+    <rect x="446" y="430" width="176" height="50" rx="12" class="no"/><text x="534" y="462" text-anchor="middle" class="t">Ineligible</text>
+    <rect x="446" y="490" width="176" height="50" rx="12" class="unk"/><text x="534" y="522" text-anchor="middle" class="t">Unknown</text>
+
+    <rect x="642" y="370" width="176" height="170" rx="18" class="card"/><circle cx="670" cy="398" r="14" class="dot"/><text x="670" y="403" text-anchor="middle" class="n">10</text>
+    <text x="660" y="450" class="t">Why</text><text x="660" y="478" class="s">Reasons for each</text><text x="660" y="498" class="s">verdict, in her</text><text x="660" y="518" class="s">language</text>
+
+    <rect x="838" y="370" width="176" height="170" rx="18" class="card"/><circle cx="866" cy="398" r="14" class="dot"/><text x="866" y="403" text-anchor="middle" class="n">11</text>
+    <text x="856" y="450" class="t">What to carry</text><text x="856" y="478" class="s">Document checklist</text>
+
+    <rect x="1034" y="370" width="176" height="170" rx="18" class="card"/><circle cx="1062" cy="398" r="14" class="dot"/><text x="1062" y="403" text-anchor="middle" class="n">12</text>
+    <text x="1052" y="450" class="t">One-page sheet</text><text x="1052" y="478" class="s">To show at the</text><text x="1052" y="498" class="s">centre</text>
+
+    <rect x="1230" y="370" width="140" height="170" rx="18" class="card"/><circle cx="1258" cy="398" r="14" class="dot"/><text x="1258" y="403" text-anchor="middle" class="n">13</text>
+    <text x="1248" y="450" class="t">Where to go</text><text x="1248" y="478" class="s">CSC, bank,</text><text x="1248" y="498" class="s">office or portal</text>
+
+    <path d="M206 455 H222" class="arrow"/><path d="M426 455 H442" class="arrow"/><path d="M622 455 H638" class="arrow"/>
+    <path d="M818 455 H834" class="arrow"/><path d="M1014 455 H1030" class="arrow"/><path d="M1210 455 H1226" class="arrow"/>
+  </g>
+
+  <!-- privacy -->
+  <rect x="30" y="580" width="1340" height="140" rx="18" class="card"/>
+  <text x="60" y="622" class="t">Privacy-first metrics</text>
+  <text x="60" y="654" class="s">Anonymous events only, under a random per-session id. Age, income and the like are kept as coarse bands.</text>
+  <text x="60" y="678" class="s">No name, phone number, Aadhaar or exact location is ever stored. The ₹ figure is "annual entitlement surfaced", not money delivered.</text>
+</svg>

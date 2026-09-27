@@ -88,8 +88,12 @@ class Profile:
     has_disability_80pct: bool | None = None    # certificate says 80% or more
     is_small_trader: bool | None = None         # shop/trade, turnover <= 1.5 cr
     is_vishwakarma_artisan: bool | None = None  # one of the 18 listed trades
-    took_business_loan_5yr: bool | None = None  # PMEGP / MUDRA / SVANidhi, unpaid
+    took_business_loan_5yr: bool | None = None  # PMEGP in 5 yrs, or unpaid MUDRA / SVANidhi
     has_government_service_in_family: bool | None = None  # self/spouse/unmarried child
+    # * Added 27 Sep 2026 for the Punjab state pensions. Each is still a plain
+    # * yes/no/don't-know follow-up asked only when a loaded scheme needs it.
+    has_job_or_business: bool | None = None  # SELF: govt/private job, or self-employed
+    pb_land_over_limit: bool | None = None   # > 2.5 acres irrigated or > 5 acres dry (with spouse)
     known_schemes: frozenset[str] = frozenset()  # ! drives the headline metric
 
     def age_band(self) -> str | None:

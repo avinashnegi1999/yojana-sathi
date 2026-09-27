@@ -34,6 +34,7 @@ from pathlib import Path
 
 from sathi.channels.base import Reply
 from sathi.conversation.flow import Conversation, State
+from sathi.core import content
 from sathi.core.content import DEFAULT_LANG, LANGS, s
 from sathi.core.schemes import Scheme, load_all
 from sathi.metrics.events import SOURCE_SLUGS, EventLog
@@ -85,6 +86,10 @@ html:lang(hi) .q{line-height:1.4;letter-spacing:0}
 .choice .tick{color:var(--focus);font-weight:600}
 .choices:has(.scale){display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
 .choices:has(.scale) .choice:not(.scale){grid-column:1/-1;justify-content:center}
+.map{display:flex;justify-content:center;margin:4px 0 6px}.mapbox{position:relative;display:inline-block;max-width:100%}.mapbox img{display:block;width:912px;height:auto;max-width:100%}.mapbox canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.maptip{position:absolute;transform:translate(-50%,calc(-100% - 12px));padding:5px 12px;border-radius:980px;background:var(--ink);color:#fff;font-size:14px;white-space:nowrap;pointer-events:none}.tabs{display:flex;gap:2px;width:max-content;margin:0 auto 14px;padding:3px;border-radius:980px;background:rgba(0,0,0,.06)}.tabs button{appearance:none;min-height:36px;padding:0 22px;border:0;border-radius:980px;background:transparent;color:var(--ink);font:inherit;font-size:15px;cursor:pointer}.tabs button[aria-selected=true]{background:var(--canvas);box-shadow:0 0 0 1px rgba(0,0,0,.06)}.tabs button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}.choices[hidden],#maptab[hidden]{display:none!important}.maphint{margin:0 0 12px;color:var(--muted);font-size:15px;text-align:center}#mapgo{position:sticky;bottom:12px;z-index:5;margin:0 0 14px}#mapgo:empty{display:none}main.wide{max-width:72rem}
+.choices:has(.grid){display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.choices:has(.grid) .choice{min-height:48px;padding:10px 16px;font-size:15px;line-height:1.25}
+@media(min-width:600px){.choices:has(.grid){grid-template-columns:repeat(3,1fr)}}
 .choice.scale{justify-content:center;min-height:52px;padding:0;border-radius:26px}
 .composer{display:flex;gap:10px;margin:0 0 8px}
 .composer input{flex:1;min-width:0;height:52px;border:1px solid var(--hairline);border-radius:26px;background:var(--canvas);color:var(--ink);font:inherit;padding:0 20px}
@@ -98,14 +103,50 @@ html:lang(hi) .q{line-height:1.4;letter-spacing:0}
 <main><section id="screen" aria-live="polite"></section></main>
 <script>
 const screen=document.querySelector('#screen');
-const UI={hi:{type:'यहाँ लिखें',send:'भेजें',download:'अपना काग़ज़ डाउनलोड करें',restart:'फिर से शुरू',other:'English',otherLang:'en',brand:'योजना साथी',answers:'आपके जवाब'},en:{type:'Type your answer',send:'Send',download:'Download your sheet',restart:'Start again',other:'हिंदी',otherLang:'hi',brand:'Yojana Sathi',answers:'Your answers'}};
+const UI={hi:{type:'यहाँ लिखें',send:'भेजें',download:'अपना काग़ज़ डाउनलोड करें',restart:'फिर से शुरू',other:'English',otherLang:'en',brand:'योजना साथी',answers:'आपके जवाब',mapHint:'नक्शे पर अपना राज्य छुएँ।',mapGo:'आगे बढ़ें',tabMap:'नक्शा',tabList:'सूची'},en:{type:'Type your answer',send:'Send',download:'Download your sheet',restart:'Start again',other:'हिंदी',otherLang:'hi',brand:'Yojana Sathi',answers:'Your answers',mapHint:'Tap your state on the map.',mapGo:'Continue',tabMap:'Map',tabList:'List'}};
 let current='en';
 // The one blue pill on a screen: the forward action, never an answer to a yes/no question.
 const PRIMARY=new Set(['consent_yes','pick:all','pick:done','next']);
 function text(value){return String(value||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function blocks(value,headline,cls){cls=cls||'q';return String(value||'').split(/\n\s*\n/).map((b,i)=>{if(headline&&i===0){const cut=b.indexOf('\n');return cut<0?`<h2 class="${cls}">${text(b)}</h2>`:`<h2 class="${cls}">${text(b.slice(0,cut))}</h2><p class="lead">${text(b.slice(cut+1))}</p>`;}const m=b.match(/^(\d+\.\s[^\n]*)\n([\s\S]*)$/);return m?`<div class="scheme"><p class="scheme-name">${text(m[1])}</p><p class="scheme-body">${text(m[2].replace(/^ +/gm,''))}</p></div>`:`<p class="message">${text(b)}</p>`;}).join('');}
-function button(b){const picked=b.label.startsWith('✅ ');const label=picked?b.label.slice(2):b.label;const cls=['choice',b.scale?'scale':'',PRIMARY.has(b.value)?'primary':'',picked?'selected':''].filter(Boolean).join(' ');return `<button class="${cls}" data-value="${encodeURIComponent(b.value)}"${picked?' aria-pressed="true"':''}><span>${text(label)}</span>${picked?'<span class="tick" aria-hidden="true">✓</span>':''}</button>`;}
-function show(data){const ui=UI[data.lang]||UI.hi;document.documentElement.lang=data.lang==='en'?'en':'hi';document.getElementById('restart').textContent=ui.restart;current=data.lang==='hi'?'hi':'en';const sw=document.getElementById('switch');sw.textContent=ui.other;sw.lang=ui.otherLang;document.getElementById('brand').textContent=ui.brand;const last=data.replies.length-1;const hasResult=data.replies.some(r=>r.kind==='result');let out=data.replies.map((r,i)=>{if(r.kind==='recap'){const body=r.text.split('\n').slice(1).join('\n');return `<details class="recap"><summary>${ui.answers}</summary><p class="message">${text(body)}</p></details>`;}const asks=i===last&&(r.buttons?.length||r.typed);return `${r.kind==='result'?blocks(r.text,true,'q'):blocks(r.text,asks,hasResult?'q2':'q')}${r.buttons?.length?`<div class="choices">${r.buttons.map(button).join('')}</div>`:''}${r.document?`<a class="download" href="${r.document}" download>${ui.download}</a>`:''}`;}).join('');const typed=!!(data.replies[last]&&data.replies[last].typed);if(typed)out+=`<form class="composer"><input name="answer" aria-label="${ui.type}" autocomplete="off" inputmode="text" placeholder="${ui.type}"><button class="send">${ui.send}</button></form>`;screen.innerHTML=out;window.scrollTo({top:0});screen.querySelectorAll('.choice').forEach(b=>b.onclick=()=>answer(decodeURIComponent(b.dataset.value)));const form=screen.querySelector('form');if(form){form.onsubmit=e=>{e.preventDefault();const input=e.currentTarget.answer;if(input.value.trim()){answer(input.value);input.value='';}};form.answer.focus();}}
+function button(b){const picked=b.label.startsWith('✅ ');const label=picked?b.label.slice(2):b.label;const cls=['choice',b.scale?'scale':'',b.grid?'grid':'',PRIMARY.has(b.value)?'primary':'',picked?'selected':''].filter(Boolean).join(' ');return `<button class="${cls}" data-value="${encodeURIComponent(b.value)}"${picked?' aria-pressed="true"':''}><span>${text(label)}</span>${picked?'<span class="tick" aria-hidden="true">✓</span>':''}</button>`;}
+let mapData=null;
+async function mapLoad(){if(mapData!==null)return mapData;mapData=false;
+try{const [meta,img]=await Promise.all([fetch('/map-seeds.json').then(r=>r.ok?r.json():null),new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src='/map.png';})]);
+if(!meta)return false;const [W,H]=meta.image,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');g.drawImage(img,0,0);
+const d=g.getImageData(0,0,W,H).data,[fr,fg,fb]=meta.fill,t=meta.tolerance,codes=Object.keys(meta.seeds),lab=new Uint8Array(W*H);
+const inside=p=>{const i=p*4;return Math.abs(d[i]-fr)<=t&&Math.abs(d[i+1]-fg)<=t&&Math.abs(d[i+2]-fb)<=t;};
+codes.forEach((code,k)=>{for(const [sx,sy] of meta.seeds[code]){const s=sy*W+sx;if(!inside(s)||lab[s])continue;lab[s]=k+1;const st=[s];
+while(st.length){const q=st.pop(),x=q%W;for(const n of [q-1,q+1,q-W,q+W]){if(n<0||n>=W*H||Math.abs(n%W-x)>1||lab[n]||!inside(n))continue;lab[n]=k+1;st.push(n);}}}});
+mapData={W,H,codes,lab};}catch(e){mapData=false;}return mapData;}
+async function drawMap(ui){const tab=document.getElementById('maptab');if(!tab)return;const m=await mapLoad();
+if(!m||!document.body.contains(tab)){tab.remove();return;}
+// * Per-state pixel lists, built once, so painting a state is cheap on hover.
+if(!m.pixels){m.pixels=m.codes.map(()=>[]);for(let p=0;p<m.lab.length;p++)if(m.lab[p])m.pixels[m.lab[p]-1].push(p);}
+const list=screen.querySelector('.choices:has(.grid)');
+// * Two tabs: the map, and the full list. Built here, only once the map has loaded.
+const tabs=document.createElement('div');tabs.className='tabs';tabs.setAttribute('role','tablist');
+tabs.innerHTML=`<button role="tab" data-tab="map" aria-selected="true">${ui.tabMap}</button><button role="tab" data-tab="list" aria-selected="false">${ui.tabList}</button>`;
+tab.before(tabs);if(list)list.hidden=true;document.querySelector('main').classList.add('wide');
+tabs.querySelectorAll('[role=tab]').forEach(b=>b.onclick=()=>{const onMap=b.dataset.tab==='map';
+tabs.querySelectorAll('[role=tab]').forEach(x=>x.setAttribute('aria-selected',String(x===b)));tab.hidden=!onMap;if(list)list.hidden=onMap;document.querySelector('main').classList.toggle('wide',onMap);});
+const box=document.getElementById('map');
+box.innerHTML=`<div class="mapbox"><img src="/map.png" alt="" width="${m.W}" height="${m.H}"><canvas class="hover" width="${m.W}" height="${m.H}"></canvas><canvas class="pick" width="${m.W}" height="${m.H}"></canvas><div class="maptip" hidden></div></div>`;
+const img=box.querySelector('img'),hover=box.querySelector('.hover').getContext('2d'),pick=box.querySelector('.pick').getContext('2d'),tip=box.querySelector('.maptip'),go=document.getElementById('mapgo');
+const names={};screen.querySelectorAll('.choice.grid').forEach(b=>{names[decodeURIComponent(b.dataset.value).slice(6)]=b.textContent.trim();});
+const nameOf=k=>names[m.codes[k-1]]||m.codes[k-1];
+const at=e=>{const r=img.getBoundingClientRect(),x=Math.round((e.clientX-r.left)/r.width*m.W),y=Math.round((e.clientY-r.top)/r.height*m.H);
+for(let s=0;s<=6;s++)for(let dy=-s;dy<=s;dy++)for(let dx=-s;dx<=s;dx++){const X=x+dx,Y=y+dy;if(X<0||Y<0||X>=m.W||Y>=m.H)continue;const k=m.lab[Y*m.W+X];if(k)return k;}return 0;};
+const paint=(g,k,rgba)=>{g.clearRect(0,0,m.W,m.H);if(!k)return;const px=g.createImageData(m.W,m.H);for(const p of m.pixels[k-1]){px.data.set(rgba,p*4);}g.putImageData(px,0,0);};
+let hovered=0;
+img.onmousemove=e=>{const k=at(e);img.style.cursor=k?'pointer':'default';
+if(k!==hovered){hovered=k;paint(hover,k,[0,102,204,70]);}
+if(!k){tip.hidden=true;return;}const r=img.getBoundingClientRect();tip.textContent=nameOf(k);tip.hidden=false;
+tip.style.left=(e.clientX-r.left)+'px';tip.style.top=(e.clientY-r.top)+'px';};
+img.onmouseleave=()=>{hovered=0;paint(hover,0);tip.hidden=true;};
+img.onclick=e=>{const k=at(e);if(!k)return;const code=m.codes[k-1];paint(pick,k,[0,102,204,230]);
+go.innerHTML=`<button class="choice primary">${ui.mapGo}: ${text(nameOf(k))}</button>`;go.firstChild.onclick=()=>answer('state:'+code);};}
+function show(data){document.querySelector('main').classList.remove('wide');const ui=UI[data.lang]||UI.hi;document.documentElement.lang=data.lang==='en'?'en':'hi';document.getElementById('restart').textContent=ui.restart;current=data.lang==='hi'?'hi':'en';const sw=document.getElementById('switch');sw.textContent=ui.other;sw.lang=ui.otherLang;document.getElementById('brand').textContent=ui.brand;const last=data.replies.length-1;const hasResult=data.replies.some(r=>r.kind==='result');let out=data.replies.map((r,i)=>{if(r.kind==='recap'){const body=r.text.split('\n').slice(1).join('\n');return `<details class="recap"><summary>${ui.answers}</summary><p class="message">${text(body)}</p></details>`;}const asks=i===last&&(r.buttons?.length||r.typed);return `${r.kind==='result'?blocks(r.text,true,'q'):blocks(r.text,asks,hasResult?'q2':'q')}${r.map?`<div id="maptab"><div class="map" id="map"></div><p class="maphint">${ui.mapHint}</p><div id="mapgo"></div></div>`:''}${r.buttons?.length?`<div class="choices">${r.buttons.map(button).join('')}</div>`:''}${r.document?`<a class="download" href="${r.document}" download>${ui.download}</a>`:''}`;}).join('');const typed=!!(data.replies[last]&&data.replies[last].typed);if(typed)out+=`<form class="composer"><input name="answer" aria-label="${ui.type}" autocomplete="off" inputmode="text" placeholder="${ui.type}"><button class="send">${ui.send}</button></form>`;screen.innerHTML=out;window.scrollTo({top:0});screen.querySelectorAll('.choice').forEach(b=>b.onclick=()=>answer(decodeURIComponent(b.dataset.value)));drawMap(ui);const form=screen.querySelector('form');if(form){form.onsubmit=e=>{e.preventDefault();const input=e.currentTarget.answer;if(input.value.trim()){answer(input.value);input.value='';}};form.answer.focus();}}
 const START=(()=>{const src=new URLSearchParams(location.search).get('start')||'';return /^[a-z]{1,20}$/.test(src)?'/start '+src:'/start';})();
 function oops(){screen.innerHTML=`<h2 class="q">${text('कुछ गड़बड़ हो गई।\nSomething went wrong.')}</h2><div class="choices"><button class="choice primary" onclick="restart()">फिर से शुरू · Start again</button></div>`;}
 async function answer(value){try{const r=await fetch('/answer',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({answer:value})});const data=await r.json().catch(()=>null);if(data&&Array.isArray(data.replies)){show(data);}else{oops();}}catch(e){oops();}}
@@ -116,6 +157,15 @@ function restart(){answer(START)}answer(START);
 
 # * Read once at import. One file, no static directory, no path handling.
 _LOGO = (Path(__file__).resolve().parent / "web" / "logo.jpg").read_bytes()
+# * The tappable India map: an image made with mapchart.net (its licence allows
+# * reuse with the "Created with mapchart.net" credit, which is kept in the
+# * image) and, per state, points inside its area. The page finds each state's
+# * area from those points, so a tap anywhere inside a state selects it. Until
+# * both files exist the state question shows the plain list, complete on its own.
+_MAP_IMAGE = Path(__file__).resolve().parent / "web" / "india_map.png"
+_MAP_SEEDS = Path(__file__).resolve().parent.parent / "data" / "maps" / "india_map_seeds.json"
+_MAP = _MAP_IMAGE.read_bytes() if _MAP_IMAGE.exists() else None
+_SEEDS = _MAP_SEEDS.read_bytes() if _MAP_SEEDS.exists() else None
 
 
 class LocalWeb:
@@ -136,12 +186,12 @@ class LocalWeb:
     # ! operator helping a queue of workers from one office stays far below it.
     NEW_SESSIONS_PER_CLIENT = 30
     NEW_SESSION_WINDOW_SECONDS = 10 * 60
-    # ! Screens where typing is the ONLY way to answer. Everywhere else the
-    # ! buttons are the whole answer and the text box would just be noise.
+    # ! Screens that show a text box. Everywhere else the buttons are the
+    # ! whole answer and a text box would just be noise.
     # ! Age has no buttons; the free-text occupation screen exists because
-    # ! the worker tapped "other"; the suggestion is prose or Skip. State and
-    # ! rating take typed input on Telegram, but here they have buttons for
-    # ! every value, so they get none.
+    # ! the worker tapped "other"; the suggestion is prose or Skip. Rating
+    # ! takes typed input on Telegram, but here it has buttons for every value.
+    # * State needs none either: the map and the list of all 36 cover it.
     TYPED_STATES = frozenset({State.AGE, State.OCCUPATION_FREE, State.SUGGESTION})
     # * The language a new browser session opens in; see _turn().
     DEFAULT_LANG = "en"
@@ -272,7 +322,17 @@ class LocalWeb:
             if convo is not None and convo.state is State.RATING and reply is replies[-1]:
                 buttons = [{"label": str(n), "value": str(n), "scale": True}
                            for n in range(1, 11)] + buttons
+            # * The same idea for the state question: a browser can show every
+            # * state and UT at once, so it gets all 36 as a grid, alphabetical in
+            # * her language, instead of the chat channels' few buttons and pages.
+            # * The values are the flow's own "state:<code>" answers.
+            if convo is not None and convo.state is State.STATE and reply is replies[-1]:
+                every = sorted(content.states(), key=lambda st: st.label(convo.lang))
+                buttons = [{"label": st.label(convo.lang), "value": f"state:{st.code}", "grid": True}
+                           for st in every]
             item = {"text": reply.text, "buttons": buttons, "typed": typed}
+            if _MAP and _SEEDS and convo is not None and convo.state is State.STATE and reply is replies[-1]:
+                item["map"] = True
             if recap_header and reply.text.startswith(recap_header):
                 item["kind"] = "recap"
                 after_recap = True
@@ -366,6 +426,12 @@ def handler_class(app: LocalWeb, secure_cookie: bool = False) -> type[BaseHTTPRe
                 return
             if self.path == "/logo.jpg":
                 self._send(HTTPStatus.OK, _LOGO, "image/jpeg")
+                return
+            if self.path == "/map.png" and _MAP:
+                self._send(HTTPStatus.OK, _MAP, "image/png")
+                return
+            if self.path == "/map-seeds.json" and _SEEDS:
+                self._send(HTTPStatus.OK, _SEEDS, "application/json")
                 return
             token = self.path.removeprefix("/document/")
             document = app.document(token) if self.path.startswith("/document/") else None
@@ -490,6 +556,21 @@ def _self_check() -> None:
     # * The button value goes through the same handler as a typed number.
     app.payload(session, "7")
     assert app.sessions[session]._rating == 7
+    # ! Feedback, 27 Sep: a worker in Coimbatore could not choose Tamil Nadu
+    # ! here. The state question must offer all 36 states and UTs as buttons,
+    # ! and a tapped state must be accepted as an answer.
+    body(app.payload("states", "/start"))
+    # * On the website the state is the first question after consent.
+    ask = body(app.payload("states", "consent_yes"))["replies"][-1]
+    values = {b["value"] for b in ask["buttons"]}
+    assert values == {f"state:{st.code}" for st in content.states()}, len(values)
+    assert len(values) == 36 and ask["typed"] is False
+    assert ask.get("map", False) is bool(_MAP and _SEEDS), "map shown only when both files exist"
+    after = body(app.payload("states", "state:TN"))["replies"][-1]
+    assert app.sessions["states"].profile.state == "TN"
+    # * Tamil Nadu has none signed: straight to the list of national schemes.
+    assert app.sessions["states"].state.value == "scheme_picker", after
+    assert "pick:all" in {b["value"] for b in after["buttons"]}, after
     assert app.sessions[session].log is None, "no --db means no metrics"
     # ! A cookie the server never issued must not become a session.
     handler = handler_class(app)

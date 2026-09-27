@@ -41,6 +41,14 @@ done = "Done"
 
 # =====================================================================
 pick_some = "Pick a few"
+# * Asked after the state (since 27 Sep 2026), so the choice can be split.
+mode_scope = "Which schemes should I check?"
+none_for_state = "No {state} schemes are checked yet. Here are the national schemes."
+both = "Both"
+national = "National schemes"
+state_only = "{state} schemes"
+all_of_these = "All of these"
+pick_one = "Pick at least one scheme, or tap All of these."
 
 [questions]
 is_unorganised_worker = "Do you do unorganised work — home-based, self-employed or daily wage?"
@@ -75,6 +83,7 @@ other = "Something else"
 correct = "Correct"
 wrong = "Wrong"
 show_more = "Show more"
+other_state = "My state isn't listed"
 # ! WhatsApp shows more than three options as a list behind a button, and
 # ! that button needs its own label. Telegram never asks for one.
 choose = "Choose"
@@ -112,6 +121,8 @@ is_small_trader = "small trader / shopkeeper"
 is_vishwakarma_artisan = "traditional artisan trade"
 took_business_loan_5yr = "recent government business loan"
 has_government_service_in_family = "government service in family"
+has_job_or_business = "job or own business"
+pb_land_over_limit = "land above the Punjab limit"
 
 is_unorganised_worker = "unorganised work (self-reported)"
 # =====================================================================
@@ -217,6 +228,7 @@ bank_branch = "your bank branch"
 post_office = "your nearest post office"
 eshram_centre = "an e-Shram centre or CSC"
 online = "on the online portal"
+local_office = "your panchayat, block or municipal office"
 unknown = "ask at your nearest Common Service Centre (CSC)"
 
 # =====================================================================

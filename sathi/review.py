@@ -10,7 +10,7 @@
 # * CSC on a number one machine transcribed once. The checking is the slow
 # * part: every value needs its source opened. So this prints every value NEXT
 # * TO the URL it came from and the sentence it was transcribed from, one
-# * scheme at a time. (As of 2026-09-25, 10 of the 15 files are signed.)
+# * scheme at a time. (As of 2026-09-27, 21 of the 23 files are signed.)
 #
 # ! What this tool does NOT do: it does not check anything for you. It shows
 # ! you what to check. Typing "yes" is you saying you opened the page and read

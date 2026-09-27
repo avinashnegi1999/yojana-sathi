@@ -61,7 +61,8 @@ class State(Enum):
 
 EXTRA_FIELDS = ('is_woman', 'is_widow', 'uk_pension_income_or_bpl', 'receives_other_pension', 'uk_pension_selected', 'household_has_lpg', 'pmuy_declaration_met',
                 'is_bpl', 'has_disability_80pct', 'is_small_trader', 'is_vishwakarma_artisan',
-                'took_business_loan_5yr', 'has_government_service_in_family')
+                'took_business_loan_5yr', 'has_government_service_in_family',
+                'has_job_or_business', 'pb_land_over_limit')
 
 # ! The order follow-ups are asked in. Not alphabetical, not file order.
 _FOLLOWUP_ORDER = (
@@ -72,6 +73,7 @@ _FOLLOWUP_ORDER = (
     "has_government_service_in_family",                      # PM Vishwakarma exclusion
     "uk_pension_income_or_bpl",                              # state pension money
     "receives_other_pension", "uk_pension_selected",        # state pension admin
+    "has_job_or_business", "pb_land_over_limit",            # Punjab state pension
     "is_widow", "has_disability_80pct",                     # sensitive, last
 )
 
@@ -89,6 +91,8 @@ NEXT, OTHER, NONE = "next", "other", "none"
 SKIP = "skip"
 ROLE_SELF, ROLE_HELPING, ROLE_TESTER = "role:self", "role:helping", "role:tester"
 LANG_HI, LANG_EN = "lang:hi", "lang:en"
+# * "My state isn't listed", then "show more" on the full state list.
+STATE_MORE = "state:more"
 
 
 def _yes_no(lang: str, *, with_dont_know: bool = False) -> tuple[Button, ...]:
@@ -110,10 +114,21 @@ class Conversation:
         log: EventLog | None = None,
         channel: str = "cli",
         cohort: str | None = None,
+        state_first: bool = True,
     ) -> None:
         self.schemes = schemes
         self.log = log
         self.channel = channel
+        # * Every channel asks the state first (the web adds a map), then which
+        # * schemes: national, her state's, or both, then the list of that
+        # * group. state_first=False keeps the older scheme-first order, which
+        # * only a chat restored from before 27 Sep 2026 is still in.
+        self.state_first = state_first
+        # * Web only: the schemes the list shows after national / state / both
+        # * was chosen, and a line shown above that list. None = every signed
+        # * scheme that could apply (the scheme-first order).
+        self._scope: list[str] | None = None
+        self._picker_note = ""
         # * cohort is the arrival-link slug, validated by the event log. The
         # * flow never reads it; it only rides along on the session.
         self.session = log.start_session(channel, cohort) if log else None
@@ -142,6 +157,13 @@ class Conversation:
         self._picker_page = 0
         self._legacy_full = False
         self._answered_fields: set[str] = set()
+        # * True when the worker chose "all schemes". Only then are other
+        # * states' schemes left out once her state is known (_active_schemes).
+        self._screen_all = False
+        # * The state question starts with a few quick buttons; "my state isn't
+        # * listed" switches it to every state and UT, paged.
+        self._state_all = False
+        self._state_page = 0
 
     # * ------------------------------------------------------------- plumbing
 
@@ -295,6 +317,11 @@ class Conversation:
         self._followup_fields.clear()
         self._followup_index = 0
         self._selected.clear()
+        self._screen_all = False
+        self._state_all = False
+        self._state_page = 0
+        self._scope = None
+        self._picker_note = ""
         self._answered_fields.clear()
         self._have_docs.clear()
         self._results = ()
@@ -302,10 +329,24 @@ class Conversation:
         return [Reply(text=self._s("commands.cancelled"), end=True)]
 
     def _ask_state(self) -> Reply:
-        buttons = tuple(
-            Button(st.label(self.lang), f"state:{st.code}")
-            for st in content.states() if st.common
-        )
+        # ! Every state and UT must be reachable on buttons alone. The browser
+        # ! had no text box on this question, so a worker from Tamil Nadu could
+        # ! not answer it at all - only the few `common` states had buttons.
+        if not self._state_all:
+            buttons = tuple(
+                Button(st.label(self.lang), f"state:{st.code}")
+                for st in content.states() if st.common
+            ) + (Button(self._s("buttons.other_state"), STATE_MORE),)
+            return Reply(text=self._s("questions.state"), buttons=buttons)
+        # * All 36, alphabetical in the worker's language, eight per page:
+        # * eight plus "show more" fits WhatsApp's ten-row list.
+        every = sorted(content.states(), key=lambda st: st.label(self.lang))
+        page_count = (len(every) + 7) // 8
+        self._state_page %= page_count
+        start = self._state_page * 8
+        buttons = tuple(Button(st.label(self.lang), f"state:{st.code}")
+                        for st in every[start:start + 8])
+        buttons += (Button(self._s("buttons.show_more"), STATE_MORE),)
         return Reply(text=self._s("questions.state"), buttons=buttons)
 
     def _ask_participant_type(self) -> Reply:
@@ -323,7 +364,26 @@ class Conversation:
         # * Until a new picker choice exists, preserve their old all-schemes
         # * meaning rather than silently evaluating an empty set.
         codes = self._selected or set(self.schemes)
-        return {code: self.schemes[code] for code in codes}
+        active = {code: self.schemes[code] for code in codes}
+        # ! "All schemes" means all schemes that could apply where she lives.
+        # ! Without this, a worker in Tamil Nadu would get every other state's
+        # ! pension listed under "not for you". A scheme she picked by hand stays
+        # ! in: she asked about it, and "this is Uttarakhand's scheme" answers her.
+        if self._screen_all and self.profile.state is not None:
+            active = {code: sc for code, sc in active.items()
+                      if not self._for_another_state(sc)}
+        return active
+
+    def _for_another_state(self, scheme: Scheme) -> bool:
+        """True when a state criterion already rules out her state.
+
+        # ! The engine's own three-valued operator, so this can never disagree
+        # ! with the verdict. It decides nothing new: a scheme dropped here is
+        # ! one the engine would call INELIGIBLE on state alone.
+        """
+        return any(c.field == "state"
+                   and operators.apply(c.op, self.profile.state, c.value) is False
+                   for c in scheme.criteria)
 
     def _advance_core(self) -> list[Reply]:
         """Ask the next selected-scheme field, then enter follow-ups."""
@@ -342,15 +402,55 @@ class Conversation:
                 return [self._current_question()]
         return self._begin_followups()
 
+    def _servable_codes(self) -> list[str]:
+        """Signed codes that could apply to her: national, or her own state's.
+
+        # ! Before her state is known (a chat restored mid-flow), every signed
+        # ! code is offered, as before this change.
+        """
+        return sorted(code for code, sc in self.schemes.items() if sc.is_servable
+                      and not (self.profile.state is not None and self._for_another_state(sc)))
+
+    def _is_state_scheme(self, scheme: Scheme) -> bool:
+        return any(c.field == "state" for c in scheme.criteria)
+
     def _ask_scheme_mode(self) -> Reply:
-        return Reply(text=self._s("scheme_picker.mode"), buttons=(
-            Button(self._s("scheme_picker.all"), "pick:all"),
-            # * A short label; "scheme_picker.choose" is the picker's instruction.
-            Button(self._s("scheme_picker.pick_some"), "pick:choose"),
+        if self.profile.state is None:
+            # * The scheme-first order (Telegram, WhatsApp) asks this before the
+            # * state is known: the original two choices.
+            return Reply(text=self._s("scheme_picker.mode"), buttons=(
+                Button(self._s("scheme_picker.all"), "pick:all"),
+                # * A short label; "scheme_picker.choose" is the picker's instruction.
+                Button(self._s("scheme_picker.pick_some"), "pick:choose"),
+            ))
+        # * Web, state known: which group of schemes to list next.
+        state_name = content.state_label(self.profile.state, self.lang)
+        return Reply(text=self._s("scheme_picker.mode_scope"), buttons=(
+            Button(self._s("scheme_picker.national"), "pick:national"),
+            Button(self._s("scheme_picker.state_only", state=state_name), "pick:state"),
+            Button(self._s("scheme_picker.both"), "pick:all"),
         ))
 
-    def _ask_scheme_picker(self) -> Reply:
-        codes = sorted(code for code, sc in self.schemes.items() if sc.is_servable)
+    def _scope_codes(self, scope: str) -> list[str]:
+        """Signed codes for "national", "state" (her own) or "both"."""
+        codes = self._servable_codes()
+        if scope == "national":
+            return [c for c in codes if not self._is_state_scheme(self.schemes[c])]
+        if scope == "state":
+            return [c for c in codes if self._is_state_scheme(self.schemes[c])]
+        return codes
+
+    def _open_scoped_picker(self, scope: str, note: str = "") -> list[Reply]:
+        """Web: list the schemes in one group; she ticks some, or all of them."""
+        self._scope = self._scope_codes(scope)
+        self._picker_note = note
+        self._selected = set()
+        self._picker_page = 0
+        self.state = State.SCHEME_PICKER
+        return [self._ask_scheme_picker()]
+
+    def _ask_scheme_picker(self, prefix: str = "") -> Reply:
+        codes = self._scope if self._scope is not None else self._servable_codes()
         page_count = max(1, (len(codes) + 6) // 7)
         self._picker_page %= page_count
         start = self._picker_page * 7
@@ -358,8 +458,14 @@ class Conversation:
                                f"pick:{code}") for code in codes[start:start + 7])
         if page_count > 1:
             buttons += (Button(self._s("buttons.show_more"), "pick:more"),)
-        return Reply(text=self._s("scheme_picker.choose"), buttons=buttons + (
-            Button(self._s("scheme_picker.all"), "pick:all"),
+        text = self._s("scheme_picker.choose")
+        all_label = self._s("scheme_picker.all")
+        if self._scope is not None:
+            # * Web list of one group: "All of these", and any note above it.
+            all_label = self._s("scheme_picker.all_of_these")
+            text = "\n\n".join(t for t in (prefix, self._picker_note, text) if t)
+        return Reply(text=text, buttons=buttons + (
+            Button(all_label, "pick:all"),
             Button(self._s("scheme_picker.done"), "pick:done"),
         ))
 
@@ -474,6 +580,12 @@ class Conversation:
         self.consent_granted = True
         if self.log and self.session:
             self.log.grant_consent(self.session)
+        # * State first (every channel, since 27 Sep 2026): the scheme choice that
+        # * follows can then offer national, her own state's, or both — never
+        # * another state's pensions in the list.
+        if self.state_first:
+            self.state = State.STATE
+            return [self._ask_state()]
         self.state = State.SCHEME_MODE
         return [self._ask_scheme_mode()]
 
@@ -485,8 +597,16 @@ class Conversation:
             self._legacy_full = True
             self.state = State.STATE
             return self._on_state(answer)
+        if self.state_first and self.profile.state is not None:
+            # * Web: national / her state's / both, then the list of that group.
+            scope = {"pick:national": "national", "pick:state": "state",
+                     "pick:all": "both"}.get(answer)
+            if scope:
+                return self._open_scoped_picker(scope)
+            return [self._ask_scheme_mode()]
         if answer == "pick:all":
             self._selected = {code for code, sc in self.schemes.items() if sc.is_servable}
+            self._screen_all = True
             return self._advance_core()
         if answer == "pick:choose":
             self.state = State.SCHEME_PICKER
@@ -496,19 +616,34 @@ class Conversation:
     def _on_scheme_picker(self, answer: str) -> list[Reply]:
         if answer == "pick:more":
             self._picker_page += 1
+        elif answer == "pick:all" and self._scope is not None:
+            # * Web: "All of these" takes the whole group and moves on.
+            self._selected = set(self._scope)
+            return self._advance_core()
         elif answer == "pick:all":
             self._selected = {code for code, sc in self.schemes.items() if sc.is_servable}
+            self._screen_all = True
         elif answer == "pick:done":
             if self._selected:
                 self.state = State.STATE
                 return self._advance_core()
+            if self._scope is not None:
+                return [self._ask_scheme_picker(prefix=self._s("scheme_picker.pick_one"))]
         elif answer.startswith("pick:"):
             code = answer.split(":", 1)[1]
             if code in self.schemes and self.schemes[code].is_servable:
                 self._selected.symmetric_difference_update({code})
+                self._screen_all = False
         return [self._ask_scheme_picker()]
 
     def _on_state(self, answer: str) -> list[Reply]:
+        if answer == STATE_MORE:
+            if self._state_all:
+                self._state_page += 1
+            else:
+                self._state_all = True
+                self._state_page = 0
+            return [self._ask_state()]
         code = None
         if answer.startswith("state:"):
             code = answer.split(":", 1)[1]
@@ -523,6 +658,17 @@ class Conversation:
         if not self.schemes:
             self.state = State.AGE
             return [self._current_question()]
+        # * State-first order: state, then which schemes. The other order has
+        # * already chosen its schemes, and carries on.
+        if self.state_first and not self._selected and not self._legacy_full:
+            if not self._scope_codes("state"):
+                # ! No signed scheme for her state: say so, and list the
+                # ! national ones rather than offer an empty "Tamil Nadu" group.
+                note = self._s("scheme_picker.none_for_state",
+                               state=content.state_label(code, self.lang))
+                return self._open_scoped_picker("national", note)
+            self.state = State.SCHEME_MODE
+            return [self._ask_scheme_mode()]
         return self._advance_core()
 
     def _on_age(self, answer: str) -> list[Reply]:
@@ -1039,24 +1185,37 @@ def _self_check() -> None:
             exclusions=(), documents=("आधार",), where_to_apply="csc", renewal="none",
         )
     }
-    c = Conversation(schemes)
+    # * The walk below is the older scheme-first order (state_first=False),
+    # * which is the only route to the full intake; the state-first order is
+    # * checked by `web` just after it.
+    c = Conversation(schemes, state_first=False)
     assert c.start()[0].button_values() == {LANG_HI, LANG_EN}
     assert c.handle(LANG_HI)[0].button_values() == {consent.YES, consent.NO}
 
     c.handle(consent.YES)
     assert c.state is State.SCHEME_MODE
-    # * The picker is the normal new route. A state callback is still accepted
-    # * below for a keyboard tap that was already in flight during deployment.
-    picked = Conversation(schemes)
+    # * Scheme-first order: consent, then the scheme question. A state callback
+    # * there is still accepted (below) for a chat restored from that order.
+    picked = Conversation(schemes, state_first=False)
     picked.handle(LANG_HI); picked.handle(consent.YES); picked.handle("pick:all")
     assert picked.state is State.AGE
+    # * The website's state-first order: state, then which schemes. The
+    # * fixture has no Uttarakhand scheme, so it goes straight to the list of
+    # * national schemes, where "All of these" moves on.
+    web = Conversation(schemes)
+    web.handle(LANG_HI); web.handle(consent.YES)
+    assert web.state is State.STATE
+    web.handle("state:UK")
+    assert web.state is State.SCHEME_PICKER
+    web.handle("pick:all")
+    assert web._selected == {"A"} and web.state is State.AGE
     c.handle("state:UK")
     c.handle("34")
     assert c.profile.age == 34 and c.profile.state == "UK"
 
     # ! A pasted essay must not reach the confirmation screen whole — Telegram
     # ! rejects an oversized message and the session would die on a bare 400.
-    flood = Conversation(schemes)
+    flood = Conversation(schemes, state_first=False)
     flood.handle(LANG_HI); flood.handle(consent.YES)
     flood.handle("state:UK"); flood.handle("34")
     replies = flood.handle("क" * 5000)
@@ -1112,7 +1271,7 @@ def _self_check() -> None:
     assert c_fb.state is State.SUGGESTION and c_fb._rating == 9
 
     # * Free-text occupation with no LLM: keyword guess, then confirmation.
-    c2 = Conversation(schemes)
+    c2 = Conversation(schemes, state_first=False)
     c2.handle(LANG_HI); c2.handle(consent.YES); c2.handle("उत्तराखंड"); c2.handle("29")
     out = c2.handle("मैं ईंट लगाता हूँ")
     assert c2.state is State.OCCUPATION_CONFIRM and c2.profile.occupation is None, \
@@ -1130,7 +1289,7 @@ def _self_check() -> None:
     assert out[0].end and c3.profile.age is None
 
     # * English, and a mid-conversation switch that keeps the answers.
-    c4 = Conversation(schemes)
+    c4 = Conversation(schemes, state_first=False)
     c4.start()
     assert "Yojana Sathi" in c4.handle(LANG_EN)[0].text
     c4.handle(consent.YES); c4.handle("state:UK"); c4.handle("30")
@@ -1148,7 +1307,7 @@ def _self_check() -> None:
 
     # * Age is rejected whole, never repaired. Every one of these used to be
     # * silently accepted as a DIFFERENT number, or to raise inside int().
-    c5 = Conversation(schemes)
+    c5 = Conversation(schemes, state_first=False)
     c5.start(); c5.handle(LANG_HI); c5.handle(consent.YES); c5.handle("state:UK")
     for bad in ("9.5", "-5", "\u00b2", "3_4", "34 \u0938\u093e\u0932", "0", "200", "", "  "):
         c5.handle(bad)
@@ -1156,7 +1315,7 @@ def _self_check() -> None:
         assert c5.state is State.AGE, f"{bad!r} must not advance past the age question"
     # * Devanagari and Arabic-Indic digits are what these users actually type.
     for good, want in (("34", 34), ("\u0969\u096a", 34), ("\u0663\u0664", 34), ("  29  ", 29)):
-        c6 = Conversation(schemes)
+        c6 = Conversation(schemes, state_first=False)
         c6.start(); c6.handle(LANG_HI); c6.handle(consent.YES); c6.handle("state:UK")
         c6.handle(good)
         assert c6.profile.age == want, f"{good!r} must be accepted as {want}"

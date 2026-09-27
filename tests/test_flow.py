@@ -112,6 +112,10 @@ def _fixture_schemes(directory: Path) -> dict:
     return load_all(directory)
 
 
+# * Most tests below were written for the scheme-first order, which is the
+# * only route to the full intake (occupation, land, family). They say so
+# * with state_first=False; the state-first default is tested near the end
+# * of this file and walked in tests/test_all_paths.py.
 def _answer_all(convo: Conversation, *, age="30", tax=DK, epfo=NO, nps=NO, known=(),
                 lang=LANG_HI) -> list:
     """Drive intake with button values only. No typed free text anywhere."""
@@ -150,7 +154,7 @@ def test_tax_yes_confirmation_and_isolated_edits():
         for lang in ("hi", "en"):
             for band in INCOME_BANDS:
                 for choice in ("keep", "income", NO, DK):
-                    convo = Conversation(schemes, log)
+                    convo = Conversation(schemes, log, state_first=False)
                     for answer in (f"lang:{lang}", "consent_yes", "state:UK", "30",
                                    "occ:construction", f"inc:{band}", "land:landless", "fam:4", YES):
                         convo.handle(answer)
@@ -216,7 +220,7 @@ def test_tax_yes_confirmation_and_isolated_edits():
                     assert convo.state is State.DONE
         # ! No and Don't know proceed normally; neither asks for confirmation.
         for answer, value in ((NO, False), (DK, None)):
-            convo = Conversation(schemes)
+            convo = Conversation(schemes, state_first=False)
             for step in (LANG_EN, "consent_yes", "state:UK", "30", "occ:construction",
                          "inc:upto_5000", "land:landless", "fam:4", YES):
                 convo.handle(step)
@@ -253,6 +257,8 @@ def test_tax_confirmation_keyboard_retires_and_reasks_through_telegram():
 
     with patch.object(telegram, "_call", wire):
         bot.handle_update({"message": {"chat": {"id": 42}, "text": "/start"}})
+        # * The full intake is the scheme-first order's; set it on the session.
+        bot.sessions["42"].state_first = False
         for answer in (LANG_EN, "consent_yes", "state:UK"):
             tap(answer)
         bot.handle_update({"message": {"chat": {"id": 42}, "text": "30"}})
@@ -290,7 +296,7 @@ def test_full_session_with_no_llm_key_reaches_a_pack():
         directory = Path(d)
         schemes = _fixture_schemes(directory)
         log = EventLog(directory / "t.db")
-        convo = Conversation(schemes, log, channel="cli")
+        convo = Conversation(schemes, log, channel="cli", state_first=False)
 
         out = _answer_all(convo, tax=NO)
         text = out[1].text  # * [0] is the answer recap
@@ -327,14 +333,14 @@ def test_the_headline_metric_counts_only_unknown_to_the_worker():
         schemes = _fixture_schemes(directory)
 
         log = EventLog(directory / "new.db")
-        _answer_all(Conversation(schemes, log), tax=NO)
+        _answer_all(Conversation(schemes, log, state_first=False), tax=NO)
         surfaced = log.query("SELECT * FROM events WHERE event_type='scheme_newly_surfaced'")
         assert len(surfaced) == 1 and surfaced[0]["value_inr"] == 12000
         log.close()
 
         # * Same worker, but they already hold TEST_A: matched, not newly surfaced.
         log2 = EventLog(directory / "known.db")
-        _answer_all(Conversation(schemes, log2), tax=NO, known=("TEST_A",))
+        _answer_all(Conversation(schemes, log2, state_first=False), tax=NO, known=("TEST_A",))
         assert log2.query("SELECT * FROM events WHERE event_type='scheme_matched'")
         assert not log2.query("SELECT * FROM events WHERE event_type='scheme_newly_surfaced'"), \
             "a scheme the worker already has must never inflate the headline number"
@@ -346,7 +352,7 @@ def test_unverified_scheme_never_produces_a_verdict_or_rupees():
         directory = Path(d)
         schemes = _fixture_schemes(directory)
         log = EventLog(directory / "t.db")
-        _answer_all(Conversation(schemes, log), tax=NO)
+        _answer_all(Conversation(schemes, log, state_first=False), tax=NO)
         unknown = log.query("SELECT * FROM events WHERE event_type='scheme_unknown'")
         assert [r["scheme_code"] for r in unknown] == ["TEST_B"]
         assert all(r["value_inr"] is None for r in unknown)
@@ -357,7 +363,7 @@ def test_ineligible_worker_gets_a_reason_and_never_a_dead_end():
     with tempfile.TemporaryDirectory() as d:
         directory = Path(d)
         schemes = _fixture_schemes(directory)
-        convo = Conversation(schemes, None)
+        convo = Conversation(schemes, None, state_first=False)
         out = _answer_all(convo, age="65", tax=NO)
         text = out[1].text
         assert "यह योजना 18 से 40 साल वालों के लिए है" in text
@@ -383,7 +389,7 @@ def test_exclusion_is_explained_in_the_workers_own_result():
     with tempfile.TemporaryDirectory() as d:
         directory = Path(d)
         schemes = _fixture_schemes(directory)
-        convo = Conversation(schemes, None)
+        convo = Conversation(schemes, None, state_first=False)
         out = _answer_all(convo, tax=YES)  # income-tax payer
         assert "आयकर भरने वालों को यह योजना नहीं मिलती" in out[1].text
 
@@ -392,7 +398,7 @@ def test_dont_know_leaves_the_answer_unset_and_yields_unknown():
     with tempfile.TemporaryDirectory() as d:
         directory = Path(d)
         schemes = _fixture_schemes(directory)
-        convo = Conversation(schemes, None)
+        convo = Conversation(schemes, None, state_first=False)
         out = _answer_all(convo, tax=DK)
         # ! "Don't know" must not be read as "no". The scheme with a tax
         # ! exclusion becomes UNKNOWN, with a question to ask at the centre.
@@ -409,7 +415,7 @@ def test_llm_path_and_button_path_agree():
         directory = Path(d)
         schemes = _fixture_schemes(directory)
 
-        buttons_only = Conversation(schemes, None)
+        buttons_only = Conversation(schemes, None, state_first=False)
         # ! Compare EVERY reply, not reply[0]. reply[0] is the answer recap,
         # ! which is built from the profile and is identical whatever the engine
         # ! decided — so the old assertion could not see a changed result at all.
@@ -421,7 +427,7 @@ def test_llm_path_and_button_path_agree():
         os.environ["LLM_API_KEY"] = "test-not-a-real-key"
         llm._ask = lambda *a, **k: "construction"
         try:
-            with_llm = Conversation(schemes, None)
+            with_llm = Conversation(schemes, None, state_first=False)
             with_llm.start()
             with_llm.handle(LANG_HI)
             with_llm.handle(consent.YES)
@@ -454,9 +460,9 @@ def test_english_gives_the_same_verdicts_with_no_devanagari():
         directory = Path(d)
         schemes = _fixture_schemes(directory)
 
-        hi_convo = Conversation(schemes, None)
+        hi_convo = Conversation(schemes, None, state_first=False)
         _answer_all(hi_convo, tax=NO)
-        en_convo = Conversation(schemes, None)
+        en_convo = Conversation(schemes, None, state_first=False)
         out = _answer_all(en_convo, tax=NO, lang=LANG_EN)
 
         assert hi_convo.profile == en_convo.profile, "language changed a recorded answer"
@@ -482,7 +488,7 @@ def test_free_text_occupation_never_loops_back_to_the_same_menu():
         schemes = _fixture_schemes(directory)
 
         for phrase in ("i dont do any job", "berojgar", "something nobody has ever typed"):
-            convo = Conversation(schemes, None)
+            convo = Conversation(schemes, None, state_first=False)
             convo.start()
             convo.handle(LANG_EN)
             convo.handle(consent.YES)
@@ -504,7 +510,7 @@ def test_not_working_is_an_answer_not_a_gap():
     with tempfile.TemporaryDirectory() as d:
         directory = Path(d)
         schemes = _fixture_schemes(directory)
-        convo = Conversation(schemes, None)
+        convo = Conversation(schemes, None, state_first=False)
         convo.start(); convo.handle(LANG_HI); convo.handle(consent.YES)
         convo.handle("state:UK"); convo.handle("30")
         convo.handle("occ:no_work")
@@ -531,7 +537,7 @@ def test_an_english_session_shows_no_hindi_anywhere_including_buttons():
     with tempfile.TemporaryDirectory() as d:
         directory = Path(d)
         schemes = _fixture_schemes(directory)
-        convo = Conversation(schemes, None)
+        convo = Conversation(schemes, None, state_first=False)
 
         # * The language picker is bilingual on purpose — it is the one screen
         # * that must be readable before a language has been chosen.
@@ -555,7 +561,7 @@ def test_a_worker_with_no_income_is_still_screened():
     with tempfile.TemporaryDirectory() as d:
         directory = Path(d)
         schemes = _fixture_schemes(directory)
-        convo = Conversation(schemes, None)
+        convo = Conversation(schemes, None, state_first=False)
         convo.start(); convo.handle(LANG_EN); convo.handle(consent.YES)
         convo.handle("state:UK"); convo.handle("30"); convo.handle("occ:no_work")
         convo.handle("inc:no_income")
@@ -569,12 +575,19 @@ def test_a_worker_with_no_income_is_still_screened():
 
 def test_selected_scheme_route_asks_only_its_required_fields():
     """A PMSBY-only check must not become the old full intake."""
-    convo = Conversation(load_all(), None)
+    convo = Conversation(load_all(), None, state_first=False)
     convo.start(); convo.handle(LANG_EN); convo.handle(consent.YES)
     picker = convo.handle("pick:choose")[0]
-    codes = {button.value.removeprefix("pick:") for button in picker.buttons
-             if button.value.startswith("pick:")}
-    assert "PMSBY" in codes and "PMJAY_70" not in codes
+    # * Seven per page; read every page, since the signed list grew past one.
+    codes: set[str] = set()
+    for _ in range(10):
+        codes |= {button.value.removeprefix("pick:") for button in picker.buttons
+                  if button.value.startswith("pick:")}
+        if not any(b.value == "pick:more" for b in picker.buttons) or "PMSBY" in codes:
+            break
+        picker = convo.handle("pick:more")[0]
+    # * TN_IGNDPS is unsigned (no document list yet), so it is never offered.
+    assert "PMSBY" in codes and "TN_IGNDPS" not in codes
     convo.handle("pick:PMSBY")
     question = convo.handle("pick:done")[0]
     assert convo.state is State.AGE and question.text == s("questions.age", "en")
@@ -598,7 +611,7 @@ def test_selected_route_does_not_log_a_scheme_the_worker_already_holds():
     headline metric counted it as newly surfaced."""
     with tempfile.TemporaryDirectory() as d:
         log = EventLog(Path(d) / "known.db")
-        convo = Conversation(load_all(), log)
+        convo = Conversation(load_all(), log, state_first=False)
         convo.start(); convo.handle(LANG_EN); convo.handle(consent.YES)
         convo.handle("pick:choose"); convo.handle("pick:PMSBY"); convo.handle("pick:done")
         convo.handle("30"); convo.handle(YES)
@@ -612,7 +625,7 @@ def test_selected_route_does_not_log_a_scheme_the_worker_already_holds():
 def test_tax_payer_on_a_route_without_an_income_question_is_not_dropped():
     """Regression: e-Shram alone never asks income; a Yes to income tax then
     tried to render the confirm screen with income_band=None and raised."""
-    convo = Conversation(load_all(), None)
+    convo = Conversation(load_all(), None, state_first=False)
     convo.start(); convo.handle(LANG_EN); convo.handle(consent.YES)
     convo.handle("pick:choose"); convo.handle("pick:ESHRAM"); convo.handle("pick:done")
     while convo.state is not State.TAX:
@@ -626,7 +639,7 @@ def test_tax_payer_on_a_route_without_an_income_question_is_not_dropped():
 def test_dont_know_on_epfo_moves_on_instead_of_reasking_forever():
     """Regression: DK skipped _set, so the field never counted as answered and
     _advance_core re-asked EPFO/ESIC on every tap."""
-    convo = Conversation(load_all(), None)
+    convo = Conversation(load_all(), None, state_first=False)
     convo.start(); convo.handle(LANG_EN); convo.handle(consent.YES)
     convo.handle("pick:choose"); convo.handle("pick:ESHRAM"); convo.handle("pick:done")
     for _ in range(10):
@@ -652,7 +665,10 @@ def test_two_maandhan_pensions_are_one_pension_in_the_total():
     results = evaluate_all(trader, schemes)
     eligible = {r.scheme_code for r in results if r.is_eligible}
     assert {"PM_SYM", "NPS_TRADERS"} <= eligible, eligible
-    payout, _cover = value_totals(results, schemes)
+    # * Only the two Maandhan pensions: APY (signed 27 Sep) is a separate
+    # * pension she may also hold, and is added on its own, not in this group.
+    maandhan = tuple(r for r in results if r.scheme_code in ("PM_SYM", "NPS_TRADERS"))
+    payout, _cover = value_totals(maandhan, schemes)
     assert payout == 36000, payout
 
 
@@ -662,7 +678,7 @@ def test_gender_answer_skips_widow_and_pmuy_followups_when_not_applicable():
     # * IGNWPS is signed (since 2026-09-15); the fixture signature below just
     # * keeps this routing test about the widow condition, not about sign-off.
     schemes["IGNWPS"] = replace(schemes["IGNWPS"], verified_by="test fixture only")
-    widow = Conversation(schemes, None)
+    widow = Conversation(schemes, None, state_first=False)
     widow.start(); widow.handle(LANG_EN); widow.handle(consent.YES)
     widow.handle("pick:choose"); widow.handle("pick:IGNWPS")
     widow.handle("pick:done"); widow.handle("45")
@@ -675,7 +691,7 @@ def test_gender_answer_skips_widow_and_pmuy_followups_when_not_applicable():
     assert widow.state is State.PACK
     assert "is_widow" not in widow._answered_fields
 
-    pmuy = Conversation(schemes, None)
+    pmuy = Conversation(schemes, None, state_first=False)
     pmuy.start(); pmuy.handle(LANG_EN); pmuy.handle(consent.YES)
     pmuy.handle("pick:choose"); pmuy.handle("pick:PMUY")
     pmuy.handle("pick:done"); pmuy.handle("30"); pmuy.handle(YES)
@@ -714,9 +730,9 @@ def test_events_survive_a_restart_and_the_dashboard_renders():
         # * A worker channel, not the default "cli": the report leaves terminal
         # * sessions out of every number, because they are always testing.
         for _ in range(6):  # 6 workers, so k-anonymity does not suppress them
-            _answer_all(Conversation(schemes, log, channel="telegram"), tax=NO)
+            _answer_all(Conversation(schemes, log, channel="telegram", state_first=False), tax=NO)
         # ! And one terminal run, which must not move any number below.
-        _answer_all(Conversation(schemes, log), tax=NO)
+        _answer_all(Conversation(schemes, log, state_first=False), tax=NO)
         before = len(log.query("SELECT * FROM events"))
         log.close()
 
@@ -754,13 +770,18 @@ def test_a_future_pension_is_never_shown_as_money_this_year():
     assert "PM_SYM" in {r.scheme_code for r in results if r.is_eligible}, \
         "the fixture no longer matches PM-SYM, so this test would prove nothing"
 
+    # * The total is whatever the engine adds up (PM-SYM ₹36,000, plus APY's
+    # * ₹12,000 since APY was signed on 27 Sep); this test is about its wording.
+    from sathi.rules.engine import value_totals
+    from sathi.render.templates import rupees
+    payout, _cover = value_totals(results, signed)
     for lang in ("hi", "en"):
         screen = templates.result_message(results, signed, frozenset(), lang)
         _, blob = pack.build(results, signed, frozenset(), lang=lang)
         sheet = blob.decode("utf-8")
         for where, text in (("screen", screen), ("sheet", sheet)):
             # ! The total now names the start age every time it is shown.
-            assert s("result.value_line", lang, total="36,000") in text, (lang, where)
+            assert s("result.value_line", lang, total=rupees(payout)) in text, (lang, where)
             # ! What she pays is on both, for every scheme that costs money.
             assert templates.premium_text(signed["PM_SYM"], lang) in text, (lang, where)
             assert templates.premium_text(signed["PMSBY"], lang) in text, (lang, where)
@@ -776,6 +797,163 @@ def test_a_future_pension_is_never_shown_as_money_this_year():
     assert templates.premium_text(signed["PMSBY"], "en") == "₹20 a year"
     # * Free schemes say nothing about cost.
     assert templates.premium_text(signed["ESHRAM"], "en") == ""
+
+
+
+def _screen_to_result(convo: Conversation, state_value: str) -> set[str]:
+    """Answer every question the current route asks until results exist.
+
+    Buttons only: age is typed, everything else takes "don't know" where
+    offered, otherwise "no", otherwise "next". Returns the screened codes.
+    """
+    for _ in range(80):
+        if convo._results:
+            return {r.scheme_code for r in convo._results}
+        if convo.state is State.STATE:
+            reply = convo.handle(state_value)
+        elif convo.state is State.AGE:
+            reply = convo.handle("30")
+        else:
+            values = [b.value for b in convo._current_question().buttons]
+            pick = next((v for v in (DK, NO, "none", NEXT) if v in values), values[0])
+            reply = convo.handle(pick)
+        assert reply, convo.state
+    raise AssertionError(f"never reached a result; stuck at {convo.state}")
+
+
+def test_every_state_and_ut_is_reachable_on_buttons_alone():
+    """Feedback, 27 Sep: a worker in Coimbatore could not pick Tamil Nadu on the
+    website. Only six states had buttons and the browser had no text box."""
+    from sathi.core import content
+    from sathi.conversation.flow import STATE_MORE
+    for lang in (LANG_EN, LANG_HI):
+        convo = Conversation(load_all(), None)
+        convo.start(); convo.handle(lang); convo.handle(consent.YES)
+        first = convo.handle("pick:all")[0]
+        assert convo.state is State.STATE
+        assert first.buttons[-1].value == STATE_MORE
+        reached: set[str] = set()
+        reply = convo.handle(STATE_MORE)[0]
+        for _ in range(10):
+            # ! WhatsApp renders at most ten rows; every page must fit.
+            assert len(reply.buttons) <= 10, len(reply.buttons)
+            assert reply.buttons[-1].value == STATE_MORE
+            reached |= {b.value.removeprefix("state:") for b in reply.buttons[:-1]}
+            reply = convo.handle(STATE_MORE)[0]
+        assert reached == {st.code for st in content.states()}, len(reached)
+        assert len(reached) == 36
+        # * Picking from a later page is an ordinary answer.
+        convo.handle("state:TN")
+        assert convo.profile.state == "TN" and convo.state is not State.STATE
+
+
+def _web_chat(state_value: str) -> tuple[Conversation, "Reply"]:
+    """A fresh English WEB chat (state first), answered up to the state."""
+    convo = Conversation(load_all(), None, state_first=True)
+    convo.start(); convo.handle(LANG_EN); convo.handle(consent.YES)
+    reply = convo.handle(state_value)[0]
+    return convo, reply
+
+
+def _listed(convo: Conversation, reply) -> set[str]:
+    """Every scheme code on the web list, across its pages."""
+    codes: set[str] = set()
+    for _ in range(10):
+        codes |= {b.value.removeprefix("pick:") for b in reply.buttons
+                  if b.value.startswith("pick:")} - {"more", "all", "done"}
+        if not any(b.value == "pick:more" for b in reply.buttons):
+            break
+        reply = convo.handle("pick:more")[0]
+    return codes
+
+
+def test_web_lists_the_group_she_chose_then_asks_for_at_least_one():
+    """Website, since 27 Sep: state first; then national / her state's / both;
+    then the list of that group, where she ticks some or taps All of these.
+    Another state's pension is never listed or screened."""
+    schemes = load_all()
+    state_only = {code for code, sc in schemes.items() if sc.is_servable
+                  and any(c.field == "state" for c in sc.criteria)}
+    national = {code for code, sc in schemes.items() if sc.is_servable} - state_only
+    punjab = {code for code in state_only
+              if any(c.field == "state" and c.value == "PB" for c in schemes[code].criteria)}
+    assert punjab == {"PB_OLD_AGE_MEN", "PB_OLD_AGE_WOMEN"}, punjab
+
+    convo, question = _web_chat("state:PB")
+    assert convo.state is State.SCHEME_MODE
+    assert [b.value for b in question.buttons] == ["pick:national", "pick:state", "pick:all"]
+
+    for choice, expected in (("pick:national", national), ("pick:state", punjab),
+                             ("pick:all", national | punjab)):
+        convo, _ = _web_chat("state:PB")
+        listed = convo.handle(choice)[0]
+        assert convo.state is State.SCHEME_PICKER
+        assert _listed(convo, listed) == expected, (choice, _listed(convo, listed) ^ expected)
+
+    # * Done with nothing ticked asks again; one tick is enough.
+    convo, _ = _web_chat("state:PB")
+    convo.handle("pick:state")
+    again = convo.handle("pick:done")[0]
+    assert convo.state is State.SCHEME_PICKER
+    assert again.text.startswith(s("scheme_picker.pick_one", "en"))
+    convo.handle("pick:PB_OLD_AGE_WOMEN"); convo.handle("pick:done")
+    assert convo._selected == {"PB_OLD_AGE_WOMEN"} and convo.state is not State.SCHEME_PICKER
+
+    # * "All of these" takes the whole group and moves straight on.
+    convo, _ = _web_chat("state:PB")
+    convo.handle("pick:national"); convo.handle("pick:all")
+    assert convo._selected == national and convo.state is not State.SCHEME_PICKER
+
+
+def test_web_state_with_no_signed_scheme_goes_straight_to_the_national_list():
+    """Tamil Nadu has none signed: say so, and list the national schemes,
+    rather than offer an empty "Tamil Nadu schemes" group."""
+    convo, listed = _web_chat("state:TN")
+    assert convo.state is State.SCHEME_PICKER
+    assert "Tamil Nadu" in listed.text
+    codes = _listed(convo, listed)
+    assert "PMSBY" in codes
+    assert not {"UK_OLD_AGE", "PB_OLD_AGE_MEN", "SK_IGNOAPS"} & codes, codes
+    convo.handle("pick:all")
+    screened = _screen_to_result(convo, "state:TN")
+    assert not {"UK_OLD_AGE", "PB_OLD_AGE_MEN", "SK_IGNOAPS"} & screened, screened
+
+
+def test_all_schemes_screens_only_national_and_her_own_state():
+    """'All schemes' in Tamil Nadu must not list Uttarakhand's pension as
+    'not for you'. In Uttarakhand it must still be screened."""
+    schemes = load_all()
+    state_only = {code for code, sc in schemes.items() if sc.is_servable
+                  and any(c.field == "state" for c in sc.criteria)}
+    assert "UK_OLD_AGE" in state_only
+    national = {code for code, sc in schemes.items() if sc.is_servable} - state_only
+
+    convo = Conversation(schemes, None, state_first=False)
+    convo.start(); convo.handle(LANG_EN); convo.handle(consent.YES); convo.handle("pick:all")
+    screened = _screen_to_result(convo, "state:TN")
+    assert not (screened & state_only), screened & state_only
+    assert national <= screened, national - screened
+
+    # * Uttarakhand's own schemes are screened there; other states' are not.
+    uk_only = {code for code in state_only
+               if any(c.field == "state" and c.value == "UK" for c in schemes[code].criteria)}
+    convo = Conversation(schemes, None, state_first=False)
+    convo.start(); convo.handle(LANG_EN); convo.handle(consent.YES); convo.handle("pick:all")
+    screened = _screen_to_result(convo, "state:UK")
+    assert uk_only <= screened, uk_only - screened
+    assert not (screened & (state_only - uk_only)), screened & (state_only - uk_only)
+
+
+def test_a_hand_picked_scheme_from_another_state_is_still_answered():
+    """She asked about Uttarakhand's pension from Tamil Nadu: tell her it is
+    Uttarakhand's, rather than silently dropping the one thing she asked."""
+    from sathi.rules.engine import Verdict
+    convo = Conversation(load_all(), None, state_first=False)
+    convo.start(); convo.handle(LANG_EN); convo.handle(consent.YES)
+    convo.handle("pick:choose"); convo.handle("pick:UK_OLD_AGE"); convo.handle("pick:done")
+    _screen_to_result(convo, "state:TN")
+    result = {r.scheme_code: r for r in convo._results}["UK_OLD_AGE"]
+    assert result.verdict is Verdict.INELIGIBLE
 
 
 def run() -> None:

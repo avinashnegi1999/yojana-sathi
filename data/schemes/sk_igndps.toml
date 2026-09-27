@@ -1,0 +1,108 @@
+# SIGNED 27 September 2026 by Avinash Negi (see verified_by), against
+# docs/audit-evidence/sk-pension-schemes-2026-09-27.pdf. Drafted the same day;
+# the checklist below is what was checked.
+#
+# * What this is: the national disability pension (IGNDPS) at Sikkim's
+# * amount. The national file (igndps.toml) carries only the central share,
+# * ₹300 a month (₹500 from 80); Sikkim's page gives ₹2,000 a month, "Central
+# * and State Share". Both files share exclusive_group "uk_state_pension", so
+# * they are never added: the group keeps the larger, which is this one.
+#
+# ! Source: pension registration portal, Government of Sikkim, read
+# ! 2026-09-27: https://pensionscheme.sikkim.gov.in/
+# ! Research note with every quote: docs/research/states/SK.md, row 3.
+# ! Evidence copy (printed 2026-09-27, 3 pages) — the same PDF as SK_IGNOAPS:
+# ! docs/audit-evidence/sk-pension-schemes-2026-09-27.pdf
+#
+# Before signing, open the page and find:
+#   1. "Eligibility Criterias" (page 1), four conditions for every scheme:
+#      SSC/COI/Residential Certificate; BPL household with an Antyodaya or
+#      Priority Household ration card; Aadhaar; a Jan Dhan bank account.
+#   2. Disability card (page 2, middle of the second row): "Should Have
+#      Attained the age of 18 years." "Disability Certificate issued by the
+#      Medical Authorities constituted for the purpose certifying more than
+#      80% disabilities and Identity Card."
+#   3. "Incentives/Financial Assistance" table (page 2), IGNDPS row:
+#      "Rs. 2000/- per month. The above amount consists of Central and State
+#      Share." = 24,000 a year.
+#
+# ? "More than 80%", where NSAP and the app's question say "80% or more". A
+# ? certificate of exactly 80% is told ELIGIBLE here; the office decides.
+# ? The page's wording is probably loose — confirm, and if it is strict, the
+# ? question needs a new band, not a change to this file.
+# ? No higher rate from 80 is listed, so there is no age band. The national
+# ? ₹500 at 80 (₹6,000 a year) is below ₹24,000, so the group still keeps this.
+# ? "Identity Card" is copied as written; the page does not say which one.
+# ? The card is matched to the scheme by content; the cards are unlabelled.
+# ? `is_bpl` stands in for "AAY or Priority Household ration card", as in
+# ? SK_IGNOAPS. Hindi text below is machine-drafted; it joins the Hindi review.
+code = "SK_IGNDPS"
+name_en = "Indira Gandhi National Disability Pension (Sikkim)"
+name_hi = "इंदिरा गांधी राष्ट्रीय दिव्यांगता पेंशन (सिक्किम)"
+authority = "Social Justice & Welfare Department, Government of Sikkim (NSAP)"
+official_url = "https://pensionscheme.sikkim.gov.in/"
+verified_on = "2026-09-27"
+verified_by = "Avinash Negi, checked 2026-09-27"
+
+[benefit]
+annual_value_inr = 24000
+value_basis = "annual_payout"
+exclusive_group = "uk_state_pension"
+premium_inr = 0
+summary_en = "A monthly pension of ₹2,000 in Sikkim for people aged 18 and above with a disability certificate of more than 80%, in a BPL household with an Antyodaya or Priority Household ration card. You get one pension, not two. Register on Sikkim's online pension portal."
+summary_hi = "सिक्किम में अंत्योदय या प्राथमिकता परिवार राशन कार्ड वाले बीपीएल परिवार के 18 साल या उससे ऊपर के उन लोगों के लिए ₹2,000 हर महीने की पेंशन जिनका दिव्यांगता प्रमाणपत्र 80% से अधिक है। पेंशन एक ही मिलती है, दो नहीं। सिक्किम के ऑनलाइन पेंशन पोर्टल पर पंजीकरण करें।"
+
+[[criteria]]
+field = "state"
+op = "eq"
+value = "SK"
+ask_en = "Which state do you live in?"
+ask_hi = "आप किस राज्य में रहते हैं?"
+pass_en = "You reported living in Sikkim; your SSC, COI or residential certificate is checked when you apply."
+pass_hi = "आपने सिक्किम में रहना बताया; आवेदन के समय आपका SSC, COI या निवास प्रमाणपत्र जाँचा जाएगा।"
+fail_en = "This is Sikkim's amount; in your state, ask about the disability pension there."
+fail_hi = "यह सिक्किम की रकम है; अपने राज्य में वहाँ की दिव्यांगता पेंशन के बारे में पूछें।"
+source_url = "https://pensionscheme.sikkim.gov.in/"
+
+[[criteria]]
+field = "age"
+op = "gte"
+value = 18
+ask_en = "How old are you?"
+ask_hi = "आपकी उम्र कितनी है?"
+pass_en = "Your reported age meets the entry-age condition."
+pass_hi = "आपकी बताई उम्र प्रवेश की आयु-शर्त पूरी करती है।"
+fail_en = "This pension starts at age 18. Sikkim's separate state disability pension has no age limit — ask about it on the portal."
+fail_hi = "यह पेंशन 18 साल की उम्र से शुरू होती है। सिक्किम की अलग राज्य दिव्यांगता पेंशन में कोई आयु-सीमा नहीं है — पोर्टल पर उसके बारे में पूछें।"
+source_url = "https://pensionscheme.sikkim.gov.in/"
+
+[[criteria]]
+field = "has_disability_80pct"
+op = "eq"
+value = true
+ask_en = "Do you have a disability certificate that shows 80% or more?"
+ask_hi = "क्या आपके पास दिव्यांगता प्रमाणपत्र है जिसमें 80% या अधिक लिखा है?"
+pass_en = "You reported a certificate of 80% or more; the office verifies it. Sikkim's page says more than 80%."
+pass_hi = "आपने 80% या अधिक का प्रमाणपत्र बताया; कार्यालय उसे जाँचेगा। सिक्किम के पेज पर 80% से अधिक लिखा है।"
+fail_en = "This pension needs a certificate of more than 80%. Sikkim also has a Chief Minister's State Disability Pension of ₹1,500 a month from 40% — ask about it on the portal."
+fail_hi = "इस पेंशन के लिए 80% से अधिक का प्रमाणपत्र चाहिए। सिक्किम में 40% से ₹1,500 महीने की मुख्यमंत्री राज्य दिव्यांगता पेंशन भी है — पोर्टल पर उसके बारे में पूछें।"
+source_url = "https://pensionscheme.sikkim.gov.in/"
+
+[[criteria]]
+field = "is_bpl"
+op = "eq"
+value = true
+ask_en = "Does your household have a BPL card, or is it listed as Below Poverty Line?"
+ask_hi = "क्या आपके परिवार के पास बीपीएल कार्ड है, या परिवार ग़रीबी रेखा से नीचे सूचीबद्ध है?"
+pass_en = "You reported a BPL household; the office checks for an Antyodaya or Priority Household ration card."
+pass_hi = "आपने बीपीएल परिवार बताया; कार्यालय अंत्योदय या प्राथमिकता परिवार राशन कार्ड जाँचेगा।"
+fail_en = "This scheme is for BPL households with an Antyodaya or Priority Household ration card. If you are unsure which card you hold, check it before you register — do not assume no."
+fail_hi = "यह योजना अंत्योदय या प्राथमिकता परिवार राशन कार्ड वाले बीपीएल परिवारों के लिए है। अगर पक्का नहीं है कि आपके पास कौन-सा कार्ड है, तो पंजीकरण से पहले देख लें — न मान लें।"
+source_url = "https://pensionscheme.sikkim.gov.in/"
+
+[paperwork]
+documents_en = ["SSC, COI or residential certificate", "Antyodaya (AAY) or Priority Household ration card", "Aadhaar card", "Jan Dhan bank account passbook", "Disability certificate from the medical authority (more than 80%)", "Identity card"]
+documents = ["SSC, COI या निवास प्रमाणपत्र", "अंत्योदय (AAY) या प्राथमिकता परिवार राशन कार्ड", "आधार कार्ड", "जन धन बैंक खाते की पासबुक", "मेडिकल प्राधिकरण का दिव्यांगता प्रमाणपत्र (80% से अधिक)", "पहचान पत्र"]
+where_to_apply = "online"
+renewal_en = "₹2,000 every month; the page lists no higher rate at any age."
+renewal = "हर महीने ₹2,000; किसी उम्र पर ज़्यादा रकम नहीं बताई गई है।"

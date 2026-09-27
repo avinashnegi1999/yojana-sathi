@@ -308,20 +308,16 @@ def test_every_document_of_every_scheme_is_reachable():
             "receives_other_pension": "no", "uk_pension_selected": "yes",
             "is_bpl": "yes", "has_disability_80pct": "yes", "is_small_trader": "yes",
             "is_vishwakarma_artisan": "yes", "took_business_loan_5yr": "no",
-            "has_government_service_in_family": "no"}
+            "has_government_service_in_family": "no",
+            "has_job_or_business": "no", "pb_land_over_limit": "no"}
 
-    def run(schemes, lang: str, age: str, state: str = "UK", bank: str = "yes"):
+    def run(schemes, lang: str, age: str, state: str = "UK", bank: str = "yes",
+            woman: str = "yes"):
         convo = Conversation(schemes, None)
         convo.start()
-        for step in (LANG_EN if lang == "en" else LANG_HI, "consent_yes",
-                     f"state:{state}", age, "occ:construction", "inc:upto_5000",
-                     "land:landless", "fam:4", bank, "no", "no", "no", "yes"):
+        for step in (LANG_EN if lang == "en" else LANG_HI, "consent_yes", f"state:{state}"):
             convo.handle(step)
-        while convo.state is State.FOLLOWUP:
-            field = convo._followup_field()
-            assert field in keep, f"new follow-up {field} — decide its eligible answer"
-            convo.handle(keep[field])
-        assert convo.state is State.KNOWN_SCHEMES, convo.state
+        _drive_to_known(convo, age=age, bank=bank, woman=woman, keep=keep)
         convo.handle("next")
         assert convo.state is State.DOCUMENTS, convo.state
         eligible = {r.scheme_code for r in convo._results if r.is_eligible}
@@ -351,12 +347,29 @@ def test_every_document_of_every_scheme_is_reachable():
             # ! PMJDY is surfaced only to someone without an account — the one
             # ! person it helps. No separate state-specific profile is needed.
             unbanked_codes, unbanked_docs = run(schemes, lang, "65", bank="no")
-            reached = young_codes | old_codes | eldest_codes | unbanked_codes
+            # ! State-rate pensions (TN_IGNDPS, SK_IGNOAPS, SK_IGNWPS,
+            # ! SK_IGNDPS, MZ_IGNOAPS, MP_KALYANI, PB_OLD_AGE_*) are only reachable
+            # ! from their own state, so one worker from each.
+            tn_codes, tn_docs = run(schemes, lang, "30", state="TN")
+            sk_codes, sk_docs = run(schemes, lang, "65", state="SK")
+            mz_codes, mz_docs = run(schemes, lang, "65", state="MZ")
+            mp_codes, mp_docs = run(schemes, lang, "65", state="MP")
+            # ! Punjab: women from 58, men from 65 — one of each.
+            pbw_codes, pbw_docs = run(schemes, lang, "60", state="PB")
+            pbm_codes, pbm_docs = run(schemes, lang, "66", state="PB", woman="no")
+            reached = (young_codes | old_codes | eldest_codes | unbanked_codes
+                       | tn_codes | sk_codes | mz_codes | mp_codes
+                       | pbw_codes | pbm_codes)
             assert reached == set(schemes), (
                 f"[{lang}] no eligible path to {sorted(set(schemes) - reached)}"
             )
-            expected = {doc for sc in schemes.values() for doc in sc.docs(lang)}
-            missing = expected - (young_docs | old_docs | eldest_docs | unbanked_docs)
+            # ! A "TODO" document list (TN_IGNDPS) is a recorded stub, checked
+            # ! in tests/test_schemes.py; it is not a document to offer.
+            expected = {doc for sc in schemes.values() for doc in sc.docs(lang)
+                        if doc != "TODO"}
+            missing = expected - (young_docs | old_docs | eldest_docs | unbanked_docs
+                                  | tn_docs | sk_docs | mz_docs | mp_docs
+                                  | pbw_docs | pbm_docs)
             assert not missing, f"[{lang}] documents never offered: {sorted(missing)}"
 
 
@@ -405,8 +418,12 @@ def test_commands_at_every_state():
             if convo2.profile != profile_before:
                 problems.append(f"/language at {state_before.value} lost an answer")
 
+        # * The state-first walk (27 Sep 2026) reaches the state question and
+        # * the scheme list. Occupation, land and family are asked only in the
+        # * scheme-first order's full intake — no signed scheme needs them —
+        # * and tests/test_flow.py walks that order.
         assert reached == set(State) - {
-            State.SCHEME_PICKER, State.STATE,
+            State.OCCUPATION, State.LAND, State.FAMILY,
             State.OCCUPATION_FREE, State.OCCUPATION_CONFIRM,
             State.TAX_CONFIRM, State.TAX_INCOME,
         }, "the tax-No command walk must reach DONE without entering confirmation"
@@ -418,7 +435,47 @@ _KEEP = {"is_woman": "yes", "is_widow": "yes", "household_has_lpg": "no",
          "receives_other_pension": "no", "uk_pension_selected": "yes",
          "is_bpl": "yes", "has_disability_80pct": "yes", "is_small_trader": "yes",
          "is_vishwakarma_artisan": "yes", "took_business_loan_5yr": "no",
-         "has_government_service_in_family": "no"}
+         "has_government_service_in_family": "no",
+         "has_job_or_business": "no", "pb_land_over_limit": "no"}
+
+
+# * One answer per core question, for walks that must reach the result.
+_CORE_ANSWERS = {
+    State.AGE: "30", State.INCOME: "inc:upto_5000", State.BANK: "yes",
+    State.TAX: "no", State.EPFO_ESIC: "no", State.NPS: "no", State.WORKER: "yes",
+    State.OCCUPATION: "occ:construction", State.LAND: "land:landless",
+    State.FAMILY: "fam:4",
+}
+
+
+def _drive_to_known(convo: Conversation, *, age: str = "30", bank: str = "yes",
+                    woman: str = "yes", keep: dict | None = None) -> list[str]:
+    """From just after the state answer to "which do you already have?".
+
+    # ! State first, then "Both" (or the national list when her state has no
+    # ! signed scheme), then "All of these", then whatever each screen asks.
+    # ! Answers are chosen per screen, not listed in order, so a new scheme or
+    # ! a new question cannot silently stall the walk. Returns what was sent.
+    """
+    keep = _KEEP if keep is None else keep
+    answers = dict(_CORE_ANSWERS)
+    answers[State.AGE], answers[State.BANK] = age, bank
+    sent: list[str] = []
+    for _ in range(80):
+        if convo.state is State.KNOWN_SCHEMES:
+            return sent
+        if convo.state in (State.SCHEME_MODE, State.SCHEME_PICKER):
+            answer = "pick:all"
+        elif convo.state is State.FOLLOWUP:
+            field = convo._followup_field()
+            assert field in keep, f"new follow-up {field} - decide its answer for the walk"
+            answer = woman if field == "is_woman" else keep[field]
+        else:
+            assert convo.state in answers, f"walk has no answer for {convo.state}"
+            answer = answers[convo.state]
+        sent.append(answer)
+        convo.handle(answer)
+    raise AssertionError(f"walk never reached the result; stuck at {convo.state}")
 
 
 def _derive_walk(schemes) -> list[str]:
@@ -433,19 +490,12 @@ def _derive_walk(schemes) -> list[str]:
     # ! already drawn makes both state pensions INELIGIBLE, and the walk needs
     # ! the eligible half of the conversation reachable.
     """
-    head = [LANG_EN, "consent_yes", "state:UK", "30", "occ:construction",
-            "inc:upto_5000", "land:landless", "fam:4", "yes", "no", "no", "no", "yes"]
+    head = [LANG_EN, "consent_yes", "state:UK"]
     probe = Conversation(schemes, None)
     probe.start()
     for step in head:
         probe.handle(step)
-    assert probe.state is State.FOLLOWUP, probe.state
-    followups = []
-    while probe.state is State.FOLLOWUP:
-        field = probe._followup_field()
-        assert field in _KEEP, f"new follow-up {field} - decide its answer for the walk"
-        followups.append(_KEEP[field])
-        probe.handle(_KEEP[field])
+    followups = _drive_to_known(probe)
     # * The sheet, then the three optional questions after it, all skipped: the
     # * point of a walk is that every state is reachable, not that anyone
     # * rates the bot.
@@ -550,8 +600,12 @@ def test_every_command_through_the_adapter_at_every_state():
         finally:
             mod._call, mod._upload = real_call, real_upload
 
+        # * The state-first walk (27 Sep 2026) reaches the state question and
+        # * the scheme list. Occupation, land and family are asked only in the
+        # * scheme-first order's full intake — no signed scheme needs them —
+        # * and tests/test_flow.py walks that order.
         assert reached == set(State) - {
-            State.SCHEME_PICKER, State.STATE,
+            State.OCCUPATION, State.LAND, State.FAMILY,
             State.OCCUPATION_FREE, State.OCCUPATION_CONFIRM,
             State.TAX_CONFIRM, State.TAX_INCOME,
         }, "the adapter's tax-No walk must reach DONE without entering confirmation"
@@ -577,6 +631,9 @@ def test_junk_input_at_every_typed_question():
                 problems.append(f"junk state {bad!r} was recorded as {convo.profile.state!r}")
 
             convo.handle("state:UK")
+            # * Then "Both" and "All of these", so the next answer is the age.
+            convo.handle("pick:all"); convo.handle("pick:all")
+            assert convo.state is State.AGE, convo.state
             for reply in convo.handle(bad):           # age question
                 _check_reply(reply, [f"age={bad!r}"], "en", problems)
             age = convo.profile.age
