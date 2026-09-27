@@ -7,7 +7,7 @@ identifiers.
 ## Now — 27 September 2026
 
 - **Live:** browser ([sathi.avinashnegi.com](https://sathi.avinashnegi.com)) and Telegram ([@YojanaSathiBot](https://t.me/YojanaSathiBot)). WhatsApp is verified on Meta's test number only.
-- **Schemes:** 21 signed (10 live; UK widow, Sikkim old-age / widow / disability, MP Kalyani, Punjab old-age women / men, PM-JAY 70+, PMJDY, PM Vishwakarma and APY signed 27 Sep, local until deployed). 2 drafts answer `UNKNOWN` — Tamil Nadu disability, Mizoram old-age (no official document list found).
+- **Schemes:** 21 signed and live (deployed 27 Sep, commit 04b9b4a); 11 of them signed that day. 2 drafts answer `UNKNOWN` — Tamil Nadu disability, Mizoram old-age (no official document list found).
 - **Flow, every channel:** language → consent → state (all 36; map on the web, buttons in chat) → national / state / both → tick schemes or "All of these" → only the needed questions → verdicts.
 - **Checks:** `python3 check.py` — all module self-checks and test files passing.
 - **Not done:** native Hindi review (much 27 Sep text is machine-drafted), and the field pilot. No impact is claimed.
@@ -292,4 +292,4 @@ copy before touching `/opt/sathi`.
 - **Parked:** TN_IGNDPS and MZ_IGNOAPS stay unsigned. Their amounts and rules are sourced, but no official page lists the documents (CRA, e-Sevai, tn.gov.in, Mizoram Social Welfare and NSAP were all checked). They are never offered in the scheme list; resume only with an official list or a recorded call to the office.
 - **State first on every channel.** The website order (state, then national / state / both, then the list) is now the default for Telegram and WhatsApp too. A state with no signed scheme goes straight to the national list. WhatsApp shows a list instead of buttons when a label is too long for a 20-character button ("Madhya Pradesh schemes").
 - Landing page and README: 21 schemes listed, the new order in "How it works", and a new hand-written core-flow diagram (`livesite/assets/core-logic.svg`) replacing the old PNG, which showed the scheme choice before the state.
-
+- **Deployed** 27 Sep, commit `04b9b4a`: AWS `check.py` passed, `sathi`, `sathi-whatsapp` and `sathi-web` restarted and active. Live web walk: state → Punjab → "Punjab schemes" → the two Punjab pensions. GitHub checks and Pages both green.
