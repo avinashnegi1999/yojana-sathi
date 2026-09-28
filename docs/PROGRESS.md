@@ -340,3 +340,8 @@ copy before touching `/opt/sathi`.
   bank-account rule; their official pages appear to ask for a savings or Jan
   Dhan account. If confirmed from the source, "no bank account" would settle
   them and skip the income-tax question for more workers.
+- **Deployed** 28 Sep, commit `9f0297f`, with `deploy/install-on-vm.sh`: AWS
+  `check.py` passed on the staged copy; all three units and Caddy active, no
+  errors since the restart; the live web page serves the new gender button.
+  Same `.env` as the previous deploy, and the server's secrets file was
+  unchanged since then. No live screening run.
