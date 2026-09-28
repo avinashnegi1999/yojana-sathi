@@ -494,12 +494,16 @@ class LocalWeb:
             steps = self._steps.get(session, [])
             at = self._at.get(session, -1)
             back = convo is not None and 0 < at < len(steps) and not convo.evaluated
-            forward = 0 <= at < len(steps) - 1
+            ahead = 0 <= at < len(steps) - 1
+            # * No Forward on the state screen (feedback, 28 Sep): the map
+            # * already comes back with her state picked and "Continue: <state>"
+            # * ready, and two buttons doing one job was one too many.
+            forward = ahead and convo is not None and convo.state is not State.STATE
             # * After Back, the answer she gave last time is marked, so she can
-            # * see it was right and go Forward. Not on the scheme list, whose
-            # * ticks already show her choice.
+            # * see it was right and go on. Not on the scheme list, whose ticks
+            # * already show her choice.
             chosen = ""
-            if forward and convo is not None and convo.state is not State.SCHEME_PICKER:
+            if ahead and convo is not None and convo.state is not State.SCHEME_PICKER:
                 chosen = steps[at + 1].answer
         # * The page labels its own controls (Send, the text box, Download) in
         # * the worker's language; they were English on a Hindi screen.
@@ -814,11 +818,12 @@ def _self_check() -> None:
     assert walk.sessions["w"].state is State.SCHEME_MODE
     again = step("/back")
     assert walk.sessions["w"].state is State.STATE and again["chosen"] == "state:UK"
-    assert again["nav"] == {"back": False, "forward": True}
+    # * No Forward on the state screen: "Continue: <state>" does that job.
+    assert again["nav"] == {"back": False, "forward": False}, again["nav"]
     assert walk.payload("w", "/back")[0] == 409, "went back past the first question"
 
     # * Forward walks the same screens again without answering anything.
-    step("/forward")
+    step("state:UK")
     step("/forward")
     step("/forward")
     assert walk.sessions["w"].state is State.AGE
