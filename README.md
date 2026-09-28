@@ -16,6 +16,8 @@
   &nbsp;&nbsp;·&nbsp;&nbsp;
   <a href="https://t.me/YojanaSathiBot">Open on Telegram ›</a>
   &nbsp;&nbsp;·&nbsp;&nbsp;
+  <a href="https://avinashnegi.com/yojana-sathi/#film">Watch the film ›</a>
+  &nbsp;&nbsp;·&nbsp;&nbsp;
   <a href="https://avinashnegi.com/yojana-sathi/">See the project ›</a>
 </p>
 

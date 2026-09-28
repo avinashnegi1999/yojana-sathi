@@ -80,6 +80,10 @@ h1,h2,.quote{text-wrap:balance}
 .hero{padding-top:96px}
 .hero .phone{margin-top:64px;width:min(300px,72vw)}
 
+/* ── the film: a dark theatre tile, no chrome around the picture ── */
+.film{width:min(980px,100%);margin:40px auto 0;border-radius:18px;overflow:hidden;background:#000}
+.film video{display:block;width:100%;height:auto;aspect-ratio:16/9}
+
 /* ── numbers ── */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:56px;text-align:left}
 .stat b{display:block;font-size:clamp(34px,4.4vw,48px);font-weight:600;line-height:1.05;letter-spacing:-.015em}
@@ -213,7 +217,7 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
 <header class="nav">
   <div class="nav-in">
     <a class="brand" href="#top"><img src="assets/social-preview.jpg" alt="" width="26" height="26">Yojana Sathi</a>
-    <nav class="links" aria-label="Sections"><a href="#how">How it works</a><a href="#conversations">Conversations</a><a href="#schemes">Schemes</a><a href="#honesty">Honesty</a></nav>
+    <nav class="links" aria-label="Sections"><a href="#film">Film</a><a href="#how">How it works</a><a href="#conversations">Conversations</a><a href="#schemes">Schemes</a><a href="#honesty">Honesty</a></nav>
     <a class="pill pill-sm" href="https://sathi.avinashnegi.com">Try it</a>
   </div>
 </header>
@@ -229,6 +233,7 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
     <div class="actions">
       <a class="pill" href="https://sathi.avinashnegi.com">Try it in your browser</a>
       <a class="more" href="https://t.me/YojanaSathiBot">Open on Telegram</a>
+      <a class="more" href="#film">Watch the film</a>
     </div>
     <figure class="phone">
       <img src="assets/shot-verdict.jpg" width="720" height="1600" fetchpriority="high"
@@ -249,6 +254,22 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
       <div class="stat"><b>₹315</b><span>a day, average for a female casual labourer, 2025<sup><a href="#s3">3</a></sup></span></div>
     </div>
     <p class="fine">Registration is not receipt of a benefit. None of these figures measures this project.</p>
+  </div>
+</section>
+
+<!-- 2b · the film -->
+<section class="tile dark center" id="film">
+  <div class="wrap reveal">
+    <h2>See it in<br>51 seconds.</h2>
+    <p class="tagline">The problem, the flow, and why a model never decides.</p>
+    <figure class="film">
+      <video controls playsinline preload="none" width="1280" height="720"
+             poster="assets/video/poster.jpg"
+             aria-label="A 51-second explainer: a wasted trip costs a casual labourer a day's wage; Yojana Sathi asks her state, then national, state or both schemes, then only the questions those schemes need; the verdict shows what she gets, why and where to go, with a one-page sheet; it runs in a browser, on Telegram and on WhatsApp behind one rule engine, which imports no language model; every scheme is a cited rule file, and an unsigned one answers unknown.">
+        <source src="assets/video/avinashnegi1999-yojana-sathi-explained.mp4" type="video/mp4">
+      </video>
+    </figure>
+    <p class="fine">Captions are in the video.</p>
   </div>
 </section>
 
