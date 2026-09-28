@@ -146,6 +146,11 @@ class Conversation:
         self._document_page = 0
         self._known_page = 0
         self._results: tuple = ()
+        # ! True once the results have been evaluated and logged. The web
+        # ! page's Back stops here: going back and answering again would
+        # ! log a second screening for the same person, and the headline ₹
+        # ! figure is a sum over those logs.
+        self.evaluated = False
         # * Set once the worker agrees to anonymous metrics. The adapter uses
         # * it to count one unique person, in a table that has no session id.
         self.consent_granted = False
@@ -1052,6 +1057,7 @@ class Conversation:
 
         active = self._active_schemes()
         self._results = evaluate_all(self.profile, active)
+        self.evaluated = True
         if self.log and self.session:
             self.log.log_results(
                 self.session, self.profile, self._results, frozenset(self._known)

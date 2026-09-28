@@ -28,6 +28,8 @@ import threading
 import time
 import urllib.request
 from collections import deque
+from copy import deepcopy
+from dataclasses import dataclass
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -61,6 +63,7 @@ html:lang(hi) body{line-height:1.6}
 .switch:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .restart{appearance:none;border:0;background:none;color:var(--blue);font:inherit;font-size:14px;cursor:pointer;min-height:44px;padding:0 2px;white-space:nowrap}
 main{max-width:40rem;margin:0 auto;padding:40px 16px 96px}
+.steps{display:flex;margin:-28px 0 4px}.step{appearance:none;border:0;background:none;color:var(--blue);font:inherit;font-size:17px;cursor:pointer;min-height:44px;padding:0;white-space:nowrap}.step.fwd{margin-left:auto}.step:active{opacity:.6}.choice.chosen{outline:2px solid var(--focus);outline-offset:2px}
 .q{margin:8px 0 24px;font-size:28px;font-weight:600;line-height:1.18;letter-spacing:-.01em;white-space:pre-wrap}
 html:lang(hi) .q{line-height:1.4;letter-spacing:0}
 .q:has(+ .lead){margin-bottom:10px}
@@ -97,20 +100,22 @@ html:lang(hi) .q{line-height:1.4;letter-spacing:0}
 .send:active,.download:active{transform:scale(.95)}
 .download{display:inline-flex;align-items:center;min-height:52px;margin:0 0 24px;padding:0 26px;border-radius:26px;background:var(--blue);color:#fff;text-decoration:none;transition:transform .12s ease}
 .sheet{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;margin:0 0 8px}.sheet .download{margin:0}.view{color:var(--blue);text-decoration:none;min-height:44px;display:inline-flex;align-items:center}.view::after{content:" ›"}.viewnote{margin:0 0 24px;color:var(--muted);font-size:14px}
-.choice:focus-visible,.send:focus-visible,.restart:focus-visible,.download:focus-visible,.composer input:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.choice:focus-visible,.send:focus-visible,.restart:focus-visible,.step:focus-visible,.download:focus-visible,.composer input:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style></head><body>
 <header class="bar"><div class="bar-in"><img src="/logo.jpg" alt="" width="28" height="28"><span class="brand" id="brand">Yojana Sathi</span><button class="switch" id="switch" type="button" onclick="switchLang()" lang="hi">हिंदी</button><button class="restart" id="restart" type="button" onclick="restart()">Start again</button></div></header>
 <main><section id="screen" aria-live="polite"></section></main>
 <script>
 const screen=document.querySelector('#screen');
-const UI={hi:{type:'यहाँ लिखें',send:'भेजें',download:'अपना काग़ज़ डाउनलोड करें',view:'काग़ज़ देखें',viewNote:'यह लिंक 1 घंटे तक खुलेगा।',restart:'फिर से शुरू',other:'English',otherLang:'en',brand:'योजना साथी',answers:'आपके जवाब',mapHint:'अपना राज्य चुनने के लिए नक्शे पर उसे छुएँ',listHint:'राज्य वर्णमाला के क्रम में हैं',mapGo:'आगे बढ़ें',tabMap:'नक्शा',tabList:'सूची'},en:{type:'Type your answer',send:'Send',download:'Download your sheet',view:'View your sheet',viewNote:'The link works for 1 hour.',restart:'Start again',other:'हिंदी',otherLang:'hi',brand:'Yojana Sathi',answers:'Your answers',mapHint:'Tap your state on the map to choose it',listHint:'States are in alphabetical order',mapGo:'Continue',tabMap:'Map',tabList:'List'}};
+const UI={hi:{type:'यहाँ लिखें',send:'भेजें',download:'अपना काग़ज़ डाउनलोड करें',view:'काग़ज़ देखें',viewNote:'यह लिंक 1 घंटे तक खुलेगा।',restart:'फिर से शुरू',other:'English',otherLang:'en',brand:'योजना साथी',answers:'आपके जवाब',mapHint:'अपना राज्य चुनने के लिए नक्शे पर उसे छुएँ',listHint:'राज्य वर्णमाला के क्रम में हैं',mapGo:'आगे बढ़ें',tabMap:'नक्शा',tabList:'सूची',back:'पीछे',forward:'आगे'},en:{type:'Type your answer',send:'Send',download:'Download your sheet',view:'View your sheet',viewNote:'The link works for 1 hour.',restart:'Start again',other:'हिंदी',otherLang:'hi',brand:'Yojana Sathi',answers:'Your answers',mapHint:'Tap your state on the map to choose it',listHint:'States are in alphabetical order',mapGo:'Continue',tabMap:'Map',tabList:'List',back:'Back',forward:'Forward'}};
 let current='en';
+// * The answer given last time on this screen. Set after Back, so she can see it and go Forward.
+let chosen='';
 // The one blue pill on a screen: the forward action, never an answer to a yes/no question.
 const PRIMARY=new Set(['consent_yes','pick:all','pick:done','next','/start']);
 function text(value){return String(value||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function blocks(value,headline,cls){cls=cls||'q';return String(value||'').split(/\n\s*\n/).map((b,i)=>{if(headline&&i===0){const cut=b.indexOf('\n');return cut<0?`<h2 class="${cls}">${text(b)}</h2>`:`<h2 class="${cls}">${text(b.slice(0,cut))}</h2><p class="lead">${text(b.slice(cut+1))}</p>`;}const m=b.match(/^(\d+\.\s[^\n]*)\n([\s\S]*)$/);return m?`<div class="scheme"><p class="scheme-name">${text(m[1])}</p><p class="scheme-body">${text(m[2].replace(/^ +/gm,''))}</p></div>`:`<p class="message">${text(b)}</p>`;}).join('');}
-function button(b){const picked=b.label.startsWith('✅ ');const label=picked?b.label.slice(2):b.label;const cls=['choice',b.scale?'scale':'',b.grid?'grid':'',PRIMARY.has(b.value)?'primary':'',picked?'selected':''].filter(Boolean).join(' ');return `<button class="${cls}" data-value="${encodeURIComponent(b.value)}"${picked?' aria-pressed="true"':''}><span>${text(label)}</span>${picked?'<span class="tick" aria-hidden="true">✓</span>':''}</button>`;}
+function button(b){const picked=b.label.startsWith('✅ ');const label=picked?b.label.slice(2):b.label;const was=!!chosen&&b.value===chosen;const cls=['choice',b.scale?'scale':'',b.grid?'grid':'',PRIMARY.has(b.value)?'primary':'',picked?'selected':'',was?'chosen':''].filter(Boolean).join(' ');return `<button class="${cls}" data-value="${encodeURIComponent(b.value)}"${picked?' aria-pressed="true"':''}${was?' aria-current="true"':''}><span>${text(label)}</span>${picked||was?'<span class="tick" aria-hidden="true">✓</span>':''}</button>`;}
 let mapPromise=null;
 // * One load, shared: the page starts it on open, and the state question reuses it.
 function mapLoad(){return mapPromise||(mapPromise=mapBuild());}
@@ -138,7 +143,7 @@ tabs.querySelectorAll('[role=tab]').forEach(x=>x.setAttribute('aria-selected',St
 const box=document.getElementById('map');
 box.innerHTML=`<div class="mapbox"><img src="/map.png" alt="" width="${m.W}" height="${m.H}"><canvas class="hover" width="${m.W}" height="${m.H}"></canvas><canvas class="pick" width="${m.W}" height="${m.H}"></canvas><div class="maptip" hidden></div></div>`;
 const img=box.querySelector('img'),hover=box.querySelector('.hover').getContext('2d'),pick=box.querySelector('.pick').getContext('2d'),tip=box.querySelector('.maptip'),go=document.getElementById('mapgo');
-const names={};screen.querySelectorAll('.choice.grid').forEach(b=>{names[decodeURIComponent(b.dataset.value).slice(6)]=b.textContent.trim();});
+const names={};screen.querySelectorAll('.choice.grid').forEach(b=>{names[decodeURIComponent(b.dataset.value).slice(6)]=b.querySelector('span').textContent.trim();});
 const nameOf=k=>names[m.codes[k-1]]||m.codes[k-1];
 const at=e=>{const r=img.getBoundingClientRect(),x=Math.round((e.clientX-r.left)/r.width*m.W),y=Math.round((e.clientY-r.top)/r.height*m.H);
 for(let s=0;s<=6;s++)for(let dy=-s;dy<=s;dy++)for(let dx=-s;dx<=s;dx++){const X=x+dx,Y=y+dy;if(X<0||Y<0||X>=m.W||Y>=m.H)continue;const k=m.lab[Y*m.W+X];if(k)return k;}return 0;};
@@ -149,9 +154,21 @@ if(k!==hovered){hovered=k;paint(hover,k,[0,102,204,70]);}
 if(!k){tip.hidden=true;return;}const r=img.getBoundingClientRect();tip.textContent=nameOf(k);tip.hidden=false;
 tip.style.left=(e.clientX-r.left)+'px';tip.style.top=(e.clientY-r.top)+'px';};
 img.onmouseleave=()=>{hovered=0;paint(hover,0);tip.hidden=true;};
-img.onclick=e=>{const k=at(e);if(!k)return;const code=m.codes[k-1];paint(pick,k,[0,102,204,230]);
-go.innerHTML=`<button class="choice primary">${ui.mapGo}: ${text(nameOf(k))}</button>`;go.firstChild.onclick=()=>answer('state:'+code);};}
-function show(data){document.querySelector('main').classList.remove('wide');const ui=UI[data.lang]||UI.hi;document.documentElement.lang=data.lang==='en'?'en':'hi';document.getElementById('restart').textContent=ui.restart;current=data.lang==='hi'?'hi':'en';const sw=document.getElementById('switch');sw.textContent=ui.other;sw.lang=ui.otherLang;document.getElementById('brand').textContent=ui.brand;const last=data.replies.length-1;const hasResult=data.replies.some(r=>r.kind==='result');let out=data.replies.map((r,i)=>{if(r.kind==='recap'){const body=r.text.split('\n').slice(1).join('\n');return `<details class="recap"><summary>${ui.answers}</summary><p class="message">${text(body)}</p></details>`;}const asks=i===last&&(r.buttons?.length||r.typed);return `${r.kind==='result'?blocks(r.text,true,'q'):blocks(r.text,asks,hasResult?'q2':'q')}${r.map?`<div id="maptab"><p class="maphint">${ui.mapHint}</p><div class="map" id="map"></div><div id="mapgo"></div></div><p class="maphint" id="listhint" hidden>${ui.listHint}</p>`:''}${r.buttons?.length?`<div class="choices"${r.map?' hidden':''}>${r.buttons.map(button).join('')}</div>`:''}${r.document?`<div class="sheet"><a class="download" href="${r.document}" download>${ui.download}</a><a class="view" href="${r.document.replace('/document/','/sheet/')}" target="_blank" rel="noopener">${ui.view}</a></div><p class="viewnote">${ui.viewNote}</p>`:''}`;}).join('');const typed=!!(data.replies[last]&&data.replies[last].typed);if(typed)out+=`<form class="composer"><input name="answer" aria-label="${ui.type}" autocomplete="off" inputmode="text" placeholder="${ui.type}"><button class="send">${ui.send}</button></form>`;screen.innerHTML=out;window.scrollTo({top:0});screen.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{const v=decodeURIComponent(b.dataset.value);if(v==='/start')restart();else answer(v);});drawMap(ui);const form=screen.querySelector('form');if(form){form.onsubmit=e=>{e.preventDefault();const input=e.currentTarget.answer;if(input.value.trim()){answer(input.value);input.value='';}};form.answer.focus();}}
+const choose=k=>{const code=m.codes[k-1];paint(pick,k,[0,102,204,230]);
+go.innerHTML=`<button class="choice primary">${ui.mapGo}: ${text(nameOf(k))}</button>`;go.firstChild.onclick=()=>answer('state:'+code);};
+img.onclick=e=>{const k=at(e);if(k)choose(k);};
+if(chosen.startsWith('state:')){const k=m.codes.indexOf(chosen.slice(6))+1;if(k)choose(k);}}
+// * Back and Forward, above the question. Each is shown only when the server says it can go there.
+function steps(nav,ui){if(!nav||!(nav.back||nav.forward))return '';return `<nav class="steps">${nav.back?`<button type="button" class="step" data-nav="/back">‹ ${ui.back}</button>`:''}${nav.forward?`<button type="button" class="step fwd" data-nav="/forward">${ui.forward} ›</button>`:''}</nav>`;}
+// * The phone's own back button does what '‹ Back' does. While Back is possible there is
+// * exactly one extra history entry; pressing back uses it up and we step back instead of
+// * leaving. When Back is not possible the entry is removed, so the button works as usual.
+let guarded=false,unguarding=false;
+function guard(on){if(on&&!guarded){history.pushState({sathi:1},'');guarded=true;}else if(!on&&guarded){guarded=false;unguarding=true;history.back();}}
+addEventListener('popstate',()=>{if(unguarding){unguarding=false;return;}if(guarded){guarded=false;nav('/back');}});
+// * A refused move (nothing there any more) leaves the screen as it is.
+async function nav(value){try{const r=await fetch('/answer',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({answer:value})});if(!r.ok)return;const data=await r.json().catch(()=>null);if(data&&Array.isArray(data.replies))show(data);}catch(e){}}
+function show(data){chosen=data.chosen||'';guard(!!(data.nav&&data.nav.back));document.querySelector('main').classList.remove('wide');const ui=UI[data.lang]||UI.hi;document.documentElement.lang=data.lang==='en'?'en':'hi';document.getElementById('restart').textContent=ui.restart;current=data.lang==='hi'?'hi':'en';const sw=document.getElementById('switch');sw.textContent=ui.other;sw.lang=ui.otherLang;document.getElementById('brand').textContent=ui.brand;const last=data.replies.length-1;const hasResult=data.replies.some(r=>r.kind==='result');let out=steps(data.nav,ui)+data.replies.map((r,i)=>{if(r.kind==='recap'){const body=r.text.split('\n').slice(1).join('\n');return `<details class="recap"><summary>${ui.answers}</summary><p class="message">${text(body)}</p></details>`;}const asks=i===last&&(r.buttons?.length||r.typed);return `${r.kind==='result'?blocks(r.text,true,'q'):blocks(r.text,asks,hasResult?'q2':'q')}${r.map?`<div id="maptab"><p class="maphint">${ui.mapHint}</p><div class="map" id="map"></div><div id="mapgo"></div></div><p class="maphint" id="listhint" hidden>${ui.listHint}</p>`:''}${r.buttons?.length?`<div class="choices"${r.map?' hidden':''}>${r.buttons.map(button).join('')}</div>`:''}${r.document?`<div class="sheet"><a class="download" href="${r.document}" download>${ui.download}</a><a class="view" href="${r.document.replace('/document/','/sheet/')}" target="_blank" rel="noopener">${ui.view}</a></div><p class="viewnote">${ui.viewNote}</p>`:''}`;}).join('');const typed=!!(data.replies[last]&&data.replies[last].typed);if(typed)out+=`<form class="composer"><input name="answer" aria-label="${ui.type}" autocomplete="off" inputmode="text" placeholder="${ui.type}"${chosen&&!chosen.startsWith('/')?` value="${text(chosen)}"`:''}><button class="send">${ui.send}</button></form>`;screen.innerHTML=out;window.scrollTo({top:0});screen.querySelectorAll('.step').forEach(b=>b.onclick=()=>nav(b.dataset.nav));screen.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{const v=decodeURIComponent(b.dataset.value);if(v==='/start')restart();else answer(v);});drawMap(ui);const form=screen.querySelector('form');if(form){form.onsubmit=e=>{e.preventDefault();const input=e.currentTarget.answer;if(input.value.trim()){answer(input.value);input.value='';}};form.answer.focus();}}
 const START=(()=>{const src=new URLSearchParams(location.search).get('start')||'';return /^[a-z]{1,20}$/.test(src)?'/start '+src:'/start';})();
 function oops(){screen.innerHTML=`<h2 class="q">${text('कुछ गड़बड़ हो गई।\nSomething went wrong.')}</h2><div class="choices"><button class="choice primary" onclick="restart()">फिर से शुरू · Start again</button></div>`;}
 async function answer(value){try{const r=await fetch('/answer',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({answer:value})});const data=await r.json().catch(()=>null);if(data&&Array.isArray(data.replies)){show(data);}else{oops();}}catch(e){oops();}}
@@ -173,6 +190,15 @@ _MAP_IMAGE = Path(__file__).resolve().parent / "web" / "india_map.png"
 _MAP_SEEDS = Path(__file__).resolve().parent.parent / "data" / "maps" / "india_map_seeds.json"
 _MAP = _MAP_IMAGE.read_bytes() if _MAP_IMAGE.exists() else None
 _SEEDS = _MAP_SEEDS.read_bytes() if _MAP_SEEDS.exists() else None
+
+
+@dataclass
+class _Step:
+    """One screen the worker has seen, kept so Back and Forward can return to it."""
+
+    answer: str                 # * the answer that led to this screen
+    convo: Conversation         # ! a private copy; never handled, only copied out
+    items: list[dict]           # * what the page showed
 
 
 class LocalWeb:
@@ -202,6 +228,16 @@ class LocalWeb:
     TYPED_STATES = frozenset({State.AGE, State.OCCUPATION_FREE, State.SUGGESTION})
     # * The language a new browser session opens in; see _turn().
     DEFAULT_LANG = "en"
+    # * Back and Forward (feedback, 28 Sep: one wrong tap meant starting over).
+    # * Every screen after consent is kept as a copy of the conversation plus
+    # * what the page showed. Back restores the screen before; Forward the one
+    # * after, until a different answer replaces what came after.
+    # ! Back stops at the results. They are logged once per screening and the
+    # ! headline ₹ figure is a sum over those logs, so going back past them and
+    # ! answering again would count one person twice. After that: Start again.
+    # ! Consent is not a step either. Going back to it and answering No would
+    # ! log a refusal after answers were already recorded under a Yes.
+    MAX_STEPS = 80
 
     def __init__(self, schemes: dict[str, Scheme], log: EventLog | None = None,
                  clock=time.monotonic) -> None:
@@ -212,6 +248,9 @@ class LocalWeb:
         self._last_seen: dict[str, float] = {}
         # * token -> (filename, bytes, created at)
         self.documents: dict[str, tuple[str, bytes, float]] = {}
+        # * session -> the screens since consent, and which one is showing.
+        self._steps: dict[str, list[_Step]] = {}
+        self._at: dict[str, int] = {}
         self._new_by_client: dict[str, deque[float]] = {}
         # ! ThreadingHTTPServer answers each request on its own thread. A
         # ! double-tap on a button is two requests inside one Conversation at
@@ -225,8 +264,7 @@ class LocalWeb:
         """Drop idle sessions and expired sheets. Caller holds the lock."""
         for key in [k for k, seen in self._last_seen.items()
                     if now - seen > self.SESSION_IDLE_SECONDS]:
-            self.sessions.pop(key, None)
-            self._last_seen.pop(key, None)
+            self._drop(key)
         for token in [t for t, (_, _, made) in self.documents.items()
                       if now - made > self.DOCUMENT_SECONDS]:
             del self.documents[token]
@@ -236,6 +274,17 @@ class LocalWeb:
                 recent.popleft()
             if not recent:
                 del self._new_by_client[client]
+
+    def _drop(self, session: str) -> None:
+        """Forget one session, its answers and its screens. Caller holds the lock."""
+        self.sessions.pop(session, None)
+        self._last_seen.pop(session, None)
+        self._steps.pop(session, None)
+        self._at.pop(session, None)
+
+    def _copy(self, convo: Conversation) -> Conversation:
+        """A private copy of a conversation. The schemes and the log are shared, not copied."""
+        return deepcopy(convo, {id(self.schemes): self.schemes, id(self.log): self.log})
 
     def _may_open_session(self, client: str, now: float) -> bool:
         """Count one new session for this client, or refuse. Caller holds the lock."""
@@ -263,8 +312,10 @@ class LocalWeb:
             # ! longest — never the one somebody tapped a second ago.
             while len(self.sessions) >= self.MAX_SESSIONS:
                 oldest = min(self._last_seen, key=self._last_seen.get)
-                self.sessions.pop(oldest, None)
-                self._last_seen.pop(oldest, None)
+                self._drop(oldest)
+            # * A new screening starts with no screens to go back to.
+            self._steps.pop(session, None)
+            self._at.pop(session, None)
             # * "/start csc" from the page's ?start=csc. Unknown slugs are
             # * ignored, never stored.
             slug = words[1].lower() if len(words) > 1 and words[0] == "/start" else ""
@@ -295,6 +346,8 @@ class LocalWeb:
 
     def payload(self, session: str, answer: str, client: str = "local") -> tuple[int, bytes]:
         """(HTTP status, JSON body). A failed turn is a message, never a dropped socket."""
+        if answer in ("/back", "/forward"):
+            return self._navigate(session, answer[1:])
         try:
             replies = self.turn(session, answer, client)
         except Exception as e:  # noqa: BLE001 — one broken session must not take the page down
@@ -303,8 +356,8 @@ class LocalWeb:
             # ! name only in the log — the message could echo what she typed.
             print(f"[web] turn failed: {type(e).__name__}")
             with self._lock:
-                convo = self.sessions.pop(session, None)
-                self._last_seen.pop(session, None)
+                convo = self.sessions.get(session)
+                self._drop(session)
             lang = convo.lang if convo is not None else DEFAULT_LANG
             return 500, self._message(s("errors.web_stopped", lang))
         if replies is None:
@@ -313,6 +366,13 @@ class LocalWeb:
             return 429, self._message(text)
 
         convo = self.sessions.get(session)
+        items = self._render(convo, replies)
+        with self._lock:
+            self._remember(session, answer, convo, items)
+        return 200, self._response(session, convo, items)
+
+    def _render(self, convo: Conversation | None, replies: list[Reply]) -> list[dict]:
+        """Replies as the page draws them. Mints a sheet token for any document."""
         typed = convo is not None and convo.state in self.TYPED_STATES
         body = []
         # * Which reply is the answer recap and which is the result, so the page
@@ -366,10 +426,87 @@ class LocalWeb:
                     self.documents[token] = (name, blob, self.clock())
                 item["document"] = f"/document/{token}"
             body.append(item)
+        return body
+
+    # * ------------------------------------------------------ back and forward
+
+    def _remember(self, session: str, answer: str, convo: Conversation | None,
+                  items: list[dict]) -> None:
+        """Keep the screen this answer produced. Caller holds the lock."""
+        if convo is None or not convo.consent_granted or convo.evaluated:
+            # * Nothing before consent, and nothing from the results on:
+            # * Back can never reach those screens, so no copy is kept.
+            return
+        if answer.startswith("/lang "):
+            # * The switch re-asks the same screen; it is not a step. Screens
+            # * kept in the other language are re-asked in this one on the way.
+            return
+        steps = self._steps.setdefault(session, [])
+        at = self._at.get(session, -1)
+        step = _Step(answer, self._copy(convo), items)
+        if at + 1 < len(steps) and steps[at + 1].answer == answer:
+            # * The same answer as last time. The flow is deterministic, so
+            # * every screen after it is still right: Forward keeps working.
+            steps[at + 1] = step
+        else:
+            del steps[at + 1:]
+            steps.append(step)
+        at += 1
+        while len(steps) > self.MAX_STEPS:
+            del steps[0]
+            at -= 1
+        self._at[session] = at
+
+    def _navigate(self, session: str, direction: str) -> tuple[int, bytes]:
+        """Show the screen before or after this one. 409 when there is none."""
+        with self._lock:
+            now = self.clock()
+            self._sweep(now)
+            convo = self.sessions.get(session)
+            steps = self._steps.get(session)
+            if convo is None or not steps:
+                return 409, self._message("")
+            at = self._at[session]
+            if direction == "back":
+                if at == 0 or convo.evaluated:
+                    return 409, self._message("")
+                target = at - 1
+            else:
+                if at + 1 >= len(steps):
+                    return 409, self._message("")
+                target = at + 1
+            step = steps[target]
+            restored = self._copy(step.convo)
+            self.sessions[session] = restored
+            self._at[session] = target
+            self._last_seen[session] = now
+        if restored.lang == convo.lang:
+            items = step.items
+        else:
+            # * She switched language after this screen was shown: ask it again
+            # * in the language she is reading now, as the top-bar switch does.
+            items = self._render(restored, [restored.set_language(convo.lang)[-1]])
+        return 200, self._response(session, restored, items)
+
+    def _response(self, session: str, convo: Conversation | None, items: list[dict]) -> bytes:
+        """The JSON the page reads: the screen, its language, and where Back and Forward go."""
+        with self._lock:
+            steps = self._steps.get(session, [])
+            at = self._at.get(session, -1)
+            back = convo is not None and 0 < at < len(steps) and not convo.evaluated
+            forward = 0 <= at < len(steps) - 1
+            # * After Back, the answer she gave last time is marked, so she can
+            # * see it was right and go Forward. Not on the scheme list, whose
+            # * ticks already show her choice.
+            chosen = ""
+            if forward and convo is not None and convo.state is not State.SCHEME_PICKER:
+                chosen = steps[at + 1].answer
         # * The page labels its own controls (Send, the text box, Download) in
         # * the worker's language; they were English on a Hindi screen.
         lang = convo.lang if convo is not None else DEFAULT_LANG
-        return 200, json.dumps({"replies": body, "lang": lang}, ensure_ascii=False).encode("utf-8")
+        return json.dumps({"replies": items, "lang": lang,
+                           "nav": {"back": back, "forward": forward}, "chosen": chosen},
+                          ensure_ascii=False).encode("utf-8")
 
     def document(self, token: str) -> tuple[str, bytes] | None:
         """A sheet by its token, or None once it has expired."""
@@ -651,6 +788,92 @@ def _self_check() -> None:
         assert tagged.sessions["p"].session.cohort == "csc"
         assert tagged.sessions["q"].session.cohort is None
         log.close()
+
+    # * ------------------------------------------------ Back and Forward
+    walk = LocalWeb(schemes)
+
+    def step(answer: str) -> dict:
+        return body(walk.payload("w", answer))
+
+    start = step("/start")
+    assert start["nav"] == {"back": False, "forward": False}, "nothing behind consent"
+    first = step("consent_yes")
+    assert first["nav"]["back"] is False, "consent is not a step to go back to"
+    step("state:UK")
+    scope = step("pick:all")
+    assert walk.sessions["w"].state is State.SCHEME_PICKER and scope["nav"]["back"]
+    step("pick:all")
+    assert walk.sessions["w"].state is State.AGE
+
+    # * Back restores the screen before, with the answer given there marked.
+    back = step("/back")
+    assert walk.sessions["w"].state is State.SCHEME_PICKER
+    assert back["nav"] == {"back": True, "forward": True}, back["nav"]
+    assert back["chosen"] == "", "the scheme list shows its own ticks"
+    step("/back")
+    assert walk.sessions["w"].state is State.SCHEME_MODE
+    again = step("/back")
+    assert walk.sessions["w"].state is State.STATE and again["chosen"] == "state:UK"
+    assert again["nav"] == {"back": False, "forward": True}
+    assert walk.payload("w", "/back")[0] == 409, "went back past the first question"
+
+    # * Forward walks the same screens again without answering anything.
+    step("/forward")
+    step("/forward")
+    step("/forward")
+    assert walk.sessions["w"].state is State.AGE
+    assert walk.sessions["w"].profile.state == "UK"
+    assert walk.payload("w", "/forward")[0] == 409, "went forward past the last screen"
+
+    # * The same answer again keeps the screens after it; a different one drops them.
+    step("/back")
+    step("/back")
+    step("/back")
+    assert step("state:UK")["nav"]["forward"] is True, "same answer lost Forward"
+    step("/back")
+    assert step("state:PB")["nav"]["forward"] is False, "a new answer kept stale screens"
+    assert walk.sessions["w"].profile.state == "PB"
+
+    # * A language switch, then Back: the earlier screen comes back in the new language.
+    step("/lang hi")
+    hindi = step("/back")
+    assert hindi["lang"] == "hi" and walk.sessions["w"].lang == "hi", hindi["lang"]
+    assert walk.sessions["w"].state is State.STATE
+
+    # ! The results are logged once per screening. Going back and forth before
+    # ! them must not log a second evaluation, and Back stops once they show.
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d:
+        log = EventLog(Path(d) / "nav.db")
+        counted = LocalWeb(schemes, log)
+        page = body(counted.payload("n", "/start"))
+        page = body(counted.payload("n", "consent_yes"))
+        wandered = False
+        for _ in range(60):
+            convo = counted.sessions["n"]
+            if convo.evaluated:
+                break
+            if convo.state is State.AGE and not wandered:
+                # * Back twice and Forward twice, then carry on.
+                for move in ("/back", "/back", "/forward", "/forward"):
+                    body(counted.payload("n", move))
+                wandered = True
+            if convo.state is State.AGE:
+                answer = "34"
+            else:
+                values = [b["value"] for b in page["replies"][-1]["buttons"]]
+                answer = next((v for v in ("state:UK", "pick:all", "none", "no") if v in values),
+                              values[0])
+            page = body(counted.payload("n", answer))
+        assert counted.sessions["n"].evaluated and wandered, "the walk never reached the results"
+        assert page["nav"]["back"] is False, "Back offered on the results"
+        assert counted.payload("n", "/back")[0] == 409, "went back past the results"
+        log.close()
+        import sqlite3
+        db = sqlite3.connect(Path(d) / "nav.db")
+        rows = db.execute("SELECT COUNT(*) FROM events WHERE event_type="
+                          "'eligibility_evaluated'").fetchone()[0]
+        db.close()
+        assert rows == 1, f"{rows} evaluations logged for one screening"
 
     # * Real HTTP: the JSON boundary, and every malformed body a 400, not a crash.
     server = ThreadingHTTPServer(("127.0.0.1", 0), handler_class(app))
