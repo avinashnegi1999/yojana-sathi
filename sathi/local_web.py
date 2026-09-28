@@ -232,12 +232,13 @@ class LocalWeb:
     # * Every screen after consent is kept as a copy of the conversation plus
     # * what the page showed. Back restores the screen before; Forward the one
     # * after, until a different answer replaces what came after.
-    # ! Back stops at the results. They are logged once per screening and the
-    # ! headline ₹ figure is a sum over those logs, so going back past them and
-    # ! answering again would count one person twice. After that: Start again.
-    # ! Consent is not a step either. Going back to it and answering No would
+    # * Back and Forward reach the end screen. Going back past the results
+    # * and answering again cannot count her twice: the event log records a
+    # * session's results, sheet and feedback once (EventLog._first_time).
+    # ! Consent is not a step. Going back to it and answering No would
     # ! log a refusal after answers were already recorded under a Yes.
     MAX_STEPS = 80
+    TICK_STATES = frozenset({State.SCHEME_PICKER, State.KNOWN_SCHEMES, State.DOCUMENTS})
 
     def __init__(self, schemes: dict[str, Scheme], log: EventLog | None = None,
                  clock=time.monotonic) -> None:
@@ -433,10 +434,8 @@ class LocalWeb:
     def _remember(self, session: str, answer: str, convo: Conversation | None,
                   items: list[dict]) -> None:
         """Keep the screen this answer produced. Caller holds the lock."""
-        if convo is None or not convo.consent_granted or convo.evaluated:
-            # * Nothing before consent, and nothing from the results on:
-            # * Back can never reach those screens, so no copy is kept.
-            return
+        if convo is None or not convo.consent_granted:
+            return  # * Nothing before consent: Back never reaches those screens.
         if answer.startswith("/lang "):
             # * The switch re-asks the same screen; it is not a step. Screens
             # * kept in the other language are re-asked in this one on the way.
@@ -468,7 +467,7 @@ class LocalWeb:
                 return 409, self._message("")
             at = self._at[session]
             if direction == "back":
-                if at == 0 or convo.evaluated:
+                if at == 0:
                     return 409, self._message("")
                 target = at - 1
             else:
@@ -493,17 +492,17 @@ class LocalWeb:
         with self._lock:
             steps = self._steps.get(session, [])
             at = self._at.get(session, -1)
-            back = convo is not None and 0 < at < len(steps) and not convo.evaluated
+            back = 0 < at < len(steps)
             ahead = 0 <= at < len(steps) - 1
             # * No Forward on the state screen (feedback, 28 Sep): the map
             # * already comes back with her state picked and "Continue: <state>"
             # * ready, and two buttons doing one job was one too many.
             forward = ahead and convo is not None and convo.state is not State.STATE
             # * After Back, the answer she gave last time is marked, so she can
-            # * see it was right and go on. Not on the scheme list, whose ticks
-            # * already show her choice.
+            # * see it was right and go on. Not on the lists she ticks (schemes,
+            # * schemes she has, papers): their ticks already show her choice.
             chosen = ""
-            if ahead and convo is not None and convo.state is not State.SCHEME_PICKER:
+            if ahead and convo is not None and convo.state not in self.TICK_STATES:
                 chosen = steps[at + 1].answer
         # * The page labels its own controls (Send, the text box, Download) in
         # * the worker's language; they were English on a Hindi screen.
@@ -845,40 +844,65 @@ def _self_check() -> None:
     assert hindi["lang"] == "hi" and walk.sessions["w"].lang == "hi", hindi["lang"]
     assert walk.sessions["w"].state is State.STATE
 
-    # ! The results are logged once per screening. Going back and forth before
-    # ! them must not log a second evaluation, and Back stops once they show.
+    # ! Back and Forward reach the end screen, and a worker who goes back past
+    # ! her results and answers again is still counted once: one screening,
+    # ! one sheet, one feedback row. Walked here with a real event log.
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d:
         log = EventLog(Path(d) / "nav.db")
         counted = LocalWeb(schemes, log)
-        page = body(counted.payload("n", "/start"))
-        page = body(counted.payload("n", "consent_yes"))
-        wandered = False
-        for _ in range(60):
-            convo = counted.sessions["n"]
-            if convo.evaluated:
-                break
-            if convo.state is State.AGE and not wandered:
-                # * Back twice and Forward twice, then carry on.
-                for move in ("/back", "/back", "/forward", "/forward"):
-                    body(counted.payload("n", move))
-                wandered = True
-            if convo.state is State.AGE:
-                answer = "34"
-            else:
+
+        def to_the_end(page: dict, age: str) -> dict:
+            """Answer every question until the end screen."""
+            for _ in range(80):
+                convo = counted.sessions["n"]
+                if convo.state is State.DONE:
+                    return page
                 values = [b["value"] for b in page["replies"][-1]["buttons"]]
-                answer = next((v for v in ("state:UK", "pick:all", "none", "no") if v in values),
-                              values[0])
-            page = body(counted.payload("n", answer))
-        assert counted.sessions["n"].evaluated and wandered, "the walk never reached the results"
-        assert page["nav"]["back"] is False, "Back offered on the results"
-        assert counted.payload("n", "/back")[0] == 409, "went back past the results"
+                if convo.state is State.AGE:
+                    answer = age
+                elif convo.state is State.PACK:
+                    answer = "yes" if "yes" in values else values[0]  # * make the sheet
+                else:
+                    answer = next((v for v in ("state:UK", "pick:all", "none", "no", "next",
+                                               "7", "skip", "role:self") if v in values),
+                                  values[0])
+                page = body(counted.payload("n", answer))
+            raise AssertionError("the walk never reached the end")
+
+        body(counted.payload("n", "/start"))
+        end = to_the_end(body(counted.payload("n", "consent_yes")), "34")
+        assert end["nav"]["back"] is True, "no Back on the end screen"
+
+        # * All the way back to the age question, answering nothing.
+        page = end
+        while counted.sessions["n"].state is not State.AGE:
+            assert page["nav"]["back"], counted.sessions["n"].state
+            page = body(counted.payload("n", "/back"))
+        assert page["replies"][-1]["typed"] and page["chosen"] == "34"
+        # * Forward again all the way, then back to age once more.
+        while page["nav"]["forward"]:
+            page = body(counted.payload("n", "/forward"))
+        assert counted.sessions["n"].state is State.DONE
+        while counted.sessions["n"].state is not State.AGE:
+            page = body(counted.payload("n", "/back"))
+        # ! A different age, and the whole screening again to the end.
+        again = to_the_end(body(counted.payload("n", "61")), "61")
+        assert counted.sessions["n"].profile.age == 61
+        assert again["nav"]["forward"] is False, "stale screens kept after a new answer"
         log.close()
+
         import sqlite3
         db = sqlite3.connect(Path(d) / "nav.db")
-        rows = db.execute("SELECT COUNT(*) FROM events WHERE event_type="
-                          "'eligibility_evaluated'").fetchone()[0]
+        for event, expected in (("eligibility_evaluated", 1), ("pack_generated", 1)):
+            rows = db.execute("SELECT COUNT(*) FROM events WHERE event_type=?",
+                              (event,)).fetchone()[0]
+            assert rows == expected, f"{rows} {event} rows for one screening"
+        surfaced = db.execute("SELECT COUNT(DISTINCT scheme_code), COUNT(*) FROM events"
+                              " WHERE event_type='scheme_newly_surfaced'").fetchone()
+        assert surfaced[0] == surfaced[1], "a scheme was surfaced twice for one person"
+        feedback = db.execute("SELECT COUNT(*) FROM feedback").fetchone()[0]
+        assert feedback == 1, f"{feedback} feedback rows for one screening"
         db.close()
-        assert rows == 1, f"{rows} evaluations logged for one screening"
 
     # * Real HTTP: the JSON boundary, and every malformed body a 400, not a crash.
     server = ThreadingHTTPServer(("127.0.0.1", 0), handler_class(app))

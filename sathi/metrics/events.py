@@ -137,6 +137,12 @@ class EventLog:
             self._conn.execute("ALTER TABLE events ADD COLUMN cohort TEXT")
         self._conn.commit()
         self._consented: set[str] = set()
+        # ! What each session has already had counted, in memory only. The web
+        # ! page's Back and Forward let a worker go back past her results and
+        # ! answer again; the second pass must not count her twice. So the
+        # ! results, the sheet and the feedback are recorded once per session:
+        # ! the first time. A restart forgets this, and forgets the sessions too.
+        self._counted: set[tuple[str, str]] = set()
 
     # * ---------------------------------------------------------------- write
 
@@ -159,6 +165,14 @@ class EventLog:
     def decline_consent(self, session: Session) -> None:
         self.log(session, "consent_declined")
 
+    def _first_time(self, session: Session, what: str) -> bool:
+        """True the first time this session records `what`, False after."""
+        with self._lock:
+            if (session.id, what) in self._counted:
+                return False
+            self._counted.add((session.id, what))
+            return True
+
     def log(
         self,
         session: Session,
@@ -171,6 +185,9 @@ class EventLog:
     ) -> str:
         if event_type not in EVENT_TYPES:
             raise ValueError(f"unknown event_type {event_type!r}")
+        # * The report counts sheets with COUNT(*), so one per session.
+        if event_type == "pack_generated" and not self._first_time(session, "pack"):
+            return ""
         if event_type not in _PRE_CONSENT and session.id not in self._consented:
             raise ConsentError(
                 f"{event_type!r} attempted before consent_granted — "
@@ -244,6 +261,8 @@ class EventLog:
         """
         from sathi.rules.engine import Verdict  # local: keeps engine free of metrics
 
+        if not self._first_time(session, "results"):
+            return
         self.log(session, "eligibility_evaluated", profile=profile)
         matched = 0
         for r in results:
@@ -463,7 +482,7 @@ class EventLog:
 
     def record_feedback(self, rating: int | None, suggestion: str = "",
                         channel: str = "cli", participant_role: str | None = None,
-                        person: str | None = None) -> None:
+                        person: str | None = None, session: Session | None = None) -> None:
         """One rating and/or one suggestion, attached to a keyed hash at most.
 
         # ! `person` is feedback_id(channel id): a keyed hash in its own
@@ -476,6 +495,10 @@ class EventLog:
             raise ValueError(f"unknown participant role {participant_role!r}")
         text = self._DIGIT_RUN.sub("[number removed]", suggestion or "").strip()[:500]
         if rating is None and not text and participant_role is None:
+            return
+        # ! `session` only refuses a second row from the same screening. It is
+        # ! never written: the feedback table has no session id, by design.
+        if session is not None and not self._first_time(session, "feedback"):
             return
         with self._lock:
             self._conn.execute(
