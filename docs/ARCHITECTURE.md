@@ -57,6 +57,7 @@ metrics/        SQLite event log — counts and coarse bands only
 - **Age is typed.** Every other question has buttons (state also accepts typing). A keypad beats 120 buttons, and a band would lose the exact boundary a rule needs — 40 versus 41.
 - **The recap shows only what was asked.** It used to print "you did not say" for every skipped question.
 - **The sheet is HTML, not PDF.** The standard library has no PDF writer, and a phone opens and prints HTML. If users show a real PDF matters, `fpdf2` is the smallest addition.
+- **The sheet also opens as a one-hour link, on every channel.** Telegram serves `/p/<token>`, WhatsApp `/w/<token>`, the web `/sheet/<token>`. WhatsApp takes the file only as plain text, so there the link is the only way to see the layout. Each link lives in the memory of the process that sent it, so a restart drops it. The file is always sent first.
 - **Idle sessions expire.** Every channel drops a conversation's answers after 30 minutes without a reply. Per-chat bookkeeping (language, `/clear` ids) goes after 48 hours.
 - **Follow-ups are opt-in** (`FOLLOWUP_SALT` unset = off). The only feature that stores a channel id — salted, hashed, in a table with no `session_id`, purged on completion or after 30 days. **The sender isn't built,** and a hash can't address a message, so the table records intent only.
 - **Two hashes, one key.** `feedback.person` and `reach.anon_id` hash the same key with different namespaces. One tester's repeat ratings collapse to one row; a join across the tables finds nothing.

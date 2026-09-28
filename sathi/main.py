@@ -133,9 +133,9 @@ def main(argv: list[str] | None = None) -> int:
 
             # ! Only this process serves /p/<token>. The store is a dict in
             # ! memory, so the process that PUBLISHES a pack is the only one
-            # ! that can serve it — a second copy in the WhatsApp process would
-            # ! answer 410 for half the links. See deploy/RUNBOOK.md for the
-            # ! Caddy route that sends /p/* here.
+            # ! that can serve it. The WhatsApp process keeps its own store and
+            # ! serves it as /w/<token> from its webhook server. See
+            # ! deploy/RUNBOOK.md for the Caddy route that sends /p/* here.
             # ! Off unless PACK_BASE_URL is set: a link to a host nobody can
             # ! reach is worse than no link, and a laptop has no such host.
             # * The scheme count on the page comes from what this process

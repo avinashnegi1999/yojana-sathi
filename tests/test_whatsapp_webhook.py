@@ -23,6 +23,7 @@ sys.path.insert(0, str(ROOT))
 from sathi.channels import whatsapp
 from sathi.channels.whatsapp import WhatsAppBot, _webhook_handler
 from sathi.core.schemes import Criterion, Scheme
+from sathi.pack import links
 
 SECRET = "app-secret"
 VERIFY = "verify-token"
@@ -132,6 +133,29 @@ def run() -> None:
         bot.work_once(block=False)
         assert len(sent) == before, "a redelivered webhook was answered twice"
         print("  ok  test_redelivery_changes_nothing")
+
+        # ! The sheet link is served by this same server, under /w/. It is a
+        # ! live token to one worker's sheet, so it must not be cached, indexed
+        # ! or passed on as a referer — and a dead one reads as expired.
+        links.clear()
+        token = links.publish(b"<html>sheet</html>")
+        with urllib.request.urlopen(f"{base}/w/{token}", timeout=5) as resp:
+            assert resp.status == 200 and resp.read() == b"<html>sheet</html>"
+            assert resp.headers["cache-control"] == "no-store"
+            assert "noindex" in resp.headers["x-robots-tag"]
+            assert resp.headers["referrer-policy"] == "no-referrer"
+        links.revoke(token)
+        for path in (f"/w/{token}", "/w/nope", "/w/"):
+            status, page = _request(base + path)
+            assert status == 410, (path, status)
+            # * No "Back to the bot" button: BOT_URL is the Telegram bot.
+            assert b"lang='hi'" in page and b"<a " not in page, page[:200]
+        # ! /p/ belongs to the Telegram process. Here it is just a stranger's
+        # ! GET, and gets the handshake's refusal.
+        status, _ = _request(f"{base}/p/{links.publish(b'x')}")
+        assert status == 403, status
+        links.clear()
+        print("  ok  test_sheet_link_is_served_under_w")
     finally:
         server.shutdown()
         server.server_close()

@@ -139,9 +139,14 @@ result links a worker taps.
 
 ### The pack link route
 
-`/p/*` is served by the **Telegram** process, not the WhatsApp one. That is not
-arbitrary: the pack store is a dict in memory, so only the process that
-published a pack can serve it. Two copies would answer `410` for half the links.
+Each bot process serves the links it sent. The pack store is a dict in memory,
+so only the process that published a pack can serve it.
+
+- `/p/*` is the **Telegram** process, on 127.0.0.1:8081. Needs its own `handle`.
+- `/w/*` is the **WhatsApp** process, from its webhook server on 8080. The
+  catch-all `handle` already sends it there; only the log filter names it.
+
+The site block:
 
     yojanasathi.avinashnegi.com {
         # ! A pack URL is a bearer token for one worker's sheet. The Python
@@ -151,7 +156,7 @@ published a pack can serve it. Two copies would answer `410` for half the links.
             format filter {
                 wrap console
                 fields {
-                    request>uri regexp "/p/[^\s?#]+" "/p/REDACTED"
+                    request>uri regexp "/(p|w)/[^\s?#]+" "/REDACTED"
                     request>remote_ip delete
                     request>remote_port delete
                     request>headers>User-Agent delete
@@ -174,20 +179,23 @@ published a pack can serve it. Two copies would answer `410` for half the links.
         }
     }
 
-This is what is live (checked against `/etc/caddy/Caddyfile` on 2026-09-20).
+Caddy 2.6.2 keeps one filter per field, so both prefixes share one pattern.
+Checked on the server's own Caddy on 2026-09-28 with a throwaway instance:
+`/p/…` and `/w/…?x=1` logged as `/REDACTED` and `/REDACTED?x=1`, no token left.
 
 ### The browser channel — the third unit, live at sathi.avinashnegi.com
 
 `deploy/sathi-web.service` runs `sathi.local_web` on `127.0.0.1:8765` with the
 production database and `--secure-cookie`. Same shape as the WhatsApp unit:
-loopback only, Caddy in front. The page fetches `/answer` and `/document/*`
-as root-relative paths, so it needs a host of its own rather than a path
-under the existing one.
+loopback only, Caddy in front. The page fetches `/answer`, `/document/*` and
+`/sheet/*` as root-relative paths, so it needs a host of its own rather than a
+path under the existing one.
 
 **The site block must redact its access log.** The first version of this block
 was a plain `log`, which records every request with the worker's IP, her
 phone's User-Agent and the full `/document/<token>` URL, a bearer link to her
-sheet. That was reproduced on Caddy 2.6.2 (what `apt install caddy` gives on
+sheet. `/sheet/<token>` (the same sheet, opened in the browser) is the same
+kind of link, so the pattern covers both. That was reproduced on Caddy 2.6.2 (what `apt install caddy` gives on
 Ubuntu 24.04) and 2.11.4 (AUDIT.md M8). Use this block, which passes
 `caddy validate` on both versions and was run on both to confirm no token,
 User-Agent, forwarded IP or cookie reaches the log:
@@ -197,7 +205,7 @@ User-Agent, forwarded IP or cookie reaches the log:
             format filter {
                 wrap console
                 fields {
-                    request>uri regexp "/document/[^\s?#]+" "/document/REDACTED"
+                    request>uri regexp "/(document|sheet)/[^\s?#]+" "/REDACTED"
                     request>remote_ip delete
                     request>remote_port delete
                     request>client_ip delete

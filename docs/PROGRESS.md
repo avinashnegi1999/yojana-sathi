@@ -298,3 +298,10 @@ copy before touching `/opt/sathi`.
 - **Fix:** a state typed at the "which schemes" question no longer reopens the old full intake.
 - **Docs:** README, CONTRIBUTING, ARCHITECTURE, IMPACT, SCHEME_AUTHORING, DEMO_SCRIPT (golden path re-walked), PILOT_PLAN and the submission draft brought up to date and shortened. History, audit evidence, research notes and LESSONS left as written.
 
+## 2026-09-28
+
+- **Landing page:** the 51-second explainer film (`#film`), with one play button in the middle; the video-tour badge on the README. Known flaw: the film's font has no ₹ or Devanagari.
+- **Web chat:** "States are in alphabetical order" over the state list; a "Start again" button on the last screen; "View your sheet", a one-hour link beside the download (`/sheet/<token>`).
+- **WhatsApp sheet link.** WhatsApp only took the sheet as a `.txt` file, which loses the layout. It now also sends a one-hour link, as Telegram and the web do. The WhatsApp process serves it itself at `/w/<token>`, since each process holds its own links in memory. `/clear` and the 48-hour idle sweep take it back. No link preview.
+- **Caddy log redaction** widened: `/(p|w)/` on the bot host, `/(document|sheet)/` on the web host. The web host's live pattern had missed `/sheet/` since the view link went up that morning. Both patterns checked on the server's Caddy 2.6.2 with a throwaway instance: nothing leaked.
+- Blog post (`avinashnegi.com/blog/scheme-sathi/`) rewritten short, point by point.

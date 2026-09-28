@@ -41,6 +41,7 @@ from sathi.channels.router import Router
 from sathi.core.content import DEFAULT_LANG, s
 from sathi.core.schemes import Scheme
 from sathi.metrics.events import EventLog
+from sathi.pack import links
 
 
 class WhatsAppError(Exception):
@@ -88,6 +89,12 @@ _AUDIO_TYPES = {
 # ? A real PDF would keep the layout. The stdlib has no PDF writer, so that is
 # ? the same fpdf2 decision pack.py already parked until users ask for it.
 _PACK_TEXT_MIME = "text/plain"
+
+# ! The layout comes back through a link: /w/<token>, served by THIS process's
+# ! webhook server. Not /p/ — that belongs to the Telegram process, and the
+# ! pack store is a dict in each process's own memory. Caddy already sends
+# ! every path but /p/* and /stats.json here (deploy/RUNBOOK.md).
+LINK_PREFIX = "w"
 
 
 def _api_version() -> str:
@@ -439,6 +446,8 @@ class WhatsAppBot(Router):
         self._seen: list[str] = []
         self._seen_set: set[str] = set()
         self._work: queue.Queue = queue.Queue(maxsize=_QUEUE_MAX)
+        # * Pack links handed to each chat, so /clear can take them back.
+        self._tokens: dict[str, list[str]] = {}
 
     # * ------------------------------------------------------------- sending
 
@@ -470,6 +479,48 @@ class WhatsAppBot(Router):
                                blob, _PACK_TEXT_MIME)
             self._deliver(key, {"type": "document",
                                 "document": {"id": media_id, "filename": filename}})
+            # ! The file is sent FIRST and always, as on Telegram. The link is
+            # ! an addition: it dies in an hour and on restart, a saved file
+            # ! survives both. It serves the HTML sheet, not the flattened text.
+            self._send_pack_link(key, reply.document[1])
+
+    def _send_pack_link(self, key: str, blob: bytes) -> None:
+        """Offer the sheet as a link. Silent no-op when links are off.
+
+        # ! WhatsApp refuses an HTML file, so the file above is plain text and
+        # ! the layout is lost. The link opens the real sheet in her browser.
+        """
+        if not links.base_url():
+            return
+        lang = self._lang.get(key, DEFAULT_LANG)
+        try:
+            token = links.publish(blob)
+            # * Kept before sending, so /clear can revoke it even if the send fails.
+            self._tokens.setdefault(key, []).append(token)
+            self._deliver(key, {"type": "text", "text": {
+                # ! No preview. WhatsApp would fetch the link to build a card,
+                # ! opening her sheet on Meta's servers before she touches it.
+                "preview_url": False,
+                "body": s("link.ready", lang, url=links.url_for(token, prefix=LINK_PREFIX)),
+            }})
+        except Exception as e:  # noqa: BLE001 — the file already went; a link is a bonus
+            print(f"[whatsapp] pack link failed: {type(e).__name__}")
+
+    def clear_chat(self, key: str, lang: str = DEFAULT_LANG,
+                   message_ref: str | int | None = None, deep: bool = False) -> Reply:
+        """WhatsApp cannot delete messages, but the sheet link can still be taken back.
+
+        # ! Revoke first. The link is the part that outlives the chat, and the
+        # ! worker asked for the conversation to be gone.
+        """
+        for token in self._tokens.pop(key, []):
+            links.revoke(token)
+        return super().clear_chat(key, lang, message_ref, deep)
+
+    def forget(self, key: str) -> None:
+        """Router.expire_idle() found this chat quiet for 48 hours."""
+        for token in self._tokens.pop(key, []):
+            links.revoke(token)
 
     def _deliver(self, key: str, message: dict) -> dict:
         return _post(self.token, f"{self.phone_number_id}/messages", {
@@ -704,19 +755,32 @@ def _webhook_handler(bot: WhatsAppBot) -> type[BaseHTTPRequestHandler]:
             self.request.settimeout(5)
             super().setup()
 
-        def _respond(self, status: int, body: bytes = b"") -> None:
+        def _respond(self, status: int, body: bytes = b"",
+                     content_type: str = "text/plain; charset=utf-8",
+                     headers: dict[str, str] | None = None) -> None:
             # ! Close after every request, including rejected bodies left unread.
             self.close_connection = True
             self.send_response(status)
             self.send_header("connection", "close")
-            self.send_header("content-type", "text/plain; charset=utf-8")
+            self.send_header("content-type", content_type)
             self.send_header("content-length", str(len(body)))
+            for name, value in (headers or {}).items():
+                self.send_header(name, value)
             self.end_headers()
             if body:
                 self.wfile.write(body)
 
         def do_GET(self) -> None:  # noqa: N802 — BaseHTTPRequestHandler's naming
             from urllib.parse import parse_qs, urlparse
+
+            path = urlparse(self.path).path
+            prefix = f"/{LINK_PREFIX}/"
+            if path.startswith(prefix):
+                # * A worker opening her sheet. None: no "Back to the bot"
+                # * button, because BOT_URL is the Telegram bot.
+                status, page = links.pack_page(path[len(prefix):], None)
+                self._respond(status, page, "text/html; charset=utf-8", links.PACK_HEADERS)
+                return
 
             query = parse_qs(urlparse(self.path).query)
             mode = (query.get("hub.mode") or [""])[0]
@@ -776,7 +840,8 @@ def _webhook_handler(bot: WhatsAppBot) -> type[BaseHTTPRequestHandler]:
 
         def log_message(self, *args) -> None:
             # ! Silence. The default access log writes the request line and the
-            # ! client address, and this endpoint's traffic is workers.
+            # ! client address, and this endpoint's traffic is workers. The
+            # ! request line of a /w/ link is also a live token to her sheet.
             pass
 
     return Handler
@@ -934,9 +999,51 @@ def _self_check() -> None:
         assert len(sent[-1]["interactive"]["body"]["text"]) <= _BODY_MAX
 
         # * The pack is flattened and uploaded as text, never as HTML.
+        saved_base = os.environ.pop("PACK_BASE_URL", None)
         bot.send("911", Reply(text="pack", document=("pack.html", b"<p>hello</p>")))
         assert uploads[-1] == ("pack.txt", _PACK_TEXT_MIME), uploads[-1]
-        assert sent[-1]["document"]["filename"] == "pack.txt"
+        assert sent[-1]["document"]["filename"] == "pack.txt", "links off still sent a link"
+
+        # ! With links on, the file goes first and the link follows it, and
+        # ! the link serves the HTML sheet, not the flattened text.
+        os.environ["PACK_BASE_URL"] = "https://links.test"
+        try:
+            links.clear()
+            bot.send("911", Reply(text="pack", document=("pack.html", b"<p>sheet</p>")))
+            assert sent[-2]["type"] == "document", sent[-2]
+            link = sent[-1]["text"]
+            assert link["preview_url"] is False, "WhatsApp would fetch the sheet for a preview"
+            assert "https://links.test/w/" in link["body"], link["body"]
+            token = link["body"].split("/w/", 1)[1].split()[0]
+            assert links.fetch(token) == b"<p>sheet</p>"
+
+            # ! /clear cannot delete WhatsApp messages, but it must take the
+            # ! link back — and still say plainly that the messages remain.
+            refusal = bot.clear_chat("911", "en")
+            assert links.fetch(token) is None, "/clear left the sheet link readable"
+            assert s("commands.clear_unsupported", "en") in refusal.text
+
+            # * A chat quiet for 48 hours loses its links too.
+            bot.send("911", Reply(text="pack", document=("pack.html", b"<p>again</p>")))
+            token = sent[-1]["text"]["body"].split("/w/", 1)[1].split()[0]
+            bot.forget("911")
+            assert links.fetch(token) is None, "forget() left the sheet link readable"
+
+            # ! A failed link send is not a failed delivery: the file already went.
+            def _link_fails(token, path, payload):
+                if payload.get("type") == "text":
+                    raise WhatsAppError("send failed: 500", 500)
+                return _wire(token, path, payload)
+
+            mod._post = _link_fails
+            bot.send("911", Reply(text="", document=("pack.html", b"<p>x</p>")))
+            mod._post = _wire
+            assert sent[-1]["type"] == "document"
+        finally:
+            links.clear()
+            os.environ.pop("PACK_BASE_URL", None)
+            if saved_base is not None:
+                os.environ["PACK_BASE_URL"] = saved_base
 
         # ! A .wav voice note is skipped, not sent and not fatal.
         count = len(sent)

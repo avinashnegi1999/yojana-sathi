@@ -26,7 +26,8 @@ echo "==> caddy"
 # ! Redacted access log, the same shape as the pack host in RUNBOOK.md. The
 # ! plain `log` this used to write recorded every worker's IP, phone model and
 # ! the full /document/<token> URL — a bearer link to her sheet — for every
-# ! request (reproduced on Caddy 2.6.2 and 2.11.4; AUDIT.md M8).
+# ! request (reproduced on Caddy 2.6.2 and 2.11.4; AUDIT.md M8). /sheet/<token>
+# ! opens the same sheet, so one pattern covers both.
 if ! grep -q "^$HOST" "$CADDYFILE"; then
   cat >> "$CADDYFILE" <<CADDY
 
@@ -35,7 +36,7 @@ $HOST {
         format filter {
             wrap console
             fields {
-                request>uri regexp "/document/[^\s?#]+" "/document/REDACTED"
+                request>uri regexp "/(document|sheet)/[^\s?#]+" "/REDACTED"
                 request>remote_ip delete
                 request>remote_port delete
                 request>client_ip delete
@@ -47,10 +48,10 @@ $HOST {
     reverse_proxy 127.0.0.1:8765
 }
 CADDY
-elif ! grep -q "/document/REDACTED" "$CADDYFILE"; then
+elif ! grep -qF '/(document|sheet)/' "$CADDYFILE"; then
   # ! An older run of this script already wrote a plain `log` block. It is
   # ! not safe to rewrite someone's Caddyfile with sed, so stop and say so.
-  echo "!! $CADDYFILE has a $HOST block without log redaction."
+  echo "!! $CADDYFILE has a $HOST block without full log redaction."
   echo "!! Replace its 'log' line with the block in deploy/RUNBOOK.md"
   echo "!! (section: The browser channel), then run: sudo systemctl reload caddy"
   exit 1

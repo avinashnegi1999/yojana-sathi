@@ -11,8 +11,8 @@
 # ! production and no cleanup job to forget to run." So this store is a plain
 # ! dict in memory. A restart drops every live link. That is correct, not a
 # ! bug: a worker who loses a link starts the bot again, and nothing about her
-# ! survives on our disk. The Telegram file upload is still sent alongside, so
-# ! a restart never leaves her with nothing.
+# ! survives on our disk. The file (HTML on Telegram, text on WhatsApp) is
+# ! still sent alongside, so a restart never leaves her with nothing.
 #
 # ! NO PII, same as the pack itself — there is no name, phone or Aadhaar field
 # ! anywhere in this project. We also do not record which token was opened,
@@ -121,24 +121,57 @@ def base_url() -> str:
     return os.environ.get("PACK_BASE_URL", "").rstrip("/")
 
 
-def url_for(token: str) -> str:
-    return f"{base_url()}/p/{token}"
+def url_for(token: str, prefix: str = "p") -> str:
+    """The link a worker taps.
+
+    # ! One prefix per process. The store is a dict in memory, so only the
+    # ! process that published a pack can serve it: Telegram serves /p/ from
+    # ! this module's server, WhatsApp serves /w/ from its webhook server.
+    """
+    return f"{base_url()}/{prefix}/{token}"
 
 
-def _expired_page() -> bytes:
-    """One page, both languages — we do not know which she chose an hour ago."""
+# ! Every response that can carry a sheet sends these. A pack is one worker's
+# ! sheet: keep it out of search engines, out of caches, and out of the
+# ! referer of anything she taps next.
+PACK_HEADERS = {
+    "x-robots-tag": "noindex, nofollow",
+    "cache-control": "no-store",
+    "referrer-policy": "no-referrer",
+}
+
+
+def pack_page(token: str, bot_url: str | None) -> tuple[int, bytes]:
+    """The sheet for this token, or the "link has expired" page.
+
+    # ! 410, not 404. The link WAS valid; it aged out. A 404 reads as "you
+    # ! typed it wrong" and sends her looking for a typo that is not there.
+    """
+    blob = fetch(token) if token else None
+    if blob is None:
+        return 410, _expired_page(bot_url)
+    return 200, blob
+
+
+def _expired_page(bot_url: str | None) -> bytes:
+    """One page, both languages — we do not know which she chose an hour ago.
+
+    # * bot_url is where "Back to the bot" goes. None leaves the button out:
+    # * a WhatsApp worker sent to the Telegram bot would be lost.
+    """
     from sathi.core.content import s as _s
 
-    bot = os.environ.get("BOT_URL", "https://t.me/YojanaSathiBot")
     blocks = []
     for lang in ("hi", "en"):
         body = html.escape(_s("link.expired_body", lang)).replace("\n", "<br>")
+        cta = ""
+        if bot_url:
+            cta = (f"<p><a href='{html.escape(bot_url, quote=True)}'>"
+                   f"{html.escape(_s('link.expired_cta', lang))}</a></p>")
         blocks.append(
             f"<section lang='{lang}'>"
             f"<h1>{html.escape(_s('link.expired_title', lang))}</h1>"
-            f"<p>{body}</p>"
-            f"<p><a href='{html.escape(bot, quote=True)}'>"
-            f"{html.escape(_s('link.expired_cta', lang))}</a></p></section>")
+            f"<p>{body}</p>{cta}</section>")
     return (
         "<!doctype html><html><head><meta charset='utf-8'>"
         "<meta name='viewport' content='width=device-width,initial-scale=1'>"
@@ -246,17 +279,12 @@ def handler_class() -> type[BaseHTTPRequestHandler]:
             self.send_header("connection", "close")
             self.send_header("content-type", content_type)
             self.send_header("content-length", str(len(body)))
-            # ! A pack is one worker's sheet. Keep it out of search engines, out
-            # ! of caches, and out of the referer of anything she taps next.
-            self.send_header("x-robots-tag", "noindex, nofollow")
             # ! Let a caller override rather than append. Sending both
             # ! "no-store" and "public, max-age=60" leaves the browser to pick,
             # ! which makes the cache promise meaningless.
-            extra = extra or {}
-            if "cache-control" not in extra:
-                self.send_header("cache-control", "no-store")
-            self.send_header("referrer-policy", "no-referrer")
-            for name, value in extra.items():
+            headers = dict(PACK_HEADERS)
+            headers.update(extra or {})
+            for name, value in headers.items():
                 self.send_header(name, value)
             self.end_headers()
             self.wfile.write(body)
@@ -277,14 +305,9 @@ def handler_class() -> type[BaseHTTPRequestHandler]:
                               })
                 return
             token = path[3:] if path.startswith("/p/") else ""
-            blob = fetch(token) if token else None
-            if blob is None:
-                # ! 410, not 404. The link WAS valid; it aged out. A 404 reads
-                # ! as "you typed it wrong" and sends her looking for a typo
-                # ! that is not there.
-                self._respond(410, _expired_page(), "text/html; charset=utf-8")
-                return
-            self._respond(200, blob, "text/html; charset=utf-8")
+            status, page = pack_page(
+                token, os.environ.get("BOT_URL", "https://t.me/YojanaSathiBot"))
+            self._respond(status, page, "text/html; charset=utf-8")
 
         def log_message(self, *args) -> None:
             # ! Silence, deliberately. The default access log records the path,
@@ -452,6 +475,11 @@ def _self_check() -> None:
     # Links off means off — no server, and the channel keeps sending the file.
     assert serve_in_background(port=0) is None
     assert base_url() == "" and url_for("t") == "/p/t"
+    assert url_for("t", prefix="w") == "/w/t"
+
+    # * The expired page names the bot only when it is told which one.
+    assert b"t.me/x" in pack_page("gone", "https://t.me/x")[1]
+    assert b"<a " not in pack_page("gone", None)[1]
 
     clear()
     print("pack.links self-check passed")
