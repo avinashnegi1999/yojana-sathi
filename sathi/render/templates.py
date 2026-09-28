@@ -104,10 +104,16 @@ def _gap(result: Result, scheme: Scheme, lang: str = "hi") -> str:
         key = "unknown_reason_unsigned" if scheme.is_researched else "unknown_reason_data"
         return s(f"result.{key}", lang)
     if result.missing_fields:
-        return s(
-            "result.unknown_reason_profile", lang,
-            fields=", ".join(field_label(f, lang) for f in result.missing_fields),
-        )
+        # * The gender answer is said on its own, gently: "Other gender / prefer
+        # * not to say" is an answer, so "no answer on woman applicant" was wrong.
+        others = [f for f in result.missing_fields if f != "is_woman"]
+        parts = []
+        if "is_woman" in result.missing_fields:
+            parts.append(s("result.unknown_reason_gender", lang))
+        if others:
+            parts.append(s("result.unknown_reason_profile", lang,
+                           fields=", ".join(field_label(f, lang) for f in others)))
+        return "; ".join(parts)
     # * BAD_RULE: a scheme file is broken. The worker gets the honest version;
     # * the detail goes to the logs for a maintainer, not to the screen.
     return s("result.unknown_reason_data", lang)

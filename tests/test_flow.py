@@ -22,7 +22,7 @@ sys.path.insert(0, str(ROOT))
 from sathi.conversation import consent
 from sathi.conversation.flow import (
     ROLE_TESTER, SKIP,
-    DK, LANG_EN, LANG_HI, NEXT, NO, YES, Conversation, State,
+    DK, GENDER_OTHER, LANG_EN, LANG_HI, NEXT, NO, YES, Conversation, State,
 )
 from sathi.core.content import s
 from sathi.core.profile import INCOME_BANDS
@@ -701,6 +701,33 @@ def test_gender_answer_skips_widow_and_pmuy_followups_when_not_applicable():
     out = pmuy.handle(NEXT)
     assert pmuy.state is State.PACK
     assert "pmuy_declaration_met" not in pmuy._answered_fields
+
+
+def test_other_gender_is_left_unset_and_the_result_says_not_sure():
+    """"Other gender / prefer not to say" is an answer, not a gap in the chat:
+    it leaves is_woman unset, so PMUY is UNKNOWN, and the result says "we are
+    not sure it applies to you", never "no answer on woman applicant"."""
+    schemes = load_all()
+    convo = Conversation(schemes, None, state_first=False)
+    convo.start(); convo.handle(LANG_EN); convo.handle(consent.YES)
+    convo.handle("pick:choose"); convo.handle("pick:PMUY"); convo.handle("pick:done")
+    ask = convo.handle("30")[-1]
+    assert convo._followup_field() == "is_woman"
+    assert ask.button_values() == {YES, NO, GENDER_OTHER}, ask.button_values()
+    assert s("buttons.other_gender", "en") in [b.label for b in ask.buttons]
+    convo.handle(GENDER_OTHER)
+    assert convo.profile.is_woman is None, "the third answer must not become a yes or a no"
+    # * Everything else answered so that only gender can leave PMUY undecided.
+    answers = {"household_has_lpg": NO}
+    while convo.state is State.FOLLOWUP:
+        convo.handle(answers.get(convo._followup_field(), YES))
+    assert convo.state is State.KNOWN_SCHEMES
+    shown = "\n".join(r.text for r in convo.handle(NEXT))
+    assert s("result.unknown_reason_gender", "en") in shown, shown
+    no_answer = s("result.unknown_reason_profile", "en", fields=s("field_labels.is_woman", "en"))
+    assert no_answer not in shown, shown
+    # * The recap reads back what she tapped, not "not answered".
+    assert s("buttons.other_gender", "en") in shown, shown
 
 
 def test_declining_consent_stores_nothing():

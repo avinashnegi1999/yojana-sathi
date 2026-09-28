@@ -163,13 +163,16 @@ const GLYPHS={
   doc:'<path d="M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h6"/>',
   speaker:'<path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4zM15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>',
   bubble:'<path d="M4 12a8 7 0 1 1 3.5 5.8L4 19.5l1-3.4A6.8 6.8 0 0 1 4 12z"/>',
-  building:'<path d="M5 21V5h9v16M14 9h5v12M3 21h18M8 8.5h3M8 12h3M8 15.5h3"/>'
+  building:'<path d="M5 21V5h9v16M14 9h5v12M3 21h18M8 8.5h3M8 12h3M8 15.5h3"/>',
+  more:'<path d="M6 12h.01M12 12h.01M18 12h.01" stroke-width="2.6"/>'
 };
 function glyph(name,cls){return GLYPHS[name]?`<svg class="${cls||'ico'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${GLYPHS[name]}</svg>`:'';}
 // * Keyed on the button's value, never its label, so both languages get the same icon.
 // * Answers with no entry here simply have no icon.
 const ICONS={
   'yes':'check','no':'xmark','dont_know':'question','consent_yes':'arrow','consent_no':'xmark',
+  // * A neutral mark for "Other gender / prefer not to say", never the question mark.
+  'gender_other':'more',
   'occ:construction':'hardhat','occ:agriculture':'leaf','occ:domestic_work':'sparkle','occ:street_vendor':'cart',
   'occ:transport':'truck','occ:manufacturing':'gear','occ:sanitation':'drop','occ:home_based':'house','other':'pencil',
   'pick:national':'columns','pick:state':'pin','pick:all':'list','next':'arrow','none':'xmark'

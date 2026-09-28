@@ -77,6 +77,8 @@ Tap all that apply, then Next."""
 yes = "Yes"
 no = "No"
 dont_know = "Don't know"
+# * The gender question only. Same effect as "Don't know": unset, so UNKNOWN.
+other_gender = "Other gender / prefer not to say"
 none_of_these = "None"
 next = "Next"
 back = "Back"
@@ -191,6 +193,9 @@ unknown_reason_data = "its rules are not yet checked against an official source"
 # ! what is known and reads to a tester as a broken bot.
 unknown_reason_unsigned = "its rules are written, but a person has not confirmed them yet"
 unknown_reason_profile = "no answer on {fields}"
+# * When the gender answer is the gap. "No answer on woman applicant" was
+# * wrong for someone who answered "Other gender / prefer not to say".
+unknown_reason_gender = "we are not sure it applies to you"
 # ! When every unsure scheme is unsure for the SAME reason, that reason is
 # ! said once. Repeating a 27-word sentence per scheme buries the one thing
 # ! the worker has to act on — the question to ask at the centre.

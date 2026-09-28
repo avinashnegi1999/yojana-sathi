@@ -94,6 +94,12 @@ YES, NO, DK = "yes", "no", "dont_know"
 # * 120 is a typing-mistake guard, not a scheme rule.
 MIN_AGE, MAX_AGE = 16, 120
 NEXT, OTHER, NONE = "next", "other", "none"
+# * The gender question's third answer, "Other gender / prefer not to say"
+# * (28 Sep). India recognises a third gender (NALSA 2014, Transgender Persons
+# * Act 2019); "Don't know" read as if she did not know her own gender.
+# ! Recorded exactly like "Don't know": the field stays unset, and every rule
+# ! that needs it answers UNKNOWN. Nothing is inferred from it.
+GENDER_OTHER = "gender_other"
 SKIP = "skip"
 ROLE_SELF, ROLE_HELPING, ROLE_TESTER = "role:self", "role:helping", "role:tester"
 LANG_HI, LANG_EN = "lang:hi", "lang:en"
@@ -943,13 +949,17 @@ class Conversation:
         field = self._followup_field()
         if field == "is_woman":
             return Reply(text=self._s("questions.is_woman"),
-                         buttons=_yes_no(self.lang, with_dont_know=True))
+                         buttons=(Button(self._s("buttons.yes"), YES),
+                                  Button(self._s("buttons.no"), NO),
+                                  Button(self._s("buttons.other_gender"), GENDER_OTHER)))
         criterion = next(c for sc in self._active_schemes().values() for c in sc.criteria + sc.exclusions
                          if c.field == field)
         return Reply(text=criterion.text("ask", self.lang),
                      buttons=_yes_no(self.lang, with_dont_know=True))
 
     def _on_followup(self, answer: str) -> list[Reply]:
+        if answer == GENDER_OTHER and self._followup_field() == "is_woman":
+            answer = DK  # * same meaning: unset, so UNKNOWN wherever it matters
         if answer not in (YES, NO, DK):
             return [self._ask_followup()]
         self._set(self._followup_field(), None if answer == DK else answer == YES)
@@ -1040,7 +1050,14 @@ class Conversation:
              if p.nps_exclusion_applies is None else yn(p.nps_exclusion_applies)),
             ("known_schemes", ", ".join(held) if held else self._s("recap.none")),
         ]
-        pairs.extend((field, yn(getattr(p, field))) for field in self._followup_fields)
+        for field in self._followup_fields:
+            value = getattr(p, field)
+            if field == "is_woman" and value is None:
+                # * "Other gender / prefer not to say" is read back as what she
+                # * tapped, not as "not answered": she did answer.
+                pairs.append((field, self._s("buttons.other_gender")))
+            else:
+                pairs.append((field, yn(value)))
         # ! Only what was actually asked. The selected-scheme flow skips every
         # ! question its schemes do not need, and this used to print "you did
         # ! not say" for all of them — work, land and household size on every

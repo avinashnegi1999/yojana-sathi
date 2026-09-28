@@ -329,3 +329,14 @@ copy before touching `/opt/sathi`.
   The `.env` sent was byte-identical to the previous deploy's and the server's
   secrets file had not changed since, so no secret changed. No screening was
   run on the live site, to keep test sessions out of the impact numbers.
+- **Gender question, every channel:** the third answer is now "Other gender /
+  prefer not to say" (India recognises a third gender: NALSA 2014, Transgender
+  Persons Act 2019), not "Don't know". Recorded exactly as before: `is_woman`
+  stays unset, so PMUY and the Punjab old-age pensions answer UNKNOWN. The
+  result says "we are not sure it applies to you" instead of "no answer on
+  woman applicant", and the recap reads back the answer she tapped. Only Yes
+  can make a woman-only scheme ELIGIBLE. Hindi drafts need review.
+- **Open question for Avinash:** PM-SYM's and NPS-Traders' files have no
+  bank-account rule; their official pages appear to ask for a savings or Jan
+  Dhan account. If confirmed from the source, "no bank account" would settle
+  them and skip the income-tax question for more workers.
