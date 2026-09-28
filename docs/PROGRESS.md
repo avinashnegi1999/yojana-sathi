@@ -323,3 +323,9 @@ copy before touching `/opt/sathi`.
 - Fixed before release: the picker's Continue sent a second answer
   ("undefined"), which re-asked the age.
 - New Hindi strings are machine-drafted and join the pending Hindi review.
+- **Deployed** 28 Sep, commit `cd7fa11`, with `deploy/install-on-vm.sh`: AWS
+  `check.py` passed on the staged copy; `sathi`, `sathi-web`,
+  `sathi-whatsapp` and Caddy active; the live web page serves the new code.
+  The `.env` sent was byte-identical to the previous deploy's and the server's
+  secrets file had not changed since, so no secret changed. No screening was
+  run on the live site, to keep test sessions out of the impact numbers.
