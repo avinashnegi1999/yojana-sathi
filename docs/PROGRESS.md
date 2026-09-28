@@ -307,3 +307,19 @@ copy before touching `/opt/sathi`.
 - Blog post (`avinashnegi.com/blog/scheme-sathi/`) rewritten short, point by point.
 - **Deployed** 28 Sep, commit `35cb3a0`: AWS `check.py` passed, all three units and Caddy active. Caddyfile backed up to `Caddyfile.bak-2026-09-28`, two lines changed, validated, reloaded. Live probes: `/w/` and `/p/` answer 410 with no-store and noindex; no probe token in Caddy's log, every URI logged as `/REDACTED`.
 - **Web Back and Forward**, every screen from the first question to the end screen. Back marks the answer given last time (a ring and a tick; a typed age comes back in the box; the map re-picks the state). The phone's back button steps back too. No Forward on the state screen — "Continue: <state>" does that job. The event log now records a session's results, sheet and feedback once (the first time), so going back past the results and re-answering cannot inflate the ₹ headline; checked by a self-check that fails with the rule switched off.
+
+## 2026-09-28 — web page engagement pass
+
+- Web only unless noted. Line icons (inline SVG, one stroke, action blue) on
+  answer buttons; "Step N" label; Listen button (browser `speechSynthesis`,
+  hidden when the phone has no voice for the language); three-step intro card
+  on the consent screen; CSC map link and WhatsApp share (fixed text, no
+  answers) under the result; ₹ totals count up to the engine's exact figure;
+  the tapped state pulses on the map.
+- Age picker on the web: −/+, slider 16–120, decade shortcuts. Starts empty;
+  Continue is off until an age is chosen. Sends the same digits as typing.
+- Every channel: the age question now accepts 16–120 only (16 = e-Shram, the
+  lowest entry age of any loaded scheme) and says the range when outside it.
+- Fixed before release: the picker's Continue sent a second answer
+  ("undefined"), which re-asked the age.
+- New Hindi strings are machine-drafted and join the pending Hindi review.

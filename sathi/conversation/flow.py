@@ -87,6 +87,12 @@ _CORE_FIELD_STATES = {
 }
 
 YES, NO, DK = "yes", "no", "dont_know"
+# * The ages the age question accepts. 16 is the lowest entry age of any scheme
+# * loaded today (e-Shram, age >= 16); below it nothing can be ELIGIBLE, so the
+# * worker is told the range rather than walked through questions for nothing.
+# ! If a scheme with a lower entry age is ever added, lower MIN_AGE with it.
+# * 120 is a typing-mistake guard, not a scheme rule.
+MIN_AGE, MAX_AGE = 16, 120
 NEXT, OTHER, NONE = "next", "other", "none"
 SKIP = "skip"
 ROLE_SELF, ROLE_HELPING, ROLE_TESTER = "role:self", "role:helping", "role:tester"
@@ -689,8 +695,13 @@ class Conversation:
         # * which int() then rejects with ValueError. isdecimal() still accepts
         # * Devanagari "३४" and Arabic-Indic "٣٤", which this bot's users type.
         digits = answer.strip()
-        if len(digits) > 3 or not digits.isdecimal() or not (1 <= int(digits) <= 120):
+        if len(digits) > 3 or not digits.isdecimal():
             return [Reply(text=self._s("questions.age_retry"))]
+        # * A real number, but outside what this screening covers: say the range
+        # * instead of "type a number", which she already did.
+        if not (MIN_AGE <= int(digits) <= MAX_AGE):
+            return [Reply(text=self._s("questions.age_out_of_range",
+                                       low=MIN_AGE, high=MAX_AGE))]
         self._set("age", int(digits))
         return self._advance_core()
 
@@ -1330,6 +1341,16 @@ def _self_check() -> None:
         c5.handle(bad)
         assert c5.profile.age is None, f"{bad!r} must be re-asked, not repaired into an age"
         assert c5.state is State.AGE, f"{bad!r} must not advance past the age question"
+    # * Outside 16-120: re-asked with the range, not "type a number".
+    for outside in ("15", "121", "1"):
+        reply = c5.handle(outside)[0].text
+        assert c5.profile.age is None and c5.state is State.AGE, outside
+        assert str(MIN_AGE) in reply and str(MAX_AGE) in reply, reply
+    for edge in ("16", "120"):
+        c7 = Conversation(schemes, state_first=False)
+        c7.start(); c7.handle(LANG_HI); c7.handle(consent.YES); c7.handle("state:UK")
+        c7.handle(edge)
+        assert c7.profile.age == int(edge), f"{edge} is inside the range"
     # * Devanagari and Arabic-Indic digits are what these users actually type.
     for good, want in (("34", 34), ("\u0969\u096a", 34), ("\u0663\u0664", 34), ("  29  ", 29)):
         c6 = Conversation(schemes, state_first=False)

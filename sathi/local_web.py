@@ -35,7 +35,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from sathi.channels.base import Reply
-from sathi.conversation.flow import Conversation, State
+from sathi.conversation.flow import MAX_AGE, MIN_AGE, Conversation, State
 from sathi.core import content
 from sathi.core.content import DEFAULT_LANG, LANGS, s
 from sathi.core.schemes import Scheme, load_all
@@ -89,7 +89,7 @@ html:lang(hi) .q{line-height:1.4;letter-spacing:0}
 .choice .tick{color:var(--focus);font-weight:600}
 .choices:has(.scale){display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
 .choices:has(.scale) .choice:not(.scale){grid-column:1/-1;justify-content:center}
-.map{display:flex;justify-content:center;margin:4px 0 6px}.mapbox{position:relative;display:inline-block;max-width:100%}.mapbox img{display:block;width:912px;height:auto;max-width:100%}.mapbox canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.maptip{position:absolute;transform:translate(-50%,calc(-100% - 12px));padding:5px 12px;border-radius:980px;background:var(--ink);color:#fff;font-size:14px;white-space:nowrap;pointer-events:none}.tabs{display:flex;gap:2px;width:max-content;margin:0 auto 14px;padding:3px;border-radius:980px;background:rgba(0,0,0,.06)}.tabs button{appearance:none;min-height:36px;padding:0 22px;border:0;border-radius:980px;background:transparent;color:var(--ink);font:inherit;font-size:14px;cursor:pointer}.tabs button[aria-selected=true]{background:var(--canvas);box-shadow:0 0 0 1px rgba(0,0,0,.06)}.tabs button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}.choices[hidden],#maptab[hidden]{display:none!important}.maphint{margin:0 0 10px;color:var(--ink);font-size:21px;font-weight:600;text-align:center}#mapgo{position:sticky;bottom:12px;z-index:5;margin:0 0 14px}#mapgo:empty{display:none}main.wide{max-width:72rem}
+.map{display:flex;justify-content:center;margin:4px 0 6px}.mapbox{position:relative;display:inline-block;max-width:100%}.mapbox canvas.hover{animation:breathe 1.6s ease-in-out infinite}.mapbox canvas.pick.pulse{animation:pulse .45s ease-in-out 2}@keyframes breathe{50%{opacity:.45}}@keyframes pulse{50%{opacity:.35}}@media(prefers-reduced-motion:reduce){.mapbox canvas{animation:none!important}}.mapbox img{display:block;width:912px;height:auto;max-width:100%}.mapbox canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.maptip{position:absolute;transform:translate(-50%,calc(-100% - 12px));padding:5px 12px;border-radius:980px;background:var(--ink);color:#fff;font-size:14px;white-space:nowrap;pointer-events:none}.tabs{display:flex;gap:2px;width:max-content;margin:0 auto 14px;padding:3px;border-radius:980px;background:rgba(0,0,0,.06)}.tabs button{appearance:none;min-height:36px;padding:0 22px;border:0;border-radius:980px;background:transparent;color:var(--ink);font:inherit;font-size:14px;cursor:pointer}.tabs button[aria-selected=true]{background:var(--canvas);box-shadow:0 0 0 1px rgba(0,0,0,.06)}.tabs button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}.choices[hidden],#maptab[hidden]{display:none!important}.maphint{margin:0 0 10px;color:var(--ink);font-size:21px;font-weight:600;text-align:center}#mapgo{position:sticky;bottom:12px;z-index:5;margin:0 0 14px}#mapgo:empty{display:none}main.wide{max-width:72rem}
 .choices:has(.grid){display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .choices:has(.grid) .choice{min-height:48px;padding:10px 16px;font-size:14px;line-height:1.29}
 @media(min-width:600px){.choices:has(.grid){grid-template-columns:repeat(3,1fr)}}
@@ -102,12 +102,35 @@ html:lang(hi) .q{line-height:1.4;letter-spacing:0}
 .sheet{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;margin:0 0 8px}.sheet .download{margin:0}.view{color:var(--blue);text-decoration:none;min-height:44px;display:inline-flex;align-items:center}.view::after{content:" ›"}.viewnote{margin:0 0 24px;color:var(--muted);font-size:14px}
 .choice:focus-visible,.send:focus-visible,.restart:focus-visible,.step:focus-visible,.download:focus-visible,.composer input:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+/* Engagement additions (experiment, 28 Sep): read aloud, icons, step label, CSC link, share. */
+.top{display:flex;align-items:center;gap:10px;margin:0 0 4px}
+.stepno{color:var(--muted);font-size:14px}
+.speak{appearance:none;margin-left:auto;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border:1px solid var(--hairline);border-radius:22px;background:var(--canvas);color:var(--blue);font:inherit;font-size:15px;cursor:pointer}
+.speak[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
+.speak:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.ico{width:22px;height:22px;flex:0 0 auto;color:var(--blue)}.choice .ico{margin-right:14px}.choice.primary .ico,.speak[aria-pressed=true] .ico{color:#fff}.speak .ico,.action .ico{width:20px;height:20px}
+.choice .label{display:flex;align-items:center}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 24px}
+.action{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 20px;border:1px solid var(--hairline);border-radius:24px;background:var(--canvas);color:var(--ink);text-decoration:none}
+.action:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.intro{list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 24px;padding:0}
+.intro-step{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;background:var(--canvas);border:1px solid var(--hairline);border-radius:18px;text-align:center;font-size:15px;line-height:1.3}
+.intro-icon{width:30px;height:30px;color:var(--blue)}
+.agepick{margin:0 0 8px}.agehint{margin:0 0 16px;color:var(--muted);font-size:15px}
+.agerow{display:flex;align-items:center;justify-content:center;gap:24px;margin:0 0 16px}
+.agestep{appearance:none;width:64px;height:64px;border-radius:50%;border:1px solid var(--hairline);background:var(--canvas);color:var(--blue);font:inherit;font-size:32px;line-height:1;cursor:pointer;transition:transform .12s ease}
+.agestep:active{transform:scale(.92)}.agestep:focus-visible,.agejump:focus-visible,.ageslider:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.agenum{min-width:3ch;text-align:center;font-size:56px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.ageslider{width:100%;height:44px;margin:0 0 12px;accent-color:var(--blue)}
+.agejumps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 20px}
+.agejump{appearance:none;min-height:44px;border:1px solid var(--hairline);border-radius:22px;background:var(--canvas);color:var(--ink);font:inherit;cursor:pointer}
+#agego:disabled{opacity:.4;cursor:default}
 </style></head><body>
 <header class="bar"><div class="bar-in"><img src="/logo.jpg" alt="" width="28" height="28"><span class="brand" id="brand">Yojana Sathi</span><button class="switch" id="switch" type="button" onclick="switchLang()" lang="hi">हिंदी</button><button class="restart" id="restart" type="button" onclick="restart()">Start again</button></div></header>
 <main><section id="screen" aria-live="polite"></section></main>
 <script>
 const screen=document.querySelector('#screen');
-const UI={hi:{type:'यहाँ लिखें',send:'भेजें',download:'अपना काग़ज़ डाउनलोड करें',view:'काग़ज़ देखें',viewNote:'यह लिंक 1 घंटे तक खुलेगा।',restart:'फिर से शुरू',other:'English',otherLang:'en',brand:'योजना साथी',answers:'आपके जवाब',mapHint:'अपना राज्य चुनने के लिए नक्शे पर उसे छुएँ',listHint:'राज्य वर्णमाला के क्रम में हैं',mapGo:'आगे बढ़ें',tabMap:'नक्शा',tabList:'सूची',back:'पीछे',forward:'आगे'},en:{type:'Type your answer',send:'Send',download:'Download your sheet',view:'View your sheet',viewNote:'The link works for 1 hour.',restart:'Start again',other:'हिंदी',otherLang:'hi',brand:'Yojana Sathi',answers:'Your answers',mapHint:'Tap your state on the map to choose it',listHint:'States are in alphabetical order',mapGo:'Continue',tabMap:'Map',tabList:'List',back:'Back',forward:'Forward'}};
+const UI={hi:{type:'यहाँ लिखें',send:'भेजें',download:'अपना काग़ज़ डाउनलोड करें',view:'काग़ज़ देखें',viewNote:'यह लिंक 1 घंटे तक खुलेगा।',restart:'फिर से शुरू',other:'English',otherLang:'en',brand:'योजना साथी',answers:'आपके जवाब',mapHint:'अपना राज्य चुनने के लिए नक्शे पर उसे छुएँ',listHint:'राज्य वर्णमाला के क्रम में हैं',mapGo:'आगे बढ़ें',intro:['कुछ सवालों के जवाब दें','देखें कौन सी योजनाएँ आपको मिल सकती हैं','अपना काग़ज़ केंद्र पर ले जाएँ'],ageContinue:'आगे बढ़ें',ageHint:'उम्र चुनने के लिए − और + दबाएँ या पट्टी खिसकाएँ',tabMap:'नक्शा',tabList:'सूची',back:'पीछे',forward:'आगे',listen:'सुनें',stop:'रोकें',step:'चरण',csc:'पास का जन सेवा केंद्र (CSC) खोजें',share:'WhatsApp पर दोस्त को बताएँ',shareText:'मैंने योजना साथी से देखा कि मुझे कौन सी सरकारी योजनाएँ मिल सकती हैं। आप भी देखें:'},en:{type:'Type your answer',send:'Send',download:'Download your sheet',view:'View your sheet',viewNote:'The link works for 1 hour.',restart:'Start again',other:'हिंदी',otherLang:'hi',brand:'Yojana Sathi',answers:'Your answers',mapHint:'Tap your state on the map to choose it',listHint:'States are in alphabetical order',mapGo:'Continue',intro:['Answer a few questions','See the schemes you can get','Take your sheet to the centre'],ageContinue:'Continue',ageHint:'Press − and + or slide the bar to choose your age',tabMap:'Map',tabList:'List',back:'Back',forward:'Forward',listen:'Listen',stop:'Stop',step:'Step',csc:'Find a Common Service Centre (CSC) near you',share:'Tell a friend on WhatsApp',shareText:'I used Yojana Sathi to see which government schemes I may get. Try it:'}};
 let current='en';
 // * The answer given last time on this screen. Set after Back, so she can see it and go Forward.
 let chosen='';
@@ -115,7 +138,51 @@ let chosen='';
 const PRIMARY=new Set(['consent_yes','pick:all','pick:done','next','/start']);
 function text(value){return String(value||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function blocks(value,headline,cls){cls=cls||'q';return String(value||'').split(/\n\s*\n/).map((b,i)=>{if(headline&&i===0){const cut=b.indexOf('\n');return cut<0?`<h2 class="${cls}">${text(b)}</h2>`:`<h2 class="${cls}">${text(b.slice(0,cut))}</h2><p class="lead">${text(b.slice(cut+1))}</p>`;}const m=b.match(/^(\d+\.\s[^\n]*)\n([\s\S]*)$/);return m?`<div class="scheme"><p class="scheme-name">${text(m[1])}</p><p class="scheme-body">${text(m[2].replace(/^ +/gm,''))}</p></div>`:`<p class="message">${text(b)}</p>`;}).join('');}
-function button(b){const picked=b.label.startsWith('✅ ');const label=picked?b.label.slice(2):b.label;const was=!!chosen&&b.value===chosen;const cls=['choice',b.scale?'scale':'',b.grid?'grid':'',PRIMARY.has(b.value)?'primary':'',picked?'selected':'',was?'chosen':''].filter(Boolean).join(' ');return `<button class="${cls}" data-value="${encodeURIComponent(b.value)}"${picked?' aria-pressed="true"':''}${was?' aria-current="true"':''}><span>${text(label)}</span>${picked||was?'<span class="tick" aria-hidden="true">✓</span>':''}</button>`;}
+// * A picture beside the answer, so a worker who reads little can still find it.
+// * Line icons in the Apple style (one stroke weight, round ends, drawn in the
+// * text colour), inline SVG so nothing extra downloads. 24x24 grid.
+const GLYPHS={
+  check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  xmark:'<path d="M6 6l12 12M18 6L6 18"/>',
+  question:'<path d="M9 9a3 3 0 1 1 4.5 2.6c-.9.5-1.5 1.2-1.5 2.2v.7"/><path d="M12 18.3v.2"/>',
+  arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+  hardhat:'<path d="M4 17.5h16M5.5 17.5a6.5 6.5 0 0 1 13 0M10 11V7.5h4V11"/>',
+  leaf:'<path d="M5 19c0-8 5-14 14-14 0 9-6 14-14 14zM5 19l7-7"/>',
+  sparkle:'<path d="M12 3.5l1.8 5.2 5.2 1.8-5.2 1.8L12 17.5l-1.8-5.2L5 10.5l5.2-1.8z"/>',
+  cart:'<path d="M3 4.5h2l2.4 10.5h10.6l2-7.5H6.3"/><circle cx="9" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/>',
+  truck:'<path d="M2.5 6.5h10.5v9.5H2.5zM13 9.5h4l3 3.5v3h-7"/><circle cx="6.5" cy="17.5" r="1.7"/><circle cx="16.5" cy="17.5" r="1.7"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"/>',
+  drop:'<path d="M12 3.5c3 4 5.5 7 5.5 10a5.5 5.5 0 0 1-11 0c0-3 2.5-6 5.5-10z"/>',
+  house:'<path d="M4 11l8-7 8 7M6 9.5V20h12V9.5M10 20v-5h4v5"/>',
+  pencil:'<path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3"/>',
+  columns:'<path d="M3 9l9-5 9 5M5.5 9v9M9.8 9v9M14.2 9v9M18.5 9v9M3 20h18"/>',
+  pin:'<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
+  list:'<path d="M9 6h11M9 12h11M9 18h11M4.5 6v.1M4.5 12v.1M4.5 18v.1"/>',
+  rupee:'<path d="M7 5h10M7 9h10M7 5h3.5a4 4 0 0 1 0 8H7l7.5 7"/>',
+  people:'<circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="16.5" cy="9" r="2.3"/><path d="M15.5 13.6A4.5 4.5 0 0 1 21 18"/>',
+  doc:'<path d="M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h6"/>',
+  speaker:'<path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4zM15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>',
+  bubble:'<path d="M4 12a8 7 0 1 1 3.5 5.8L4 19.5l1-3.4A6.8 6.8 0 0 1 4 12z"/>',
+  building:'<path d="M5 21V5h9v16M14 9h5v12M3 21h18M8 8.5h3M8 12h3M8 15.5h3"/>'
+};
+function glyph(name,cls){return GLYPHS[name]?`<svg class="${cls||'ico'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${GLYPHS[name]}</svg>`:'';}
+// * Keyed on the button's value, never its label, so both languages get the same icon.
+// * Answers with no entry here simply have no icon.
+const ICONS={
+  'yes':'check','no':'xmark','dont_know':'question','consent_yes':'arrow','consent_no':'xmark',
+  'occ:construction':'hardhat','occ:agriculture':'leaf','occ:domestic_work':'sparkle','occ:street_vendor':'cart',
+  'occ:transport':'truck','occ:manufacturing':'gear','occ:sanitation':'drop','occ:home_based':'house','other':'pencil',
+  'pick:national':'columns','pick:state':'pin','pick:all':'list','next':'arrow','none':'xmark'
+};
+function iconFor(value){
+  if(ICONS[value])return ICONS[value];
+  if(value.startsWith('inc:'))return 'rupee';
+  if(value.startsWith('land:'))return 'leaf';
+  if(value.startsWith('fam:'))return 'people';
+  if(value.startsWith('doc:'))return 'doc';
+  return '';
+}
+function button(b){const picked=b.label.startsWith('✅ ');const label=picked?b.label.slice(2):b.label;const icon=(b.scale||b.grid)?'':iconFor(b.value);const was=!!chosen&&b.value===chosen;const cls=['choice',b.scale?'scale':'',b.grid?'grid':'',PRIMARY.has(b.value)?'primary':'',picked?'selected':'',was?'chosen':''].filter(Boolean).join(' ');return `<button class="${cls}" data-value="${encodeURIComponent(b.value)}"${picked?' aria-pressed="true"':''}${was?' aria-current="true"':''}><span class="label">${icon?glyph(icon):''}<span class="text">${text(label)}</span></span>${picked||was?'<span class="tick" aria-hidden="true">✓</span>':''}</button>`;}
 let mapPromise=null;
 // * One load, shared: the page starts it on open, and the state question reuses it.
 function mapLoad(){return mapPromise||(mapPromise=mapBuild());}
@@ -154,7 +221,12 @@ if(k!==hovered){hovered=k;paint(hover,k,[0,102,204,70]);}
 if(!k){tip.hidden=true;return;}const r=img.getBoundingClientRect();tip.textContent=nameOf(k);tip.hidden=false;
 tip.style.left=(e.clientX-r.left)+'px';tip.style.top=(e.clientY-r.top)+'px';};
 img.onmouseleave=()=>{hovered=0;paint(hover,0);tip.hidden=true;};
-const choose=k=>{const code=m.codes[k-1];paint(pick,k,[0,102,204,230]);
+// * Pulse (experiment, 28 Sep): the chosen state blinks gently twice when tapped,
+// * and the state under the finger or mouse breathes, so she sees the map respond.
+// * CSS animations only; reduced motion turns them off.
+const pickCanvas=box.querySelector('.pick');
+const pulse=()=>{pickCanvas.classList.remove('pulse');void pickCanvas.offsetWidth;pickCanvas.classList.add('pulse');};
+const choose=k=>{const code=m.codes[k-1];paint(pick,k,[0,102,204,230]);pulse();
 go.innerHTML=`<button class="choice primary">${ui.mapGo}: ${text(nameOf(k))}</button>`;go.firstChild.onclick=()=>answer('state:'+code);};
 img.onclick=e=>{const k=at(e);if(k)choose(k);};
 if(chosen.startsWith('state:')){const k=m.codes.indexOf(chosen.slice(6))+1;if(k)choose(k);}}
@@ -168,7 +240,122 @@ function guard(on){if(on&&!guarded){history.pushState({sathi:1},'');guarded=true
 addEventListener('popstate',()=>{if(unguarding){unguarding=false;return;}if(guarded){guarded=false;nav('/back');}});
 // * A refused move (nothing there any more) leaves the screen as it is.
 async function nav(value){try{const r=await fetch('/answer',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({answer:value})});if(!r.ok)return;const data=await r.json().catch(()=>null);if(data&&Array.isArray(data.replies))show(data);}catch(e){}}
-function show(data){chosen=data.chosen||'';guard(!!(data.nav&&data.nav.back));document.querySelector('main').classList.remove('wide');const ui=UI[data.lang]||UI.hi;document.documentElement.lang=data.lang==='en'?'en':'hi';document.getElementById('restart').textContent=ui.restart;current=data.lang==='hi'?'hi':'en';const sw=document.getElementById('switch');sw.textContent=ui.other;sw.lang=ui.otherLang;document.getElementById('brand').textContent=ui.brand;const last=data.replies.length-1;const hasResult=data.replies.some(r=>r.kind==='result');let out=steps(data.nav,ui)+data.replies.map((r,i)=>{if(r.kind==='recap'){const body=r.text.split('\n').slice(1).join('\n');return `<details class="recap"><summary>${ui.answers}</summary><p class="message">${text(body)}</p></details>`;}const asks=i===last&&(r.buttons?.length||r.typed);return `${r.kind==='result'?blocks(r.text,true,'q'):blocks(r.text,asks,hasResult?'q2':'q')}${r.map?`<div id="maptab"><p class="maphint">${ui.mapHint}</p><div class="map" id="map"></div><div id="mapgo"></div></div><p class="maphint" id="listhint" hidden>${ui.listHint}</p>`:''}${r.buttons?.length?`<div class="choices"${r.map?' hidden':''}>${r.buttons.map(button).join('')}</div>`:''}${r.document?`<div class="sheet"><a class="download" href="${r.document}" download>${ui.download}</a><a class="view" href="${r.document.replace('/document/','/sheet/')}" target="_blank" rel="noopener">${ui.view}</a></div><p class="viewnote">${ui.viewNote}</p>`:''}`;}).join('');const typed=!!(data.replies[last]&&data.replies[last].typed);if(typed)out+=`<form class="composer"><input name="answer" aria-label="${ui.type}" autocomplete="off" inputmode="text" placeholder="${ui.type}"${chosen&&!chosen.startsWith('/')?` value="${text(chosen)}"`:''}><button class="send">${ui.send}</button></form>`;screen.innerHTML=out;window.scrollTo({top:0});screen.querySelectorAll('.step').forEach(b=>b.onclick=()=>nav(b.dataset.nav));screen.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{const v=decodeURIComponent(b.dataset.value);if(v==='/start')restart();else answer(v);});drawMap(ui);const form=screen.querySelector('form');if(form){form.onsubmit=e=>{e.preventDefault();const input=e.currentTarget.answer;if(input.value.trim()){answer(input.value);input.value='';}};form.answer.focus();}}
+function show(data){chosen=data.chosen||'';guard(!!(data.nav&&data.nav.back));document.querySelector('main').classList.remove('wide');const ui=UI[data.lang]||UI.hi;document.documentElement.lang=data.lang==='en'?'en':'hi';document.getElementById('restart').textContent=ui.restart;current=data.lang==='hi'?'hi':'en';const sw=document.getElementById('switch');sw.textContent=ui.other;sw.lang=ui.otherLang;document.getElementById('brand').textContent=ui.brand;const last=data.replies.length-1;const hasResult=data.replies.some(r=>r.kind==='result');let out=steps(data.nav,ui)+topRow(data,ui,hasResult)+data.replies.map((r,i)=>{if(r.kind==='recap'){const body=r.text.split('\n').slice(1).join('\n');return `<details class="recap"><summary>${ui.answers}</summary><p class="message">${text(body)}</p></details>`;}const asks=i===last&&(r.buttons?.length||r.typed);return `${r.kind==='result'?`<div class="result">${blocks(r.text,true,'q')}</div>${resultActions(ui)}`:blocks(r.text,asks,hasResult?'q2':'q')}${r.map?`<div id="maptab"><p class="maphint">${ui.mapHint}</p><div class="map" id="map"></div><div id="mapgo"></div></div><p class="maphint" id="listhint" hidden>${ui.listHint}</p>`:''}${introCard(r,ui)}${r.buttons?.length?`<div class="choices"${r.map?' hidden':''}>${r.buttons.map(button).join('')}</div>`:''}${r.document?`<div class="sheet"><a class="download" href="${r.document}" download>${ui.download}</a><a class="view" href="${r.document.replace('/document/','/sheet/')}" target="_blank" rel="noopener">${ui.view}</a></div><p class="viewnote">${ui.viewNote}</p>`:''}`;}).join('');const agePick=data.replies[last]&&data.replies[last].age;const typed=!agePick&&!!(data.replies[last]&&data.replies[last].typed);if(agePick)out+=agePicker(agePick,ui);if(typed)out+=`<form class="composer"><input name="answer" aria-label="${ui.type}" autocomplete="off" inputmode="text" placeholder="${ui.type}"${chosen&&!chosen.startsWith('/')?` value="${text(chosen)}"`:''}><button class="send">${ui.send}</button></form>`;screen.innerHTML=out;window.scrollTo({top:0});afterShow(data,ui);if(agePick)wireAge(agePick);screen.querySelectorAll('.step').forEach(b=>b.onclick=()=>nav(b.dataset.nav));// * Only buttons that carry an answer. The age picker's Continue is styled as a
+// * choice but has no data-value; wiring it here sent "undefined" as a second answer.
+screen.querySelectorAll('.choice[data-value]').forEach(b=>b.onclick=()=>{const v=decodeURIComponent(b.dataset.value);if(v==='/start')restart();else answer(v);});drawMap(ui);const form=screen.querySelector('form');if(form){form.onsubmit=e=>{e.preventDefault();const input=e.currentTarget.answer;if(input.value.trim()){answer(input.value);input.value='';}};form.answer.focus();}}
+// * The three steps, shown once on the consent screen, so she knows what the
+// * questions lead to before she starts. Icons carry it for those who read little.
+const INTRO_ICONS=['pencil','list','building'];
+function introCard(r,ui){
+  if(!(r.buttons||[]).some(b=>b.value==='consent_yes'))return '';
+  const items=ui.intro.map((line,i)=>`<li class="intro-step">${glyph(INTRO_ICONS[i],'intro-icon')}<span class="intro-text">${text(line)}</span></li>`).join('');
+  return `<ol class="intro">${items}</ol>`;
+}
+// * The age picker (web only). No keyboard: a big number, − and +, a slider,
+// * and shortcuts to each decade. It starts EMPTY and Continue stays off until
+// * she chooses: a pre-filled age sent unchanged would be a silently wrong age.
+// * After Back, the age she gave last time is shown instead.
+function agePicker(range,ui){
+  const jumps=[];for(let a=Math.ceil(range.min/10)*10;a<=Math.min(range.max,90);a+=10)jumps.push(a);
+  return `<div class="agepick"><p class="agehint">${ui.ageHint}</p>
+<div class="agerow"><button type="button" class="agestep" data-d="-1" aria-label="−1">−</button><output class="agenum" id="agenum" aria-live="polite">—</output><button type="button" class="agestep" data-d="1" aria-label="+1">+</button></div>
+<input type="range" class="ageslider" id="ageslider" min="${range.min}" max="${range.max}" step="1" value="${Math.round((range.min+range.max)/2)}" aria-label="${ui.type}">
+<div class="agejumps">${jumps.map(a=>`<button type="button" class="agejump" data-a="${a}">${a}</button>`).join('')}</div>
+<button type="button" class="choice primary" id="agego" disabled>${ui.ageContinue}</button></div>`;
+}
+function wireAge(range){
+  const num=document.getElementById('agenum'),slider=document.getElementById('ageslider'),go=document.getElementById('agego');
+  let age=null;
+  const set=a=>{age=Math.max(range.min,Math.min(range.max,a));num.textContent=age;slider.value=age;go.disabled=false;go.textContent=`${(UI[current]||UI.en).ageContinue}: ${age}`;};
+  const prev=/^\d{1,3}$/.test(chosen)?Number(chosen):null;
+  if(prev!==null&&prev>=range.min&&prev<=range.max)set(prev);
+  screen.querySelectorAll('.agestep').forEach(b=>b.onclick=()=>set((age===null?Number(slider.value):age)+Number(b.dataset.d)));
+  screen.querySelectorAll('.agejump').forEach(b=>b.onclick=()=>set(Number(b.dataset.a)));
+  slider.oninput=()=>set(Number(slider.value));
+  go.onclick=()=>{if(age!==null)answer(String(age));};
+}
+// * ------------------------------------------------ read aloud, step, result extras
+// * The row above the question: "Step 3" on the left, "Listen" on the right.
+// * Listen starts hidden; afterShow() shows it only when the phone has a voice
+// * for this language. No Hindi voice means no button, never Hindi in an English voice.
+function topRow(data,ui,hasResult){
+  const stepLabel=(data.step>0&&!hasResult)?`<span class="stepno">${ui.step} ${data.step}</span>`:'';
+  return `<div class="top">${stepLabel}<button type="button" class="speak" id="speak" aria-pressed="false" hidden>${glyph('speaker')}<span>${ui.listen}</span></button></div>`;
+}
+// * Under the result: where to go, and telling a friend. The share message is
+// * fixed text and the site's address. It never carries her answers or results.
+function resultActions(ui){
+  const csc='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent('Common Service Centre near me');
+  const share='https://wa.me/?text='+encodeURIComponent(ui.shareText+' '+location.origin);
+  return `<div class="actions"><a class="action" href="${csc}" target="_blank" rel="noopener noreferrer">${glyph('pin')}${ui.csc}</a><a class="action" href="${share}" target="_blank" rel="noopener noreferrer">${glyph('bubble')}${ui.share}</a></div>`;
+}
+// * The phone's voice for a language, or null. Prefers an Indian voice.
+function voiceFor(lang){
+  if(!('speechSynthesis' in window))return null;
+  const voices=speechSynthesis.getVoices();
+  const want=lang==='hi'?'hi':'en';
+  return voices.find(v=>v.lang.replace('_','-').toLowerCase()==want+'-in')
+      || voices.find(v=>v.lang.toLowerCase().startsWith(want))
+      || null;
+}
+// * What Listen reads: the question or result, then the answer buttons when
+// * there are few enough to follow by ear (not the 36 states).
+function textToRead(){
+  const parts=[];
+  screen.querySelectorAll('.q,.lead,.q2,section > .message,.intro-text,.result .message,.scheme-name,.scheme-body').forEach(el=>parts.push(el.textContent));
+  const labels=[...screen.querySelectorAll('.choice:not(.grid):not(.scale) .text')].map(el=>el.textContent);
+  if(labels.length&&labels.length<=10)parts.push(labels.join('. '));
+  return parts.join('. ');
+}
+function setupSpeak(lang,ui){
+  const btn=document.getElementById('speak');
+  if(!btn)return;
+  const voice=voiceFor(lang);
+  if(!voice){btn.hidden=true;return;}
+  btn.hidden=false;
+  const label=btn.querySelector('span');
+  const idle=()=>{btn.setAttribute('aria-pressed','false');label.textContent=ui.listen;};
+  btn.onclick=()=>{
+    if(speechSynthesis.speaking){speechSynthesis.cancel();idle();return;}
+    const u=new SpeechSynthesisUtterance(textToRead());
+    u.voice=voice;u.lang=voice.lang;u.rate=0.9;
+    u.onend=idle;u.onerror=idle;
+    btn.setAttribute('aria-pressed','true');label.textContent=ui.stop;
+    speechSynthesis.speak(u);
+  };
+}
+// * The ₹ totals on the result count up from 0 and stop on the exact figure
+// * the engine computed; the final text is the original text, unchanged.
+// * Skipped when the phone asks for reduced motion.
+function countUp(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  screen.querySelectorAll('.result .message').forEach(el=>{
+    const original=el.textContent;
+    const m=original.match(/₹([\d,]+)/);
+    if(!m)return;
+    const target=Number(m[1].replace(/,/g,''));
+    if(!(target>0))return;
+    const start=performance.now(),ms=900;
+    const tick=now=>{
+      if(!document.body.contains(el))return;
+      const t=Math.min(1,(now-start)/ms);
+      if(t>=1){el.textContent=original;return;}
+      const shown=Math.round(target*(1-Math.pow(1-t,3))).toLocaleString('en-IN');
+      el.textContent=original.replace(m[0],'₹'+shown);
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+}
+let lastLang='en',lastUi=null;
+function afterShow(data,ui){
+  if('speechSynthesis' in window)speechSynthesis.cancel();
+  lastLang=data.lang==='hi'?'hi':'en';lastUi=ui;
+  setupSpeak(lastLang,ui);
+  countUp();
+}
+// * Some browsers load their voices late; show Listen as soon as they arrive.
+if('speechSynthesis' in window)speechSynthesis.onvoiceschanged=()=>{if(lastUi)setupSpeak(lastLang,lastUi);};
 const START=(()=>{const src=new URLSearchParams(location.search).get('start')||'';return /^[a-z]{1,20}$/.test(src)?'/start '+src:'/start';})();
 function oops(){screen.innerHTML=`<h2 class="q">${text('कुछ गड़बड़ हो गई।\nSomething went wrong.')}</h2><div class="choices"><button class="choice primary" onclick="restart()">फिर से शुरू · Start again</button></div>`;}
 async function answer(value){try{const r=await fetch('/answer',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({answer:value})});const data=await r.json().catch(()=>null);if(data&&Array.isArray(data.replies)){show(data);}else{oops();}}catch(e){oops();}}
@@ -409,6 +596,10 @@ class LocalWeb:
                 buttons = buttons + [{"label": s("closing.start_again", convo.lang),
                                       "value": "/start", "restart": True}]
             item = {"text": text, "buttons": buttons, "typed": typed}
+            # * The age question gets a number picker on this channel: no keyboard
+            # * needed. It sends the same digit string a typed answer would.
+            if convo is not None and convo.state is State.AGE and reply is replies[-1]:
+                item["age"] = {"min": MIN_AGE, "max": MAX_AGE}
             if _MAP and _SEEDS and convo is not None and convo.state is State.STATE and reply is replies[-1]:
                 item["map"] = True
             if recap_header and reply.text.startswith(recap_header):
@@ -507,8 +698,13 @@ class LocalWeb:
         # * The page labels its own controls (Send, the text box, Download) in
         # * the worker's language; they were English on a Hindi screen.
         lang = convo.lang if convo is not None else DEFAULT_LANG
+        # * Which screen this is since consent, counting from 1, for the page's
+        # * "Step 3" label. 0 before consent. No total: the number of questions
+        # * depends on her answers, so a total would be a guess.
+        step = at + 1 if 0 <= at < len(steps) else 0
         return json.dumps({"replies": items, "lang": lang,
-                           "nav": {"back": back, "forward": forward}, "chosen": chosen},
+                           "nav": {"back": back, "forward": forward}, "chosen": chosen,
+                           "step": step},
                           ensure_ascii=False).encode("utf-8")
 
     def document(self, token: str) -> tuple[str, bytes] | None:
@@ -879,6 +1075,7 @@ def _self_check() -> None:
             assert page["nav"]["back"], counted.sessions["n"].state
             page = body(counted.payload("n", "/back"))
         assert page["replies"][-1]["typed"] and page["chosen"] == "34"
+        assert page["replies"][-1]["age"] == {"min": MIN_AGE, "max": MAX_AGE}, "no age picker"
         # * Forward again all the way, then back to age once more.
         while page["nav"]["forward"]:
             page = body(counted.payload("n", "/forward"))
