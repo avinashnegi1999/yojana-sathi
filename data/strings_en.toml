@@ -270,6 +270,10 @@ still_need_how = "Ask at the centre how to get each one."
 done = """All done. Good luck!
 Send /start any time to check again."""
 followup = "May I ask you once in 14 days whether it worked out?"
+# * The browser has no /start to send; it shows a "Start again" button instead.
+done_web = "All done. Good luck!"
+declined_web = "No problem. Nothing was saved."
+start_again = "Start again"
 
 # =====================================================================
 [commands]

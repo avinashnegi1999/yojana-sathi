@@ -96,6 +96,7 @@ html:lang(hi) .q{line-height:1.4;letter-spacing:0}
 .send{appearance:none;border:0;border-radius:26px;background:var(--blue);color:#fff;font:inherit;padding:0 26px;height:52px;cursor:pointer;transition:transform .12s ease}
 .send:active,.download:active{transform:scale(.95)}
 .download{display:inline-flex;align-items:center;min-height:52px;margin:0 0 24px;padding:0 26px;border-radius:26px;background:var(--blue);color:#fff;text-decoration:none;transition:transform .12s ease}
+.sheet{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;margin:0 0 8px}.sheet .download{margin:0}.view{color:var(--blue);text-decoration:none;min-height:44px;display:inline-flex;align-items:center}.view::after{content:" ›"}.viewnote{margin:0 0 24px;color:var(--muted);font-size:14px}
 .choice:focus-visible,.send:focus-visible,.restart:focus-visible,.download:focus-visible,.composer input:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style></head><body>
@@ -103,10 +104,10 @@ html:lang(hi) .q{line-height:1.4;letter-spacing:0}
 <main><section id="screen" aria-live="polite"></section></main>
 <script>
 const screen=document.querySelector('#screen');
-const UI={hi:{type:'यहाँ लिखें',send:'भेजें',download:'अपना काग़ज़ डाउनलोड करें',restart:'फिर से शुरू',other:'English',otherLang:'en',brand:'योजना साथी',answers:'आपके जवाब',mapHint:'अपना राज्य चुनने के लिए नक्शे पर उसे छुएँ',listHint:'राज्य वर्णमाला के क्रम में हैं',mapGo:'आगे बढ़ें',tabMap:'नक्शा',tabList:'सूची'},en:{type:'Type your answer',send:'Send',download:'Download your sheet',restart:'Start again',other:'हिंदी',otherLang:'hi',brand:'Yojana Sathi',answers:'Your answers',mapHint:'Tap your state on the map to choose it',listHint:'States are in alphabetical order',mapGo:'Continue',tabMap:'Map',tabList:'List'}};
+const UI={hi:{type:'यहाँ लिखें',send:'भेजें',download:'अपना काग़ज़ डाउनलोड करें',view:'काग़ज़ देखें',viewNote:'यह लिंक 1 घंटे तक खुलेगा।',restart:'फिर से शुरू',other:'English',otherLang:'en',brand:'योजना साथी',answers:'आपके जवाब',mapHint:'अपना राज्य चुनने के लिए नक्शे पर उसे छुएँ',listHint:'राज्य वर्णमाला के क्रम में हैं',mapGo:'आगे बढ़ें',tabMap:'नक्शा',tabList:'सूची'},en:{type:'Type your answer',send:'Send',download:'Download your sheet',view:'View your sheet',viewNote:'The link works for 1 hour.',restart:'Start again',other:'हिंदी',otherLang:'hi',brand:'Yojana Sathi',answers:'Your answers',mapHint:'Tap your state on the map to choose it',listHint:'States are in alphabetical order',mapGo:'Continue',tabMap:'Map',tabList:'List'}};
 let current='en';
 // The one blue pill on a screen: the forward action, never an answer to a yes/no question.
-const PRIMARY=new Set(['consent_yes','pick:all','pick:done','next']);
+const PRIMARY=new Set(['consent_yes','pick:all','pick:done','next','/start']);
 function text(value){return String(value||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function blocks(value,headline,cls){cls=cls||'q';return String(value||'').split(/\n\s*\n/).map((b,i)=>{if(headline&&i===0){const cut=b.indexOf('\n');return cut<0?`<h2 class="${cls}">${text(b)}</h2>`:`<h2 class="${cls}">${text(b.slice(0,cut))}</h2><p class="lead">${text(b.slice(cut+1))}</p>`;}const m=b.match(/^(\d+\.\s[^\n]*)\n([\s\S]*)$/);return m?`<div class="scheme"><p class="scheme-name">${text(m[1])}</p><p class="scheme-body">${text(m[2].replace(/^ +/gm,''))}</p></div>`:`<p class="message">${text(b)}</p>`;}).join('');}
 function button(b){const picked=b.label.startsWith('✅ ');const label=picked?b.label.slice(2):b.label;const cls=['choice',b.scale?'scale':'',b.grid?'grid':'',PRIMARY.has(b.value)?'primary':'',picked?'selected':''].filter(Boolean).join(' ');return `<button class="${cls}" data-value="${encodeURIComponent(b.value)}"${picked?' aria-pressed="true"':''}><span>${text(label)}</span>${picked?'<span class="tick" aria-hidden="true">✓</span>':''}</button>`;}
@@ -150,7 +151,7 @@ tip.style.left=(e.clientX-r.left)+'px';tip.style.top=(e.clientY-r.top)+'px';};
 img.onmouseleave=()=>{hovered=0;paint(hover,0);tip.hidden=true;};
 img.onclick=e=>{const k=at(e);if(!k)return;const code=m.codes[k-1];paint(pick,k,[0,102,204,230]);
 go.innerHTML=`<button class="choice primary">${ui.mapGo}: ${text(nameOf(k))}</button>`;go.firstChild.onclick=()=>answer('state:'+code);};}
-function show(data){document.querySelector('main').classList.remove('wide');const ui=UI[data.lang]||UI.hi;document.documentElement.lang=data.lang==='en'?'en':'hi';document.getElementById('restart').textContent=ui.restart;current=data.lang==='hi'?'hi':'en';const sw=document.getElementById('switch');sw.textContent=ui.other;sw.lang=ui.otherLang;document.getElementById('brand').textContent=ui.brand;const last=data.replies.length-1;const hasResult=data.replies.some(r=>r.kind==='result');let out=data.replies.map((r,i)=>{if(r.kind==='recap'){const body=r.text.split('\n').slice(1).join('\n');return `<details class="recap"><summary>${ui.answers}</summary><p class="message">${text(body)}</p></details>`;}const asks=i===last&&(r.buttons?.length||r.typed);return `${r.kind==='result'?blocks(r.text,true,'q'):blocks(r.text,asks,hasResult?'q2':'q')}${r.map?`<div id="maptab"><p class="maphint">${ui.mapHint}</p><div class="map" id="map"></div><div id="mapgo"></div></div><p class="maphint" id="listhint" hidden>${ui.listHint}</p>`:''}${r.buttons?.length?`<div class="choices"${r.map?' hidden':''}>${r.buttons.map(button).join('')}</div>`:''}${r.document?`<a class="download" href="${r.document}" download>${ui.download}</a>`:''}`;}).join('');const typed=!!(data.replies[last]&&data.replies[last].typed);if(typed)out+=`<form class="composer"><input name="answer" aria-label="${ui.type}" autocomplete="off" inputmode="text" placeholder="${ui.type}"><button class="send">${ui.send}</button></form>`;screen.innerHTML=out;window.scrollTo({top:0});screen.querySelectorAll('.choice').forEach(b=>b.onclick=()=>answer(decodeURIComponent(b.dataset.value)));drawMap(ui);const form=screen.querySelector('form');if(form){form.onsubmit=e=>{e.preventDefault();const input=e.currentTarget.answer;if(input.value.trim()){answer(input.value);input.value='';}};form.answer.focus();}}
+function show(data){document.querySelector('main').classList.remove('wide');const ui=UI[data.lang]||UI.hi;document.documentElement.lang=data.lang==='en'?'en':'hi';document.getElementById('restart').textContent=ui.restart;current=data.lang==='hi'?'hi':'en';const sw=document.getElementById('switch');sw.textContent=ui.other;sw.lang=ui.otherLang;document.getElementById('brand').textContent=ui.brand;const last=data.replies.length-1;const hasResult=data.replies.some(r=>r.kind==='result');let out=data.replies.map((r,i)=>{if(r.kind==='recap'){const body=r.text.split('\n').slice(1).join('\n');return `<details class="recap"><summary>${ui.answers}</summary><p class="message">${text(body)}</p></details>`;}const asks=i===last&&(r.buttons?.length||r.typed);return `${r.kind==='result'?blocks(r.text,true,'q'):blocks(r.text,asks,hasResult?'q2':'q')}${r.map?`<div id="maptab"><p class="maphint">${ui.mapHint}</p><div class="map" id="map"></div><div id="mapgo"></div></div><p class="maphint" id="listhint" hidden>${ui.listHint}</p>`:''}${r.buttons?.length?`<div class="choices"${r.map?' hidden':''}>${r.buttons.map(button).join('')}</div>`:''}${r.document?`<div class="sheet"><a class="download" href="${r.document}" download>${ui.download}</a><a class="view" href="${r.document.replace('/document/','/sheet/')}" target="_blank" rel="noopener">${ui.view}</a></div><p class="viewnote">${ui.viewNote}</p>`:''}`;}).join('');const typed=!!(data.replies[last]&&data.replies[last].typed);if(typed)out+=`<form class="composer"><input name="answer" aria-label="${ui.type}" autocomplete="off" inputmode="text" placeholder="${ui.type}"><button class="send">${ui.send}</button></form>`;screen.innerHTML=out;window.scrollTo({top:0});screen.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{const v=decodeURIComponent(b.dataset.value);if(v==='/start')restart();else answer(v);});drawMap(ui);const form=screen.querySelector('form');if(form){form.onsubmit=e=>{e.preventDefault();const input=e.currentTarget.answer;if(input.value.trim()){answer(input.value);input.value='';}};form.answer.focus();}}
 const START=(()=>{const src=new URLSearchParams(location.search).get('start')||'';return /^[a-z]{1,20}$/.test(src)?'/start '+src:'/start';})();
 function oops(){screen.innerHTML=`<h2 class="q">${text('कुछ गड़बड़ हो गई।\nSomething went wrong.')}</h2><div class="choices"><button class="choice primary" onclick="restart()">फिर से शुरू · Start again</button></div>`;}
 async function answer(value){try{const r=await fetch('/answer',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({answer:value})});const data=await r.json().catch(()=>null);if(data&&Array.isArray(data.replies)){show(data);}else{oops();}}catch(e){oops();}}
@@ -336,7 +337,17 @@ class LocalWeb:
                 every = sorted(content.states(), key=lambda st: st.label(convo.lang))
                 buttons = [{"label": st.label(convo.lang), "value": f"state:{st.code}", "grid": True}
                            for st in every]
-            item = {"text": reply.text, "buttons": buttons, "typed": typed}
+            text = reply.text
+            # * The chat channels end with "send /start"; the browser has no
+            # * /start, so an ending gets web wording and one big "Start again"
+            # * button in the middle, where the eye already is.
+            if reply.end and convo is not None:
+                web_text = {s("closing.done", convo.lang): s("closing.done_web", convo.lang),
+                            s("consent.declined", convo.lang): s("closing.declined_web", convo.lang)}
+                text = web_text.get(text, text)
+                buttons = buttons + [{"label": s("closing.start_again", convo.lang),
+                                      "value": "/start", "restart": True}]
+            item = {"text": text, "buttons": buttons, "typed": typed}
             if _MAP and _SEEDS and convo is not None and convo.state is State.STATE and reply is replies[-1]:
                 item["map"] = True
             if recap_header and reply.text.startswith(recap_header):
@@ -439,13 +450,20 @@ def handler_class(app: LocalWeb, secure_cookie: bool = False) -> type[BaseHTTPRe
             if self.path == "/map-seeds.json" and _SEEDS:
                 self._send(HTTPStatus.OK, _SEEDS, "application/json")
                 return
-            token = self.path.removeprefix("/document/")
-            document = app.document(token) if self.path.startswith("/document/") else None
+            # * /document/<token> downloads the sheet; /sheet/<token> opens the
+            # * same sheet in the browser. Same token, same one-hour life.
+            view = self.path.startswith("/sheet/")
+            token = self.path.removeprefix("/sheet/" if view else "/document/")
+            document = (app.document(token)
+                        if self.path.startswith(("/document/", "/sheet/")) else None)
             if document:
                 name, blob = document
                 self.send_response(HTTPStatus.OK)
                 self.send_header("Content-Type", "text/html; charset=utf-8")
-                self.send_header("Content-Disposition", f"attachment; filename={html.escape(name, quote=True)}")
+                if view:
+                    self.send_header("X-Robots-Tag", "noindex")
+                else:
+                    self.send_header("Content-Disposition", f"attachment; filename={html.escape(name, quote=True)}")
                 self.send_header("Content-Length", str(len(blob)))
                 self.send_header("Cache-Control", "no-store")
                 self.send_header("Referrer-Policy", "no-referrer")
