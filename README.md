@@ -16,9 +16,11 @@
   &nbsp;&nbsp;·&nbsp;&nbsp;
   <a href="https://t.me/YojanaSathiBot">Open on Telegram ›</a>
   &nbsp;&nbsp;·&nbsp;&nbsp;
-  <a href="https://avinashnegi.com/yojana-sathi/#film">Watch the film ›</a>
-  &nbsp;&nbsp;·&nbsp;&nbsp;
   <a href="https://avinashnegi.com/yojana-sathi/">See the project ›</a>
+</p>
+
+<p align="center">
+  <a href="https://gitdiagram.com/avinashnegi1999/yojana-sathi/video"><img src="https://gitdiagram.com/video-badge.svg" alt="Watch a one-minute video tour of yojana-sathi"></a>
 </p>
 
 <br>
