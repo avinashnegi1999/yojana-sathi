@@ -375,3 +375,10 @@ contradicted. Tests for each in `tests/test_flow.py`.
   the web "Step N" no longer counts ticks on a list as steps.
 - The unorganised-work question gives examples (own small shop, stall, trade).
 - New Hindi text is draft and joins the pending Hindi review.
+- **Deployed** 29 Sep, commit `7e6b15b`, with `deploy/install-on-vm.sh`: AWS
+  `check.py` passed on the staged copy; server code matches the commit; all
+  three units and Caddy active, no errors from the new code (the only log
+  line is the old WhatsApp process's usual shutdown KeyboardInterrupt); the
+  live web page serves the cross-check buttons. Same `.env` as the previous
+  deploy. No live screening run. The three changed signed files (APY, UK
+  old-age, UK widow) are live and still need Avinash's re-read.
