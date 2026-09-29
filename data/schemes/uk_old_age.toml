@@ -61,7 +61,11 @@ fail_hi = "आपकी बताई उम्र प्रवेश की आ�
 source_url = "https://socialwelfare.uk.gov.in/service/old-age-pension/"
 
 [[criteria]]
-field = "uk_pension_income_or_bpl"
+# ! 2026-09-29: this file's own field. It shared `uk_pension_income_or_bpl`
+# ! with uk_widow.toml, whose question is about FAMILY income; one answer
+# ! served both. Field name only — the question, the rule and the texts below
+# ! are unchanged. Re-read at the next review (`python3 -m sathi.review`).
+field = "uk_old_age_income_or_bpl"
 op = "eq"
 value = true
 # ! The department page: "The monthly income of the applicant should not exceed

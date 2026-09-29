@@ -345,3 +345,33 @@ copy before touching `/opt/sathi`.
   errors since the restart; the live web page serves the new gender button.
   Same `.env` as the previous deploy, and the server's secrets file was
   unchanged since then. No live screening run.
+
+## 2026-09-29 — contradiction audit of the questions (local, not deployed)
+
+Walked every question on Uttarakhand + "both" in code and fixed what
+contradicted. Tests for each in `tests/test_flow.py`.
+- **Signed files changed — re-read at the next review:** `uk_old_age.toml` and
+  `uk_widow.toml` each got their own income-or-BPL field
+  (`uk_old_age_income_or_bpl`, `uk_widow_income_or_bpl`); one shared field
+  showed a 60+ widow only the OWN-income wording, so the widow file's FAMILY
+  condition was never asked. Texts unchanged. `apy.toml` gained the "or has
+  been an income-tax payer" half of its own quoted PFRDA rule as an APY-only
+  question (`has_paid_income_tax_before`), closing its `# ?` flag.
+- The Uttarakhand income-or-BPL questions show the earlier income and BPL
+  answers under them.
+- Two cross-checks, answered once each, only her tap changes an answer:
+  "no unorganised work" then "my own shop / trade" (no PF or ESIC cut); "no
+  bank account" then Jan Dhan, APY or an insurance ticked as already held.
+- Core questions follow the same rule as follow-ups: not asked when every
+  scheme that needs them is already ruled out (PF or ESIC: Yes now skips the
+  NPS and unorganised-work questions; a 42-year-old in Uttarakhand is no
+  longer asked income, which only PM-SYM, 18–40, uses there).
+- A pension route she already holds makes the other routes in its
+  `exclusive_group` "already held": not "New for you", and no ₹ added to
+  "annual entitlement surfaced" (`engine.held_routes`; rules unchanged).
+- "Not a woman" records "not a widow": men were asked the widow pension's
+  questions, then told "can't be sure" about two widow pensions.
+- The recap keeps answers that ruled a scheme out (they used to vanish), and
+  the web "Step N" no longer counts ticks on a list as steps.
+- The unorganised-work question gives examples (own small shop, stall, trade).
+- New Hindi text is draft and joins the pending Hindi review.

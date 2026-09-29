@@ -52,6 +52,10 @@ class Profile:
     family_size: int | None = None
     has_bank_account: bool | None = None
     is_income_tax_payer: bool | None = None
+    # ! APY only: "is OR HAS BEEN an income-tax payer" (PFRDA, from 1 Oct 2022).
+    # ! Kept apart from the present-tense question above, which e-Shram, PM-SYM,
+    # ! NPS-Traders and the state pensions use: they bar current payers only.
+    has_paid_income_tax_before: bool | None = None
     # ! Two fields, not one, and not three. The schemes do not agree on which
     # ! memberships disqualify: PM-SYM bars EPFO, ESIC and specified NPS, while
     # ! e-Shram's definition of an unorganised worker names only ESIC and EPFO.
@@ -72,7 +76,12 @@ class Profile:
     # ! Additional self-reported answers stay in memory; never document uploads.
     is_woman: bool | None = None
     is_widow: bool | None = None
-    uk_pension_income_or_bpl: bool | None = None
+    # ! Two fields, one per Uttarakhand pension (29 Sep audit). The old-age
+    # ! file asks about her OWN income, the widow file about her FAMILY's; one
+    # ! shared `uk_pension_income_or_bpl` answered one wording and applied it to
+    # ! both, so a 60+ widow was never asked the widow file's own condition.
+    uk_old_age_income_or_bpl: bool | None = None
+    uk_widow_income_or_bpl: bool | None = None
     uk_pension_selected: bool | None = None
     # ! The Uttarakhand widow pension bars an applicant already drawing another
     # ! pension — the department's Hindi pension overview states it, and
@@ -130,6 +139,9 @@ def _self_check() -> None:
     assert "is_epfo_or_esic_member" in PROFILE_FIELDS
     assert "nps_exclusion_applies" in PROFILE_FIELDS
     assert "receives_other_pension" in PROFILE_FIELDS
+    assert {"uk_old_age_income_or_bpl", "uk_widow_income_or_bpl"} <= PROFILE_FIELDS
+    assert "uk_pension_income_or_bpl" not in PROFILE_FIELDS, \
+        "the shared UK field is gone; each pension file names its own"
     assert "is_statutory_scheme_member" not in PROFILE_FIELDS, \
         "the conflated field is gone; a scheme file still naming it must be fixed"
     print("profile.py OK")

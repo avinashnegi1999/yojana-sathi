@@ -50,7 +50,7 @@ A deep link to the page that carries **that exact value**. Not the site root, no
 
 <br>
 
-`state` · `age` · `occupation` · `is_unorganised_worker` · `income_band` · `land_holding_band` · `family_size` · `has_bank_account` · `is_income_tax_payer` · `is_epfo_or_esic_member` · `nps_exclusion_applies` · `is_woman` · `is_widow` · `uk_pension_income_or_bpl` · `uk_pension_selected` · `receives_other_pension` · `household_has_lpg` · `pmuy_declaration_met` · `is_bpl` · `has_disability_80pct` · `is_small_trader` · `is_vishwakarma_artisan` · `took_business_loan_5yr` · `has_government_service_in_family` · `has_job_or_business` · `pb_land_over_limit` · `known_schemes`
+`state` · `age` · `occupation` · `is_unorganised_worker` · `income_band` · `land_holding_band` · `family_size` · `has_bank_account` · `is_income_tax_payer` · `has_paid_income_tax_before` · `is_epfo_or_esic_member` · `nps_exclusion_applies` · `is_woman` · `is_widow` · `uk_old_age_income_or_bpl` · `uk_widow_income_or_bpl` · `uk_pension_selected` · `receives_other_pension` · `household_has_lpg` · `pmuy_declaration_met` · `is_bpl` · `has_disability_80pct` · `is_small_trader` · `is_vishwakarma_artisan` · `took_business_loan_5yr` · `has_government_service_in_family` · `has_job_or_business` · `pb_land_over_limit` · `known_schemes`
 
 - `is_unorganised_worker` is what the worker says. It is never inferred from a job title.
 - `nps_exclusion_applies` is a yes / no / not-sure finding about the exclusion, not a general claim of NPS membership. Other or uncertain NPS types stay unresolved.

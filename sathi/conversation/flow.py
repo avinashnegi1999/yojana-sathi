@@ -26,7 +26,7 @@ from sathi.metrics.events import EventLog
 from sathi.pack import checklist, pack
 from sathi.render import llm, templates
 from sathi.rules import operators
-from sathi.rules.engine import Verdict, evaluate_all
+from sathi.rules.engine import Verdict, evaluate_all, held_routes
 
 
 class State(Enum):
@@ -46,6 +46,7 @@ class State(Enum):
     TAX = "is_income_tax_payer"
     TAX_CONFIRM = "tax_confirm"
     TAX_INCOME = "tax_income"
+    CROSS_CHECK = "cross_check"
     EPFO_ESIC = "is_epfo_or_esic_member"
     NPS = "nps_exclusion_applies"
     WORKER = "is_unorganised_worker"
@@ -59,23 +60,42 @@ class State(Enum):
     DONE = "done"
 
 
-EXTRA_FIELDS = ('is_woman', 'is_widow', 'uk_pension_income_or_bpl', 'receives_other_pension', 'uk_pension_selected', 'household_has_lpg', 'pmuy_declaration_met',
+EXTRA_FIELDS = ('is_woman', 'is_widow', 'uk_old_age_income_or_bpl', 'uk_widow_income_or_bpl',
+                'receives_other_pension', 'uk_pension_selected', 'household_has_lpg', 'pmuy_declaration_met',
                 'is_bpl', 'has_disability_80pct', 'is_small_trader', 'is_vishwakarma_artisan',
                 'took_business_loan_5yr', 'has_government_service_in_family',
-                'has_job_or_business', 'pb_land_over_limit')
+                'has_job_or_business', 'pb_land_over_limit', 'has_paid_income_tax_before')
 
 # ! The order follow-ups are asked in. Not alphabetical, not file order.
 _FOLLOWUP_ORDER = (
+    "has_paid_income_tax_before",                           # APY only, next to the tax topic
     "is_woman", "is_bpl",                                   # broad, shared
     "household_has_lpg", "pmuy_declaration_met",            # PMUY pair
     "is_small_trader",                                      # NPS-Traders
     "is_vishwakarma_artisan", "took_business_loan_5yr",     # PM Vishwakarma loan
     "has_government_service_in_family",                      # PM Vishwakarma exclusion
-    "uk_pension_income_or_bpl",                              # state pension money
+    "uk_old_age_income_or_bpl", "uk_widow_income_or_bpl",   # state pension money
     "receives_other_pension", "uk_pension_selected",        # state pension admin
     "has_job_or_business", "pb_land_over_limit",            # Punjab state pension
     "is_widow", "has_disability_80pct",                     # sensitive, last
 )
+
+# * Earlier answers shown under a question that depends on them (29 Sep audit:
+# * "income ₹15,000–₹25,000", then "is your income ₹4,000 or less, or do you
+# * hold a BPL card?" read as a contradiction). She reads them together; the
+# * app decides nothing from them.
+_CONTEXT_FOR = {
+    "uk_old_age_income_or_bpl": ("income_band", "is_bpl", "uk_widow_income_or_bpl"),
+    "uk_widow_income_or_bpl": ("income_band", "is_bpl", "uk_old_age_income_or_bpl"),
+}
+
+# * Answers that say she works for herself. Given after "no unorganised work"
+# * (and no PF or ESIC cut), the two are shown side by side: e-Shram counts
+# * self-employed work as unorganised (eshram.toml), so one of them is wrong.
+_SELF_EMPLOYED_FIELDS = ("is_small_trader", "is_vishwakarma_artisan")
+
+# * The two buttons of a cross-check screen. Only her tap changes an answer.
+FIX_EARLIER, FIX_KEEP, FIX_UNTICK = "fix:earlier", "fix:keep", "fix:untick"
 
 _CORE_FIELD_STATES = {
     "state": State.STATE, "age": State.AGE, "occupation": State.OCCUPATION,
@@ -158,6 +178,7 @@ class Conversation:
         self._document_page = 0
         self._known_page = 0
         self._results: tuple = ()
+        self._held: frozenset[str] = frozenset()  # * set with the results; see _evaluate
         # * Set once the worker agrees to anonymous metrics. The adapter uses
         # * it to count one unique person, in a table that has no session id.
         self.consent_granted = False
@@ -176,6 +197,13 @@ class Conversation:
         # * listed" switches it to every state and UT, paged.
         self._state_all = False
         self._state_page = 0
+        # * The cross-check on screen ("worker" or "bank"), and those already
+        # * answered: each is asked at most once per screening.
+        self._cross_check = ""
+        self._checks_done: set[str] = set()
+        # * True once "which of these do you already have?" was answered, so a
+        # * cross-check that reopens questions does not ask it a second time.
+        self._known_declared = False
 
     # * ------------------------------------------------------------- plumbing
 
@@ -267,6 +295,7 @@ class Conversation:
             State.TAX: lambda: Reply(text=self._s("questions.is_income_tax_payer"),
                                      buttons=_yes_no(self.lang, with_dont_know=True)),
             State.TAX_CONFIRM: self._ask_tax_confirm,
+            State.CROSS_CHECK: self._ask_cross_check,
             State.EPFO_ESIC: lambda: Reply(
                 text=self._s("questions.is_epfo_or_esic_member"),
                 buttons=_yes_no(self.lang, with_dont_know=True)),
@@ -326,6 +355,10 @@ class Conversation:
         """/cancel — drop the profile now, not at the end of the session."""
         self.profile = Profile()
         self._known.clear()
+        self._held = frozenset()
+        self._cross_check = ""
+        self._checks_done.clear()
+        self._known_declared = False
         self._followup_fields.clear()
         self._followup_index = 0
         self._selected.clear()
@@ -386,6 +419,32 @@ class Conversation:
                       if not self._for_another_state(sc)}
         return active
 
+    def _settled_no(self, scheme: Scheme) -> bool:
+        """True when an answer already given rules this scheme out.
+
+        # ! The engine's own three-valued operator on answered fields only. A
+        # ! criterion already False, or an exclusion already True, settles the
+        # ! verdict: nothing she says later can reopen it. It decides nothing
+        # ! new, and None never settles anything — an unanswered field is
+        # ! exactly what a question is for.
+        """
+        for c, settling in ([(c, False) for c in scheme.criteria]
+                            + [(x, True) for x in scheme.exclusions]):
+            actual = getattr(self.profile, c.field, None)
+            if actual is None:
+                continue
+            try:
+                if operators.apply(c.op, actual, c.value) is settling:
+                    return True
+            except operators.OperatorError:
+                continue  # * a broken file is the engine's to report, not ours to hide
+        return False
+
+    def _open_schemes(self) -> dict[str, Scheme]:
+        """Screened schemes her answers so far have not already ruled out."""
+        return {code: sc for code, sc in self._active_schemes().items()
+                if not self._settled_no(sc)}
+
     def _for_another_state(self, scheme: Scheme) -> bool:
         """True when a state criterion already rules out her state.
 
@@ -405,8 +464,11 @@ class Conversation:
         if not self.schemes:
             self.state = State.BANK
             return [self._current_question()]
+        # * Only fields a scheme she can still get needs (29 Sep audit): after
+        # * "PF or ESIC is cut: Yes" every scheme that asks about unorganised
+        # * work or NPS has already ruled her out, so neither is asked.
         wanted = ((set(_CORE_FIELD_STATES) - {"is_unorganised_worker"}) if self._legacy_full else
-                  {c.field for sc in self._active_schemes().values()
+                  {c.field for sc in self._open_schemes().values()
                    for c in sc.criteria + sc.exclusions})
         for field, state in _CORE_FIELD_STATES.items():
             if field in wanted and field not in self._answered_fields:
@@ -867,9 +929,10 @@ class Conversation:
         # ! Other NPS types remain unresolved across official descriptions.
         # ! Do not turn them into either a refusal or a confirmed exemption.
         self._set("nps_exclusion_applies", answer == YES if answer in (YES, NO) else None)
-        # * Ask only when a screened scheme needs this fact; a job title is not proof.
+        # * Ask only when a scheme she can still get needs this fact; a job
+        # * title is not proof.
         if any(c.field == "is_unorganised_worker"
-               for sc in self._active_schemes().values() for c in sc.criteria):
+               for sc in self._open_schemes().values() for c in sc.criteria):
             self.state = State.WORKER
             return [self._current_question()]
         return self._begin_followups()
@@ -897,23 +960,7 @@ class Conversation:
         # ! never skips: an unanswered field is exactly what a follow-up is for.
         supported = EXTRA_FIELDS
         wanted: set[str] = set()
-        for scheme in self._active_schemes().values():
-            settled_no = False
-            # * A criterion already False, or an exclusion already True, settles
-            # * the verdict the same way: nothing asked later can reopen it.
-            for c, settling in ([(c, False) for c in scheme.criteria]
-                                + [(x, True) for x in scheme.exclusions]):
-                actual = getattr(self.profile, c.field, None)
-                if actual is None:
-                    continue
-                try:
-                    if operators.apply(c.op, actual, c.value) is settling:
-                        settled_no = True
-                        break
-                except operators.OperatorError:
-                    continue  # * a broken file is the engine's to report, not ours to hide
-            if settled_no:
-                continue
+        for scheme in self._open_schemes().values():
             for c in scheme.criteria + scheme.exclusions:
                 if c.field in supported:
                     wanted.add(c.field)
@@ -954,16 +1001,98 @@ class Conversation:
                                   Button(self._s("buttons.other_gender"), GENDER_OTHER)))
         criterion = next(c for sc in self._active_schemes().values() for c in sc.criteria + sc.exclusions
                          if c.field == field)
-        return Reply(text=criterion.text("ask", self.lang),
-                     buttons=_yes_no(self.lang, with_dont_know=True))
+        text = criterion.text("ask", self.lang)
+        # * The question first (the web page makes the first line its heading),
+        # * then what she told us earlier that bears on it.
+        earlier = self._earlier_answers(_CONTEXT_FOR.get(field, ()))
+        if earlier:
+            text += "\n\n" + earlier
+        return Reply(text=text, buttons=_yes_no(self.lang, with_dont_know=True))
+
+    def _earlier_answers(self, fields: tuple[str, ...]) -> str:
+        """Those of `fields` she has answered, as recap lines under a heading."""
+        answered = dict(self._answer_pairs())
+        lines = [self._s("recap.line", label=self._s(f"field_labels.{f}"), value=answered[f])
+                 for f in fields if f in answered]
+        return "\n".join([self._s("recap.earlier")] + lines) if lines else ""
 
     def _on_followup(self, answer: str) -> list[Reply]:
-        if answer == GENDER_OTHER and self._followup_field() == "is_woman":
+        field = self._followup_field()
+        if answer == GENDER_OTHER and field == "is_woman":
             answer = DK  # * same meaning: unset, so UNKNOWN wherever it matters
         if answer not in (YES, NO, DK):
             return [self._ask_followup()]
-        self._set(self._followup_field(), None if answer == DK else answer == YES)
+        self._set(field, None if answer == DK else answer == YES)
+        # ! "Not a woman" means not a widow — the word itself says so, and every
+        # ! widow pension here (IGNWPS, Uttarakhand, MP Kalyani, Sikkim) is for
+        # ! widows. The widow question was already skipped on this answer, yet
+        # ! the field stayed unset: a man was asked the widow pension's income
+        # ! and selection questions, then told "can't be sure, ask at the centre"
+        # ! about two widow pensions (29 Sep). Recorded as the fact it is, not
+        # ! as an answer: the recap shows only what she tapped. "Other gender /
+        # ! prefer not to say" infers nothing, as before.
+        if field == "is_woman" and answer == NO:
+            self.profile = replace(self.profile, is_widow=False)
+        # * "No unorganised work", then "yes, I run my own shop / trade", with no
+        # * PF or ESIC cut: show both and let her say which is right.
+        if (field in _SELF_EMPLOYED_FIELDS and answer == YES
+                and self.profile.is_unorganised_worker is False
+                and self.profile.is_epfo_or_esic_member is not True
+                and "worker" not in self._checks_done):
+            return self._start_cross_check("worker")
         return self._begin_followups()
+
+    # * ------------------------------------------------------- cross-checks
+
+    def _bank_conflicts(self) -> list[str]:
+        """Ticked as already held, though she said she has no bank account.
+
+        # * Any scheme whose rules look at the bank account goes with one: APY
+        # * and the two insurances need an account, and Jan Dhan (PMJDY) IS one.
+        # * Read from the scheme files, not a hand-kept list.
+        """
+        if self.profile.has_bank_account is not False:
+            return []
+        return sorted(code for code in self._known if code in self.schemes
+                      and any(c.field == "has_bank_account"
+                              for c in self.schemes[code].criteria))
+
+    def _start_cross_check(self, kind: str) -> list[Reply]:
+        self._cross_check = kind
+        self.state = State.CROSS_CHECK
+        return [self._ask_cross_check()]
+
+    def _ask_cross_check(self) -> Reply:
+        # ! Two answers side by side, and two buttons. Only her tap changes an
+        # ! earlier answer (the tax check's rule); nothing is corrected for her.
+        if self._cross_check == "worker":
+            return Reply(text=self._s("confirm.worker"), buttons=(
+                Button(self._s("confirm.worker_yes"), FIX_EARLIER),
+                Button(self._s("confirm.keep_answers"), FIX_KEEP)))
+        names = [self.schemes[code].name(self.lang) for code in self._bank_conflicts()]
+        key = "confirm.bank_one" if len(names) == 1 else "confirm.bank_many"
+        return Reply(text=self._s(key, names=", ".join(names)), buttons=(
+            Button(self._s("confirm.bank_yes"), FIX_EARLIER),
+            Button(self._s("confirm.untick"), FIX_UNTICK)))
+
+    def _on_cross_check(self, answer: str) -> list[Reply]:
+        kind = self._cross_check
+        if kind == "worker" and answer in (FIX_EARLIER, FIX_KEEP):
+            self._checks_done.add(kind)
+            if answer == FIX_EARLIER:
+                self._set("is_unorganised_worker", True)
+            # * e-Shram and PM-SYM may be open again; their questions come next.
+            return self._begin_followups()
+        if kind == "bank" and answer in (FIX_EARLIER, FIX_UNTICK):
+            self._checks_done.add(kind)
+            if answer == FIX_EARLIER:
+                self._set("has_bank_account", True)
+                # * An account can open APY and the two insurances again; any
+                # * question they still need comes next, then the result.
+                return self._begin_followups()
+            self._known -= set(self._bank_conflicts())
+            return self._finish_known()
+        return [self._ask_cross_check()]
 
     def _known_options(self) -> list[str]:
         """Every scheme being screened, plus any a rule names as an exclusion.
@@ -984,6 +1113,10 @@ class Conversation:
         return sorted(code for code in options if code in self.schemes)
 
     def _continue_after_questions(self) -> list[Reply]:
+        # * A cross-check can reopen questions after the held-schemes list was
+        # * answered. It is not asked a second time.
+        if self._known_declared:
+            return self._finish_known()
         if self._known_options():
             self.state = State.KNOWN_SCHEMES
             return [self._ask_known_schemes()]
@@ -1007,6 +1140,14 @@ class Conversation:
             self._known.clear()
         elif answer != NEXT:
             return [self._ask_known_schemes()]
+        self._known_declared = True
+        # * "No bank account", then Jan Dhan or APY ticked as already held.
+        if self._bank_conflicts() and "bank" not in self._checks_done:
+            return self._start_cross_check("bank")
+        return self._finish_known()
+
+    def _finish_known(self) -> list[Reply]:
+        """Record what she already holds, then show the result."""
         self.profile = replace(self.profile, known_schemes=frozenset(self._known))
         self._event("known_schemes_declared")
         return self._evaluate()
@@ -1020,6 +1161,13 @@ class Conversation:
         # ! these answers and has no other way to see what was recorded — the
         # ! taps are callbacks, and nothing in the chat says which one was hit.
         """
+        # * The sheet puts the heading on the box, so it asks for the lines only.
+        lines = [self._s("recap.line", label=self._s(f"field_labels.{f}"), value=v)
+                 for f, v in self._answer_pairs()]
+        return "\n".join(([self._s("recap.header")] if header else []) + lines)
+
+    def _answer_pairs(self) -> list[tuple[str, str]]:
+        """(field, answer as she would read it), for every question she was asked."""
         p = self.profile
         unset = self._s("recap.not_answered")
 
@@ -1050,7 +1198,13 @@ class Conversation:
              if p.nps_exclusion_applies is None else yn(p.nps_exclusion_applies)),
             ("known_schemes", ", ".join(held) if held else self._s("recap.none")),
         ]
-        for field in self._followup_fields:
+        # ! Every follow-up she answered, in the order they are asked. This read
+        # ! only the follow-ups still wanted at the end, so an answer that ruled
+        # ! her out of a scheme ("BPL: No") vanished from her own recap (29 Sep).
+        followups = [f for f in _FOLLOWUP_ORDER if f in self._answered_fields]
+        followups += sorted(f for f in self._answered_fields
+                            if f in EXTRA_FIELDS and f not in _FOLLOWUP_ORDER)
+        for field in followups:
             value = getattr(p, field)
             if field == "is_woman" and value is None:
                 # * "Other gender / prefer not to say" is read back as what she
@@ -1065,11 +1219,7 @@ class Conversation:
         # ! (AUDIT.md M1). A "Don't know" answer IS in _answered_fields and
         # ! still shows as not answered, which is the point of showing it.
         # ! The held-schemes line is always shown: that question is always asked.
-        pairs = [(f, v) for f, v in pairs if f == "known_schemes" or f in self._answered_fields]
-        # * The sheet puts the heading on the box, so it asks for the lines only.
-        lines = [self._s("recap.line", label=self._s(f"field_labels.{f}"), value=v)
-                 for f, v in pairs]
-        return "\n".join(([self._s("recap.header")] if header else []) + lines)
+        return [(f, v) for f, v in pairs if f == "known_schemes" or f in self._answered_fields]
 
     # * -------------------------------------------------------------- results
 
@@ -1080,13 +1230,16 @@ class Conversation:
 
         active = self._active_schemes()
         self._results = evaluate_all(self.profile, active)
+        # * What she already has, for "New for you" and the headline metric:
+        # * what she ticked, plus every other route to a pension she ticked.
+        # * The rules above saw exactly what she ticked.
+        self._held = held_routes(frozenset(self._known), active)
         if self.log and self.session:
             self.log.log_results(
-                self.session, self.profile, self._results, frozenset(self._known)
+                self.session, self.profile, self._results, self._held
             )
 
-        text = templates.result_message(self._results, active,
-                                        frozenset(self._known), self.lang)
+        text = templates.result_message(self._results, active, self._held, self.lang)
         # * Recap first: the worker sees what was recorded, then the verdict
         # * built on it. Its own message so a long result cannot push it away.
         replies = [Reply(text=self._recap()), Reply(text=text)]
@@ -1149,7 +1302,7 @@ class Conversation:
         replies = []
         if answer == YES:
             filename, blob = pack.build(
-                self._results, self.schemes, frozenset(self._known),
+                self._results, self.schemes, self._held,
                 frozenset(self._have_docs), lang=self.lang, recap=self._recap(header=False)
             )
             self._event("pack_generated")

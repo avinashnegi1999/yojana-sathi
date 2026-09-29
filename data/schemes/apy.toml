@@ -102,15 +102,30 @@ source_url = "https://pfrda.org.in/w/faqs/atal-pension-yojana"
 # ! source, so a former taxpayer is barred too. The question the intake asks is
 # ! present tense, which is WEAKER than the rule — a past taxpayer who answers
 # ! "no" truthfully would be told yes here and refused at the bank.
-# ? Flag for sign-off: either the intake question gains "or have you ever been",
-# ? or the fail text has to carry the warning. Left as-is rather than silently
-# ? changing a question that four other schemes depend on.
+# * Resolved 2026-09-29, at Avinash's request: the shared question stays present
+# * tense, and the "has been" half is the second exclusion below, asked only
+# * while APY is still possible. Asking everyone "have you ever paid" would
+# * refuse former payers that e-Shram, PM-SYM, NPS-Traders and the state
+# * pensions accept, because their sources bar current payers only.
 [[exclusions]]
 field = "is_income_tax_payer"
 op = "eq"
 value = true
 reason_en = "You reported paying income tax. Since 1 October 2022, anyone who is — or has ever been — an income-tax payer cannot open a new APY account."
 reason_hi = "आपने आयकर भरना बताया। 1 अक्टूबर 2022 से, जो व्यक्ति आयकरदाता है या कभी रहा है, वह नया APY खाता नहीं खोल सकता।"
+source_url = "https://pfrda.org.in/w/faqs/atal-pension-yojana"
+
+# ! 2026-09-29: the "or has been" half of the same PFRDA sentence quoted above.
+# ! Added by Claude at Avinash's request; nothing new is claimed. The texts are
+# ! drafts — re-read them at the next review (`python3 -m sathi.review`).
+[[exclusions]]
+field = "has_paid_income_tax_before"
+op = "eq"
+value = true
+ask_en = "Have you paid income tax in any earlier year? Atal Pension Yojana is closed to anyone who is, or has ever been, an income-tax payer."
+ask_hi = "क्या आपने पहले किसी साल आयकर भरा है? अटल पेंशन योजना उनके लिए बंद है जो आयकरदाता हैं या कभी रहे हैं।"
+reason_en = "You reported paying income tax in an earlier year. Since 1 October 2022, anyone who is — or has ever been — an income-tax payer cannot open a new APY account."
+reason_hi = "आपने पहले किसी साल आयकर भरना बताया। 1 अक्टूबर 2022 से, जो व्यक्ति आयकरदाता है या कभी रहा है, वह नया APY खाता नहीं खोल सकता।"
 source_url = "https://pfrda.org.in/w/faqs/atal-pension-yojana"
 
 [paperwork]

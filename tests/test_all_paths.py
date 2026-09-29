@@ -304,7 +304,7 @@ def test_every_document_of_every_scheme_is_reachable():
     # ! not start until 60. That is a fact about the schemes, not a gap here.
     """
     keep = {"is_woman": "yes", "is_widow": "yes", "household_has_lpg": "no",
-            "pmuy_declaration_met": "yes", "uk_pension_income_or_bpl": "yes",
+            "pmuy_declaration_met": "yes", "uk_old_age_income_or_bpl": "yes", "uk_widow_income_or_bpl": "yes", "has_paid_income_tax_before": "no",
             "receives_other_pension": "no", "uk_pension_selected": "yes",
             "is_bpl": "yes", "has_disability_80pct": "yes", "is_small_trader": "yes",
             "is_vishwakarma_artisan": "yes", "took_business_loan_5yr": "no",
@@ -421,17 +421,19 @@ def test_commands_at_every_state():
         # * The state-first walk (27 Sep 2026) reaches the state question and
         # * the scheme list. Occupation, land and family are asked only in the
         # * scheme-first order's full intake — no signed scheme needs them —
-        # * and tests/test_flow.py walks that order.
+        # * and tests/test_flow.py walks that order. CROSS_CHECK appears only
+        # * after two answers that contradict each other; this walk gives none,
+        # * and tests/test_flow.py walks both cross-checks.
         assert reached == set(State) - {
             State.OCCUPATION, State.LAND, State.FAMILY,
             State.OCCUPATION_FREE, State.OCCUPATION_CONFIRM,
-            State.TAX_CONFIRM, State.TAX_INCOME,
+            State.TAX_CONFIRM, State.TAX_INCOME, State.CROSS_CHECK,
         }, "the tax-No command walk must reach DONE without entering confirmation"
     assert not problems, "\n".join(f"  - {p}" for p in sorted(set(problems))[:25])
 
 
 _KEEP = {"is_woman": "yes", "is_widow": "yes", "household_has_lpg": "no",
-         "pmuy_declaration_met": "yes", "uk_pension_income_or_bpl": "yes",
+         "pmuy_declaration_met": "yes", "uk_old_age_income_or_bpl": "yes", "uk_widow_income_or_bpl": "yes", "has_paid_income_tax_before": "no",
          "receives_other_pension": "no", "uk_pension_selected": "yes",
          "is_bpl": "yes", "has_disability_80pct": "yes", "is_small_trader": "yes",
          "is_vishwakarma_artisan": "yes", "took_business_loan_5yr": "no",
@@ -603,11 +605,12 @@ def test_every_command_through_the_adapter_at_every_state():
         # * The state-first walk (27 Sep 2026) reaches the state question and
         # * the scheme list. Occupation, land and family are asked only in the
         # * scheme-first order's full intake — no signed scheme needs them —
-        # * and tests/test_flow.py walks that order.
+        # * and tests/test_flow.py walks that order. CROSS_CHECK needs two
+        # * contradicting answers; tests/test_flow.py walks it.
         assert reached == set(State) - {
             State.OCCUPATION, State.LAND, State.FAMILY,
             State.OCCUPATION_FREE, State.OCCUPATION_CONFIRM,
-            State.TAX_CONFIRM, State.TAX_INCOME,
+            State.TAX_CONFIRM, State.TAX_INCOME, State.CROSS_CHECK,
         }, "the adapter's tax-No walk must reach DONE without entering confirmation"
     assert not problems, "\n".join(f"  - {p}" for p in sorted(set(problems))[:25])
 

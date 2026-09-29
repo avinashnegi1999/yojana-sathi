@@ -173,6 +173,8 @@ const ICONS={
   'yes':'check','no':'xmark','dont_know':'question','consent_yes':'arrow','consent_no':'xmark',
   // * A neutral mark for "Other gender / prefer not to say", never the question mark.
   'gender_other':'more',
+  // * A cross-check: change the earlier answer, keep both, or remove the ticks.
+  'fix:earlier':'pencil','fix:keep':'check','fix:untick':'xmark',
   'occ:construction':'hardhat','occ:agriculture':'leaf','occ:domestic_work':'sparkle','occ:street_vendor':'cart',
   'occ:transport':'truck','occ:manufacturing':'gear','occ:sanitation':'drop','occ:home_based':'house','other':'pencil',
   'pick:national':'columns','pick:state':'pin','pick:all':'list','next':'arrow','none':'xmark'
@@ -681,6 +683,11 @@ class LocalWeb:
             items = self._render(restored, [restored.set_language(convo.lang)[-1]])
         return 200, self._response(session, restored, items)
 
+    @staticmethod
+    def _question(convo: Conversation) -> tuple[State, str]:
+        """Which question a saved screen asks: its state, and which follow-up."""
+        return (convo.state, convo._followup_field() if convo.state is State.FOLLOWUP else "")
+
     def _response(self, session: str, convo: Conversation | None, items: list[dict]) -> bytes:
         """The JSON the page reads: the screen, its language, and where Back and Forward go."""
         with self._lock:
@@ -698,13 +705,18 @@ class LocalWeb:
             chosen = ""
             if ahead and convo is not None and convo.state not in self.TICK_STATES:
                 chosen = steps[at + 1].answer
+            # * Which question this is since consent, counting from 1, for the
+            # * page's "Step 3" label; 0 before consent. A tap that redraws the
+            # * same question (a tick on a list, its next page) is not a new
+            # * step: counting each one showed "Step 41" on the held-schemes list
+            # * (29 Sep). No total: the number of questions depends on her answers.
+            step = 0
+            if 0 <= at < len(steps):
+                step = 1 + sum(1 for i in range(1, at + 1)
+                               if self._question(steps[i].convo) != self._question(steps[i - 1].convo))
         # * The page labels its own controls (Send, the text box, Download) in
         # * the worker's language; they were English on a Hindi screen.
         lang = convo.lang if convo is not None else DEFAULT_LANG
-        # * Which screen this is since consent, counting from 1, for the page's
-        # * "Step 3" label. 0 before consent. No total: the number of questions
-        # * depends on her answers, so a total would be a guess.
-        step = at + 1 if 0 <= at < len(steps) else 0
         return json.dumps({"replies": items, "lang": lang,
                            "nav": {"back": back, "forward": forward}, "chosen": chosen,
                            "step": step},
@@ -1006,6 +1018,17 @@ def _self_check() -> None:
     assert walk.sessions["w"].state is State.SCHEME_PICKER and scope["nav"]["back"]
     step("pick:all")
     assert walk.sessions["w"].state is State.AGE
+
+    # * "Step N" counts questions: a tick redraws the same list, so it is the
+    # * same step, not the next one (29 Sep: "Step 41" on the held list).
+    ticks = LocalWeb(schemes)
+    body(ticks.payload("t", "/start"))
+    body(ticks.payload("t", "consent_yes"))
+    body(ticks.payload("t", "state:UK"))
+    picker = body(ticks.payload("t", "pick:all"))
+    ticked = body(ticks.payload("t", "pick:ESHRAM"))
+    assert picker["step"] == ticked["step"] == 3, (picker["step"], ticked["step"])
+    assert body(ticks.payload("t", "pick:all"))["step"] == 4
 
     # * Back restores the screen before, with the answer given there marked.
     back = step("/back")

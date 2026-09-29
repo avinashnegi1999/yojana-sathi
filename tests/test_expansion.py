@@ -21,7 +21,7 @@ def test_new_scheme_boundaries():
     schemes = {k: replace(v, verified_by='test fixture only', stubs=())
                for k,v in real.items()}
     p = Profile(state='UK', age=30, has_bank_account=True, is_woman=True,
-                is_widow=True, uk_pension_income_or_bpl=True,
+                is_widow=True, uk_old_age_income_or_bpl=True, uk_widow_income_or_bpl=True,
                 receives_other_pension=False,
                 uk_pension_selected=True, household_has_lpg=False,
                 pmuy_declaration_met=True)
@@ -34,9 +34,9 @@ def test_new_scheme_boundaries():
     assert evaluate(replace(p,state='UP'),schemes['UK_WIDOW']).verdict is Verdict.INELIGIBLE
     # The broad income band must never stand in for the separate income/BPL answer.
     for band in ('upto_5000','above_25000'):
-        q=replace(p,income_band=band,uk_pension_income_or_bpl=None)
+        q=replace(p,income_band=band,uk_widow_income_or_bpl=None)
         assert evaluate(q,schemes['UK_WIDOW']).verdict is Verdict.UNKNOWN
-    assert evaluate(replace(p,uk_pension_income_or_bpl=False),schemes['UK_WIDOW']).verdict is Verdict.INELIGIBLE
+    assert evaluate(replace(p,uk_widow_income_or_bpl=False),schemes['UK_WIDOW']).verdict is Verdict.INELIGIBLE
     # ! The department's Hindi pension overview explicitly excludes a widow
     # ! already receiving another pension; its old-age page still does not.
     q=replace(p,age=65,receives_other_pension=True)
@@ -82,7 +82,7 @@ def test_the_two_state_pensions_are_never_counted_as_two_payments():
     # ! receiving none still qualifies for both routes on paper, which is
     # ! exactly the case that used to be added up.
     p = Profile(state='UK', age=65, has_bank_account=True, is_woman=True,
-                is_widow=True, uk_pension_income_or_bpl=True,
+                is_widow=True, uk_old_age_income_or_bpl=True, uk_widow_income_or_bpl=True,
                 receives_other_pension=False,
                 uk_pension_selected=True, household_has_lpg=False,
                 pmuy_declaration_met=True)
@@ -119,7 +119,7 @@ def test_the_sheet_a_worker_carries_is_readable_on_a_phone():
                 is_income_tax_payer=False, is_epfo_or_esic_member=False,
                 nps_exclusion_applies=False, is_unorganised_worker=True,
                 is_woman=True, is_widow=False, household_has_lpg=False,
-                pmuy_declaration_met=True, uk_pension_income_or_bpl=True,
+                pmuy_declaration_met=True, uk_old_age_income_or_bpl=True, uk_widow_income_or_bpl=True,
                 receives_other_pension=False, uk_pension_selected=True)
     results = evaluate_all(p, signed)
     assert any(r.is_eligible for r in results), 'an empty sheet checks nothing'
@@ -168,7 +168,7 @@ def test_no_reason_is_said_to_a_worker_twice():
                 is_income_tax_payer=False, is_epfo_or_esic_member=False,
                 nps_exclusion_applies=False, is_unorganised_worker=True,
                 is_woman=True, is_widow=False, household_has_lpg=False,
-                pmuy_declaration_met=True, uk_pension_income_or_bpl=True,
+                pmuy_declaration_met=True, uk_old_age_income_or_bpl=True, uk_widow_income_or_bpl=True,
                 receives_other_pension=False, uk_pension_selected=True)
     from sathi.rules.engine import evaluate_all
     results = evaluate_all(p, signed)
@@ -213,7 +213,7 @@ def test_all_unknown_never_tells_a_worker_they_failed():
                 family_size=4, has_bank_account=True, is_income_tax_payer=True,
                 is_epfo_or_esic_member=False, is_unorganised_worker=False,
                 is_woman=False, is_widow=False, household_has_lpg=False,
-                pmuy_declaration_met=False, uk_pension_income_or_bpl=False,
+                pmuy_declaration_met=False, uk_old_age_income_or_bpl=False, uk_widow_income_or_bpl=False,
                 receives_other_pension=False, uk_pension_selected=False)
     from sathi.rules.engine import evaluate_all
     results = evaluate_all(p, schemes)
@@ -259,7 +259,7 @@ def test_followups_preserve_unknown_and_language():
             assert c._followup_field()==field
             c.handle('dont_know')
             assert getattr(c.profile,field) is None
-        assert 'uk_pension_income_or_bpl' in seen
+        assert 'uk_widow_income_or_bpl' in seen  # * age 30: the old-age file is already out
         assert 'household_has_lpg' in seen
         assert c.state is State.KNOWN_SCHEMES
         assert c.profile.income_band=='upto_5000'
@@ -321,7 +321,8 @@ def test_new_boolean_conditions_against_source_oracle():
     for state,age,income,other,selected,widow in itertools.product(
             (None,'UK','UP'),(None,17,18,59,60,75),
             (None,False,True),(None,False,True),(None,False,True),(None,False,True)):
-        p=Profile(state=state,age=age,uk_pension_income_or_bpl=income,
+        p=Profile(state=state,age=age,uk_old_age_income_or_bpl=income,
+                  uk_widow_income_or_bpl=income,
                   receives_other_pension=other,
                   uk_pension_selected=selected,is_widow=widow)
         for code,limit in (('UK_OLD_AGE',60),('UK_WIDOW',18)):

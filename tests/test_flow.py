@@ -22,7 +22,8 @@ sys.path.insert(0, str(ROOT))
 from sathi.conversation import consent
 from sathi.conversation.flow import (
     ROLE_TESTER, SKIP,
-    DK, GENDER_OTHER, LANG_EN, LANG_HI, NEXT, NO, YES, Conversation, State,
+    DK, FIX_EARLIER, FIX_KEEP, FIX_UNTICK, GENDER_OTHER, LANG_EN, LANG_HI, NEXT, NO, YES,
+    Conversation, State,
 )
 from sathi.core.content import s
 from sathi.core.profile import INCOME_BANDS
@@ -684,12 +685,15 @@ def test_gender_answer_skips_widow_and_pmuy_followups_when_not_applicable():
     widow.handle("pick:done"); widow.handle("45")
     assert widow._followup_field() == "is_woman"
     widow.handle(NO)
-    assert widow._followup_field() == "is_bpl"
-    widow.handle(YES)
-    assert widow.state is State.KNOWN_SCHEMES
+    # ! "Not a woman" settles a widow pension: no BPL question for it any more
+    # ! (29 Sep; he used to be asked it, then told "can't be sure").
+    assert widow.state is State.KNOWN_SCHEMES, widow.state
     out = widow.handle(NEXT)
     assert widow.state is State.PACK
-    assert "is_widow" not in widow._answered_fields
+    assert widow.profile.is_widow is False
+    assert "is_widow" not in widow._answered_fields, "recorded as a fact, never shown as tapped"
+    ignwps = next(r for r in widow._results if r.scheme_code == "IGNWPS")
+    assert ignwps.verdict.name == "INELIGIBLE", ignwps.verdict
 
     pmuy = Conversation(schemes, None, state_first=False)
     pmuy.start(); pmuy.handle(LANG_EN); pmuy.handle(consent.YES)
@@ -981,6 +985,159 @@ def test_a_hand_picked_scheme_from_another_state_is_still_answered():
     _screen_to_result(convo, "state:TN")
     result = {r.scheme_code: r for r in convo._results}["UK_OLD_AGE"]
     assert result.verdict is Verdict.INELIGIBLE
+
+
+# * ------------------------------------------------ 29 Sep contradiction audit
+# * Uttarakhand, "both" national and state, every scheme: the route where the
+# * questions were found contradicting each other.
+
+def _uk_all(age: str, answers: dict[str, str], known: tuple[str, ...] = ()) -> tuple[Conversation, list[str]]:
+    """Walk Uttarakhand + all schemes to the result. Returns the conversation and
+    every question field asked, in order. Unlisted questions are answered No."""
+    convo = Conversation(load_all(), None)
+    convo.start(); convo.handle(LANG_EN); convo.handle(consent.YES)
+    convo.handle("state:UK"); convo.handle("pick:all"); convo.handle("pick:all")
+    out = convo.handle(age)
+    asked: list[str] = []
+    for _ in range(60):
+        if convo.state in (State.DOCUMENTS, State.PACK):
+            return convo, asked
+        if convo.state is State.KNOWN_SCHEMES:
+            for code in known:
+                convo.handle(f"known:{code}")
+            known = ()
+            asked.append("known_schemes")
+            out = convo.handle(answers.get("known_schemes", NEXT))
+            continue
+        field = convo._followup_field() if convo.state is State.FOLLOWUP else convo.state.value
+        values = [b.value for b in out[-1].buttons]
+        answer = answers.get(field, "inc:upto_5000" if field == "income_band" else NO)
+        assert answer in values, f"{field}: {answer} not offered in {values}"
+        asked.append(field)
+        out = convo.handle(answer)
+    raise AssertionError(f"never reached the result; stuck at {convo.state}")
+
+
+def _verdict(convo: Conversation, code: str) -> str:
+    return next(r.verdict.name for r in convo._results if r.scheme_code == code)
+
+
+def test_each_uttarakhand_pension_asks_its_own_income_question():
+    """#1. The old-age file asks about OWN income, the widow file about the
+    FAMILY's. One shared answer used to decide both, with the old-age wording
+    shown to a 60+ widow, so her family's income was never asked."""
+    widow = {"has_bank_account": YES, "is_woman": YES, "is_widow": YES,
+             "uk_old_age_income_or_bpl": YES, "uk_widow_income_or_bpl": NO,
+             "uk_pension_selected": YES}
+    convo, asked = _uk_all("65", widow)
+    assert asked.index("uk_old_age_income_or_bpl") < asked.index("uk_widow_income_or_bpl"), asked
+    assert convo.profile.uk_old_age_income_or_bpl is True
+    assert convo.profile.uk_widow_income_or_bpl is False
+    assert _verdict(convo, "UK_OLD_AGE") == "ELIGIBLE"
+    assert _verdict(convo, "UK_WIDOW") == "INELIGIBLE", "the family answer decides the widow route"
+
+
+def test_the_income_or_bpl_question_shows_the_earlier_answers():
+    """#2 and #7. "Income ₹15,000–₹25,000", then "₹4,000 or less, or a BPL
+    card?" read as a contradiction. The earlier income and BPL answers now sit
+    under the question, so she reads them together."""
+    convo = Conversation(load_all(), None)
+    convo.start(); convo.handle(LANG_EN); convo.handle(consent.YES)
+    convo.handle("state:UK"); convo.handle("pick:all"); convo.handle("pick:all")
+    out = convo.handle("35")
+    for _ in range(40):
+        if convo.state is State.FOLLOWUP and convo._followup_field() == "uk_widow_income_or_bpl":
+            break
+        field = convo._followup_field() if convo.state is State.FOLLOWUP else convo.state.value
+        answer = {"income_band": "inc:15001_25000", "has_bank_account": YES,
+                  "is_woman": YES, "is_bpl": NO}.get(field, NO)
+        out = convo.handle(answer)
+    else:
+        raise AssertionError("the widow income question was never asked")
+    text = out[-1].text
+    question = s("recap.earlier", "en")
+    assert text.index(question) > 0, "the question comes first; the page makes it the heading"
+    assert s("income_bands.15001_25000", "en") in text, text
+    assert s("field_labels.is_bpl", "en") + ": " + s("buttons.no", "en") in text, text
+
+
+def test_a_held_pension_route_is_not_new_and_adds_no_rupees():
+    """#3. Holding the national widow pension in Uttarakhand is holding the
+    state social pension. The Uttarakhand widow pension is the same payment by
+    another route: not "New for you", and nothing added to the headline."""
+    widow = {"has_bank_account": YES, "is_woman": YES, "is_widow": YES, "is_bpl": YES,
+             "uk_widow_income_or_bpl": YES, "uk_pension_selected": YES}
+    convo, _ = _uk_all("45", widow, known=("IGNWPS",))
+    assert _verdict(convo, "UK_WIDOW") == "ELIGIBLE"
+    assert "UK_WIDOW" in convo._held and "UK_WIDOW" not in convo.profile.known_schemes, \
+        "display and metrics treat it as held; the rules saw only what she ticked"
+    from sathi.rules.engine import newly_surfaced
+    assert "UK_WIDOW" not in newly_surfaced(convo._results, convo._held)
+
+
+def test_apy_asks_about_income_tax_in_earlier_years():
+    """#4. APY bars anyone who "is or has been" an income-tax payer. The shared
+    question is present tense, so a former payer was told APY fits."""
+    convo, asked = _uk_all("30", {"has_bank_account": YES, "is_income_tax_payer": NO,
+                                  "has_paid_income_tax_before": YES})
+    assert "has_paid_income_tax_before" in asked
+    assert _verdict(convo, "APY") == "INELIGIBLE"
+    # * Current payers are already out of APY, so they are not asked again.
+    _, asked = _uk_all("30", {"has_bank_account": YES, "is_income_tax_payer": YES,
+                              "tax_confirm": "tax:keep"})
+    assert "has_paid_income_tax_before" not in asked
+    # * The other schemes still bar current payers only.
+    convo, _ = _uk_all("30", {"has_bank_account": YES, "is_income_tax_payer": NO,
+                              "is_unorganised_worker": YES, "has_paid_income_tax_before": YES})
+    assert _verdict(convo, "ESHRAM") == "ELIGIBLE", "a former payer is not refused e-Shram"
+
+
+def test_self_employed_after_no_unorganised_work_is_checked_once():
+    """#5. "No unorganised work", then "yes, I run my own shop": both are shown
+    and she chooses. Only her tap changes the earlier answer."""
+    answers = {"has_bank_account": YES, "is_unorganised_worker": NO, "is_small_trader": YES,
+               "cross_check": FIX_EARLIER}
+    convo, asked = _uk_all("30", answers)
+    assert asked.count("cross_check") == 1, asked
+    assert convo.profile.is_unorganised_worker is True
+    assert _verdict(convo, "ESHRAM") == "ELIGIBLE", "e-Shram is open again after her correction"
+    kept, asked = _uk_all("30", dict(answers, cross_check=FIX_KEEP, is_vishwakarma_artisan=YES))
+    assert asked.count("cross_check") == 1, "asked once, even with a second self-employed answer"
+    assert kept.profile.is_unorganised_worker is False
+    # * PF or ESIC cut from pay: "not unorganised" is consistent. No check.
+    _, asked = _uk_all("30", dict(answers, is_epfo_or_esic_member=YES))
+    assert "cross_check" not in asked
+
+
+def test_pf_or_esic_skips_questions_that_cannot_change_anything():
+    """#6. After "PF or ESIC is cut: Yes", every scheme that asks about
+    unorganised work or NPS has already ruled her out. Neither is asked."""
+    _, asked = _uk_all("30", {"has_bank_account": YES, "is_epfo_or_esic_member": YES})
+    assert "is_unorganised_worker" not in asked and "nps_exclusion_applies" not in asked, asked
+    _, asked = _uk_all("30", {"has_bank_account": YES})
+    assert "is_unorganised_worker" in asked and "nps_exclusion_applies" in asked, asked
+
+
+def test_a_held_bank_scheme_after_no_bank_account_is_checked():
+    """#8. "No bank account", then Jan Dhan or APY ticked as already held."""
+    convo, asked = _uk_all("30", {"cross_check": FIX_EARLIER}, known=("PMJDY",))
+    assert asked.count("cross_check") == 1 and asked.count("known_schemes") == 1, \
+        f"the held list is not asked twice: {asked}"
+    assert convo.profile.has_bank_account is True
+    assert _verdict(convo, "PMJDY") == "INELIGIBLE", "she has an account, so not a new one"
+    convo, _ = _uk_all("30", {"cross_check": FIX_UNTICK}, known=("PMJDY", "ESHRAM"))
+    assert convo.profile.has_bank_account is False
+    assert convo.profile.known_schemes == {"ESHRAM"}, "only the bank-linked tick is removed"
+    _, asked = _uk_all("30", {"has_bank_account": YES}, known=("PMJDY",))
+    assert "cross_check" not in asked, "with an account, holding Jan Dhan is consistent"
+
+
+def test_the_recap_keeps_an_answer_that_ruled_a_scheme_out():
+    """An answer that settled a scheme ("BPL: No") used to vanish from her own
+    recap, because the recap read only the questions still wanted at the end."""
+    convo, asked = _uk_all("45", {"is_woman": YES, "is_bpl": NO})
+    assert "is_bpl" in asked
+    assert s("field_labels.is_bpl", "en") in convo._recap()
 
 
 def run() -> None:

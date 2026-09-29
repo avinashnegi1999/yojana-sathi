@@ -289,6 +289,22 @@ def newly_surfaced(results: tuple[Result, ...], known: frozenset[str]) -> tuple[
     return tuple(r.scheme_code for r in results if r.is_eligible and r.scheme_code not in known)
 
 
+def held_routes(known: frozenset[str], schemes: dict[str, Scheme]) -> frozenset[str]:
+    """What she already has, counting every alternative route to a payment she holds.
+
+    # ! 29 Sep audit. A widow in Uttarakhand who already draws the national
+    # ! widow pension gets the state social pension through that route; the
+    # ! Uttarakhand widow pension is the same payment by another door. It was
+    # ! shown "New for you" and added ₹18,000 to "annual entitlement surfaced".
+    # ! Same exclusive_group = same payment, so holding one member means every
+    # ! member is already held. Display and metrics only: the rules still see
+    # ! exactly the schemes she ticked (profile.known_schemes).
+    """
+    groups = exclusive_groups(schemes)
+    held_groups = {groups[code] for code in known if code in groups}
+    return frozenset(known) | {code for code, group in groups.items() if group in held_groups}
+
+
 def _self_check() -> None:
     # * Full coverage lives in tests/test_rules.py. This is the smoke test that
     # * runs on import from check.py.
@@ -352,6 +368,10 @@ def _self_check() -> None:
     loaded = {"UK_OLD_AGE": pension, "UK_WIDOW": widow, "PMSBY": bima}
     got = value_totals(pair + (cover("PMSBY", 200000),), loaded)
     assert got == (18000, 200000), got
+    # * Holding one route to the state pension holds them all; nothing else.
+    assert held_routes(frozenset({"UK_OLD_AGE"}), loaded) == {"UK_OLD_AGE", "UK_WIDOW"}
+    assert held_routes(frozenset({"PMSBY"}), loaded) == {"PMSBY"}
+    assert held_routes(frozenset(), loaded) == frozenset()
     print("engine.py OK")
 
 

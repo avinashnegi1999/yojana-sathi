@@ -51,7 +51,10 @@ all_of_these = "All of these"
 pick_one = "Pick at least one scheme, or tap All of these."
 
 [questions]
-is_unorganised_worker = "Do you do unorganised work — home-based, self-employed or daily wage?"
+# * Examples added 29 Sep: a shopkeeper who read "unorganised" as "labourer"
+# * answered No, then Yes to "do you run a shop". e-Shram counts self-employed
+# * work (eshram.toml), so the question now says what self-employed means.
+is_unorganised_worker = "Do you do unorganised work — home-based, self-employed (like your own small shop, stall or trade) or daily wage?"
 # =====================================================================
 state = "Which state do you live in?"
 state_retry = "I didn't recognise that state. Pick one below."
@@ -113,7 +116,9 @@ above_2_hectare = "More than 2 hectares"
 [field_labels]
 is_woman = "woman applicant"
 is_widow = "widow status"
-uk_pension_income_or_bpl = "pension income/BPL condition"
+uk_old_age_income_or_bpl = "old-age pension: own income or BPL card"
+uk_widow_income_or_bpl = "widow pension: family income or BPL card"
+has_paid_income_tax_before = "income tax in an earlier year"
 receives_other_pension = "already receiving another pension"
 uk_pension_selected = "local pension selection"
 household_has_lpg = "household LPG connection"
@@ -151,6 +156,22 @@ tax = """Income: {income}
 Income tax: Yes
 Keep both?"""
 keep_both = "Keep both"
+# * Two answers that cannot both be right as meant (29 Sep audit). Shown side
+# * by side; only her own tap changes an earlier answer, as with tax above.
+worker = """Two of your answers do not fit together.
+You said you do not do unorganised work, but also that you run your own shop, business or trade.
+Working for yourself usually counts as unorganised work when no PF or ESIC is cut.
+Which is right?"""
+worker_yes = "My work is unorganised"
+keep_answers = "Keep my answers"
+bank_one = """Two of your answers do not fit together.
+You said you do not have a bank account, but you ticked: {names}.
+This comes with a bank account. Which is right?"""
+bank_many = """Two of your answers do not fit together.
+You said you do not have a bank account, but you ticked: {names}.
+These come with a bank account. Which is right?"""
+bank_yes = "I have a bank account"
+untick = "Remove the ticks"
 change_income = "Change income"
 change_tax = "Change tax"
 
@@ -348,6 +369,9 @@ header = "Your answers:"
 line = "• {label}: {value}"
 not_answered = "not answered"
 none = "none"
+# * Shown under a question that depends on earlier answers, so the two are
+# * read together (29 Sep audit: income ₹15,000–25,000, then "₹4,000 or less?").
+earlier = "What you told us earlier:"
 
 [nps_choices]
 unresolved = "Needs confirmation"

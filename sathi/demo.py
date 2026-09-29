@@ -17,7 +17,7 @@ def examples():
                      is_unorganised_worker=True, has_bank_account=True,
                      is_income_tax_payer=False, is_epfo_or_esic_member=False,
                      nps_exclusion_applies=False)
-    pension = Profile(state='UK', age=65, uk_pension_income_or_bpl=True,
+    pension = Profile(state='UK', age=65, uk_old_age_income_or_bpl=True,
                       uk_pension_selected=True)
     return (
         ('PMJJBY', worker, 'Age 30; individual account; applying for new cover.',

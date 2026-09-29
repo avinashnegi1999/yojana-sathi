@@ -114,7 +114,10 @@ def _oracle(code: str, p: Profile) -> bool | None:
     elif code in ("UK_OLD_AGE", "UK_WIDOW"):
         criterion(None if p.state is None else p.state == "UK")
         criterion(None if age is None else age >= (60 if code == "UK_OLD_AGE" else 18))
-        criterion(p.uk_pension_income_or_bpl)
+        # ! Each file's own condition (split 2026-09-29): the old-age page asks
+        # ! about the applicant's OWN income, the widow overview the FAMILY's.
+        criterion(p.uk_old_age_income_or_bpl if code == "UK_OLD_AGE"
+                  else p.uk_widow_income_or_bpl)
         criterion(p.uk_pension_selected)
         if code == "UK_WIDOW":
             criterion(p.is_widow)
@@ -143,6 +146,8 @@ def _oracle(code: str, p: Profile) -> bool | None:
         # ! Central/State Government employees. An unsourced exclusion REFUSES
         # ! someone, which is the failure this project cares about most.
         exclusion(tax)
+        # * "... who is OR HAS BEEN an income-tax payer" (the same sentence).
+        exclusion(p.has_paid_income_tax_before)
     elif code == "PMJAY_70":
         # Union Cabinet, PIB PRID=2053883: "all the senior citizens aged 70
         # years and above irrespective of income".
