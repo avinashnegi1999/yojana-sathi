@@ -89,6 +89,8 @@ h1,h2,.quote{text-wrap:balance}
 .play:active{transform:scale(.95)}
 .play:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
 .film.playing .play{opacity:0;pointer-events:none}
+/* * The second film sits under the first in the same dark tile. */
+.film-next{margin-top:112px}
 
 /* ── numbers ── */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:56px;text-align:left}
@@ -263,9 +265,10 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
   </div>
 </section>
 
-<!-- 2b · the film -->
+<!-- 2b · the films: a short introduction, then the full explanation -->
 <section class="tile dark center" id="film">
   <div class="wrap reveal">
+    <p class="eyebrow">Introduction · 51 seconds</p>
     <h2>See it in<br>51 seconds.</h2>
     <p class="tagline">The problem, the flow, and why a model never decides.</p>
     <figure class="film">
@@ -274,7 +277,21 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
              aria-label="A 51-second explainer: a wasted trip costs a casual labourer a day's wage; Yojana Sathi asks her state, then national, state or both schemes, then only the questions those schemes need; the verdict shows what she gets, why and where to go, with a one-page sheet; it runs in a browser, on Telegram and on WhatsApp behind one rule engine, which imports no language model; every scheme is a cited rule file, and an unsigned one answers unknown.">
         <source src="assets/video/avinashnegi1999-yojana-sathi-explained.mp4" type="video/mp4">
       </video>
-      <button class="play" type="button" aria-label="Play the film"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></button>
+      <button class="play" type="button" aria-label="Play the introduction"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></button>
+    </figure>
+    <p class="fine">Captions are in the video.</p>
+  </div>
+  <div class="wrap reveal film-next">
+    <p class="eyebrow">Explanation · 23 minutes</p>
+    <h2>How it was built.</h2>
+    <p class="tagline">I vibe-coded the software, then had to learn how to trust it.</p>
+    <figure class="film">
+      <video playsinline preload="none" width="1280" height="720"
+             poster="assets/video/how-it-was-built-poster.jpg"
+             aria-label="A 23-minute explanation of how Yojana Sathi was built: the problem it answers, how the code was written with an AI coding assistant — plan first, then edit, with a second opinion — and the checks that decide what ships.">
+        <source src="assets/video/how-it-was-built.mp4" type="video/mp4">
+      </video>
+      <button class="play" type="button" aria-label="Play the explanation"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></button>
     </figure>
     <p class="fine">Captions are in the video.</p>
   </div>
@@ -516,17 +533,23 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
     .catch(function () { /* server down: the page is complete without this */ });
 })();
 
-// * The film: tap the button or the picture to play or pause. Native controls
-// * (seek, volume, full screen) appear once it has started.
+// * The films: tap the button or the picture to play or pause. Native controls
+// * (seek, volume, full screen) appear once one has started. Starting one
+// * pauses the other, so two soundtracks never play at once.
 (function(){
-  const film=document.querySelector('.film');if(!film)return;
-  const v=film.querySelector('video'),b=film.querySelector('.play');
-  const toggle=()=>{if(v.paused||v.ended){v.controls=true;v.play();}else{v.pause();}};
-  b.addEventListener('click',toggle);
-  v.addEventListener('click',e=>{if(!v.controls){e.preventDefault();toggle();}});
-  v.addEventListener('play',()=>film.classList.add('playing'));
-  v.addEventListener('pause',()=>film.classList.remove('playing'));
-  v.addEventListener('ended',()=>film.classList.remove('playing'));
+  const films=[...document.querySelectorAll('.film')];
+  films.forEach(film=>{
+    const v=film.querySelector('video'),b=film.querySelector('.play');
+    const toggle=()=>{if(v.paused||v.ended){v.controls=true;v.play();}else{v.pause();}};
+    b.addEventListener('click',toggle);
+    v.addEventListener('click',e=>{if(!v.controls){e.preventDefault();toggle();}});
+    v.addEventListener('play',()=>{
+      film.classList.add('playing');
+      films.forEach(other=>{if(other!==film)other.querySelector('video').pause();});
+    });
+    v.addEventListener('pause',()=>film.classList.remove('playing'));
+    v.addEventListener('ended',()=>film.classList.remove('playing'));
+  });
 })();
 </script>
 </body></html>

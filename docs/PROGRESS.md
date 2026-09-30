@@ -382,3 +382,11 @@ contradicted. Tests for each in `tests/test_flow.py`.
   live web page serves the cross-check buttons. Same `.env` as the previous
   deploy. No live screening run. The three changed signed files (APY, UK
   old-age, UK widow) are live and still need Avinash's re-read.
+
+## 2026-09-30 — site: the full explanation film
+
+- avinashnegi.com/yojana-sathi `#film` now has two films in the same tile:
+  the 51-second introduction (unchanged), then "How it was built.", the
+  23-minute explanation (`livesite/assets/video/how-it-was-built.mp4`, 92.5 MB,
+  720p, captions in the video; poster is its 4-minute "Vibe-coded" frame).
+  Starting one pauses the other. Loads nothing until played (`preload="none"`).
