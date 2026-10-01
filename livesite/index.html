@@ -285,6 +285,9 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
 }
 .scene .lbl{font:600 17px var(--font);fill:var(--muted);text-anchor:middle}
 .scene .fade{transition:opacity .35s ease}
+.scene .rays{animation:spin 14s linear infinite;transform-box:fill-box;transform-origin:center}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.scene .rays{animation:none}}
 .scene .popin{transition:opacity .35s ease,transform .45s cubic-bezier(.3,1.5,.5,1);transform-box:fill-box;transform-origin:50% 100%}
 .scene .popin.off{opacity:0;transform:scale(.6)}
 .journey-hud{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:760px;margin:26px auto 0}
@@ -435,12 +438,12 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
       <button class="replay" type="button" id="j-replay">Play again ↻</button>
     </div>
     <div class="scene-wrap"><svg class="scene" id="j-scene" viewBox="0 70 1000 290" role="img"
-         aria-label="An illustrated trip. Without Yojana Sathi, a worker walks and takes the bus to the block office, finds it is the wrong counter, and walks home with the day gone. With Yojana Sathi, her phone first tells her she is eligible, to go to the bank branch, and to carry her passbook and Aadhaar; she goes straight there.">
+         aria-label="An illustrated trip. Without Yojana Sathi, a worker takes the bus to the block office and is told it is the wrong counter, walks to the service centre and is told to bring her passbook, and goes home with the day gone. With Yojana Sathi, her phone first tells her she is eligible, to go to the bank branch, and to carry her passbook and Aadhaar; she goes straight there.">
       <!-- ground -->
       <rect x="0" y="300" width="1000" height="60" fill="#f5f5f7"/>
       <line x1="0" y1="300" x2="1000" y2="300" stroke="#d2d2d7" stroke-width="2"/>
       <!-- the day: the sun crosses the sky while she travels -->
-      <g id="j-sun" transform="translate(95,255)"><circle r="20" fill="#fff" stroke="#d2d2d7" stroke-width="3"/></g>
+      <g id="j-sun" transform="translate(95,255)"><g class="rays" stroke="#1d1d1f" stroke-width="3.5" stroke-linecap="round"><line x1="0" y1="-25" x2="0" y2="-33" transform="rotate(0)"/><line x1="0" y1="-25" x2="0" y2="-33" transform="rotate(45)"/><line x1="0" y1="-25" x2="0" y2="-33" transform="rotate(90)"/><line x1="0" y1="-25" x2="0" y2="-33" transform="rotate(135)"/><line x1="0" y1="-25" x2="0" y2="-33" transform="rotate(180)"/><line x1="0" y1="-25" x2="0" y2="-33" transform="rotate(225)"/><line x1="0" y1="-25" x2="0" y2="-33" transform="rotate(270)"/><line x1="0" y1="-25" x2="0" y2="-33" transform="rotate(315)"/></g><circle r="17" fill="#1d1d1f"/></g>
       <!-- route already walked -->
       <line id="j-trail-out" x1="95" y1="311" x2="95" y2="311" stroke="#0066cc" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 9"/>
       <line id="j-trail-back" x1="590" y1="321" x2="590" y2="321" stroke="#7a7a7a" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 9"/>
@@ -481,6 +484,10 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
       <text class="lbl" x="922" y="342">Service centre</text>
       <!-- outcomes -->
       <g id="j-x" class="popin off"><circle cx="620" cy="226" r="16" fill="#7a7a7a"/><path d="M613 219l14 14M627 219l-14 14" stroke="#fff" stroke-width="3" stroke-linecap="round"/></g>
+      <g id="j-x2" class="popin off"><circle cx="966" cy="228" r="16" fill="#7a7a7a"/><path d="M959 221l14 14M973 221l-14 14" stroke="#fff" stroke-width="3" stroke-linecap="round"/></g>
+      <g id="j-n1" class="popin off"><rect x="500" y="132" width="180" height="34" rx="17" fill="#7a7a7a"/><text x="590" y="154" fill="#fff" font-size="14" font-weight="600" text-anchor="middle" font-family="system-ui,sans-serif">Not this counter</text></g>
+      <g id="j-n2" class="popin off"><rect x="806" y="150" width="190" height="34" rx="17" fill="#7a7a7a"/><text x="901" y="172" fill="#fff" font-size="14" font-weight="600" text-anchor="middle" font-family="system-ui,sans-serif">Bring your passbook</text></g>
+      <g id="j-n3" class="popin off"><rect x="680" y="122" width="220" height="34" rx="17" fill="#0066cc"/><text x="790" y="144" fill="#fff" font-size="14" font-weight="600" text-anchor="middle" font-family="system-ui,sans-serif">Right counter, right papers</text></g>
       <g id="j-ok" class="popin off"><circle cx="782" cy="234" r="16" fill="#0066cc"/><path d="M774 234l5 6 11-12" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g>
       <!-- the answer on her phone, before she leaves -->
       <g id="j-bubble" class="popin off">
@@ -1060,8 +1067,8 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
     const tOut=$('#j-trail-out'),tBack=$('#j-trail-back');
     const hTrips=$('#j-trips'),hCost=$('#j-cost'),hCostL=$('#j-cost-l'),hOut=$('#j-out');
     const PLANS={
-      without:{dur:5800,dest:590,segs:[[0,600,HOME,HOME],[600,2800,HOME,590],[2800,3700,590,590],[3700,5800,590,HOME]]},
-      with:{dur:4600,dest:760,segs:[[0,1500,HOME,HOME],[1500,3800,HOME,760],[3800,4600,760,760]]}
+      without:{dur:10400,segs:[[0,800,HOME,HOME],[800,3400,HOME,590],[3400,5000,590,590],[5000,6400,590,922],[6400,7800,922,922],[7800,10400,922,HOME]]},
+      with:{dur:6600,segs:[[0,2000,HOME,HOME],[2000,4800,HOME,760],[4800,6600,760,760]]}
     };
     let mode='without',raf=0,t0=0,next=null,userTook=false;
     function xAt(plan,t){
@@ -1070,7 +1077,7 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
     }
     const show=(el,on)=>el.classList.toggle('off',!on);
     function render(t){
-      const plan=PLANS[mode],[x,moving]=xAt(plan,t),p=Math.min(1,t/plan.dur);
+      const plan=PLANS[mode],[x,moving]=xAt(plan,t),p=Math.min(1,t/PLANS.without.dur);
       const riding=moving&&x>STOP_A&&x<STOP_B;
       const bob=moving&&!riding?Math.abs(Math.sin(t/110))*3:0;
       walker.setAttribute('transform','translate('+x.toFixed(1)+','+(300-bob).toFixed(1)+')');
@@ -1079,24 +1086,27 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
       bus.setAttribute('transform','translate('+bx.toFixed(1)+',0)');
       sun.setAttribute('transform','translate('+(95+830*p).toFixed(1)+','+(255-165*Math.sin(Math.PI*p)).toFixed(1)+')');
       pan(x);
+      const n1=$('#j-n1'),n2=$('#j-n2'),n3=$('#j-n3'),x2=$('#j-x2');
       if(mode==='without'){
-        tOut.setAttribute('x2',Math.max(HOME,t<=2800?x:590));
-        tBack.setAttribute('x2',t>3700?x:590);tBack.style.opacity=t>3700?1:0;
-        shutter.setAttribute('opacity',t>=2900?1:0);
-        show(xMark,t>=3100);show(ok,false);show(bubble,false);phone.setAttribute('opacity',0);
-        hTrips.textContent=t>600?1:0;$('#j-trips-l').textContent=t>600?'trip, wasted':'trips';
-        hCost.textContent=t>=2800?inr(WAGE+FARE):'₹0';hCostL.textContent='wage and bus fare, lost';
-        hCost.className=t>=2800?'bad':'';
-        hOut.textContent=t>=3100?'Wrong counter':'—';hOut.className=t>=3100?'bad':'';
+        tOut.setAttribute('x2',Math.max(HOME,t<=6400?x:922));
+        tBack.setAttribute('x1',922);tBack.setAttribute('x2',t>7800?x:922);tBack.style.opacity=t>7800?1:0;
+        shutter.setAttribute('opacity',t>=3500?1:0);
+        show(xMark,t>=3700);show(n1,t>=3700&&t<5200);
+        show(x2,t>=6600);show(n2,t>=6600&&t<8000);
+        show(ok,false);show(n3,false);show(bubble,false);phone.setAttribute('opacity',0);
+        hTrips.textContent=t>800?1:0;$('#j-trips-l').textContent=t>800?'trip, wasted':'trips';
+        hCost.textContent=t>=3400?inr(WAGE+FARE):'₹0';hCostL.textContent='wage and bus fare, lost';
+        hCost.className=t>=3400?'bad':'';
+        hOut.textContent=t>=6600?'Sent away twice':t>=3700?'Wrong counter':'—';hOut.className=t>=3700?'bad':'';
       }else{
         tOut.setAttribute('x2',Math.max(HOME,x));tBack.style.opacity=0;
-        shutter.setAttribute('opacity',0);show(xMark,false);
-        show(bubble,t>=250&&t<3800);phone.setAttribute('opacity',t>=150&&t<3800?1:0);
-        show(ok,t>=3900);
-        hTrips.textContent=t>1500?1:0;$('#j-trips-l').textContent=t>1500?'trip':'trips';
-        hCost.textContent=t>=3800?inr(WAGE+FARE):'₹0';hCostL.textContent='wage and bus fare, well spent';
-        hCost.className=t>=3800?'good':'';
-        hOut.textContent=t>=3900?'Right counter':'—';hOut.className=t>=3900?'good':'';
+        shutter.setAttribute('opacity',0);show(xMark,false);show(x2,false);show(n1,false);show(n2,false);
+        show(bubble,t>=300&&t<4800);phone.setAttribute('opacity',t>=200&&t<4800?1:0);
+        show(ok,t>=4900);show(n3,t>=5000);
+        hTrips.textContent=t>2000?1:0;$('#j-trips-l').textContent=t>2000?'trip':'trips';
+        hCost.textContent=t>=4800?inr(WAGE+FARE):'₹0';hCostL.textContent='wage and bus fare, well spent';
+        hCost.className=t>=4800?'good':'';
+        hOut.textContent=t>=4900?'Right counter':'—';hOut.className=t>=4900?'good':'';
       }
     }
     /* On a phone the drawing is 2.3x the screen; keep her in frame. */
