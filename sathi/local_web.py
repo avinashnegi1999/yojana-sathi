@@ -131,6 +131,23 @@ main.busy #screen{opacity:.55;pointer-events:none;transition:opacity .2s .15s}
 .note a{color:var(--blue)}
 .noscript{max-width:40rem;margin:0 auto;padding:40px 16px;font-size:19px}
 @media(max-width:400px){.intro{grid-template-columns:1fr}.intro-step{flex-direction:row;text-align:left;padding:12px 16px}}
+/* Welcome and goodbye scenes (2 Oct): the same worker as on the project site,
+   waving hello on the first screen and walking to the counter with her sheet
+   on the result. Inline SVG and CSS only, nothing to download; reduced motion
+   shows the last frame. */
+.scene-art{display:block;width:100%;max-width:340px;height:auto;margin:0 auto 12px;overflow:visible}
+.scene-art .pop{transform-box:fill-box;transform-origin:50% 100%;opacity:0;transform:scale(.6);animation:pop .45s cubic-bezier(.3,1.5,.5,1) forwards}
+.hello .wave{transform-box:view-box;transform-origin:158px 66px;animation:wave .45s ease-in-out 4 alternate}
+.hello .pop{animation-delay:.35s}
+.bye .walker{animation:walk 2.4s cubic-bezier(.45,0,.3,1) forwards}
+.bye .bob{animation:bob .3s ease-in-out 8 alternate}
+.bye .ok{animation-delay:2.4s}.bye .wish{animation-delay:2.7s}
+@keyframes pop{to{opacity:1;transform:none}}
+@keyframes wave{from{transform:rotate(-14deg)}to{transform:rotate(20deg)}}
+@keyframes walk{from{transform:translateX(0)}to{transform:translateX(184px)}}
+@keyframes bob{to{transform:translateY(-3px)}}
+@media(prefers-reduced-motion:reduce){.scene-art *{animation:none!important}.scene-art .pop{opacity:1;transform:none}.bye .walker{transform:translateX(184px)}}
+@media print{.scene-art{display:none!important}}
 @media print{.bar,.steps,.top,.actions,.sheet,.viewnote,.recap,.note,.choices{display:none!important}body{background:#fff}main{padding:0;max-width:none}.scheme{border-color:#999;break-inside:avoid}}
 </style></head><body>
 <header class="bar"><div class="bar-in"><img src="/logo.jpg" alt="" width="28" height="28"><span class="brand" id="brand">Yojana Sathi</span><button class="switch" id="switch" type="button" onclick="switchLang()" lang="hi">हिंदी</button><button class="restart" id="restart" type="button" onclick="restart()">Start again</button></div></header>
@@ -262,9 +279,33 @@ async function send(value){if(busy)return undefined;busy=true;const main=documen
 const ctl=typeof AbortController==='function'?new AbortController():null;const timer=ctl?setTimeout(()=>ctl.abort(),20000):0;
 try{return await fetch('/answer',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({answer:value}),signal:ctl?ctl.signal:undefined});}
 catch(e){return null;}finally{if(timer)clearTimeout(timer);busy=false;main.classList.remove('busy');}}
-function show(data){chosen=data.chosen||'';guard(!!(data.nav&&data.nav.back));document.querySelector('main').classList.remove('wide');const ui=UI[data.lang]||UI.hi;document.documentElement.lang=data.lang==='en'?'en':'hi';document.getElementById('restart').textContent=ui.restart;current=data.lang==='hi'?'hi':'en';const sw=document.getElementById('switch');sw.textContent=ui.other;sw.lang=ui.otherLang;document.getElementById('brand').textContent=ui.brand;document.getElementById('note').innerHTML=`${text(ui.note)} <a href="https://github.com/avinashnegi1999/yojana-sathi" target="_blank" rel="noopener">${text(ui.noteLink)}</a>`;const last=data.replies.length-1;const hasResult=data.replies.some(r=>r.kind==='result');let out=steps(data.nav,ui)+topRow(data,ui,hasResult)+data.replies.map((r,i)=>{if(r.kind==='recap'){const body=r.text.split('\n').slice(1).join('\n');return `<details class="recap"><summary>${ui.answers}</summary><p class="message">${text(body)}</p></details>`;}const nb=r.buttons?r.buttons.length:0;const asks=i===last&&(nb||r.typed);return `${r.kind==='result'?`<div class="result">${blocks(r.text,true,'q')}</div>${resultActions(ui)}`:blocks(r.text,asks,hasResult?'q2':'q')}${r.map?`<div id="maptab"><p class="maphint">${ui.mapHint}</p><div class="map" id="map"></div><div id="mapgo"></div></div><p class="maphint" id="listhint" hidden>${ui.listHint}</p>`:''}${introCard(r,ui)}${nb?`<div class="choices${r.buttons.some(b=>b.grid)?' has-grid':''}${r.buttons.some(b=>b.scale)?' has-scale':''}"${r.map?' hidden':''}>${r.buttons.map(button).join('')}</div>`:''}${r.document?`<div class="sheet"><a class="download" href="${r.document}" download>${ui.download}</a><a class="view" href="${r.document.replace('/document/','/sheet/')}" target="_blank" rel="noopener">${ui.view}</a></div><p class="viewnote">${ui.viewNote}</p>`:''}`;}).join('');const agePick=data.replies[last]&&data.replies[last].age;const typed=!agePick&&!!(data.replies[last]&&data.replies[last].typed);if(agePick)out+=agePicker(agePick,ui);if(typed)out+=`<form class="composer"><input name="answer" aria-label="${ui.type}" autocomplete="off" inputmode="text" placeholder="${ui.type}"${chosen&&!chosen.startsWith('/')?` value="${text(chosen)}"`:''}><button class="send">${ui.send}</button></form>`;screen.innerHTML=out;window.scrollTo({top:0});afterShow(data,ui);if(agePick)wireAge(agePick);screen.querySelectorAll('.step').forEach(b=>b.onclick=()=>nav(b.dataset.nav));// * Only buttons that carry an answer. The age picker's Continue is styled as a
+function show(data){chosen=data.chosen||'';guard(!!(data.nav&&data.nav.back));document.querySelector('main').classList.remove('wide');const ui=UI[data.lang]||UI.hi;document.documentElement.lang=data.lang==='en'?'en':'hi';document.getElementById('restart').textContent=ui.restart;current=data.lang==='hi'?'hi':'en';const sw=document.getElementById('switch');sw.textContent=ui.other;sw.lang=ui.otherLang;document.getElementById('brand').textContent=ui.brand;document.getElementById('note').innerHTML=`${text(ui.note)} <a href="https://github.com/avinashnegi1999/yojana-sathi" target="_blank" rel="noopener">${text(ui.noteLink)}</a>`;const last=data.replies.length-1;const hasResult=data.replies.some(r=>r.kind==='result');let out=steps(data.nav,ui)+topRow(data,ui,hasResult)+sceneArt(data,hasResult)+data.replies.map((r,i)=>{if(r.kind==='recap'){const body=r.text.split('\n').slice(1).join('\n');return `<details class="recap"><summary>${ui.answers}</summary><p class="message">${text(body)}</p></details>`;}const nb=r.buttons?r.buttons.length:0;const asks=i===last&&(nb||r.typed);return `${r.kind==='result'?`<div class="result">${blocks(r.text,true,'q')}</div>${resultActions(ui)}`:blocks(r.text,asks,hasResult?'q2':'q')}${r.map?`<div id="maptab"><p class="maphint">${ui.mapHint}</p><div class="map" id="map"></div><div id="mapgo"></div></div><p class="maphint" id="listhint" hidden>${ui.listHint}</p>`:''}${introCard(r,ui)}${nb?`<div class="choices${r.buttons.some(b=>b.grid)?' has-grid':''}${r.buttons.some(b=>b.scale)?' has-scale':''}"${r.map?' hidden':''}>${r.buttons.map(button).join('')}</div>`:''}${r.document?`<div class="sheet"><a class="download" href="${r.document}" download>${ui.download}</a><a class="view" href="${r.document.replace('/document/','/sheet/')}" target="_blank" rel="noopener">${ui.view}</a></div><p class="viewnote">${ui.viewNote}</p>`:''}`;}).join('');const agePick=data.replies[last]&&data.replies[last].age;const typed=!agePick&&!!(data.replies[last]&&data.replies[last].typed);if(agePick)out+=agePicker(agePick,ui);if(typed)out+=`<form class="composer"><input name="answer" aria-label="${ui.type}" autocomplete="off" inputmode="text" placeholder="${ui.type}"${chosen&&!chosen.startsWith('/')?` value="${text(chosen)}"`:''}><button class="send">${ui.send}</button></form>`;screen.innerHTML=out;window.scrollTo({top:0});afterShow(data,ui);if(agePick)wireAge(agePick);screen.querySelectorAll('.step').forEach(b=>b.onclick=()=>nav(b.dataset.nav));// * Only buttons that carry an answer. The age picker's Continue is styled as a
 // * choice but has no data-value; wiring it here sent "undefined" as a second answer.
 screen.querySelectorAll('.choice[data-value]').forEach(b=>b.onclick=()=>{const v=decodeURIComponent(b.dataset.value);if(v==='/start')restart();else answer(v);});drawMap(ui);const form=screen.querySelector('form');if(form){form.onsubmit=e=>{e.preventDefault();const input=e.currentTarget.answer;if(input.value.trim())answer(input.value);};form.answer.focus();}}
+// * Two small scenes: a wave hello on the first (consent) screen, and on the
+// * result she walks to the counter with her sheet. Decoration only, hidden
+// * from screen readers; the words on the screen carry the meaning.
+const SCENE_TEXT={hi:{hello:'नमस्ते',bye:'शुभकामनाएँ'},en:{hello:'Hello',bye:'All the best'}};
+function sceneArt(data,hasResult){
+  const t=SCENE_TEXT[data.lang]||SCENE_TEXT.en;
+  const ground='<rect x="0" y="104" width="320" height="16" fill="#e8e8ed"/><line x1="0" y1="104" x2="320" y2="104" stroke="#d2d2d7" stroke-width="2"/>';
+  const her='<circle cx="0" cy="-46" r="7.5" fill="#1d1d1f"/><path d="M-9 -36 Q0 -40 9 -36 L13 0 L-13 0 Z" fill="#1d1d1f"/>';
+  if(data.replies.some(r=>(r.buttons||[]).some(b=>b.value==='consent_yes'))){
+    return `<svg class="scene-art hello" viewBox="0 0 320 120" aria-hidden="true">${ground}
+<rect x="30" y="64" width="54" height="40" fill="#1d1d1f"/><path d="M22 68L57 40L92 68Z" fill="#333"/><rect x="50" y="78" width="14" height="26" fill="#f5f5f7"/>
+<g transform="translate(150,104)">${her}<rect x="-17" y="-34" width="7" height="12" rx="2" fill="#0066cc"/></g>
+<line class="wave" x1="158" y1="66" x2="172" y2="50" stroke="#1d1d1f" stroke-width="5" stroke-linecap="round"/>
+<g class="pop"><rect x="182" y="16" width="118" height="36" rx="18" fill="#0066cc"/><path d="M196 50L188 64L212 50Z" fill="#0066cc"/><text x="241" y="40" fill="#fff" font-size="16" font-weight="600" text-anchor="middle">${text(t.hello)}</text></g></svg>`;
+  }
+  if(hasResult){
+    return `<svg class="scene-art bye" viewBox="0 0 320 120" aria-hidden="true">${ground}
+<path d="M216 62L262 38L308 62Z" fill="#1d1d1f"/><rect x="222" y="62" width="80" height="42" fill="#333"/><rect x="250" y="74" width="24" height="30" fill="#f5f5f7"/>
+<g class="walker"><g transform="translate(70,104)"><g class="bob">${her}<rect x="9" y="-32" width="12" height="15" rx="1.5" fill="#fff" stroke="#1d1d1f" stroke-width="1.5"/><path d="M12 -27h6M12 -23h6" stroke="#0066cc" stroke-width="1.5"/></g></g></g>
+<g class="pop ok"><circle cx="292" cy="30" r="13" fill="#0066cc"/><path d="M286 30l4 4.5 8-9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g class="pop wish"><rect x="20" y="16" width="${t.bye.length>8?150:132}" height="36" rx="18" fill="#0066cc"/><text x="${t.bye.length>8?95:86}" y="40" fill="#fff" font-size="16" font-weight="600" text-anchor="middle">${text(t.bye)}</text></g></svg>`;
+  }
+  return '';
+}
 // * The three steps, shown once on the consent screen, so she knows what the
 // * questions lead to before she starts. Icons carry it for those who read little.
 const INTRO_ICONS=['pencil','list','building'];
