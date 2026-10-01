@@ -175,6 +175,96 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
 .foot a:hover{color:var(--ink);text-decoration:none}
 .foot-base{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;padding-top:14px;border-top:1px solid var(--hairline)}
 
+/* ── alive: interactive pieces ── */
+/* wage calculator */
+.calc{margin:48px auto 0;max-width:620px;padding:28px;background:var(--canvas);border-radius:18px;text-align:left}
+.calc-row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:18px}
+.calc-row:first-child{margin-top:0}
+.calc label{font-size:15px;color:var(--body)}
+.calc output{font-weight:600;font-variant-numeric:tabular-nums}
+.calc input[type=range]{width:100%;accent-color:var(--blue);margin-top:8px}
+.toggle{display:inline-flex;gap:2px;padding:3px;border-radius:980px;background:rgba(0,0,0,.06)}
+.toggle button{min-height:32px;padding:0 14px;border:0;border-radius:980px;background:transparent;font:inherit;font-size:14px;color:var(--ink);cursor:pointer}
+.toggle button[aria-pressed=true]{background:var(--canvas);box-shadow:0 0 0 1px rgba(0,0,0,.06)}
+.calc-out{margin-top:22px;padding-top:18px;border-top:1px solid var(--hairline);text-align:center}
+.calc-out b{display:block;font-size:clamp(34px,5vw,48px);font-weight:600;line-height:1.05;letter-spacing:-.015em;font-variant-numeric:tabular-nums}
+.calc-out span{display:block;margin-top:6px;color:var(--muted);font-size:14px}
+/* steps become a walkthrough */
+.step{padding:18px;margin:-18px;border-radius:18px;cursor:pointer;transition:background .25s ease,transform .15s ease}
+.step:active{transform:scale(.98)}
+.step.on{background:var(--parchment)}
+.step.on .n{color:var(--blue)}
+.step-bar{height:3px;margin-top:40px;border-radius:3px;background:var(--hairline);overflow:hidden}
+.step-bar i{display:block;height:100%;width:25%;background:var(--blue);transition:width .5s ease}
+/* rule demo */
+.demo{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:48px;text-align:left;align-items:center}
+.q{padding:16px 0;border-top:1px solid rgba(245,245,247,.14)}
+.q:last-child{border-bottom:1px solid rgba(245,245,247,.14)}
+.q p{color:var(--on-dark)!important;font-size:15px;margin-bottom:10px}
+.dark .toggle{background:rgba(255,255,255,.1)}
+.dark .toggle button{color:var(--on-dark)}
+.dark .toggle button[aria-pressed=true]{background:var(--sky);color:#fff;box-shadow:none}
+.verdict-card{padding:32px;border-radius:18px;background:#1d1d1f;text-align:center;transition:background .3s ease}
+.verdict-card .v{font-size:clamp(28px,4vw,40px);font-weight:600;color:var(--on-dark);transition:color .3s}
+.verdict-card p{margin-top:12px;font-size:15px}
+.verdict-card.u .v{color:var(--sky)}
+.verdict-card.e .v{color:#fff}
+.verdict-card.n .v{color:var(--muted-dark)}
+.verdicts span{cursor:pointer;transition:background .25s,box-shadow .25s,color .25s,transform .15s}
+.verdicts span:active{transform:scale(.95)}
+.verdicts span.lit{background:var(--on-dark);color:var(--ink);box-shadow:none}
+.verdicts .u.lit{background:var(--sky);color:#fff}
+.verdicts span.dim{opacity:.4}
+.demo-note{margin-top:18px;font-size:12px;color:var(--muted-dark)}
+/* scheme filter */
+.filter{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center;margin-top:40px}
+.search{min-height:44px;width:min(320px,100%);padding:0 20px;border:1px solid rgba(0,0,0,.08);border-radius:980px;font:inherit;font-size:17px;color:var(--ink);background:var(--canvas)}
+.search:focus{outline:2px solid var(--focus);outline-offset:2px}
+.scheme{transition:transform .2s ease,background .2s ease,opacity .25s ease}
+.scheme:hover{background:#ececf0}
+.scheme.gone{display:none}
+/* expandable scheme cards */
+.scheme.x{cursor:pointer;position:relative;padding-right:56px}
+.scheme.x::after{content:"+";position:absolute;top:20px;right:20px;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:rgba(210,210,215,.64);color:var(--ink);font-size:18px;line-height:1;transition:transform .3s ease}
+.scheme.x.open::after{transform:rotate(45deg)}
+.scheme.x:active{transform:scale(.99)}
+.scheme.open{grid-column:1/-1;background:var(--canvas);box-shadow:inset 0 0 0 1px var(--hairline)}
+.sx{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s ease}
+.scheme.open .sx{grid-template-rows:1fr}
+.sx > div{overflow:hidden}
+.sx-in{padding-top:18px;margin-top:18px;border-top:1px solid var(--hairline);font-size:15px;color:var(--body)}
+.sx-in h4{margin:18px 0 6px;font-size:14px;font-weight:600;color:var(--ink)}
+.sx-in h4:first-child{margin-top:0}
+.sx-in ul{margin:0;padding-left:18px}
+.sx-in li{margin:4px 0}
+.sx-in .hi{color:var(--muted);font-size:14px}
+.sx-in .meta{margin-top:16px;font-size:13px;color:var(--muted)}
+.sx-in .part + .part{margin-top:22px;padding-top:18px;border-top:1px solid var(--divider,#f0f0f0)}
+/* zoom viewer for diagrams */
+.zoom-hint{position:absolute;right:14px;bottom:14px;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:rgba(210,210,215,.64);color:var(--ink);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);pointer-events:none}
+.view a,.card-fig a{position:relative;cursor:zoom-in}
+.zv{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.92);display:none;touch-action:none;overscroll-behavior:contain}
+.zv.on{display:block}
+.zv-stage{position:absolute;inset:0;overflow:hidden;cursor:grab}
+.zv-stage.drag{cursor:grabbing}
+.zv img{position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;background:#fff;border-radius:8px;user-select:none;-webkit-user-drag:none}
+.zv-bar{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:6px;border-radius:980px;background:rgba(39,39,41,.8);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px)}
+.zv-bar button,.zv-close{display:grid;place-items:center;width:44px;height:44px;border:0;border-radius:50%;background:rgba(210,210,215,.2);color:#fff;font:inherit;font-size:20px;cursor:pointer;transition:transform .15s}
+.zv-bar button:active,.zv-close:active{transform:scale(.95)}
+.zv-bar output{min-width:56px;text-align:center;color:#f5f5f7;font-size:14px;font-variant-numeric:tabular-nums}
+.zv-close{position:absolute;top:16px;right:16px}
+.zv-open{position:absolute;top:26px;left:20px;color:var(--sky);font-size:14px}
+.zv-tip{position:absolute;top:28px;left:50%;transform:translateX(-50%);color:#a1a1a6;font-size:12px;white-space:nowrap}
+@media(max-width:734px){.zv-tip{display:none}}
+.count{margin-top:16px;color:var(--muted);font-size:14px}
+.empty{grid-column:1/-1;padding:24px;color:var(--muted)}
+/* count-up numbers stay steady */
+.stat b{font-variant-numeric:tabular-nums}
+@media(max-width:734px){
+  .demo{grid-template-columns:1fr}
+  .step{margin:-12px;padding:12px}
+}
+
 /* ── gentle arrival, never a gate on reading ── */
 .js .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.3,1)}
 .js .reveal.in{opacity:1;transform:none}
@@ -262,6 +352,20 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
       <div class="stat"><b>₹315</b><span>a day, average for a female casual labourer, 2025<sup><a href="#s3">3</a></sup></span></div>
     </div>
     <p class="fine">Registration is not receipt of a benefit. None of these figures measures this project.</p>
+    <div class="calc" id="calc">
+      <h3>What a wasted trip costs.</h3>
+      <div class="calc-row" style="margin-top:18px"><label>Worker</label>
+        <div class="toggle" role="group" aria-label="Average daily wage">
+          <button type="button" data-wage="455" aria-pressed="true">Man · ₹455</button>
+          <button type="button" data-wage="315" aria-pressed="false">Woman · ₹315</button>
+        </div></div>
+      <div style="margin-top:18px"><div class="calc-row" style="margin-top:0"><label for="trips">Wasted trips to the wrong counter</label><output id="trips-out">2</output></div>
+        <input type="range" id="trips" min="1" max="10" value="2"></div>
+      <div style="margin-top:12px"><div class="calc-row" style="margin-top:0"><label for="fare">Bus fare, both ways (₹)</label><output id="fare-out">₹60</output></div>
+        <input type="range" id="fare" min="0" max="300" step="10" value="60"></div>
+      <div class="calc-out"><b id="loss">₹1,030</b><span id="loss-note">about 2.3 days of wages, gone before any benefit</span></div>
+    </div>
+    <p class="fine">Wages are the PLFS 2025 averages cited above. Trips and fare are yours to set; this is an illustration, not a measurement.</p>
   </div>
 </section>
 
@@ -308,6 +412,7 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
       <div class="step"><span class="n">03</span><h3>Decide</h3><p>Plain rule files with cited sources. Same answers, same verdict — no model decides.</p></div>
       <div class="step"><span class="n">04</span><h3>Walk in</h3><p>What you get, what it costs, what to carry, and where to go.</p></div>
     </div>
+    <div class="step-bar" aria-hidden="true"><i></i></div>
   </div>
   <div class="wide">
     <div class="rail-head"><h3>Under the hood</h3><div class="arrows"><button class="arrow" type="button" data-rail="hood" data-dir="-1" aria-label="Previous">‹</button><button class="arrow" type="button" data-rail="hood" data-dir="1" aria-label="Next">›</button></div></div>
@@ -324,7 +429,21 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
   <div class="wrap reveal">
     <h2>Unknown is an answer.</h2>
     <p class="tagline">Most screeners have two outcomes and quietly default the third. If a question wasn't answered, or a rule hasn't been checked by a person, this one says so — and names what's missing.</p>
-    <div class="verdicts"><span>Eligible</span><span>Not eligible</span><span class="u">Unknown</span></div>
+    <div class="verdicts"><span data-v="e" tabindex="0" role="button">Eligible</span><span data-v="n" tabindex="0" role="button">Not eligible</span><span class="u" data-v="u" tabindex="0" role="button">Unknown</span></div>
+    <div class="demo" id="demo">
+      <div>
+        <p class="eyebrow" style="margin-bottom:6px">Try the logic</p>
+        <div class="q" data-q="age"><p>Are you between 18 and 40?</p><div class="toggle" role="group"><button type="button" data-a="y" aria-pressed="true">Yes</button><button type="button" data-a="n" aria-pressed="false">No</button><button type="button" data-a="u" aria-pressed="false">Don't know</button></div></div>
+        <div class="q" data-q="bank"><p>Do you have a savings bank account?</p><div class="toggle" role="group"><button type="button" data-a="y" aria-pressed="true">Yes</button><button type="button" data-a="n" aria-pressed="false">No</button><button type="button" data-a="u" aria-pressed="false">Don't know</button></div></div>
+        <div class="q" data-q="tax"><p>Do you pay, or have you ever paid, income tax?</p><div class="toggle" role="group"><button type="button" data-a="n" aria-pressed="true">No</button><button type="button" data-a="y" aria-pressed="false">Yes</button><button type="button" data-a="u" aria-pressed="false">Don't know</button></div></div>
+      </div>
+      <div class="verdict-card e" id="vcard" aria-live="polite">
+        <p class="eyebrow" style="margin:0 0 8px">Atal Pension Yojana</p>
+        <div class="v" id="vtext">Eligible</div>
+        <p id="vwhy">Every condition is met. Next: what to carry, and the bank branch.</p>
+      </div>
+    </div>
+    <p class="demo-note">A simplified illustration of the three-way logic. The bot decides from its signed rule file, not from this page.</p>
   </div>
 </section>
 
@@ -389,6 +508,15 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
   <div class="wrap reveal">
     <h2>Twenty-one schemes.<br>Each signed by a person.</h2>
     <p class="tagline">A reviewed set of answers that hold up beats a broad directory of approximate ones.</p>
+    <div class="filter">
+      <div class="toggle" role="group" aria-label="Filter schemes" id="sfilter">
+        <button type="button" data-f="all" aria-pressed="true">All</button>
+        <button type="button" data-f="national" aria-pressed="false">National</button>
+        <button type="button" data-f="state" aria-pressed="false">State</button>
+      </div>
+      <input class="search" id="ssearch" type="search" placeholder="Search a scheme, state or office" aria-label="Search schemes">
+    </div>
+    <p class="count" id="scount" aria-live="polite">Showing 20 of 20</p>
     <div class="schemes">
       <h3 class="group">National · every state</h3>
       <div class="scheme"><h3>PM Shram Yogi Maandhan</h3><p class="benefit">₹36,000 per year from age&nbsp;60</p><p class="where">Common Service Centre</p></div>
@@ -531,6 +659,183 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
       document.getElementById('live').hidden = false;
     })
     .catch(function () { /* server down: the page is complete without this */ });
+})();
+
+// * Alive: small interactive pieces. All work offline; none send anything anywhere.
+(function(){
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const inr=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+
+  /* Wasted-trip calculator. */
+  let wage=455;
+  const trips=document.getElementById('trips'),fare=document.getElementById('fare');
+  function calc(){
+    const t=+trips.value,f=+fare.value,loss=t*(wage+f);
+    document.getElementById('trips-out').textContent=t;
+    document.getElementById('fare-out').textContent=inr(f);
+    document.getElementById('loss').textContent=inr(loss);
+    document.getElementById('loss-note').textContent='about '+(loss/wage).toFixed(1)+' days of wages, gone before any benefit';
+  }
+  document.querySelectorAll('#calc [data-wage]').forEach(b=>b.addEventListener('click',()=>{
+    wage=+b.dataset.wage;
+    document.querySelectorAll('#calc [data-wage]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+    calc();
+  }));
+  trips.addEventListener('input',calc);fare.addEventListener('input',calc);calc();
+
+  /* Stats count up once when seen. */
+  const nums=[...document.querySelectorAll('.stat b')].filter(b=>!b.id);
+  function countUp(el){
+    const raw=el.textContent,m=raw.match(/[\d.]+/);if(!m||reduce)return;
+    const end=parseFloat(m[0]),dec=(m[0].split('.')[1]||'').length,t0=performance.now(),dur=1200;
+    (function tick(now){const p=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-p,3);
+      el.textContent=raw.replace(m[0],(end*e).toFixed(dec));if(p<1)requestAnimationFrame(tick);else el.textContent=raw;})(t0);
+  }
+  if('IntersectionObserver' in window){
+    const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){countUp(e.target);io.unobserve(e.target);}}),{threshold:.6});
+    nums.forEach(n=>io.observe(n));
+  }
+
+  /* Steps: a walkthrough that advances by itself until someone takes over. */
+  const steps=[...document.querySelectorAll('.steps .step')],bar=document.querySelector('.step-bar i');
+  let cur=0,auto=null;
+  function go(i){cur=i;steps.forEach((s,j)=>s.classList.toggle('on',j===i));bar.style.width=((i+1)*25)+'%';}
+  steps.forEach((s,i)=>{s.tabIndex=0;s.setAttribute('role','button');
+    const take=()=>{clearInterval(auto);auto=null;go(i);};
+    s.addEventListener('click',take);s.addEventListener('mouseenter',take);
+    s.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();take();}});});
+  go(0);
+  if(!reduce&&'IntersectionObserver' in window){
+    const sio=new IntersectionObserver(es=>es.forEach(e=>{
+      if(e.isIntersecting&&!auto&&steps.length){auto=setInterval(()=>go((cur+1)%steps.length),2600);sio.disconnect();}
+    }),{threshold:.5});
+    if(steps[0])sio.observe(steps[0].parentNode);
+  }
+
+  /* Rule demo: any No → not eligible; else any Don't know → unknown; else eligible. */
+  const ans={age:'y',bank:'y',tax:'n'};
+  const label={age:'your age band',bank:'a savings account',tax:'income-tax status'};
+  const pass={age:'y',bank:'y',tax:'n'};
+  const pills=document.querySelectorAll('.verdicts span');
+  function decide(){
+    const keys=Object.keys(ans);
+    const fail=keys.filter(k=>ans[k]!=='u'&&ans[k]!==pass[k]);
+    const unk=keys.filter(k=>ans[k]==='u');
+    let v,why;
+    if(fail.length){v='n';why='Fails on '+fail.map(k=>label[k]).join(' and ')+'. No trip needed.';}
+    else if(unk.length){v='u';why='Missing: '+unk.map(k=>label[k]).join(', ')+'. Find this out before you go.';}
+    else{v='e';why='Every condition is met. Next: what to carry, and the bank branch.';}
+    const card=document.getElementById('vcard');card.className='verdict-card '+v;
+    document.getElementById('vtext').textContent={e:'Eligible',n:'Not eligible',u:'Unknown'}[v];
+    document.getElementById('vwhy').textContent=why;
+    pills.forEach(p=>{p.classList.toggle('lit',p.dataset.v===v);p.classList.toggle('dim',p.dataset.v!==v);});
+  }
+  document.querySelectorAll('#demo .q').forEach(q=>q.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+    ans[q.dataset.q]=b.dataset.a;
+    q.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));decide();
+  })));
+  /* Tapping a verdict pill sets answers that lead to it. */
+  const presets={e:{age:'y',bank:'y',tax:'n'},n:{age:'n',bank:'y',tax:'n'},u:{age:'y',bank:'u',tax:'n'}};
+  pills.forEach(p=>{const fire=()=>{Object.assign(ans,presets[p.dataset.v]);
+      document.querySelectorAll('#demo .q').forEach(q=>q.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.a===ans[q.dataset.q]))));decide();};
+    p.addEventListener('click',fire);p.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fire();}});});
+  decide();
+
+  /* Scheme filter and search. */
+  let mode='all';
+  const cards=[];let group='national';
+  document.querySelectorAll('.schemes > *').forEach(el=>{
+    if(el.classList.contains('group')){group=/^\s*state/i.test(el.textContent)?'state':'national';el.dataset.g=group;}
+    else{el.dataset.g=group;cards.push(el);}
+  });
+  const groups=document.querySelectorAll('.schemes .group');
+  const empty=document.createElement('p');empty.className='empty';empty.textContent='No scheme matches. Try a state name or "pension".';empty.hidden=true;
+  document.querySelector('.schemes').appendChild(empty);
+  function filter(){
+    const q=document.getElementById('ssearch').value.trim().toLowerCase();let n=0;
+    cards.forEach(c=>{const ok=(mode==='all'||c.dataset.g===mode)&&(!q||c.textContent.toLowerCase().includes(q));c.classList.toggle('gone',!ok);if(ok)n++;});
+    groups.forEach(g=>g.hidden=!cards.some(c=>c.dataset.g===g.dataset.g&&!c.classList.contains('gone')));
+    empty.hidden=n>0;
+    document.getElementById('scount').textContent='Showing '+n+' of '+cards.length;
+  }
+  document.querySelectorAll('#sfilter button').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.f;
+    document.querySelectorAll('#sfilter button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));filter();}));
+  document.getElementById('ssearch').addEventListener('input',filter);filter();
+
+  /* Expandable cards. Content comes only from assets/schemes.json, which is
+     built from the signed rule files. If it fails to load, cards stay as they are. */
+  const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const list=a=>a&&a.length?'<ul>'+a.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'';
+  fetch('assets/schemes.json').then(r=>r.ok?r.json():null).then(data=>{
+    if(!data)return;
+    cards.forEach(card=>{
+      const title=card.querySelector('h3').textContent.trim(),parts=data[title];
+      if(!parts)return;
+      const body=parts.map(p=>'<div class="part">'+
+        (parts.length>1?'<h4>'+esc(p.name)+'</h4>':'')+
+        (p.name_hi?'<p class="hi">'+esc(p.name_hi)+'</p>':'')+
+        (p.summary?'<h4>What it is</h4><p>'+esc(p.summary)+'</p>':'')+
+        (p.asks.length?'<h4>What the bot asks</h4>'+list(p.asks):'')+
+        (p.documents.length?'<h4>What to carry</h4>'+list(p.documents):'')+
+        (p.renewal?'<h4>After you join</h4><p>'+esc(p.renewal)+'</p>':'')+
+        '<p class="meta">'+esc(p.authority)+(p.verified?' · signed off '+esc(p.verified):'')+
+        (p.source?' · <a href="'+esc(p.source)+'" target="_blank" rel="noopener">Official source</a>':'')+'</p></div>').join('');
+      const sx=document.createElement('div');sx.className='sx';sx.innerHTML='<div><div class="sx-in">'+body+'</div></div>';
+      card.appendChild(sx);card.classList.add('x');
+      card.tabIndex=0;card.setAttribute('role','button');card.setAttribute('aria-expanded','false');
+      const toggle=()=>{const open=!card.classList.contains('open');
+        cards.forEach(c=>{if(c!==card&&c.classList.contains('open')){c.classList.remove('open');c.setAttribute('aria-expanded','false');}});
+        card.classList.toggle('open',open);card.setAttribute('aria-expanded',String(open));
+        if(open&&!reduce)setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'nearest'}),360);};
+      card.addEventListener('click',e=>{if(e.target.closest('a'))return;toggle();});
+      card.addEventListener('keydown',e=>{if(e.target!==card)return;if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
+    });
+  }).catch(()=>{});
+})();
+
+// * Zoomable diagrams: wheel or pinch to zoom, drag to pan, double-click to
+// * toggle, Esc to close. Without JS the links still open the full-size file.
+(function(){
+  const links=[...document.querySelectorAll('.view a, .card-fig a')];
+  if(!links.length)return;
+  const zv=document.createElement('div');zv.className='zv';zv.setAttribute('role','dialog');zv.setAttribute('aria-modal','true');zv.setAttribute('aria-label','Diagram viewer');
+  zv.innerHTML='<div class="zv-stage"><img alt=""></div><a class="zv-open" target="_blank" rel="noopener">Open file ↗</a><p class="zv-tip">Scroll or pinch to zoom · drag to move · double-click to reset</p><button class="zv-close" type="button" aria-label="Close">✕</button><div class="zv-bar"><button type="button" data-z="-1" aria-label="Zoom out">−</button><output>100%</output><button type="button" data-z="1" aria-label="Zoom in">+</button><button type="button" data-z="0" aria-label="Fit to screen">⤢</button></div>';
+  document.body.appendChild(zv);
+  const stage=zv.querySelector('.zv-stage'),img=zv.querySelector('img'),out=zv.querySelector('output'),openA=zv.querySelector('.zv-open');
+  let s=1,fit=1,x=0,y=0,last=null;
+  const draw=()=>{img.style.transform=`translate(${x}px,${y}px) scale(${s})`;out.textContent=Math.round(s/fit*100)+'%';};
+  function fitView(){const W=innerWidth,H=innerHeight,w=img.naturalWidth||1200,h=img.naturalHeight||700;
+    fit=Math.min((W-48)/w,(H-140)/h);s=fit;x=(W-w*s)/2;y=(H-h*s)/2-20;draw();}
+  function zoomAt(f,cx,cy){const ns=Math.min(Math.max(s*f,fit*.5),fit*12);x=cx-(cx-x)*(ns/s);y=cy-(cy-y)*(ns/s);s=ns;draw();}
+  function open(a){const src=a.getAttribute('href');img.alt=(a.querySelector('img')||{}).alt||'';openA.href=src;last=a;
+    zv.classList.add('on');document.body.style.overflow='hidden';
+    if(img.getAttribute('src')===src&&img.complete)fitView();else{img.onload=fitView;img.src=src;}
+    zv.querySelector('.zv-close').focus();}
+  function close(){zv.classList.remove('on');document.body.style.overflow='';if(last)last.focus();}
+  links.forEach(a=>{
+    const hint=document.createElement('span');hint.className='zoom-hint';hint.setAttribute('aria-hidden','true');
+    hint.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5 21 21M10.5 7.5v6M7.5 10.5h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+    a.appendChild(hint);
+    a.addEventListener('click',e=>{if(e.metaKey||e.ctrlKey||e.shiftKey)return;e.preventDefault();open(a);});
+  });
+  zv.querySelector('.zv-close').addEventListener('click',close);
+  zv.querySelectorAll('.zv-bar button').forEach(b=>b.addEventListener('click',()=>{const k=+b.dataset.z;
+    if(!k)fitView();else zoomAt(k>0?1.4:1/1.4,innerWidth/2,innerHeight/2);}));
+  addEventListener('keydown',e=>{if(!zv.classList.contains('on'))return;
+    if(e.key==='Escape')close();else if(e.key==='+'||e.key==='=')zoomAt(1.4,innerWidth/2,innerHeight/2);else if(e.key==='-')zoomAt(1/1.4,innerWidth/2,innerHeight/2);else if(e.key==='0')fitView();});
+  stage.addEventListener('wheel',e=>{e.preventDefault();zoomAt(Math.exp(-e.deltaY*.0015),e.clientX,e.clientY);},{passive:false});
+  stage.addEventListener('dblclick',e=>{Math.abs(s-fit)<.01?zoomAt(2.5,e.clientX,e.clientY):fitView();});
+  /* pointers: one drags, two pinch */
+  const pts=new Map();let pinch=null;
+  stage.addEventListener('pointerdown',e=>{stage.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});stage.classList.add('drag');
+    if(pts.size===2){const [a,b]=[...pts.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y)};}});
+  stage.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;const p=pts.get(e.pointerId);
+    if(pts.size===2&&pinch){pts.set(e.pointerId,{x:e.clientX,y:e.clientY});const [a,b]=[...pts.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);
+      zoomAt(d/pinch.d,(a.x+b.x)/2,(a.y+b.y)/2);pinch.d=d;return;}
+    x+=e.clientX-p.x;y+=e.clientY-p.y;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});draw();});
+  const up=e=>{pts.delete(e.pointerId);if(pts.size<2)pinch=null;if(!pts.size)stage.classList.remove('drag');};
+  stage.addEventListener('pointerup',up);stage.addEventListener('pointercancel',up);
+  addEventListener('resize',()=>{if(zv.classList.contains('on'))fitView();});
 })();
 
 // * The films: tap the button or the picture to play or pause. Native controls

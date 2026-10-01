@@ -1,0 +1,482 @@
+{
+ "PM Shram Yogi Maandhan": [
+  {
+   "name": "Pradhan Mantri Shram Yogi Maandhan",
+   "name_hi": "प्रधानमंत्री श्रम योगी मानधन",
+   "authority": "Ministry of Labour & Employment, Government of India",
+   "summary": "A minimum pension of ₹3,000 a month after age 60, with 50% family pension to the spouse. The Government matches the worker's contribution 1:1, and there is no administrative charge. You do not need proof of age or income — self-certification with Aadhaar is enough, though a false declaration can be penalised.",
+   "asks": [
+    "Do you do income-earning work in the unorganised sector?",
+    "How old are you?",
+    "Roughly how much do you earn in a month?"
+   ],
+   "documents": [
+    "Aadhaar card",
+    "Bank passbook",
+    "Self-certified form and auto-debit consent form (available at the centre)"
+   ],
+   "renewal": "Nothing to renew. The monthly contribution continues until you turn 60.",
+   "source": "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=79&lid=63&page=74",
+   "verified": "2026-10-01"
+  }
+ ],
+ "National Pension Scheme for Traders": [
+  {
+   "name": "National Pension Scheme for Traders and Self-Employed (NPS-Traders)",
+   "name_hi": "व्यापारियों और स्वरोज़गार के लिए राष्ट्रीय पेंशन योजना (NPS-Traders)",
+   "authority": "Ministry of Labour and Employment",
+   "summary": "Age 60 onwards, a minimum assured pension of ₹3,000 a month for small shopkeepers, retail traders and the self-employed with yearly turnover up to ₹1.5 crore. Your fixed contribution depends on your entry age and continues until 60. If you die after the pension begins, your spouse receives half the pension. You cannot hold this together with PM-SYM — it is one or the other. Enrol at a Common Service Centre.",
+   "asks": [
+    "Do you run a shop, retail trade or self-employed business with yearly turnover of ₹1.5 crore or less?",
+    "How old are you?"
+   ],
+   "documents": [
+    "Aadhaar card",
+    "Savings bank account passbook or IFSC"
+   ],
+   "renewal": "A fixed monthly contribution is auto-debited until age 60; the amount depends on your age at entry. Leaving early returns your own contribution with the interest set by the scheme rules.",
+   "source": "https://maandhan.in/",
+   "verified": "2026-10-01"
+  }
+ ],
+ "Atal Pension Yojana": [
+  {
+   "name": "Atal Pension Yojana",
+   "name_hi": "अटल पेंशन योजना",
+   "authority": "Pension Fund Regulatory and Development Authority (PFRDA)",
+   "summary": "A pension every month from age 60, guaranteed by the Central Government, for life. You choose the amount when you join — ₹1,000, ₹2,000, ₹3,000, ₹4,000 or ₹5,000 a month — and the monthly contribution depends on the amount you pick and your age when you join. The younger you join, the less you pay. After your death your spouse receives the same pension for life. The figure shown here is the smallest tier: for it you pay ₹42 a month if you join at 18, ₹116 at 30, or ₹291 at 40. Not open to anyone who is, or has ever been, an income-tax payer. Open it at the bank or post office where you already have a savings account.",
+   "asks": [
+    "How old are you?",
+    "Do you have a bank account or a post office savings account?",
+    "Have you paid income tax in any earlier year? Atal Pension Yojana is closed to anyone who is, or has ever been, an income-tax payer."
+   ],
+   "documents": [
+    "Bank or post office savings account passbook",
+    "Aadhaar card",
+    "Mobile number",
+    "Nominee's details"
+   ],
+   "renewal": "The contribution is auto-debited from your savings account every month, quarter or half-year. Keep enough balance in the account — a failed debit attracts a charge. Nominee details are mandatory at enrolment.",
+   "source": "https://pfrda.org.in/schemes/atal-pension-yojana-apy",
+   "verified": "2026-10-01"
+  }
+ ],
+ "PM Jeevan Jyoti Bima Yojana": [
+  {
+   "name": "Pradhan Mantri Jeevan Jyoti Bima Yojana",
+   "name_hi": "प्रधानमंत्री जीवन ज्योति बीमा योजना",
+   "authority": "Government of India",
+   "summary": "Life insurance: ₹2 lakh on death from any cause, subject to policy terms. Standard renewal premium ₹436/year. Non-accidental death is excluded for the first 30 days on joining/rejoining. Only one account per person; consent and premium payment are required. This cover is in addition to any other life insurance you already hold.",
+   "asks": [
+    "How old are you?",
+    "Do you have an individual bank or post office account?"
+   ],
+   "documents": [
+    "Aadhaar card",
+    "Bank or post office account details",
+    "Enrolment and auto-debit consent form"
+   ],
+   "renewal": "Cover year: 1 June–31 May. Renew annually; cover ends at 55 by nearest birthday or account closure/insufficient funds. New entry stops after 50; this screening is for new entry. First-time joining: Jun–Aug ₹436, Sep–Nov ₹342, Dec–Feb ₹228, Mar–May ₹114. Confirm with your participating branch.",
+   "source": "https://financialservices.gov.in/pmjjby",
+   "verified": "2026-09-09"
+  }
+ ],
+ "PM Suraksha Bima Yojana": [
+  {
+   "name": "Pradhan Mantri Suraksha Bima Yojana",
+   "name_hi": "प्रधानमंत्री सुरक्षा बीमा योजना",
+   "authority": "Department of Financial Services, Ministry of Finance",
+   "summary": "Accident insurance. ₹2 lakh for accidental death or the permanent disabilities specified by the scheme. ₹1 lakh for permanent, complete loss of sight in one eye or use of one hand or foot. Any other partial disability pays nothing, and hospital bills are not reimbursed — this is not health cover. Death by suicide is not covered. It is in addition to any other insurance you already hold. Premium ₹20 yearly, debited with your consent from your bank or post office account.",
+   "asks": [
+    "Ask the bank to confirm your insurance age by nearest birthday.",
+    "How old are you?",
+    "Do you have a bank or post office account?"
+   ],
+   "documents": [
+    "Aadhaar card",
+    "Bank passbook",
+    "Enrolment and auto-debit consent form (available at the bank)"
+   ],
+   "renewal": "Yearly, 1 June to 31 May, subject to consent and premium payment. Cover can end at age 70 by nearest birthday, account closure, or insufficient balance.",
+   "source": "https://jansuraksha.gov.in/Files/PMSBY/English/Rules.pdf",
+   "verified": "2026-09-09"
+  }
+ ],
+ "Ayushman Bharat PM-JAY, 70+": [
+  {
+   "name": "Ayushman Bharat PM-JAY — cover for age 70 and above",
+   "name_hi": "आयुष्मान भारत PM-JAY — 70 वर्ष और उससे अधिक उम्र के लिए",
+   "authority": "National Health Authority, Ministry of Health and Family Welfare",
+   "summary": "Free hospital treatment worth up to ₹5 lakh a year. Everyone aged 70 and above qualifies, whatever their income — there is no poverty test and no list to be on. If your family already has an Ayushman card, this is an extra ₹5 lakh for you alone, not shared with younger members. Being on a private health policy or on ESI does not stop you. If you are on CGHS, ECHS or Ayushman CAPF you must choose one scheme or this one. This is not money paid to you: it pays the hospital when you are admitted. Get the card made before you need it, with just your Aadhaar: on the Ayushman app, at beneficiary.nha.gov.in, or at the nearest empanelled hospital. Helpline 14555.",
+   "asks": [
+    "How old are you?"
+   ],
+   "documents": [
+    "Aadhaar card"
+   ],
+   "renewal": "The cover is up to ₹5 lakh every year. Treatment is free at hospitals empanelled under PM-JAY, anywhere in India, not only in your own state.",
+   "source": "https://nha.gov.in/PM-JAY",
+   "verified": "2026-09-27"
+  }
+ ],
+ "PM Vishwakarma": [
+  {
+   "name": "PM Vishwakarma",
+   "name_hi": "पीएम विश्वकर्मा",
+   "authority": "Ministry of Micro, Small and Medium Enterprises",
+   "summary": "For artisans who work with their hands in one of 18 traditional trades — carpenter, blacksmith, potter, cobbler, tailor, mason, barber, washerman, goldsmith, boat maker, basket/mat weaver, toy maker and others. Registration brings a recognition certificate and ID card, skills training with a daily stipend, a one-time toolkit grant worth up to ₹15,000 as e-vouchers, and access to collateral-free loans at a reduced rate — a loan you would repay, not a payment. One person per family. Not for anyone who took a PMEGP loan in the last five years, or has an unpaid MUDRA or PM SVANidhi loan from that time. Check the full trade list on the portal, then register at a Common Service Centre.",
+   "asks": [
+    "Do you work with your hands in a traditional trade — such as carpenter, blacksmith, potter, cobbler, tailor, mason, barber, washerman, goldsmith or weaver?",
+    "How old are you?",
+    "In the last five years, have you taken a PMEGP loan (even if repaid), or a MUDRA or PM SVANidhi loan that is not fully repaid?",
+    "Are you, your spouse, or any unmarried child in government service?"
+   ],
+   "documents": [
+    "Aadhaar card",
+    "Mobile number linked to Aadhaar",
+    "Bank account details",
+    "Ration card (for family details)"
+   ],
+   "renewal": "Registration is verified by the gram panchayat or urban local body, then the district. The toolkit incentive follows basic training. Loans are optional and separate.",
+   "source": "https://pmvishwakarma.gov.in/",
+   "verified": "2026-09-27"
+  }
+ ],
+ "PM Ujjwala Yojana": [
+  {
+   "name": "Pradhan Mantri Ujjwala Yojana",
+   "name_hi": "प्रधानमंत्री उज्ज्वला योजना",
+   "authority": "Government of India",
+   "summary": "Deposit-free LPG connection, first refill and stove for eligible poor households. This is in-kind support, not annual cash or unlimited free refills. Distributor verification and prescribed documents are required.",
+   "asks": [
+    "How old are you?",
+    "Are you a woman applying in your own name?",
+    "Does anyone in your household already have an LPG gas connection, or a piped gas (PNG) connection at home?",
+    "Have you checked the official PMUY deprivation declaration and do you meet it? Income alone is not proof. If you have not checked, choose Don't know and ask the LPG distributor. https://www.pmuy.gov.in/faq.html"
+   ],
+   "documents": [
+    "Application/KYC form and photograph",
+    "Applicant and adult household members' Aadhaar (submit only to distributor)",
+    "Family-composition document or permitted migrant declaration",
+    "Address proof",
+    "Bank account details",
+    "Signed deprivation declaration"
+   ],
+   "renewal": "Apply free at pmuy.gov.in or at an LPG distributor; a CSC charges ₹20 to submit it for you. Some states charge a stamp fee. The distributor does biometric Aadhaar e-KYC, and an inspection at your home before the connection is released. Subsequent refills and any subsidy follow current rules; the first-refill benefit is not a recurring cash entitlement.",
+   "source": "https://www.pmuy.gov.in/faq.html",
+   "verified": "2026-09-09"
+  }
+ ],
+ "Jan Dhan bank account": [
+  {
+   "name": "Jan Dhan bank account (PMJDY)",
+   "name_hi": "जन धन बैंक खाता (PMJDY)",
+   "authority": "Department of Financial Services, Ministry of Finance",
+   "summary": "A free basic savings account at any bank, with no minimum balance, for anyone who does not have any other account. It comes with a RuPay debit card, which carries ₹2 lakh accident insurance. Almost every scheme on this list — the insurance covers, the pensions — needs a bank account to pay into, so this is the first door. Open it at any bank branch or a Bank Mitra with your Aadhaar number (or Aadhaar enrolment ID) and a photograph.",
+   "asks": [
+    "Do you have a bank account or a post office savings account?"
+   ],
+   "documents": [
+    "Aadhaar number, or Aadhaar enrolment ID (EID)",
+    "Recent photograph (not older than six months), or the bank takes one"
+   ],
+   "renewal": "No minimum balance, and the deposit earns interest. Eligible account holders can get an overdraft of up to ₹10,000.",
+   "source": "https://pmjdy.gov.in/",
+   "verified": "2026-09-27"
+  }
+ ],
+ "e-Shram registration": [
+  {
+   "name": "e-Shram registration",
+   "name_hi": "ई-श्रम पंजीकरण",
+   "authority": "Ministry of Labour & Employment, Government of India",
+   "summary": "A registration service with no payout of its own — right now, only registration happens through e-Shram. It gives unorganised workers a UAN card to help access schemes. Agricultural labourers and landless farmers can register. Registration is free, the card does not expire, and turning 60 changes nothing. Linked schemes have separate eligibility and application requirements.",
+   "asks": [
+    "Do you do income-earning work in the unorganised sector?",
+    "How old are you?"
+   ],
+   "documents": [
+    "Aadhaar card",
+    "Aadhaar-linked mobile number (if you have none, a centre can register you by fingerprint)"
+   ],
+   "renewal": "Nothing to renew. The card never expires, but update it if your details change.",
+   "source": "https://eshram.gov.in/faqs",
+   "verified": "2026-09-10"
+  }
+ ],
+ "Indira Gandhi National Old Age Pension": [
+  {
+   "name": "Indira Gandhi National Old Age Pension",
+   "name_hi": "इंदिरा गांधी राष्ट्रीय वृद्धावस्था पेंशन",
+   "authority": "Ministry of Rural Development (NSAP)",
+   "summary": "A monthly pension from the central government for people aged 60 and above in a BPL household: ₹200 a month up to age 79, ₹500 a month from 80. Most states add their own amount on top — what you actually receive is usually more, and your state's own pension scheme (if listed here) shows the fuller figure. You get one pension, not both. Apply through the UMANG app or at the panchayat or municipal office.",
+   "asks": [
+    "How old are you?",
+    "Does your household have a BPL card, or is it listed as Below Poverty Line?"
+   ],
+   "documents": [
+    "Aadhaar card",
+    "BPL card or BPL list extract",
+    "Age proof",
+    "Bank or post office passbook",
+    "Photograph"
+   ],
+   "renewal": "Paid directly to your bank or post office account. Report a change of address. The amount rises automatically at 80.",
+   "source": "https://nsap.nic.in/",
+   "verified": "2026-09-15"
+  }
+ ],
+ "Indira Gandhi National Widow Pension": [
+  {
+   "name": "Indira Gandhi National Widow Pension",
+   "name_hi": "इंदिरा गांधी राष्ट्रीय विधवा पेंशन",
+   "authority": "Ministry of Rural Development (NSAP)",
+   "summary": "A monthly pension from the central government for widows aged 40 to 79 in a BPL household: ₹300 a month, rising to ₹500 from age 80. States usually add to this, so the real amount is often higher. It stops on remarriage or if the household moves above the poverty line. You get one pension, not both this and a state widow pension. Apply through UMANG or at the panchayat or municipal office.",
+   "asks": [
+    "Are you a widow?",
+    "How old are you?",
+    "Does your household have a BPL card, or is it listed as Below Poverty Line?"
+   ],
+   "documents": [
+    "Aadhaar card",
+    "Husband's death certificate",
+    "BPL card or BPL list extract",
+    "Age proof",
+    "Bank or post office passbook",
+    "Photograph"
+   ],
+   "renewal": "Paid to your bank or post office account. Stops on remarriage. Rises automatically at 80.",
+   "source": "https://nsap.nic.in/",
+   "verified": "2026-09-15"
+  }
+ ],
+ "Indira Gandhi National Disability Pension": [
+  {
+   "name": "Indira Gandhi National Disability Pension",
+   "name_hi": "इंदिरा गांधी राष्ट्रीय दिव्यांगता पेंशन",
+   "authority": "Ministry of Rural Development (NSAP)",
+   "summary": "A monthly pension from the central government for people aged 18 and above with a disability certificate showing 80% or more, in a BPL household: ₹300 a month, ₹500 from age 80. States usually add to this amount. If you do not yet have a disability certificate, that is the first step — ask at the district hospital. Apply through UMANG or at the panchayat or municipal office.",
+   "asks": [
+    "How old are you?",
+    "Do you have a disability certificate that shows 80% or more?",
+    "Does your household have a BPL card, or is it listed as Below Poverty Line?"
+   ],
+   "documents": [
+    "Aadhaar card",
+    "Disability certificate (UDID)",
+    "BPL card or BPL list extract",
+    "Age proof",
+    "Bank or post office passbook",
+    "Photograph"
+   ],
+   "renewal": "Paid to your bank or post office account. Rises automatically at 80.",
+   "source": "https://nsap.nic.in/",
+   "verified": "2026-09-15"
+  }
+ ],
+ "Uttarakhand old-age pension": [
+  {
+   "name": "Uttarakhand old-age pension",
+   "name_hi": "उत्तराखंड वृद्धावस्था पेंशन",
+   "authority": "Government of Uttarakhand",
+   "summary": "₹1,500 monthly pension after approval. If you already draw another pension, ask the office whether it affects this application — the national scheme portal says it does, the department's own page does not mention it. Apply through ssp.uk.gov.in or assisted services. Eligibility and documents are checked by the department. Do not add multiple pension routes together as guaranteed payments.",
+   "asks": [
+    "Which state do you live in?",
+    "How old are you?",
+    "For the state pension: is YOUR OWN monthly income, from all sources, ₹4,000 or less — or do you hold a BPL card? If unsure, choose Don't know.",
+    "Have you already been selected for the pension through the local Gram Sabha/Gram Panchayat or councillor process? If not, the local office can explain this application step."
+   ],
+   "documents": [
+    "Aadhaar card",
+    "Bank passbook",
+    "Income certificate or BPL card",
+    "Family register (rural) or ration card (urban)",
+    "Local selection proposal",
+    "Attested photograph"
+   ],
+   "renewal": "Follow the department's current verification instructions; report changes in eligibility. Confirm whether any existing pension affects your application.",
+   "source": "https://socialwelfare.uk.gov.in/service/old-age-pension/",
+   "verified": "2026-10-01"
+  }
+ ],
+ "Uttarakhand widow pension": [
+  {
+   "name": "Uttarakhand widow pension",
+   "name_hi": "उत्तराखंड विधवा पेंशन",
+   "authority": "Government of Uttarakhand",
+   "summary": "₹1,500 monthly pension after approval, set by Uttarakhand government order of 21 April 2022. The Uttarakhand department's pension overview says this route is for widows who are not receiving another pension. Apply through ssp.uk.gov.in or assisted services. Eligibility and documents are checked by the department. Do not add multiple pension routes together as guaranteed payments.",
+   "asks": [
+    "Which state do you live in?",
+    "How old are you?",
+    "Are you a widow (your husband has died)? You can choose Don't know to skip. Do not send a certificate here.",
+    "For the state pension: is your FAMILY's monthly income from all sources ₹4,000 or less, OR do you hold a BPL card? If unsure, choose Don't know.",
+    "Have you already been selected for the pension through the local Gram Sabha/Gram Panchayat or councillor process? If not, the local office can explain this application step.",
+    "Are you already receiving any other pension? If you are unsure, choose Don't know."
+   ],
+   "documents": [
+    "Aadhaar card",
+    "Bank passbook",
+    "Income certificate or BPL card",
+    "Family register (rural) or ration card (urban)",
+    "Local selection proposal",
+    "Attested photograph",
+    "Husband's death certificate"
+   ],
+   "renewal": "Follow the department's current verification instructions and report changes in eligibility.",
+   "source": "https://socialwelfare.uk.gov.in/service/widow-pension/",
+   "verified": "2026-10-01"
+  }
+ ],
+ "Sikkim old-age pension": [
+  {
+   "name": "Indira Gandhi National Old Age Pension (Sikkim)",
+   "name_hi": "इंदिरा गांधी राष्ट्रीय वृद्धावस्था पेंशन (सिक्किम)",
+   "authority": "Social Justice & Welfare Department, Government of Sikkim (NSAP)",
+   "summary": "A monthly pension in Sikkim for people aged 60 and above in a BPL household with an Antyodaya or Priority Household ration card: ₹1,500 a month from 60, ₹2,000 from 70 and ₹2,500 from 80. You get one pension, not two. Register on Sikkim's online pension portal.",
+   "asks": [
+    "Which state do you live in?",
+    "How old are you?",
+    "Does your household have a BPL card, or is it listed as Below Poverty Line?"
+   ],
+   "documents": [
+    "SSC, COI or residential certificate",
+    "Antyodaya (AAY) or Priority Household ration card",
+    "Aadhaar card",
+    "Jan Dhan bank account passbook"
+   ],
+   "renewal": "The amount rises at 70 and again at 80.",
+   "source": "https://pensionscheme.sikkim.gov.in/",
+   "verified": "2026-09-27"
+  }
+ ],
+ "Sikkim widow pension": [
+  {
+   "name": "Indira Gandhi National Widow Pension (Sikkim)",
+   "name_hi": "इंदिरा गांधी राष्ट्रीय विधवा पेंशन (सिक्किम)",
+   "authority": "Social Justice & Welfare Department, Government of Sikkim (NSAP)",
+   "summary": "A monthly pension of ₹2,000 in Sikkim for widows aged 21 and above in a BPL household with an Antyodaya or Priority Household ration card. You need your husband's death certificate and a certificate that you have not remarried. You get one pension, not two. Register on Sikkim's online pension portal.",
+   "asks": [
+    "Which state do you live in?",
+    "Are you a widow?",
+    "How old are you?",
+    "Does your household have a BPL card, or is it listed as Below Poverty Line?"
+   ],
+   "documents": [
+    "SSC, COI or residential certificate",
+    "Antyodaya (AAY) or Priority Household ration card",
+    "Aadhaar card",
+    "Jan Dhan bank account passbook",
+    "Husband's death certificate showing your name as his wife",
+    "Non-marriage certificate (not remarried)"
+   ],
+   "renewal": "₹2,000 every month; the page lists no higher rate at any age.",
+   "source": "https://pensionscheme.sikkim.gov.in/",
+   "verified": "2026-09-27"
+  }
+ ],
+ "Sikkim disability pension": [
+  {
+   "name": "Indira Gandhi National Disability Pension (Sikkim)",
+   "name_hi": "इंदिरा गांधी राष्ट्रीय दिव्यांगता पेंशन (सिक्किम)",
+   "authority": "Social Justice & Welfare Department, Government of Sikkim (NSAP)",
+   "summary": "A monthly pension of ₹2,000 in Sikkim for people aged 18 and above with a disability certificate of more than 80%, in a BPL household with an Antyodaya or Priority Household ration card. You get one pension, not two. Register on Sikkim's online pension portal.",
+   "asks": [
+    "Which state do you live in?",
+    "How old are you?",
+    "Do you have a disability certificate that shows 80% or more?",
+    "Does your household have a BPL card, or is it listed as Below Poverty Line?"
+   ],
+   "documents": [
+    "SSC, COI or residential certificate",
+    "Antyodaya (AAY) or Priority Household ration card",
+    "Aadhaar card",
+    "Jan Dhan bank account passbook",
+    "Disability certificate from the medical authority (more than 80%)",
+    "Identity card"
+   ],
+   "renewal": "₹2,000 every month; the page lists no higher rate at any age.",
+   "source": "https://pensionscheme.sikkim.gov.in/",
+   "verified": "2026-09-27"
+  }
+ ],
+ "Madhya Pradesh Kalyani pension": [
+  {
+   "name": "Mukhyamantri Kalyani Pension (Madhya Pradesh)",
+   "name_hi": "मुख्यमंत्री कल्याणी पेंशन (मध्य प्रदेश)",
+   "authority": "Social Justice Department, Government of Madhya Pradesh",
+   "summary": "A monthly pension of ₹600 from the Madhya Pradesh government for widows aged 18 to 79 who are native to the state. You do not need a BPL card. You must not pay income tax, be a government employee, or already get a family pension or any other pension. Apply at the District Panchayat (village) or the Municipality (town), or through Public Service Guarantee.",
+   "asks": [
+    "Which state do you live in?",
+    "Are you a widow?",
+    "How old are you?",
+    "Are you already receiving any other pension? If you are unsure, choose Don't know."
+   ],
+   "documents": [
+    "Prescribed application form",
+    "Two photographs",
+    "Samagra ID",
+    "Aadhaar number",
+    "Mobile number",
+    "Bank passbook",
+    "Age proof certificate",
+    "Husband's death certificate",
+    "Self-attested declaration: not an income-tax payer",
+    "Self-certified declaration: not a government employee or officer",
+    "Self-attested declaration: not receiving a family pension",
+    "Self-certified declaration: not receiving any other pension",
+    "Proof of being a native of Madhya Pradesh"
+   ],
+   "renewal": "₹600 every month from the state government, up to age 79.",
+   "source": "https://dhar.nic.in/en/scheme/chief-minister-kalyani-pension-scheme/",
+   "verified": "2026-09-27"
+  }
+ ],
+ "Punjab old-age pension": [
+  {
+   "name": "Punjab old-age pension (women, 58+)",
+   "name_hi": "पंजाब वृद्धावस्था पेंशन (महिलाएँ, 58+)",
+   "authority": "Department of Social Security and Women & Child Development, Government of Punjab",
+   "summary": "₹1,500 a month from the Punjab government for women aged 58 and above, with total income of ₹60,000 a year or less, not in a job or self-employed, and land within the limit. You will sign a declaration that you have no commercial property, no house over 200 sq m in a town, and pay no income tax, VAT or professional tax. You get one pension, not two. Get the form at your panchayat, block (BDPO), Sewa Kendra, Anganwadi or the District Social Security Officer.",
+   "asks": [
+    "Which state do you live in?",
+    "Are you a woman?",
+    "How old are you?",
+    "Roughly how much do you earn in a month?",
+    "Do you have a job (government or private), or run your own work or business?",
+    "Together with your spouse, do you own more than 2.5 acres of irrigated (nehri/chahi) land, or more than 5 acres of dry (barani) or waterlogged land?"
+   ],
+   "documents": [
+    "One proof of age: Aadhaar card, voter card, voter-list entry, matriculation certificate or birth certificate",
+    "Signed self-declaration (no job, not self-employed, land, income, property, taxes)",
+    "Aadhaar number, mobile number and bank account number",
+    "Application form"
+   ],
+   "renewal": "The CDPO verifies within a month and the District Social Security Officer sanctions it. Paid through your bank.",
+   "source": "https://sswcd.punjab.gov.in/en/social-security/pensionsfinancial-assistance",
+   "verified": "2026-09-27"
+  },
+  {
+   "name": "Punjab old-age pension (men, 65+)",
+   "name_hi": "पंजाब वृद्धावस्था पेंशन (पुरुष, 65+)",
+   "authority": "Department of Social Security and Women & Child Development, Government of Punjab",
+   "summary": "₹1,500 a month from the Punjab government for men aged 65 and above, with total income of ₹60,000 a year or less, not in a job or self-employed, and land within the limit. You will sign a declaration that you have no commercial property, no house over 200 sq m in a town, and pay no income tax, VAT or professional tax. You get one pension, not two. Get the form at your panchayat, block (BDPO), Sewa Kendra, Anganwadi or the District Social Security Officer.",
+   "asks": [
+    "Which state do you live in?",
+    "Are you a woman?",
+    "How old are you?",
+    "Roughly how much do you earn in a month?",
+    "Do you have a job (government or private), or run your own work or business?",
+    "Together with your spouse, do you own more than 2.5 acres of irrigated (nehri/chahi) land, or more than 5 acres of dry (barani) or waterlogged land?"
+   ],
+   "documents": [
+    "One proof of age: Aadhaar card, voter card, voter-list entry, matriculation certificate or birth certificate",
+    "Signed self-declaration (no job, not self-employed, land, income, property, taxes)",
+    "Aadhaar number, mobile number and bank account number",
+    "Application form"
+   ],
+   "renewal": "The CDPO verifies within a month and the District Social Security Officer sanctions it. Paid through your bank.",
+   "source": "https://sswcd.punjab.gov.in/en/social-security/pensionsfinancial-assistance",
+   "verified": "2026-09-27"
+  }
+ ]
+}
