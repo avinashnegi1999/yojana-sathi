@@ -276,7 +276,13 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
 .journey-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px 18px;margin-bottom:22px}
 .replay{border:0;background:none;color:var(--blue);font:inherit;font-size:14px;cursor:pointer;padding:6px 4px}
 .replay:active{transform:scale(.95)}
-.scene{display:block;width:100%;height:auto;overflow:visible}
+.scene-wrap{overflow:hidden;border-radius:18px}
+.scene{display:block;width:100%;height:auto}
+@media(max-width:734px){
+  .journey{width:100%}
+  .scene-wrap{border-radius:0}
+  .scene{width:230%;max-width:none;will-change:transform}
+}
 .scene .lbl{font:600 17px var(--font);fill:var(--muted);text-anchor:middle}
 .scene .fade{transition:opacity .35s ease}
 .scene .popin{transition:opacity .35s ease,transform .45s cubic-bezier(.3,1.5,.5,1);transform-box:fill-box;transform-origin:50% 100%}
@@ -428,13 +434,13 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
       </div>
       <button class="replay" type="button" id="j-replay">Play again ↻</button>
     </div>
-    <svg class="scene" id="j-scene" viewBox="0 0 1000 360" role="img"
+    <div class="scene-wrap"><svg class="scene" id="j-scene" viewBox="0 70 1000 290" role="img"
          aria-label="An illustrated trip. Without Yojana Sathi, a worker walks and takes the bus to the block office, finds it is the wrong counter, and walks home with the day gone. With Yojana Sathi, her phone first tells her she is eligible, to go to the bank branch, and to carry her passbook and Aadhaar; she goes straight there.">
       <!-- ground -->
       <rect x="0" y="300" width="1000" height="60" fill="#f5f5f7"/>
       <line x1="0" y1="300" x2="1000" y2="300" stroke="#d2d2d7" stroke-width="2"/>
       <!-- the day: the sun crosses the sky while she travels -->
-      <g id="j-sun" transform="translate(80,210)"><circle r="20" fill="#fff" stroke="#d2d2d7" stroke-width="3"/></g>
+      <g id="j-sun" transform="translate(95,255)"><circle r="20" fill="#fff" stroke="#d2d2d7" stroke-width="3"/></g>
       <!-- route already walked -->
       <line id="j-trail-out" x1="95" y1="311" x2="95" y2="311" stroke="#0066cc" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 9"/>
       <line id="j-trail-back" x1="590" y1="321" x2="590" y2="321" stroke="#7a7a7a" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 9"/>
@@ -490,7 +496,7 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
         <path d="M-9 -35 Q0 -39 9 -35 L14 0 L-14 0 Z" fill="#1d1d1f"/>
         <rect id="j-phone" x="10" y="-32" width="8" height="13" rx="2" fill="#0066cc" opacity="0"/>
       </g>
-    </svg>
+    </svg></div>
     <div class="journey-hud" aria-live="polite">
       <div><b id="j-trips">0</b><span id="j-trips-l">trips</span></div>
       <div><b id="j-cost">₹0</b><span id="j-cost-l">wage and bus fare</span></div>
@@ -1071,7 +1077,8 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
       walker.style.opacity=riding?0:1;
       const bx=riding?x-10:(x<=STOP_A?270:390);
       bus.setAttribute('transform','translate('+bx.toFixed(1)+',0)');
-      sun.setAttribute('transform','translate('+(80+840*p).toFixed(1)+','+(210-150*Math.sin(Math.PI*p)).toFixed(1)+')');
+      sun.setAttribute('transform','translate('+(95+830*p).toFixed(1)+','+(255-165*Math.sin(Math.PI*p)).toFixed(1)+')');
+      pan(x);
       if(mode==='without'){
         tOut.setAttribute('x2',Math.max(HOME,t<=2800?x:590));
         tBack.setAttribute('x2',t>3700?x:590);tBack.style.opacity=t>3700?1:0;
@@ -1092,6 +1099,15 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
         hOut.textContent=t>=3900?'Right counter':'—';hOut.className=t>=3900?'good':'';
       }
     }
+    /* On a phone the drawing is 2.3x the screen; keep her in frame. */
+    const narrow=matchMedia('(max-width:734px)');
+    const VIEW=1000/2.3;
+    function pan(x){
+      if(!narrow.matches){scene.style.transform='';return;}
+      const c=Math.min(1000-VIEW/2,Math.max(VIEW/2,x));
+      scene.style.transform='translateX('+(-(c-VIEW/2)/10).toFixed(3)+'%)';
+    }
+    narrow.addEventListener&&narrow.addEventListener('change',()=>render(PLANS[mode].dur));
     function setMode(m){mode=m;document.querySelectorAll('#journey [data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));}
     function play(m,then){
       cancelAnimationFrame(raf);clearTimeout(next);setMode(m);
@@ -1103,7 +1119,7 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
     document.querySelectorAll('#journey [data-mode]').forEach(b=>b.addEventListener('click',()=>{userTook=true;play(b.dataset.mode);}));
     $('#j-replay').addEventListener('click',()=>{userTook=true;play(mode);});
     render(0);
-    const auto=()=>play('without',()=>{if(!userTook)play('with');});
+    const auto=()=>{if(!userTook)play('without',()=>{if(!userTook)play('with');});};
     if(reduce){setMode('with');render(PLANS.with.dur);}
     else if('IntersectionObserver' in window){
       const io=new IntersectionObserver(es=>{if(es[0].isIntersecting){io.disconnect();setTimeout(auto,500);}},{threshold:.4});io.observe(scene);
