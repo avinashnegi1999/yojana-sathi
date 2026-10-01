@@ -14,7 +14,17 @@ set -euo pipefail
 TARGET="${1:?usage: pull-backups.sh user@host [local folder]}"
 DEST="${2:-$HOME/sathi-backups}"
 KEY="${KEY:-$HOME/.ssh/sathi_aws}"
-PYTHON="${PYTHON:-$(command -v python3 || command -v python)}"
+# ! On Windows, `python3` can be the Microsoft Store stub, which prints an
+# ! install hint instead of running. Use the first one that actually runs.
+if [[ -z "${PYTHON:-}" ]]; then
+  for candidate in python3 python; do
+    if "$candidate" -c 'import sys; sys.exit(sys.version_info < (3, 11))' 2>/dev/null; then
+      PYTHON="$candidate"
+      break
+    fi
+  done
+fi
+[[ -n "${PYTHON:-}" ]] || { echo "no working Python 3.11+ found; set PYTHON=..."; exit 1; }
 
 mkdir -p "$DEST"
 chmod 700 "$DEST"
