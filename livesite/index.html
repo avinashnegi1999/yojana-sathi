@@ -265,6 +265,92 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
   .step{margin:-12px;padding:12px}
 }
 
+/* ═══ illustrations ═══════════════════════════════════════════════
+   Drawn in the same grammar as the rest of the page: flat ink shapes,
+   greys from the palette, and blue only where the worker's own path or
+   a decision is. Every scene states what is illustration and what is data.
+   ════════════════════════════════════════════════════════════════ */
+
+/* hero: the trip */
+.journey{margin:52px auto 0;width:min(1000px,calc(100% - 44px))}
+.journey-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px 18px;margin-bottom:22px}
+.replay{border:0;background:none;color:var(--blue);font:inherit;font-size:14px;cursor:pointer;padding:6px 4px}
+.replay:active{transform:scale(.95)}
+.scene{display:block;width:100%;height:auto;overflow:visible}
+.scene .lbl{font:600 17px var(--font);fill:var(--muted);text-anchor:middle}
+.scene .fade{transition:opacity .35s ease}
+.scene .popin{transition:opacity .35s ease,transform .45s cubic-bezier(.3,1.5,.5,1);transform-box:fill-box;transform-origin:50% 100%}
+.scene .popin.off{opacity:0;transform:scale(.6)}
+.journey-hud{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:760px;margin:26px auto 0}
+.journey-hud div{display:grid;gap:4px}
+.journey-hud b{font-size:clamp(20px,3vw,30px);font-weight:600;line-height:1.1;letter-spacing:-.01em;font-variant-numeric:tabular-nums;transition:color .3s}
+.journey-hud span{color:var(--muted);font-size:13px;line-height:1.35}
+.journey-hud b.bad{color:var(--muted)}
+.journey-hud b.good{color:var(--blue)}
+.journey figcaption{margin-top:18px}
+
+/* problem: one square per day of wages */
+.days{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-top:18px}
+.days i{position:relative;display:block;height:26px;border-radius:7px;background:var(--parchment);overflow:hidden}
+.days i::after{content:"";position:absolute;inset:0;background:var(--blue);transform-origin:0 50%;transform:scaleX(var(--f,0));transition:transform .45s cubic-bezier(.2,.7,.3,1)}
+.days-note{margin-top:8px;color:var(--muted);font-size:12px;text-align:center}
+
+/* steps: a small picture above each */
+.step-art{display:block;width:100%;max-width:170px;height:auto;margin:0 0 14px;color:var(--ink)}
+.step-art .pin{transition:transform .55s cubic-bezier(.3,1.6,.5,1),opacity .3s;transform:translateY(-12px);opacity:.35}
+.step.on .step-art .pin{transform:none;opacity:1}
+.step-art .chip{transition:transform .4s cubic-bezier(.3,1.5,.5,1),opacity .3s;transform-box:fill-box;transform-origin:center;opacity:.35;transform:scale(.85)}
+.step.on .step-art .chip{opacity:1;transform:none}
+.step.on .step-art .chip:nth-of-type(2){transition-delay:.12s}
+.step-art .sig{stroke-dasharray:120;stroke-dashoffset:120;transition:stroke-dashoffset .9s ease}
+.step.on .step-art .sig{stroke-dashoffset:0}
+.step-art .out{opacity:.3;transition:opacity .3s}
+.step.on .step-art .out{opacity:1}
+.step.on .step-art .out:nth-of-type(2){transition-delay:.15s}
+.step.on .step-art .out:nth-of-type(3){transition-delay:.3s}
+.step-art .tick{stroke-dasharray:16;stroke-dashoffset:16;transition:stroke-dashoffset .35s ease}
+.step.on .step-art .tick{stroke-dashoffset:0}
+.step.on .step-art .tick:nth-of-type(2){transition-delay:.2s}
+.step.on .step-art .tick:nth-of-type(3){transition-delay:.4s}
+
+/* unknown: answers pass through a signed rule file into one of three trays */
+.sorter{display:block;width:100%;max-width:900px;height:auto;margin:48px auto 0}
+.sorter text{font-family:var(--font)}
+.sorter .row{fill:#323235}
+.sorter .rlbl{font-size:15px;fill:var(--on-dark)}
+.sorter .ans{font-size:13px;font-weight:600;text-anchor:middle}
+.sorter .wire{fill:none;stroke:#48484a;stroke-width:2;transition:stroke .3s}
+.sorter .wire.on{stroke:var(--sky)}
+.sorter .tray rect{fill:none;stroke:rgba(245,245,247,.25);stroke-width:1.5;transition:fill .3s,stroke .3s}
+.sorter .tray text{font-size:16px;font-weight:600;fill:var(--muted-dark);text-anchor:middle;transition:fill .3s}
+.sorter .tray.on rect{fill:var(--on-dark);stroke:var(--on-dark)}
+.sorter .tray.on text{fill:var(--ink)}
+.sorter .tray.u.on rect{fill:var(--sky);stroke:var(--sky)}
+.sorter .tray.u.on text{fill:#fff}
+.sorter .token{transition:transform .6s cubic-bezier(.3,.1,.2,1),opacity .2s}
+
+/* schemes: a glyph per kind of benefit */
+.sicon{display:grid;place-items:center;width:40px;height:40px;margin-bottom:14px;border-radius:11px;background:var(--canvas);color:var(--blue)}
+.sicon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:734px){.sicon{display:none}}
+
+/* story: a rule file, signed */
+.signed{display:block;width:min(360px,100%);height:auto;margin:36px auto 0}
+.signed text{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px}
+.signed .sigline{stroke-dasharray:420;stroke-dashoffset:420;transition:stroke-dashoffset 2.2s cubic-bezier(.4,.1,.2,1) .3s}
+.signed.in .sigline,.reveal.in .signed .sigline{stroke-dashoffset:0}
+
+@media(prefers-reduced-motion:reduce){
+  .step-art .pin,.step-art .chip,.step-art .out{opacity:1;transform:none}
+  .step-art .sig,.step-art .tick,.signed .sigline{stroke-dashoffset:0}
+  .sorter .token,.days i::after{transition:none}
+}
+@media(max-width:734px){
+  .journey-hud{gap:10px}
+  .journey-hud span{font-size:12px}
+  .days{gap:4px}
+}
+
 /* ── gentle arrival, never a gate on reading ── */
 .js .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.3,1)}
 .js .reveal.in{opacity:1;transform:none}
@@ -333,11 +419,85 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
       <a class="more" href="https://t.me/YojanaSathiBot">Open on Telegram</a>
       <a class="more" href="#film">Watch the film</a>
     </div>
-    <figure class="phone">
-      <img src="assets/shot-verdict.jpg" width="720" height="1600" fetchpriority="high"
-           alt="A Telegram result listing two schemes, each with what you get, why you qualify, and where to go — including the premium and what the cover excludes.">
-    </figure>
   </div>
+  <figure class="journey" id="journey">
+    <div class="journey-top">
+      <div class="toggle" role="group" aria-label="Show the trip">
+        <button type="button" data-mode="without" aria-pressed="true">Without Yojana Sathi</button>
+        <button type="button" data-mode="with" aria-pressed="false">With Yojana Sathi</button>
+      </div>
+      <button class="replay" type="button" id="j-replay">Play again ↻</button>
+    </div>
+    <svg class="scene" id="j-scene" viewBox="0 0 1000 360" role="img"
+         aria-label="An illustrated trip. Without Yojana Sathi, a worker walks and takes the bus to the block office, finds it is the wrong counter, and walks home with the day gone. With Yojana Sathi, her phone first tells her she is eligible, to go to the bank branch, and to carry her passbook and Aadhaar; she goes straight there.">
+      <!-- ground -->
+      <rect x="0" y="300" width="1000" height="60" fill="#f5f5f7"/>
+      <line x1="0" y1="300" x2="1000" y2="300" stroke="#d2d2d7" stroke-width="2"/>
+      <!-- the day: the sun crosses the sky while she travels -->
+      <g id="j-sun" transform="translate(80,210)"><circle r="20" fill="#fff" stroke="#d2d2d7" stroke-width="3"/></g>
+      <!-- route already walked -->
+      <line id="j-trail-out" x1="95" y1="311" x2="95" y2="311" stroke="#0066cc" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 9"/>
+      <line id="j-trail-back" x1="590" y1="321" x2="590" y2="321" stroke="#7a7a7a" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 9"/>
+      <!-- home -->
+      <rect x="48" y="240" width="94" height="60" fill="#1d1d1f"/>
+      <path d="M36 246 L95 202 L154 246 Z" fill="#333"/>
+      <rect x="84" y="262" width="22" height="38" fill="#f5f5f7"/>
+      <rect x="58" y="256" width="16" height="14" fill="#f5f5f7"/>
+      <text class="lbl" x="95" y="342">Home</text>
+      <!-- bus stop and bus -->
+      <line x1="258" y1="232" x2="258" y2="300" stroke="#1d1d1f" stroke-width="4"/>
+      <rect x="236" y="214" width="44" height="22" rx="6" fill="#1d1d1f"/>
+      <text x="258" y="230" fill="#fff" font-size="12" font-weight="600" text-anchor="middle" font-family="system-ui,sans-serif">BUS</text>
+      <g id="j-bus" transform="translate(270,0)">
+        <rect x="0" y="246" width="110" height="46" rx="10" fill="#333"/>
+        <rect x="10" y="256" width="20" height="14" rx="2" fill="#f5f5f7"/><rect x="36" y="256" width="20" height="14" rx="2" fill="#f5f5f7"/><rect x="62" y="256" width="20" height="14" rx="2" fill="#f5f5f7"/><rect x="88" y="256" width="14" height="14" rx="2" fill="#f5f5f7"/>
+        <circle cx="24" cy="294" r="9" fill="#1d1d1f"/><circle cx="88" cy="294" r="9" fill="#1d1d1f"/>
+      </g>
+      <!-- block office -->
+      <rect x="512" y="188" width="156" height="10" fill="#333"/>
+      <rect x="520" y="196" width="140" height="104" fill="#1d1d1f"/>
+      <rect x="560" y="236" width="60" height="44" fill="#f5f5f7"/>
+      <g id="j-shutter" class="fade" opacity="0">
+        <rect x="560" y="236" width="60" height="44" fill="#7a7a7a"/>
+        <path d="M560 245H620M560 254H620M560 263H620M560 272H620" stroke="#5a5a5e" stroke-width="2"/>
+      </g>
+      <text class="lbl" x="590" y="342">Block office</text>
+      <!-- bank branch -->
+      <path d="M682 214 L760 176 L838 214 Z" fill="#1d1d1f"/>
+      <rect x="690" y="214" width="140" height="86" fill="#333"/>
+      <rect x="702" y="226" width="10" height="64" fill="#48484a"/><rect x="808" y="226" width="10" height="64" fill="#48484a"/>
+      <rect id="j-door" x="740" y="246" width="40" height="54" fill="#f5f5f7"/>
+      <text class="lbl" x="760" y="342">Bank branch</text>
+      <!-- common service centre -->
+      <rect x="852" y="212" width="140" height="14" rx="3" fill="#7a7a7a"/>
+      <rect x="860" y="226" width="124" height="74" fill="#1d1d1f"/>
+      <rect x="878" y="242" width="88" height="32" fill="#f5f5f7"/>
+      <text class="lbl" x="922" y="342">Service centre</text>
+      <!-- outcomes -->
+      <g id="j-x" class="popin off"><circle cx="620" cy="226" r="16" fill="#7a7a7a"/><path d="M613 219l14 14M627 219l-14 14" stroke="#fff" stroke-width="3" stroke-linecap="round"/></g>
+      <g id="j-ok" class="popin off"><circle cx="782" cy="234" r="16" fill="#0066cc"/><path d="M774 234l5 6 11-12" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g>
+      <!-- the answer on her phone, before she leaves -->
+      <g id="j-bubble" class="popin off">
+        <rect x="128" y="112" width="250" height="78" rx="16" fill="#0066cc"/>
+        <path d="M150 188 L140 206 L170 188 Z" fill="#0066cc"/>
+        <text x="146" y="138" fill="#fff" font-size="14" font-weight="600" font-family="system-ui,sans-serif">Eligible: Atal Pension Yojana</text>
+        <text x="146" y="158" fill="#fff" font-size="13" font-family="system-ui,sans-serif">Go to: your bank branch</text>
+        <text x="146" y="177" fill="#fff" font-size="13" font-family="system-ui,sans-serif">Carry: passbook, Aadhaar</text>
+      </g>
+      <!-- her -->
+      <g id="j-walker" transform="translate(95,300)">
+        <circle cx="0" cy="-46" r="8.5" fill="#1d1d1f"/>
+        <path d="M-9 -35 Q0 -39 9 -35 L14 0 L-14 0 Z" fill="#1d1d1f"/>
+        <rect id="j-phone" x="10" y="-32" width="8" height="13" rx="2" fill="#0066cc" opacity="0"/>
+      </g>
+    </svg>
+    <div class="journey-hud" aria-live="polite">
+      <div><b id="j-trips">0</b><span id="j-trips-l">trips</span></div>
+      <div><b id="j-cost">₹0</b><span id="j-cost-l">wage and bus fare</span></div>
+      <div><b id="j-out">—</b><span>at the counter</span></div>
+    </div>
+    <figcaption class="fine">An illustration, not a recorded journey. ₹315 is the PLFS 2025 average day for a female casual labourer; the ₹60 fare is an example.</figcaption>
+  </figure>
 </section>
 
 <!-- 2 · problem -->
@@ -364,6 +524,8 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
       <div style="margin-top:12px"><div class="calc-row" style="margin-top:0"><label for="fare">Bus fare, both ways (₹)</label><output id="fare-out">₹60</output></div>
         <input type="range" id="fare" min="0" max="300" step="10" value="60"></div>
       <div class="calc-out"><b id="loss">₹1,030</b><span id="loss-note">about 2.3 days of wages, gone before any benefit</span></div>
+      <div class="days" id="days" aria-hidden="true"></div>
+      <p class="days-note">Each square is one day's wage.</p>
     </div>
     <p class="fine">Wages are the PLFS 2025 averages cited above. Trips and fare are yours to set; this is an illustration, not a measurement.</p>
   </div>
@@ -407,10 +569,10 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
     <h2>Ask less.<br>Decide by rule.</h2>
     <p class="tagline">Start with your state. Answer only what matters. Let the rules decide.</p>
     <div class="steps">
-      <div class="step"><span class="n">01</span><h3>Choose</h3><p>Your state — on a map or a list. Then national schemes, your state's, or both.</p></div>
-      <div class="step"><span class="n">02</span><h3>Answer</h3><p>Only the questions those schemes need. “Don't know” is always allowed.</p></div>
-      <div class="step"><span class="n">03</span><h3>Decide</h3><p>Plain rule files with cited sources. Same answers, same verdict — no model decides.</p></div>
-      <div class="step"><span class="n">04</span><h3>Walk in</h3><p>What you get, what it costs, what to carry, and where to go.</p></div>
+      <div class="step"><svg class="step-art" viewBox="0 0 170 100" aria-hidden="true"><rect x="18" y="2" width="134" height="20" rx="10" fill="#fff" stroke="#e0e0e0"/><text x="32" y="16" font-size="11" fill="#6e6e73" font-family="system-ui,sans-serif">Madhya Pradesh</text><rect x="18" y="27" width="134" height="20" rx="10" fill="#fff" stroke="#e0e0e0"/><text x="32" y="41" font-size="11" fill="#6e6e73" font-family="system-ui,sans-serif">Punjab</text><g class="chip"><rect x="18" y="52" width="134" height="20" rx="10" fill="#0066cc"/><text x="32" y="66" font-size="11" fill="#fff" font-weight="600" font-family="system-ui,sans-serif">Uttarakhand</text></g><g class="pin"><circle cx="140" cy="62" r="7" fill="#fff"/><path d="M136.5 62l2.5 2.6 4.5-5" fill="none" stroke="#0066cc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g><rect x="18" y="77" width="134" height="20" rx="10" fill="#fff" stroke="#e0e0e0"/><text x="32" y="91" font-size="11" fill="#6e6e73" font-family="system-ui,sans-serif">Sikkim</text></svg><span class="n">01</span><h3>Choose</h3><p>Your state — on a map or a list. Then national schemes, your state's, or both.</p></div>
+      <div class="step"><svg class="step-art" viewBox="0 0 170 100" aria-hidden="true"><rect x="10" y="12" width="104" height="30" rx="15" fill="#f5f5f7" stroke="#e0e0e0"/><text x="24" y="32" font-size="13" fill="currentColor" font-family="system-ui,'Noto Sans Devanagari',sans-serif">आपकी उम्र?</text><g class="chip"><rect x="46" y="56" width="40" height="30" rx="15" fill="#0066cc"/><text x="66" y="76" font-size="13" fill="#fff" font-weight="600" text-anchor="middle" font-family="system-ui,sans-serif">34</text></g><g class="chip"><rect x="92" y="56" width="74" height="30" rx="15" fill="#fff" stroke="#0066cc" stroke-width="1.5"/><text x="129" y="76" font-size="12" fill="#0066cc" text-anchor="middle" font-family="system-ui,sans-serif">Don't know</text></g></svg><span class="n">02</span><h3>Answer</h3><p>Only the questions those schemes need. “Don't know” is always allowed.</p></div>
+      <div class="step"><svg class="step-art" viewBox="0 0 170 100" aria-hidden="true"><rect x="14" y="6" width="66" height="88" rx="6" fill="#fff" stroke="currentColor" stroke-width="2"/><path d="M24 22H70M24 32H64M24 42H70M24 52H58" stroke="#d2d2d7" stroke-width="3" stroke-linecap="round"/><path class="sig" d="M24 76c5-10 9 4 14-3s7-9 11 1 7 4 12-4 4-2 7 3" fill="none" stroke="#0066cc" stroke-width="2" stroke-linecap="round"/><path d="M88 50H104M98 44l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><g class="out"><circle cx="128" cy="22" r="11" fill="#1d1d1f"/><path d="M123 22l3.5 4 6-7" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></g><g class="out"><circle cx="128" cy="50" r="10" fill="#fff" stroke="#7a7a7a" stroke-width="2"/><path d="M124 46l8 8M132 46l-8 8" stroke="#7a7a7a" stroke-width="2" stroke-linecap="round"/></g><g class="out"><circle cx="128" cy="78" r="11" fill="#0066cc"/><text x="128" y="83" font-size="14" font-weight="700" fill="#fff" text-anchor="middle" font-family="system-ui,sans-serif">?</text></g><text x="146" y="26" font-size="10" fill="#6e6e73" font-family="system-ui,sans-serif">yes</text><text x="146" y="54" font-size="10" fill="#6e6e73" font-family="system-ui,sans-serif">no</text><text x="146" y="82" font-size="10" fill="#6e6e73" font-family="system-ui,sans-serif">?</text></svg><span class="n">03</span><h3>Decide</h3><p>Plain rule files with cited sources. Same answers, same verdict — no model decides.</p></div>
+      <div class="step"><svg class="step-art" viewBox="0 0 170 100" aria-hidden="true"><rect x="10" y="8" width="88" height="86" rx="6" fill="#1d1d1f"/><rect x="22" y="24" width="64" height="38" fill="#f5f5f7"/><circle cx="54" cy="40" r="7" fill="#7a7a7a"/><path d="M42 62c0-8 5-12 12-12s12 4 12 12" fill="#7a7a7a"/><rect x="18" y="62" width="72" height="7" fill="#48484a"/><rect x="108" y="22" width="52" height="66" rx="5" fill="#fff" stroke="currentColor" stroke-width="2"/><path class="tick" d="M116 38l4 4 7-8" fill="none" stroke="#0066cc" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path class="tick" d="M116 55l4 4 7-8" fill="none" stroke="#0066cc" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path class="tick" d="M116 72l4 4 7-8" fill="none" stroke="#0066cc" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M132 38H152M132 55H150M132 72H148" stroke="#d2d2d7" stroke-width="3" stroke-linecap="round"/></svg><span class="n">04</span><h3>Walk in</h3><p>What you get, what it costs, what to carry, and where to go.</p></div>
     </div>
     <div class="step-bar" aria-hidden="true"><i></i></div>
   </div>
@@ -430,6 +592,31 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
     <h2>Unknown is an answer.</h2>
     <p class="tagline">Most screeners have two outcomes and quietly default the third. If a question wasn't answered, or a rule hasn't been checked by a person, this one says so — and names what's missing.</p>
     <div class="verdicts"><span data-v="e" tabindex="0" role="button">Eligible</span><span data-v="n" tabindex="0" role="button">Not eligible</span><span class="u" data-v="u" tabindex="0" role="button">Unknown</span></div>
+    <svg class="sorter" id="sorter" viewBox="0 0 900 230" role="img" aria-label="Your three answers go into a signed rule file, which puts the result in one of three trays: eligible, not eligible, or unknown. It follows the answers you choose below.">
+      <g id="s-rows">
+        <rect class="row" x="10" y="20" width="250" height="44" rx="22"/><text class="rlbl" x="34" y="48">Age 18 to 40</text>
+        <rect class="row" x="10" y="93" width="250" height="44" rx="22"/><text class="rlbl" x="34" y="121">Savings account</text>
+        <rect class="row" x="10" y="166" width="250" height="44" rx="22"/><text class="rlbl" x="34" y="194">Ever paid income tax</text>
+        <g id="s-a-age"><rect x="176" y="30" width="74" height="24" rx="12"/><text class="ans" x="213" y="47"></text></g>
+        <g id="s-a-bank"><rect x="176" y="103" width="74" height="24" rx="12"/><text class="ans" x="213" y="120"></text></g>
+        <g id="s-a-tax"><rect x="176" y="176" width="74" height="24" rx="12"/><text class="ans" x="213" y="193"></text></g>
+      </g>
+      <path class="wire on" d="M260 42 C300 42 290 115 330 115"/>
+      <path class="wire on" d="M260 115 H330"/>
+      <path class="wire on" d="M260 188 C300 188 290 115 330 115"/>
+      <rect x="330" y="45" width="190" height="140" rx="16" fill="#1d1d1f" stroke="#48484a"/>
+      <text x="425" y="80" font-size="15" font-weight="600" fill="#f5f5f7" text-anchor="middle">Signed rule file</text>
+      <path d="M362 100H488M362 114H470M362 128H482" stroke="#48484a" stroke-width="3" stroke-linecap="round"/>
+      <path d="M364 156c5-9 9 3 13-3s6-8 10 1 7 3 11-4 4-2 7 2" fill="none" stroke="#2997ff" stroke-width="2" stroke-linecap="round"/>
+      <text x="488" y="166" font-size="11" fill="#a1a1a6" text-anchor="end" font-family="ui-monospace,Menlo,Consolas,monospace">apy.toml</text>
+      <path class="wire" id="s-w-e" d="M520 115 C560 115 560 42 600 42"/>
+      <path class="wire" id="s-w-n" d="M520 115 H600"/>
+      <path class="wire" id="s-w-u" d="M520 115 C560 115 560 188 600 188"/>
+      <g class="tray" id="s-t-e"><rect x="600" y="20" width="290" height="44" rx="22"/><text x="745" y="48">Eligible</text></g>
+      <g class="tray" id="s-t-n"><rect x="600" y="93" width="290" height="44" rx="22"/><text x="745" y="121">Not eligible</text></g>
+      <g class="tray u" id="s-t-u"><rect x="600" y="166" width="290" height="44" rx="22"/><text x="745" y="194">Unknown</text></g>
+      <circle class="token" id="s-token" cx="0" cy="0" r="8" fill="#2997ff" style="transform:translate(520px,115px)"/>
+    </svg>
     <div class="demo" id="demo">
       <div>
         <p class="eyebrow" style="margin-bottom:6px">Try the logic</p>
@@ -455,6 +642,7 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
   </div>
   <div class="wide">
     <div class="rail shots" style="margin-top:56px">
+      <figure class="shot"><div class="phone"><img src="assets/shot-verdict.jpg" width="720" height="1600" loading="lazy" alt="A Telegram result listing two schemes, each with what you get, why you qualify, and where to go — including the premium and what the cover excludes."></div><figcaption>The verdict: what you get, why, and where to go.</figcaption></figure>
       <figure class="shot"><div class="phone"><img src="assets/shot-consent.jpg" width="720" height="1600" loading="lazy" alt="The WhatsApp bot offering Hindi and English as tappable buttons, then stating it will not ask for a name, phone number or Aadhaar number, and that only counts are kept."></div><figcaption>Buttons before typing, and the privacy promise up front.</figcaption></figure>
       <figure class="shot"><div class="phone"><img src="assets/shot-recap.jpg" width="720" height="1600" loading="lazy" alt="A WhatsApp recap listing every answer the worker gave — state, age, work, income and more — before the result that is built on them."></div><figcaption>Every answer read back before any verdict.</figcaption></figure>
       <figure class="shot"><div class="phone"><img src="assets/shot-unknown.jpg" width="720" height="1600" loading="lazy" alt="The answer recap showing unanswered facts written as 'you did not say' and 'needs confirmation' rather than being filled in with a default."></div><figcaption>“You did not say” survives all the way to the verdict.</figcaption></figure>
@@ -580,6 +768,18 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
   <div class="wrap reveal">
     <p class="eyebrow">Built by Avinash Negi</p>
     <h2>Built with AI.<br>Checked by hand.</h2>
+    <svg class="signed" viewBox="0 0 360 230" role="img" aria-label="An excerpt of the Atal Pension Yojana rule file, ending in a hand signature.">
+      <rect x="10" y="10" width="340" height="210" rx="14" fill="#fff" stroke="#e0e0e0" stroke-width="1.5"/>
+      <rect x="10" y="10" width="340" height="34" rx="14" fill="#f5f5f7"/><rect x="10" y="30" width="340" height="14" fill="#f5f5f7"/>
+      <text x="30" y="32" fill="#6e6e73">data/schemes/apy.toml</text>
+      <text x="30" y="70" fill="#1d1d1f">code = <tspan fill="#0066cc">"APY"</tspan></text>
+      <text x="30" y="92" fill="#1d1d1f">annual_value_inr = <tspan fill="#0066cc">12000</tspan></text>
+      <text x="30" y="114" fill="#1d1d1f">source_url = <tspan fill="#0066cc">"pfrda.org.in/…"</tspan></text>
+      <text x="30" y="136" fill="#1d1d1f">verified_by = <tspan fill="#0066cc">"Avinash Negi"</tspan></text>
+      <line x1="30" y1="192" x2="330" y2="192" stroke="#e0e0e0" stroke-width="1.5"/>
+      <path class="sigline" d="M40 186C46 160 58 156 58 182S72 166 80 176 92 190 100 168 112 152 116 178C120 192 134 166 144 172S164 182 172 166C184 146 194 186 208 176S232 166 252 172 280 178 300 168" fill="none" stroke="#0066cc" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="330" y="210" fill="#6e6e73" font-size="11" text-anchor="end">no rule reaches a worker unsigned</text>
+    </svg>
     <blockquote class="quote" style="margin-left:auto;margin-right:auto">“Not one threshold, rupee figure or age band in this project was authored by a model.”<cite>— from <a href="https://avinashnegi.com/blog/scheme-sathi/">the blog post</a></cite></blockquote>
     <p class="story-body">I designed Yojana Sathi, checked and signed off every scheme it serves, and deployed and run it myself. An AI coding assistant wrote much of the code and the first drafts of the scheme files under my review; no rule reaches a worker until I have signed it.</p>
     <div class="actions">
@@ -837,6 +1037,136 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
   const up=e=>{pts.delete(e.pointerId);if(pts.size<2)pinch=null;if(!pts.size)stage.classList.remove('drag');};
   stage.addEventListener('pointerup',up);stage.addEventListener('pointercancel',up);
   addEventListener('resize',()=>{if(zv.classList.contains('on'))fitView();});
+})();
+
+// * Illustrations: the trip, the days lost, the sorter and the scheme glyphs.
+(function(){
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $=s=>document.querySelector(s);
+  const inr=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+
+  /* ── The trip ── */
+  const scene=$('#j-scene');
+  if(scene){
+    const WAGE=315,FARE=60,HOME=95,STOP_A=280,STOP_B=400;
+    const walker=$('#j-walker'),bus=$('#j-bus'),sun=$('#j-sun'),phone=$('#j-phone');
+    const bubble=$('#j-bubble'),xMark=$('#j-x'),ok=$('#j-ok'),shutter=$('#j-shutter');
+    const tOut=$('#j-trail-out'),tBack=$('#j-trail-back');
+    const hTrips=$('#j-trips'),hCost=$('#j-cost'),hCostL=$('#j-cost-l'),hOut=$('#j-out');
+    const PLANS={
+      without:{dur:5800,dest:590,segs:[[0,600,HOME,HOME],[600,2800,HOME,590],[2800,3700,590,590],[3700,5800,590,HOME]]},
+      with:{dur:4600,dest:760,segs:[[0,1500,HOME,HOME],[1500,3800,HOME,760],[3800,4600,760,760]]}
+    };
+    let mode='without',raf=0,t0=0,next=null,userTook=false;
+    function xAt(plan,t){
+      for(const [a,b,x0,x1] of plan.segs){if(t<=b){const p=Math.min(1,Math.max(0,(t-a)/((b-a)||1)));return [x0+(x1-x0)*p,x0!==x1&&t>a];}}
+      const l=plan.segs[plan.segs.length-1];return [l[3],false];
+    }
+    const show=(el,on)=>el.classList.toggle('off',!on);
+    function render(t){
+      const plan=PLANS[mode],[x,moving]=xAt(plan,t),p=Math.min(1,t/plan.dur);
+      const riding=moving&&x>STOP_A&&x<STOP_B;
+      const bob=moving&&!riding?Math.abs(Math.sin(t/110))*3:0;
+      walker.setAttribute('transform','translate('+x.toFixed(1)+','+(300-bob).toFixed(1)+')');
+      walker.style.opacity=riding?0:1;
+      const bx=riding?x-10:(x<=STOP_A?270:390);
+      bus.setAttribute('transform','translate('+bx.toFixed(1)+',0)');
+      sun.setAttribute('transform','translate('+(80+840*p).toFixed(1)+','+(210-150*Math.sin(Math.PI*p)).toFixed(1)+')');
+      if(mode==='without'){
+        tOut.setAttribute('x2',Math.max(HOME,t<=2800?x:590));
+        tBack.setAttribute('x2',t>3700?x:590);tBack.style.opacity=t>3700?1:0;
+        shutter.setAttribute('opacity',t>=2900?1:0);
+        show(xMark,t>=3100);show(ok,false);show(bubble,false);phone.setAttribute('opacity',0);
+        hTrips.textContent=t>600?1:0;$('#j-trips-l').textContent=t>600?'trip, wasted':'trips';
+        hCost.textContent=t>=2800?inr(WAGE+FARE):'₹0';hCostL.textContent='wage and bus fare, lost';
+        hCost.className=t>=2800?'bad':'';
+        hOut.textContent=t>=3100?'Wrong counter':'—';hOut.className=t>=3100?'bad':'';
+      }else{
+        tOut.setAttribute('x2',Math.max(HOME,x));tBack.style.opacity=0;
+        shutter.setAttribute('opacity',0);show(xMark,false);
+        show(bubble,t>=250&&t<3800);phone.setAttribute('opacity',t>=150&&t<3800?1:0);
+        show(ok,t>=3900);
+        hTrips.textContent=t>1500?1:0;$('#j-trips-l').textContent=t>1500?'trip':'trips';
+        hCost.textContent=t>=3800?inr(WAGE+FARE):'₹0';hCostL.textContent='wage and bus fare, well spent';
+        hCost.className=t>=3800?'good':'';
+        hOut.textContent=t>=3900?'Right counter':'—';hOut.className=t>=3900?'good':'';
+      }
+    }
+    function setMode(m){mode=m;document.querySelectorAll('#journey [data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));}
+    function play(m,then){
+      cancelAnimationFrame(raf);clearTimeout(next);setMode(m);
+      if(reduce){render(PLANS[m].dur);if(then)then();return;}
+      t0=performance.now();
+      (function loop(now){const t=now-t0;render(Math.min(t,PLANS[m].dur));
+        if(t<PLANS[m].dur)raf=requestAnimationFrame(loop);else if(then)next=setTimeout(then,1600);})(t0);
+    }
+    document.querySelectorAll('#journey [data-mode]').forEach(b=>b.addEventListener('click',()=>{userTook=true;play(b.dataset.mode);}));
+    $('#j-replay').addEventListener('click',()=>{userTook=true;play(mode);});
+    render(0);
+    const auto=()=>play('without',()=>{if(!userTook)play('with');});
+    if(reduce){setMode('with');render(PLANS.with.dur);}
+    else if('IntersectionObserver' in window){
+      const io=new IntersectionObserver(es=>{if(es[0].isIntersecting){io.disconnect();setTimeout(auto,500);}},{threshold:.4});io.observe(scene);
+    }else auto();
+  }
+
+  /* ── Days of wages, one square each, following the calculator ── */
+  const days=$('#days');
+  if(days){
+    for(let i=0;i<10;i++)days.appendChild(document.createElement('i'));
+    const draw=()=>{
+      const pressed=document.querySelector('#calc [data-wage][aria-pressed="true"]');
+      const wage=+(pressed?pressed.dataset.wage:455),t=+$('#trips').value,f=+$('#fare').value;
+      const d=t*(wage+f)/wage;
+      [...days.children].forEach((sq,i)=>sq.style.setProperty('--f',Math.max(0,Math.min(1,d-i)).toFixed(3)));
+    };
+    ['#trips','#fare'].forEach(s=>$(s).addEventListener('input',draw));
+    document.querySelectorAll('#calc [data-wage]').forEach(b=>b.addEventListener('click',()=>setTimeout(draw)));
+    draw();
+  }
+
+  /* ── The sorter follows the "Try the logic" answers ── */
+  const sorter=$('#sorter');
+  if(sorter){
+    const PASS={age:'y',bank:'y',tax:'n'},WORD={y:'Yes',n:'No',u:'?'};
+    const trayY={e:42,n:115,u:188},token=$('#s-token');
+    function readAnswers(){const a={};document.querySelectorAll('#demo .q').forEach(q=>{const b=q.querySelector('[aria-pressed="true"]');a[q.dataset.q]=b?b.dataset.a:'u';});return a;}
+    function paint(){
+      const a=readAnswers();
+      const fail=Object.keys(a).some(k=>a[k]!=='u'&&a[k]!==PASS[k]);
+      const v=fail?'n':Object.values(a).includes('u')?'u':'e';
+      for(const k of ['age','bank','tax']){
+        const g=$('#s-a-'+k),r=g.querySelector('rect'),tx=g.querySelector('text'),val=a[k];
+        const good=val===PASS[k];
+        r.setAttribute('fill',val==='u'?'#2997ff':good?'#f5f5f7':'none');
+        r.setAttribute('stroke',val==='u'?'none':good?'none':'#a1a1a6');
+        tx.setAttribute('fill',val==='u'?'#fff':good?'#1d1d1f':'#a1a1a6');
+        tx.textContent=val==='u'?'Not sure':WORD[val];
+      }
+      ['e','n','u'].forEach(k=>{$('#s-t-'+k).classList.toggle('on',k===v);$('#s-w-'+k).classList.toggle('on',k===v);});
+      token.style.transition='none';token.style.transform='translate(520px,115px)';
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{token.style.transition='';token.style.transform='translate(620px,'+trayY[v]+'px)';}));
+    }
+    document.querySelectorAll('#demo .q button, .verdicts span').forEach(b=>b.addEventListener('click',()=>setTimeout(paint)));
+    paint();
+  }
+
+  /* ── Scheme glyphs: one per kind of benefit ── */
+  const G={
+    coins:'<ellipse cx="12" cy="6.5" rx="7" ry="3"/><path d="M5 6.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5M5 11.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/>',
+    shield:'<path d="M12 3l7 3v5c0 5-3.2 8.6-7 10-3.8-1.4-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
+    health:'<rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M12 8v8M8 12h8"/>',
+    gas:'<rect x="7" y="7" width="10" height="14" rx="4"/><path d="M10 7V4h4v3M9 12h6"/>',
+    bank:'<path d="M3 9.5L12 4l9 5.5M5.5 10.5v7M10 10.5v7M14 10.5v7M18.5 10.5v7M3 20h18"/>',
+    card:'<rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="8.5" cy="11" r="2"/><path d="M6 16h5M14 10h4M14 14h4"/>',
+    tool:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3.5 17.5l3 3 5.8-5.8a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.3-.7-.7-2.3z"/>'
+  };
+  const kind=t=>/Jeevan Jyoti|Suraksha/.test(t)?'shield':/Ayushman/.test(t)?'health':/Ujjwala/.test(t)?'gas':/Jan Dhan/.test(t)?'bank':/e-Shram/.test(t)?'card':/Vishwakarma/.test(t)?'tool':'coins';
+  document.querySelectorAll('.scheme > h3').forEach(h=>{
+    const ic=document.createElement('span');ic.className='sicon';ic.setAttribute('aria-hidden','true');
+    ic.innerHTML='<svg viewBox="0 0 24 24">'+G[kind(h.textContent)]+'</svg>';
+    h.parentNode.insertBefore(ic,h);
+  });
 })();
 
 // * The films: tap the button or the picture to play or pause. Native controls
