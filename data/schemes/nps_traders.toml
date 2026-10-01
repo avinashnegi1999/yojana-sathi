@@ -26,9 +26,10 @@ name_en = "National Pension Scheme for Traders and Self-Employed (NPS-Traders)"
 name_hi = "व्यापारियों और स्वरोज़गार के लिए राष्ट्रीय पेंशन योजना (NPS-Traders)"
 authority = "Ministry of Labour and Employment"
 official_url = "https://maandhan.in/"
-verified_on = "2026-09-14"
-verified_by = "Avinash Negi, checked 2026-09-14"
+verified_on = "2026-10-01"
+verified_by = "Avinash Negi, checked 2026-10-01"
 
+verified_hash = "sha256:a9e3618e1eb16511b7cc8de90ce7ecc8dff35834e919c4cb9bb56106ae470719"
 [benefit]
 annual_value_inr = 36000
 value_basis = "annual_payout"

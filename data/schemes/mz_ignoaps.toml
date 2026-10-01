@@ -43,6 +43,7 @@ official_url = "https://socialwelfare.mizoram.gov.in/page/old-age-pension-old-ag
 verified_on = "2026-09-27"
 verified_by = "claude — AUTO-RESEARCHED, PENDING HUMAN VERIFICATION"
 
+verified_hash = ""
 [benefit]
 annual_value_inr = 14400
 annual_value_age_bands = [{ min_age = 80, annual_value_inr = 18000 }]

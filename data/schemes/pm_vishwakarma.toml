@@ -38,6 +38,7 @@ official_url = "https://pmvishwakarma.gov.in/"
 verified_on = "2026-09-27"
 verified_by = "Avinash Negi, checked 2026-09-27"
 
+verified_hash = "sha256:26f1bc963db29803fb7907852f800881bb6a9b526d2887bf3af32772106ccae2"
 [benefit]
 # ! 0, NOT 15000, and not because the grant is not real. The validator refuses
 # ! a one_time basis with a value, because no total anywhere sums one-time

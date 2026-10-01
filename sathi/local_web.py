@@ -59,21 +59,21 @@ html:lang(hi) body{line-height:1.6}
 .bar-in{max-width:40rem;margin:0 auto;min-height:52px;display:flex;align-items:center;gap:10px;padding:0 16px}
 .bar img{width:28px;height:28px;border-radius:50%;flex:0 0 auto}
 .brand{font-weight:600;font-size:17px;letter-spacing:0;white-space:nowrap}
-.switch{margin-left:auto;appearance:none;border:1px solid var(--hairline);background:var(--canvas);color:var(--ink);font:inherit;font-size:14px;cursor:pointer;min-height:32px;padding:0 14px;border-radius:16px;white-space:nowrap}
+.switch{margin-left:auto;appearance:none;border:1px solid var(--hairline);background:var(--canvas);color:var(--ink);font:inherit;font-size:16px;cursor:pointer;min-height:44px;padding:0 16px;border-radius:22px;white-space:nowrap}
 .switch:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
-.restart{appearance:none;border:0;background:none;color:var(--blue);font:inherit;font-size:14px;cursor:pointer;min-height:44px;padding:0 2px;white-space:nowrap}
+.restart{appearance:none;border:0;background:none;color:var(--blue);font:inherit;font-size:16px;cursor:pointer;min-height:44px;padding:0 2px;white-space:nowrap}
 main{max-width:40rem;margin:0 auto;padding:40px 16px 96px}
 .steps{display:flex;margin:-28px 0 4px}.step{appearance:none;border:0;background:none;color:var(--blue);font:inherit;font-size:17px;cursor:pointer;min-height:44px;padding:0;white-space:nowrap}.step.fwd{margin-left:auto}.step:active{opacity:.6}.choice.chosen{outline:2px solid var(--focus);outline-offset:2px}
 .q{margin:8px 0 24px;font-size:28px;font-weight:600;line-height:1.18;letter-spacing:-.01em;white-space:pre-wrap}
 html:lang(hi) .q{line-height:1.4;letter-spacing:0}
-.q:has(+ .lead){margin-bottom:10px}
+.q.has-lead{margin-bottom:10px}
 .q2{margin:32px 0 16px;font-size:21px;font-weight:600;line-height:1.24}
 .recap{margin:0 0 24px;border-bottom:1px solid var(--hairline);padding-bottom:12px}
-.recap summary{cursor:pointer;color:var(--blue);font-size:14px;min-height:44px;display:flex;align-items:center;list-style:none}
+.recap summary{cursor:pointer;color:var(--blue);font-size:16px;min-height:44px;display:flex;align-items:center;list-style:none}
 .recap summary::-webkit-details-marker{display:none}
 .recap summary::after{content:"›";margin-left:6px;transition:transform .15s}
 .recap[open] summary::after{transform:rotate(90deg)}
-.recap .message{margin:4px 0 0;font-size:14px;color:var(--muted)}
+.recap .message{margin:4px 0 0;font-size:16px;color:var(--muted)}
 .lead{margin:0 0 24px;white-space:pre-wrap;color:var(--muted);font-size:21px;line-height:1.43}
 @media(min-width:736px){main{padding-top:64px}.q{font-size:34px}}
 
@@ -87,24 +87,24 @@ html:lang(hi) .q{line-height:1.4;letter-spacing:0}
 .choice.primary{justify-content:center;background:var(--blue);border-color:var(--blue);color:#fff}
 .choice.selected{border:2px solid var(--focus);padding:12px 21px}
 .choice .tick{color:var(--focus);font-weight:600}
-.choices:has(.scale){display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
-.choices:has(.scale) .choice:not(.scale){grid-column:1/-1;justify-content:center}
-.map{display:flex;justify-content:center;margin:4px 0 6px}.mapbox{position:relative;display:inline-block;max-width:100%}.mapbox canvas.hover{animation:breathe 1.6s ease-in-out infinite}.mapbox canvas.pick.pulse{animation:pulse .45s ease-in-out 2}@keyframes breathe{50%{opacity:.45}}@keyframes pulse{50%{opacity:.35}}@media(prefers-reduced-motion:reduce){.mapbox canvas{animation:none!important}}.mapbox img{display:block;width:912px;height:auto;max-width:100%}.mapbox canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.maptip{position:absolute;transform:translate(-50%,calc(-100% - 12px));padding:5px 12px;border-radius:980px;background:var(--ink);color:#fff;font-size:14px;white-space:nowrap;pointer-events:none}.tabs{display:flex;gap:2px;width:max-content;margin:0 auto 14px;padding:3px;border-radius:980px;background:rgba(0,0,0,.06)}.tabs button{appearance:none;min-height:36px;padding:0 22px;border:0;border-radius:980px;background:transparent;color:var(--ink);font:inherit;font-size:14px;cursor:pointer}.tabs button[aria-selected=true]{background:var(--canvas);box-shadow:0 0 0 1px rgba(0,0,0,.06)}.tabs button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}.choices[hidden],#maptab[hidden]{display:none!important}.maphint{margin:0 0 10px;color:var(--ink);font-size:21px;font-weight:600;text-align:center}#mapgo{position:sticky;bottom:12px;z-index:5;margin:0 0 14px}#mapgo:empty{display:none}main.wide{max-width:72rem}
-.choices:has(.grid){display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.choices:has(.grid) .choice{min-height:48px;padding:10px 16px;font-size:14px;line-height:1.29}
-@media(min-width:600px){.choices:has(.grid){grid-template-columns:repeat(3,1fr)}}
+.choices.has-scale{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.choices.has-scale .choice:not(.scale){grid-column:1/-1;justify-content:center}
+.map{display:flex;justify-content:center;margin:4px 0 6px}.mapbox{position:relative;display:inline-block;max-width:100%}.mapbox canvas.hover{animation:breathe 1.6s ease-in-out infinite}.mapbox canvas.pick.pulse{animation:pulse .45s ease-in-out 2}@keyframes breathe{50%{opacity:.45}}@keyframes pulse{50%{opacity:.35}}@media(prefers-reduced-motion:reduce){.mapbox canvas{animation:none!important}}.mapbox img{display:block;width:912px;height:auto;max-width:100%}.mapbox canvas{position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%;pointer-events:none}.maptip{position:absolute;transform:translate(-50%,calc(-100% - 12px));padding:5px 12px;border-radius:980px;background:var(--ink);color:#fff;font-size:14px;white-space:nowrap;pointer-events:none}.tabs{display:flex;gap:2px;width:max-content;margin:0 auto 14px;padding:3px;border-radius:980px;background:rgba(0,0,0,.06)}.tabs button{appearance:none;min-height:44px;padding:0 22px;border:0;border-radius:980px;background:transparent;color:var(--ink);font:inherit;font-size:16px;cursor:pointer}.tabs button[aria-selected=true]{background:var(--canvas);box-shadow:0 0 0 1px rgba(0,0,0,.06)}.tabs button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}.choices[hidden],#maptab[hidden]{display:none!important}.maphint{margin:0 0 10px;color:var(--ink);font-size:21px;font-weight:600;text-align:center}#mapgo{position:sticky;bottom:12px;z-index:5;margin:0 0 14px}#mapgo:empty{display:none}main.wide{max-width:72rem}
+.choices.has-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.choices.has-grid .choice{min-height:52px;padding:10px 16px;font-size:16px;line-height:1.29}
+@media(min-width:600px){.choices.has-grid{grid-template-columns:repeat(3,1fr)}}
 .choice.scale{justify-content:center;min-height:52px;padding:0;border-radius:26px}
 .composer{display:flex;gap:10px;margin:0 0 8px}
 .composer input{flex:1;min-width:0;height:52px;border:1px solid var(--hairline);border-radius:26px;background:var(--canvas);color:var(--ink);font:inherit;padding:0 20px}
 .send{appearance:none;border:0;border-radius:26px;background:var(--blue);color:#fff;font:inherit;padding:0 26px;height:52px;cursor:pointer;transition:transform .12s ease}
 .send:active,.download:active{transform:scale(.95)}
 .download{display:inline-flex;align-items:center;min-height:52px;margin:0 0 24px;padding:0 26px;border-radius:26px;background:var(--blue);color:#fff;text-decoration:none;transition:transform .12s ease}
-.sheet{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;margin:0 0 8px}.sheet .download{margin:0}.view{color:var(--blue);text-decoration:none;min-height:44px;display:inline-flex;align-items:center}.view::after{content:" ›"}.viewnote{margin:0 0 24px;color:var(--muted);font-size:14px}
+.sheet{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;margin:0 0 8px}.sheet .download{margin:0}.view{color:var(--blue);text-decoration:none;min-height:44px;display:inline-flex;align-items:center}.view::after{content:" ›"}.viewnote{margin:0 0 24px;color:var(--muted);font-size:16px}
 .choice:focus-visible,.send:focus-visible,.restart:focus-visible,.step:focus-visible,.download:focus-visible,.composer input:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 /* Engagement additions (experiment, 28 Sep): read aloud, icons, step label, CSC link, share. */
 .top{display:flex;align-items:center;gap:10px;margin:0 0 4px}
-.stepno{color:var(--muted);font-size:14px}
+.stepno{color:var(--muted);font-size:16px}
 .speak{appearance:none;margin-left:auto;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border:1px solid var(--hairline);border-radius:22px;background:var(--canvas);color:var(--blue);font:inherit;font-size:15px;cursor:pointer}
 .speak[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue)}
 .speak:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
@@ -114,9 +114,9 @@ html:lang(hi) .q{line-height:1.4;letter-spacing:0}
 .action{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 20px;border:1px solid var(--hairline);border-radius:24px;background:var(--canvas);color:var(--ink);text-decoration:none}
 .action:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .intro{list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 24px;padding:0}
-.intro-step{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;background:var(--canvas);border:1px solid var(--hairline);border-radius:18px;text-align:center;font-size:15px;line-height:1.3}
+.intro-step{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;background:var(--canvas);border:1px solid var(--hairline);border-radius:18px;text-align:center;font-size:16px;line-height:1.3}
 .intro-icon{width:30px;height:30px;color:var(--blue)}
-.agepick{margin:0 0 8px}.agehint{margin:0 0 16px;color:var(--muted);font-size:15px}
+.agepick{margin:0 0 8px}.agehint{margin:0 0 16px;color:var(--muted);font-size:16px}
 .agerow{display:flex;align-items:center;justify-content:center;gap:24px;margin:0 0 16px}
 .agestep{appearance:none;width:64px;height:64px;border-radius:50%;border:1px solid var(--hairline);background:var(--canvas);color:var(--blue);font:inherit;font-size:32px;line-height:1;cursor:pointer;transition:transform .12s ease}
 .agestep:active{transform:scale(.92)}.agestep:focus-visible,.agejump:focus-visible,.ageslider:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
@@ -125,19 +125,28 @@ html:lang(hi) .q{line-height:1.4;letter-spacing:0}
 .agejumps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 20px}
 .agejump{appearance:none;min-height:44px;border:1px solid var(--hairline);border-radius:22px;background:var(--canvas);color:var(--ink);font:inherit;cursor:pointer}
 #agego:disabled{opacity:.4;cursor:default}
+/* Fixes from the 1 Oct web audit: one request at a time, an honest footer, print. */
+main.busy #screen{opacity:.55;pointer-events:none;transition:opacity .2s .15s}
+.note{max-width:40rem;margin:0 auto;padding:0 16px 40px;color:var(--muted);font-size:15px}
+.note a{color:var(--blue)}
+.noscript{max-width:40rem;margin:0 auto;padding:40px 16px;font-size:19px}
+@media(max-width:400px){.intro{grid-template-columns:1fr}.intro-step{flex-direction:row;text-align:left;padding:12px 16px}}
+@media print{.bar,.steps,.top,.actions,.sheet,.viewnote,.recap,.note,.choices{display:none!important}body{background:#fff}main{padding:0;max-width:none}.scheme{border-color:#999;break-inside:avoid}}
 </style></head><body>
 <header class="bar"><div class="bar-in"><img src="/logo.jpg" alt="" width="28" height="28"><span class="brand" id="brand">Yojana Sathi</span><button class="switch" id="switch" type="button" onclick="switchLang()" lang="hi">हिंदी</button><button class="restart" id="restart" type="button" onclick="restart()">Start again</button></div></header>
 <main><section id="screen" aria-live="polite"></section></main>
+<noscript><div class="noscript" lang="hi"><p>यह पेज चलाने के लिए फ़ोन के ब्राउज़र में JavaScript चालू करें, या Telegram पर <a href="https://t.me/YojanaSathiBot">@YojanaSathiBot</a> खोलें।</p><p lang="en">Please turn on JavaScript to use this page, or open <a href="https://t.me/YojanaSathiBot">@YojanaSathiBot</a> on Telegram.</p></div></noscript>
+<footer class="note" id="note"></footer>
 <script>
 const screen=document.querySelector('#screen');
-const UI={hi:{type:'यहाँ लिखें',send:'भेजें',download:'अपना काग़ज़ डाउनलोड करें',view:'काग़ज़ देखें',viewNote:'यह लिंक 1 घंटे तक खुलेगा।',restart:'फिर से शुरू',other:'English',otherLang:'en',brand:'योजना साथी',answers:'आपके जवाब',mapHint:'अपना राज्य चुनने के लिए नक्शे पर उसे छुएँ',listHint:'राज्य वर्णमाला के क्रम में हैं',mapGo:'आगे बढ़ें',intro:['कुछ सवालों के जवाब दें','देखें कौन सी योजनाएँ आपको मिल सकती हैं','अपना काग़ज़ केंद्र पर ले जाएँ'],ageContinue:'आगे बढ़ें',ageHint:'उम्र चुनने के लिए − और + दबाएँ या पट्टी खिसकाएँ',tabMap:'नक्शा',tabList:'सूची',back:'पीछे',forward:'आगे',listen:'सुनें',stop:'रोकें',step:'चरण',csc:'पास का जन सेवा केंद्र (CSC) खोजें',share:'WhatsApp पर दोस्त को बताएँ',shareText:'मैंने योजना साथी से देखा कि मुझे कौन सी सरकारी योजनाएँ मिल सकती हैं। आप भी देखें:'},en:{type:'Type your answer',send:'Send',download:'Download your sheet',view:'View your sheet',viewNote:'The link works for 1 hour.',restart:'Start again',other:'हिंदी',otherLang:'hi',brand:'Yojana Sathi',answers:'Your answers',mapHint:'Tap your state on the map to choose it',listHint:'States are in alphabetical order',mapGo:'Continue',intro:['Answer a few questions','See the schemes you can get','Take your sheet to the centre'],ageContinue:'Continue',ageHint:'Press − and + or slide the bar to choose your age',tabMap:'Map',tabList:'List',back:'Back',forward:'Forward',listen:'Listen',stop:'Stop',step:'Step',csc:'Find a Common Service Centre (CSC) near you',share:'Tell a friend on WhatsApp',shareText:'I used Yojana Sathi to see which government schemes I may get. Try it:'}};
+const UI={hi:{type:'यहाँ लिखें',send:'भेजें',download:'अपना काग़ज़ डाउनलोड करें',view:'काग़ज़ देखें',viewNote:'यह लिंक 1 घंटे तक खुलेगा।',restart:'फिर से शुरू',other:'English',otherLang:'en',brand:'योजना साथी',answers:'आपके जवाब',mapHint:'अपना राज्य चुनने के लिए नक्शे पर उसे छुएँ',listHint:'राज्य वर्णमाला के क्रम में हैं',mapGo:'आगे बढ़ें',intro:['कुछ सवालों के जवाब दें','देखें कौन सी योजनाएँ आपको मिल सकती हैं','अपना काग़ज़ केंद्र पर ले जाएँ'],ageContinue:'आगे बढ़ें',ageHint:'उम्र चुनने के लिए − और + दबाएँ या पट्टी खिसकाएँ',tabMap:'नक्शा',tabList:'सूची',back:'पीछे',forward:'आगे',listen:'सुनें',stop:'रोकें',step:'चरण',csc:'पास का जन सेवा केंद्र (CSC) खोजें',print:'प्रिंट करें',next:'अगला व्यक्ति',retry:'फिर से कोशिश करें',slow:'इंटरनेट धीमा है या बंद है। आपके जवाब सुरक्षित हैं।',note:'यह सरकारी वेबसाइट नहीं है। यह एक स्वतंत्र, मुफ़्त प्रोजेक्ट है। आख़िरी फ़ैसला सरकारी विभाग करता है।',noteLink:'कौन चलाता है'},en:{type:'Type your answer',send:'Send',download:'Download your sheet',view:'View your sheet',viewNote:'The link works for 1 hour.',restart:'Start again',other:'हिंदी',otherLang:'hi',brand:'Yojana Sathi',answers:'Your answers',mapHint:'Tap your state on the map to choose it',listHint:'States are in alphabetical order',mapGo:'Continue',intro:['Answer a few questions','See the schemes you can get','Take your sheet to the centre'],ageContinue:'Continue',ageHint:'Press − and + or slide the bar to choose your age',tabMap:'Map',tabList:'List',back:'Back',forward:'Forward',listen:'Listen',stop:'Stop',step:'Step',csc:'Find a Common Service Centre (CSC) near you',print:'Print',next:'Next person',retry:'Try again',slow:'The internet is slow or off. Your answers are safe.',note:'This is not a government website. It is an independent, free project. The government department makes the final decision.',noteLink:'Who runs this'}};
 let current='en';
 // * The answer given last time on this screen. Set after Back, so she can see it and go Forward.
 let chosen='';
 // The one blue pill on a screen: the forward action, never an answer to a yes/no question.
 const PRIMARY=new Set(['consent_yes','pick:all','pick:done','next','/start']);
 function text(value){return String(value||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-function blocks(value,headline,cls){cls=cls||'q';return String(value||'').split(/\n\s*\n/).map((b,i)=>{if(headline&&i===0){const cut=b.indexOf('\n');return cut<0?`<h2 class="${cls}">${text(b)}</h2>`:`<h2 class="${cls}">${text(b.slice(0,cut))}</h2><p class="lead">${text(b.slice(cut+1))}</p>`;}const m=b.match(/^(\d+\.\s[^\n]*)\n([\s\S]*)$/);return m?`<div class="scheme"><p class="scheme-name">${text(m[1])}</p><p class="scheme-body">${text(m[2].replace(/^ +/gm,''))}</p></div>`:`<p class="message">${text(b)}</p>`;}).join('');}
+function blocks(value,headline,cls){cls=cls||'q';return String(value||'').split(/\n\s*\n/).map((b,i)=>{if(headline&&i===0){const cut=b.indexOf('\n');return cut<0?`<h2 class="${cls}">${text(b)}</h2>`:`<h2 class="${cls} has-lead">${text(b.slice(0,cut))}</h2><p class="lead">${text(b.slice(cut+1))}</p>`;}const m=b.match(/^(\d+\.\s[^\n]*)\n([\s\S]*)$/);return m?`<div class="scheme"><p class="scheme-name">${text(m[1])}</p><p class="scheme-body">${text(m[2].replace(/^ +/gm,''))}</p></div>`:`<p class="message">${text(b)}</p>`;}).join('');}
 // * A picture beside the answer, so a worker who reads little can still find it.
 // * Line icons in the Apple style (one stroke weight, round ends, drawn in the
 // * text colour), inline SVG so nothing extra downloads. 24x24 grid.
@@ -202,10 +211,10 @@ mapData={W,H,codes,lab};}catch(e){mapData=false;}return mapData;}
 async function drawMap(ui){const tab=document.getElementById('maptab');if(!tab)return;document.querySelector('main').classList.add('wide');const m=await mapLoad();
 if(!document.body.contains(tab))return;
 // * No map (files missing, image blocked): fall back to the list, which was hidden to avoid a flash.
-if(!m){const l=screen.querySelector('.choices:has(.grid)');if(l)l.hidden=false;const lh=document.getElementById('listhint');if(lh)lh.hidden=false;tab.remove();document.querySelector('main').classList.remove('wide');return;}
+if(!m){const l=screen.querySelector('.choices.has-grid');if(l)l.hidden=false;const lh=document.getElementById('listhint');if(lh)lh.hidden=false;tab.remove();document.querySelector('main').classList.remove('wide');return;}
 // * Per-state pixel lists, built once, so painting a state is cheap on hover.
 if(!m.pixels){m.pixels=m.codes.map(()=>[]);for(let p=0;p<m.lab.length;p++)if(m.lab[p])m.pixels[m.lab[p]-1].push(p);}
-const list=screen.querySelector('.choices:has(.grid)');
+const list=screen.querySelector('.choices.has-grid');
 // * Two tabs: the map, and the full list. Built here, only once the map has loaded.
 const tabs=document.createElement('div');tabs.className='tabs';tabs.setAttribute('role','tablist');
 tabs.innerHTML=`<button role="tab" data-tab="map" aria-selected="true">${ui.tabMap}</button><button role="tab" data-tab="list" aria-selected="false">${ui.tabList}</button>`;
@@ -244,10 +253,18 @@ let guarded=false,unguarding=false;
 function guard(on){if(on&&!guarded){history.pushState({sathi:1},'');guarded=true;}else if(!on&&guarded){guarded=false;unguarding=true;history.back();}}
 addEventListener('popstate',()=>{if(unguarding){unguarding=false;return;}if(guarded){guarded=false;nav('/back');}});
 // * A refused move (nothing there any more) leaves the screen as it is.
-async function nav(value){try{const r=await fetch('/answer',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({answer:value})});if(!r.ok)return;const data=await r.json().catch(()=>null);if(data&&Array.isArray(data.replies))show(data);}catch(e){}}
-function show(data){chosen=data.chosen||'';guard(!!(data.nav&&data.nav.back));document.querySelector('main').classList.remove('wide');const ui=UI[data.lang]||UI.hi;document.documentElement.lang=data.lang==='en'?'en':'hi';document.getElementById('restart').textContent=ui.restart;current=data.lang==='hi'?'hi':'en';const sw=document.getElementById('switch');sw.textContent=ui.other;sw.lang=ui.otherLang;document.getElementById('brand').textContent=ui.brand;const last=data.replies.length-1;const hasResult=data.replies.some(r=>r.kind==='result');let out=steps(data.nav,ui)+topRow(data,ui,hasResult)+data.replies.map((r,i)=>{if(r.kind==='recap'){const body=r.text.split('\n').slice(1).join('\n');return `<details class="recap"><summary>${ui.answers}</summary><p class="message">${text(body)}</p></details>`;}const asks=i===last&&(r.buttons?.length||r.typed);return `${r.kind==='result'?`<div class="result">${blocks(r.text,true,'q')}</div>${resultActions(ui)}`:blocks(r.text,asks,hasResult?'q2':'q')}${r.map?`<div id="maptab"><p class="maphint">${ui.mapHint}</p><div class="map" id="map"></div><div id="mapgo"></div></div><p class="maphint" id="listhint" hidden>${ui.listHint}</p>`:''}${introCard(r,ui)}${r.buttons?.length?`<div class="choices"${r.map?' hidden':''}>${r.buttons.map(button).join('')}</div>`:''}${r.document?`<div class="sheet"><a class="download" href="${r.document}" download>${ui.download}</a><a class="view" href="${r.document.replace('/document/','/sheet/')}" target="_blank" rel="noopener">${ui.view}</a></div><p class="viewnote">${ui.viewNote}</p>`:''}`;}).join('');const agePick=data.replies[last]&&data.replies[last].age;const typed=!agePick&&!!(data.replies[last]&&data.replies[last].typed);if(agePick)out+=agePicker(agePick,ui);if(typed)out+=`<form class="composer"><input name="answer" aria-label="${ui.type}" autocomplete="off" inputmode="text" placeholder="${ui.type}"${chosen&&!chosen.startsWith('/')?` value="${text(chosen)}"`:''}><button class="send">${ui.send}</button></form>`;screen.innerHTML=out;window.scrollTo({top:0});afterShow(data,ui);if(agePick)wireAge(agePick);screen.querySelectorAll('.step').forEach(b=>b.onclick=()=>nav(b.dataset.nav));// * Only buttons that carry an answer. The age picker's Continue is styled as a
+async function nav(value){const r=await send(value);if(r===undefined)return;if(r===null){offline();return;}if(!r.ok)return;const data=await r.json().catch(()=>null);if(data&&Array.isArray(data.replies))show(data);}
+// ! One request at a time. A double tap on two yes/no screens in a row used to
+// ! answer the second question too. While a request is out, taps are ignored.
+// * undefined: ignored (busy). null: the network failed or took over 20 s.
+let busy=false;
+async function send(value){if(busy)return undefined;busy=true;const main=document.querySelector('main');main.classList.add('busy');
+const ctl=typeof AbortController==='function'?new AbortController():null;const timer=ctl?setTimeout(()=>ctl.abort(),20000):0;
+try{return await fetch('/answer',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({answer:value}),signal:ctl?ctl.signal:undefined});}
+catch(e){return null;}finally{if(timer)clearTimeout(timer);busy=false;main.classList.remove('busy');}}
+function show(data){chosen=data.chosen||'';guard(!!(data.nav&&data.nav.back));document.querySelector('main').classList.remove('wide');const ui=UI[data.lang]||UI.hi;document.documentElement.lang=data.lang==='en'?'en':'hi';document.getElementById('restart').textContent=ui.restart;current=data.lang==='hi'?'hi':'en';const sw=document.getElementById('switch');sw.textContent=ui.other;sw.lang=ui.otherLang;document.getElementById('brand').textContent=ui.brand;document.getElementById('note').innerHTML=`${text(ui.note)} <a href="https://github.com/avinashnegi1999/yojana-sathi" target="_blank" rel="noopener">${text(ui.noteLink)}</a>`;const last=data.replies.length-1;const hasResult=data.replies.some(r=>r.kind==='result');let out=steps(data.nav,ui)+topRow(data,ui,hasResult)+data.replies.map((r,i)=>{if(r.kind==='recap'){const body=r.text.split('\n').slice(1).join('\n');return `<details class="recap"><summary>${ui.answers}</summary><p class="message">${text(body)}</p></details>`;}const nb=r.buttons?r.buttons.length:0;const asks=i===last&&(nb||r.typed);return `${r.kind==='result'?`<div class="result">${blocks(r.text,true,'q')}</div>${resultActions(ui)}`:blocks(r.text,asks,hasResult?'q2':'q')}${r.map?`<div id="maptab"><p class="maphint">${ui.mapHint}</p><div class="map" id="map"></div><div id="mapgo"></div></div><p class="maphint" id="listhint" hidden>${ui.listHint}</p>`:''}${introCard(r,ui)}${nb?`<div class="choices${r.buttons.some(b=>b.grid)?' has-grid':''}${r.buttons.some(b=>b.scale)?' has-scale':''}"${r.map?' hidden':''}>${r.buttons.map(button).join('')}</div>`:''}${r.document?`<div class="sheet"><a class="download" href="${r.document}" download>${ui.download}</a><a class="view" href="${r.document.replace('/document/','/sheet/')}" target="_blank" rel="noopener">${ui.view}</a></div><p class="viewnote">${ui.viewNote}</p>`:''}`;}).join('');const agePick=data.replies[last]&&data.replies[last].age;const typed=!agePick&&!!(data.replies[last]&&data.replies[last].typed);if(agePick)out+=agePicker(agePick,ui);if(typed)out+=`<form class="composer"><input name="answer" aria-label="${ui.type}" autocomplete="off" inputmode="text" placeholder="${ui.type}"${chosen&&!chosen.startsWith('/')?` value="${text(chosen)}"`:''}><button class="send">${ui.send}</button></form>`;screen.innerHTML=out;window.scrollTo({top:0});afterShow(data,ui);if(agePick)wireAge(agePick);screen.querySelectorAll('.step').forEach(b=>b.onclick=()=>nav(b.dataset.nav));// * Only buttons that carry an answer. The age picker's Continue is styled as a
 // * choice but has no data-value; wiring it here sent "undefined" as a second answer.
-screen.querySelectorAll('.choice[data-value]').forEach(b=>b.onclick=()=>{const v=decodeURIComponent(b.dataset.value);if(v==='/start')restart();else answer(v);});drawMap(ui);const form=screen.querySelector('form');if(form){form.onsubmit=e=>{e.preventDefault();const input=e.currentTarget.answer;if(input.value.trim()){answer(input.value);input.value='';}};form.answer.focus();}}
+screen.querySelectorAll('.choice[data-value]').forEach(b=>b.onclick=()=>{const v=decodeURIComponent(b.dataset.value);if(v==='/start')restart();else answer(v);});drawMap(ui);const form=screen.querySelector('form');if(form){form.onsubmit=e=>{e.preventDefault();const input=e.currentTarget.answer;if(input.value.trim())answer(input.value);};form.answer.focus();}}
 // * The three steps, shown once on the consent screen, so she knows what the
 // * questions lead to before she starts. Icons carry it for those who read little.
 const INTRO_ICONS=['pencil','list','building'];
@@ -287,12 +304,12 @@ function topRow(data,ui,hasResult){
   const stepLabel=(data.step>0&&!hasResult)?`<span class="stepno">${ui.step} ${data.step}</span>`:'';
   return `<div class="top">${stepLabel}<button type="button" class="speak" id="speak" aria-pressed="false" hidden>${glyph('speaker')}<span>${ui.listen}</span></button></div>`;
 }
-// * Under the result: where to go, and telling a friend. The share message is
-// * fixed text and the site's address. It never carries her answers or results.
+// * Under the result: print it, where to go, and on a pilot link a fresh start
+// * for the next person in the queue.
 function resultActions(ui){
   const csc='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent('Common Service Centre near me');
-  const share='https://wa.me/?text='+encodeURIComponent(ui.shareText+' '+location.origin);
-  return `<div class="actions"><a class="action" href="${csc}" target="_blank" rel="noopener noreferrer">${glyph('pin')}${ui.csc}</a><a class="action" href="${share}" target="_blank" rel="noopener noreferrer">${glyph('bubble')}${ui.share}</a></div>`;
+  const next=START!=='/start'?`<button type="button" class="action" onclick="restart()">${glyph('people')}${ui.next}</button>`:'';
+  return `<div class="actions"><button type="button" class="action" onclick="window.print()">${glyph('doc')}${ui.print}</button><a class="action" href="${csc}" target="_blank" rel="noopener noreferrer">${glyph('pin')}${ui.csc}</a>${next}</div>`;
 }
 // * The phone's voice for a language, or null. Prefers an Indian voice.
 function voiceFor(lang){
@@ -363,9 +380,14 @@ function afterShow(data,ui){
 if('speechSynthesis' in window)speechSynthesis.onvoiceschanged=()=>{if(lastUi)setupSpeak(lastLang,lastUi);};
 const START=(()=>{const src=new URLSearchParams(location.search).get('start')||'';return /^[a-z]{1,20}$/.test(src)?'/start '+src:'/start';})();
 function oops(){screen.innerHTML=`<h2 class="q">${text('कुछ गड़बड़ हो गई।\nSomething went wrong.')}</h2><div class="choices"><button class="choice primary" onclick="restart()">फिर से शुरू · Start again</button></div>`;}
-async function answer(value){try{const r=await fetch('/answer',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({answer:value})});const data=await r.json().catch(()=>null);if(data&&Array.isArray(data.replies)){show(data);}else{oops();}}catch(e){oops();}}
+// * The network failed, not the server: her answers are still there. Try again
+// * asks for the screen she is on (/resume), so nothing is answered twice.
+function offline(){const ui=UI[current]||UI.en;screen.innerHTML=`<h2 class="q">${text(ui.slow)}</h2><div class="choices"><button class="choice primary" onclick="resume()">${text(ui.retry)}</button></div>`;}
+async function answer(value){const r=await send(value);if(r===undefined)return;if(r===null){offline();return;}const data=await r.json().catch(()=>null);if(data&&Array.isArray(data.replies)){show(data);}else{oops();}}
 function switchLang(){answer('/lang '+(current==='en'?'hi':'en'))}
-function restart(){answer(START)}answer(START);
+function restart(){answer(START)}
+// * On open, come back to the screen she was on (a refresh used to start over).
+function resume(){answer(START.replace('/start','/resume'))}resume();
 // * Start fetching the map now, so it is ready by the time the state is asked.
 mapLoad();
 </script></body></html>"""
@@ -468,6 +490,27 @@ class LocalWeb:
             if not recent:
                 del self._new_by_client[client]
 
+    def sweep_idle(self) -> None:
+        """Drop idle sessions and old sheets now, without waiting for a request."""
+        with self._lock:
+            self._sweep(self.clock())
+
+    def start_sweeper(self, every: float = 60) -> threading.Thread:
+        """Sweep once a minute in the background.
+
+        # ! Council audit, 1 Oct 2026: sessions were swept only when the next
+        # ! request arrived, so the last worker of the evening left her answers
+        # ! in RAM past the 30 minutes the README promises. The sweep takes the
+        # ! same lock as every turn.
+        """
+        def loop() -> None:
+            while True:
+                time.sleep(every)
+                self.sweep_idle()
+        thread = threading.Thread(target=loop, daemon=True, name="sathi-web-sweep")
+        thread.start()
+        return thread
+
     def _drop(self, session: str) -> None:
         """Forget one session, its answers and its screens. Caller holds the lock."""
         self.sessions.pop(session, None)
@@ -541,6 +584,16 @@ class LocalWeb:
         """(HTTP status, JSON body). A failed turn is a message, never a dropped socket."""
         if answer in ("/back", "/forward"):
             return self._navigate(session, answer[1:])
+        words = answer.split()
+        if words[:1] == ["/resume"]:
+            # * The page sends this when it opens. A refresh, a pull-to-refresh
+            # * or Android reloading a killed tab used to send /start and throw
+            # * away every answer. Now the screen she was on comes back; with
+            # * nothing to come back to it is an ordinary /start.
+            resumed = self._resume(session)
+            if resumed is not None:
+                return resumed
+            answer = " ".join(["/start"] + words[1:2])
         try:
             replies = self.turn(session, answer, client)
         except Exception as e:  # noqa: BLE001 — one broken session must not take the page down
@@ -682,6 +735,24 @@ class LocalWeb:
             # * in the language she is reading now, as the top-bar switch does.
             items = self._render(restored, [restored.set_language(convo.lang)[-1]])
         return 200, self._response(session, restored, items)
+
+    def _resume(self, session: str) -> tuple[int, bytes] | None:
+        """The screen this session is on now, or None when there is none to show."""
+        with self._lock:
+            now = self.clock()
+            self._sweep(now)
+            convo = self.sessions.get(session)
+            steps = self._steps.get(session)
+            if convo is None or not steps:
+                return None  # * Before consent nothing is kept; start again.
+            step = steps[self._at[session]]
+            self._last_seen[session] = now
+        if step.convo.lang == convo.lang:
+            items = step.items
+        else:
+            # * She switched language on this screen: ask it in the one she reads now.
+            items = self._render(convo, [convo.set_language(convo.lang)[-1]])
+        return 200, self._response(session, convo, items)
 
     @staticmethod
     def _question(convo: Conversation) -> tuple[State, str]:
@@ -888,6 +959,7 @@ def main(argv: list[str] | None = None) -> int:
     log = EventLog(args.db) if args.db else None
     app = LocalWeb(load_all(Path("data/schemes")), log)
     server = ThreadingHTTPServer(("127.0.0.1", args.port), handler_class(app, args.secure_cookie))
+    app.start_sweeper()
     print(f"Local experiment: http://127.0.0.1:{server.server_address[1]}")
     try:
         server.serve_forever()
@@ -939,6 +1011,20 @@ def _self_check() -> None:
     ask = body(app.payload("states", "consent_yes"))["replies"][-1]
     values = {b["value"] for b in ask["buttons"]}
     assert values == {f"state:{st.code}" for st in content.states()}, len(values)
+    # ! A refresh asks for /resume. Mid-screening it must bring back the same
+    # ! question with the answers kept, not consent again (web audit, 1 Oct).
+    resumed = body(app.payload("states", "/resume"))
+    assert app.sessions["states"].consent_granted, "resume must not start over"
+    assert {b["value"] for b in resumed["replies"][-1]["buttons"]} == values
+    # * Nothing to resume (new tab, or still at consent): an ordinary start,
+    # * in English like every link, the CSC pilot link included.
+    fresh = body(app.payload("new-tab", "/resume csc"))
+    assert app.sessions["new-tab"].state is State.CONSENT
+    assert fresh["lang"] == "en", fresh["lang"]
+    # ! The page must run on old Android browsers: no :has() (Chrome < 105
+    # ! throws in querySelector) and no optional chaining (Chrome < 80 cannot
+    # ! parse the script at all, so the page is blank).
+    assert ":has(" not in _PAGE and "?." not in _PAGE
     assert len(values) == 36 and ask["typed"] is False
     assert ask.get("map", False) is bool(_MAP and _SEEDS), "map shown only when both files exist"
     after = body(app.payload("states", "state:TN"))["replies"][-1]
@@ -979,6 +1065,11 @@ def _self_check() -> None:
     assert "b" in aged.sessions, "an active one must not"
     now[0] += LocalWeb.DOCUMENT_SECONDS
     assert aged.document("tok") is None, "a sheet must expire after an hour"
+    # * The background sweep drops a quiet session with no request at all.
+    aged.payload("quiet", "/start")
+    now[0] += LocalWeb.SESSION_IDLE_SECONDS + 1
+    aged.sweep_idle()
+    assert "quiet" not in aged.sessions, "an idle session waited for the next request"
 
     # ! One client cannot mint sessions without limit, and others are unaffected.
     limited = LocalWeb(schemes, clock=lambda: now[0])

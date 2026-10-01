@@ -25,6 +25,7 @@ authority    = "TODO"   # the ministry or department that actually runs it
 official_url = "TODO"
 verified_on  = "TODO"   # ISO date, e.g. "2026-09-12". Shown to judges as staleness.
 verified_by  = "TODO"   # your name. Someone has to own each number.
+verified_hash = ""
 
 # * OPTIONAL: schemes the worker must already hold before this one is possible.
 # * Use scheme codes. Delete the line if there are none.

@@ -19,6 +19,25 @@ SSH=(ssh -i "$KEY" -o StrictHostKeyChecking=accept-new "$TARGET")
 
 [[ -f "$SRC/.env" ]] || { echo "no .env at $SRC — cannot deploy without TELEGRAM_TOKEN"; exit 1; }
 
+# ! Deploy only what git has (council audit, 1 Oct 2026). This script copies
+# ! the working tree, so an uncommitted edit or a stray file went live with no
+# ! record of what had shipped. Refuse unless every deployed path is clean.
+DEPLOYED=(sathi data tests check.py pyproject.toml)
+if [[ -n "$(git -C "$SRC" status --porcelain --untracked-files=all -- "${DEPLOYED[@]}")" ]]; then
+  echo "refusing to deploy: uncommitted or untracked changes in what would ship:"
+  git -C "$SRC" status --short --untracked-files=all -- "${DEPLOYED[@]}"
+  echo "commit them (or remove them), then run this again."
+  exit 1
+fi
+# * What is about to run, for the server and for anyone later asking which
+# * rules produced a verdict: the commit, and git's own hash of data/schemes
+# * (it changes whenever any scheme file does).
+VERSION_FILE="$(mktemp)"
+printf 'commit=%s\nschemes=%s\ndeployed=%s\n' \
+  "$(git -C "$SRC" rev-parse HEAD)" "$(git -C "$SRC" rev-parse HEAD:data/schemes)" \
+  "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$VERSION_FILE"
+echo "==> deploying $(head -1 "$VERSION_FILE")"
+
 echo "==> creating the sathi user and directories"
 "${SSH[@]}" 'sudo bash -s' <<'REMOTE'
 set -euo pipefail
@@ -55,6 +74,9 @@ scp -i "$KEY" "$SRC/.env" "$TARGET:/tmp/sathi-stage/sathi.env"
 
 echo "==> installing the unit file"
 scp -i "$KEY" "$SRC/deploy/sathi.service" "$TARGET:/tmp/sathi-stage/sathi.service"
+scp -i "$KEY" "$VERSION_FILE" "$TARGET:/tmp/sathi-stage/VERSION"
+rm -f "$VERSION_FILE"
+scp -i "$KEY" "$SRC/deploy/sathi-backup.service" "$SRC/deploy/sathi-backup.timer" "$TARGET:/tmp/sathi-stage/"
 
 echo "==> moving into place, running the checks, starting"
 "${SSH[@]}" 'sudo bash -s' <<'REMOTE'
@@ -68,7 +90,7 @@ set -euo pipefail
 cd /tmp/sathi-stage && python3 check.py
 
 rsync -a --delete --exclude '__pycache__' \
-  /tmp/sathi-stage/{sathi,data,tests,check.py,pyproject.toml} /opt/sathi/
+  /tmp/sathi-stage/{sathi,data,tests,check.py,pyproject.toml,VERSION} /opt/sathi/
 chown -R sathi:sathi /opt/sathi
 
 # ! MERGE the laptop's .env into the server's, never replace it. The laptop
@@ -116,8 +138,16 @@ fi
 chown sathi:sathi /var/lib/sathi/sathi.db
 
 install -m 644 /tmp/sathi-stage/sathi.service /etc/systemd/system/sathi.service
+# ! A nightly copy of the event database (council audit, 1 Oct 2026: the
+# ! impact evidence had no copy anywhere). Reads the live file only; copies go
+# ! to /var/lib/sathi/backups, owner-only, last 14 kept. Off-server copies:
+# ! deploy/pull-backups.sh, run from a laptop.
+install -d -m 700 -o sathi -g sathi /var/lib/sathi/backups
+install -m 644 /tmp/sathi-stage/sathi-backup.service /etc/systemd/system/sathi-backup.service
+install -m 644 /tmp/sathi-stage/sathi-backup.timer /etc/systemd/system/sathi-backup.timer
 systemctl daemon-reload
 systemctl enable sathi
+systemctl enable --now sathi-backup.timer
 # ! Every enabled Sathi unit, together. They share /opt/sathi and one database;
 # ! restarting only `sathi` left whatsapp and web on the previous code.
 UNITS="sathi $(systemctl list-unit-files 'sathi-*.service' --state=enabled --no-legend | awk '{print $1}')"

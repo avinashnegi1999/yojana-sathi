@@ -75,6 +75,18 @@ SOURCE_SLUGS = frozenset({"reddit", "discord", "github", "youtube", "twitter",
                           "whatsapp", "poster", "csc", "pilot", "direct"})
 
 
+def _to_the_hour(moment: datetime) -> str:
+    """A UTC time, kept to the hour only.
+
+    # ! Council audit, 1 Oct 2026. At one CSC with thirty workers, a time to
+    # ! the second beside state, age band and income band points at one person:
+    # ! the operator knows who sat down at 10:42. To the hour, a row is one of
+    # ! everyone screened that hour. The same reason applies to followups,
+    # ! whose created time could be matched against an event's.
+    """
+    return moment.replace(minute=0, second=0, microsecond=0).isoformat(timespec="seconds")
+
+
 class ConsentError(Exception):
     """A profile event was attempted before the worker agreed. Never caught."""
 
@@ -237,7 +249,7 @@ class EventLog:
                 (
                     event_id,
                     session.id,
-                    datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                    _to_the_hour(datetime.now(timezone.utc)),
                     event_type,
                     scheme_code,
                     row["state"],
@@ -548,8 +560,8 @@ class EventLog:
                 (
                     digest,
                     channel,
-                    (now + timedelta(days=days)).isoformat(timespec="seconds"),
-                    now.isoformat(timespec="seconds"),
+                    _to_the_hour(now + timedelta(days=days)),
+                    _to_the_hour(now),
                 ),
             )
             self._conn.commit()

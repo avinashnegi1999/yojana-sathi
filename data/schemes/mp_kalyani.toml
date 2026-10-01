@@ -50,6 +50,7 @@ official_url = "https://dhar.nic.in/en/scheme/chief-minister-kalyani-pension-sch
 verified_on = "2026-09-27"
 verified_by = "Avinash Negi, checked 2026-09-27"
 
+verified_hash = "sha256:6e836f02d69a467e86589abc4a72adf7ca09bae38212d4ab7fbb73c91ec671df"
 [benefit]
 annual_value_inr = 7200
 value_basis = "annual_payout"

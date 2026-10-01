@@ -286,7 +286,7 @@ def _signed_schemes() -> dict:
     # ! would come back UNKNOWN and the sweep would silently test nothing.
     # ! The ₹ values are not part of what this test compares.
     return {
-        code: replace(sc, verified_by="test-signature (tests/test_rule_boundaries.py)",
+        code: replace(sc, verified_by="test-signature (tests/test_rule_boundaries.py)", verified_hash=sc.content_hash,
                       stubs=())
         for code, sc in load_all(ROOT / "data" / "schemes").items()
     }

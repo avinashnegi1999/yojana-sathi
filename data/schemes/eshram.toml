@@ -35,6 +35,7 @@ official_url = "https://eshram.gov.in/faqs"
 verified_on  = "2026-09-10"
 verified_by  = "Avinash Negi, checked 2026-09-10"
 
+verified_hash = "sha256:4c1edf017b0abe01d8866b29a255c0953f06c28f2ccff7dd0b215e51a47dff3d"
 # * WHAT THE WORKER GETS
 [benefit]
 # ! Zero is CORRECT here and is not a stub. e-Shram carries no payout of its

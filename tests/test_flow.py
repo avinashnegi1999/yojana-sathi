@@ -13,6 +13,7 @@
 import os
 import sys
 import tempfile
+import tomllib
 from dataclasses import replace
 from pathlib import Path
 
@@ -27,7 +28,7 @@ from sathi.conversation.flow import (
 )
 from sathi.core.content import s
 from sathi.core.profile import INCOME_BANDS
-from sathi.core.schemes import load_all
+from sathi.core.schemes import content_hash, load_all
 from sathi.metrics.events import EventLog
 from sathi.metrics.report import _connect, numbers, render
 
@@ -39,6 +40,7 @@ authority    = "Test Ministry"
 official_url = "https://example.gov.in/a"
 verified_on  = "2026-09-01"
 verified_by  = "test-fixture"
+verified_hash = "__BOUND__"
 
 [benefit]
 annual_value_inr = 12000
@@ -83,6 +85,7 @@ authority    = "Test Ministry"
 official_url = "https://example.gov.in/b"
 verified_on  = "TODO"
 verified_by  = "TODO"
+verified_hash = ""
 
 [benefit]
 annual_value_inr = "TODO"
@@ -108,7 +111,10 @@ renewal        = "TODO"
 
 
 def _fixture_schemes(directory: Path) -> dict:
-    (directory / "a.toml").write_text(VERIFIED, encoding="utf-8")
+    # * VERIFIED is a signed file: its signature is bound to its own content,
+    # * as `python3 -m sathi.review` would write it.
+    bound = content_hash(tomllib.loads(VERIFIED.replace('"__BOUND__"', '""')))
+    (directory / "a.toml").write_text(VERIFIED.replace("__BOUND__", bound), encoding="utf-8")
     (directory / "b.toml").write_text(STUBBED, encoding="utf-8")
     return load_all(directory)
 
@@ -678,7 +684,7 @@ def test_gender_answer_skips_widow_and_pmuy_followups_when_not_applicable():
     schemes = load_all()
     # * IGNWPS is signed (since 2026-09-15); the fixture signature below just
     # * keeps this routing test about the widow condition, not about sign-off.
-    schemes["IGNWPS"] = replace(schemes["IGNWPS"], verified_by="test fixture only")
+    schemes["IGNWPS"] = replace(schemes["IGNWPS"], verified_by="test fixture only", verified_hash=schemes["IGNWPS"].content_hash)
     widow = Conversation(schemes, None, state_first=False)
     widow.start(); widow.handle(LANG_EN); widow.handle(consent.YES)
     widow.handle("pick:choose"); widow.handle("pick:IGNWPS")

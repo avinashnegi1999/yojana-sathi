@@ -17,7 +17,6 @@ import argparse
 import html
 import os
 import sqlite3
-import statistics
 import sys
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -87,18 +86,9 @@ def numbers(conn: sqlite3.Connection, since: str = "", cohort: str = "",
         conn, f"SELECT COUNT(*) FROM events WHERE event_type='pack_generated'{where}", p
     )
 
-    # * Median session length: last event minus first, per session, in minutes.
-    durations = []
-    for row in conn.execute(
-        f"SELECT session_id, MIN(ts) a, MAX(ts) b FROM events"
-        f" WHERE 1=1{where} GROUP BY session_id", p,
-    ):
-        try:
-            delta = datetime.fromisoformat(row["b"]) - datetime.fromisoformat(row["a"])
-        except ValueError:
-            continue
-        if delta.total_seconds() > 0:
-            durations.append(delta.total_seconds() / 60)
+    # ! No median session length any more (council audit, 1 Oct 2026). Event
+    # ! times are now kept to the hour so a row cannot be matched to the person
+    # ! who sat down at 10:42, and a duration cannot be read from them.
 
     return {
         "screened": screened,
@@ -106,7 +96,6 @@ def numbers(conn: sqlite3.Connection, since: str = "", cohort: str = "",
         "per_worker": round(matched / screened, 2) if screened else 0.0,
         "surfaced": surfaced,
         "packs": packs,
-        "median_minutes": round(statistics.median(durations), 1) if durations else 0.0,
         "sessions_total": _scalar(
             conn, f"SELECT COUNT(DISTINCT session_id) FROM events WHERE 1=1{where}", p
         ),
@@ -274,9 +263,8 @@ _METHOD = [
     ("Schemes matched per screening", "COUNT(scheme_matched) / screening sessions evaluated"),
     ("Newly surfaced", "COUNT(scheme_newly_surfaced) — matched AND not in the worker's own declared list"),
     ("Entitlement surfaced", "SUM(value_inr) over scheme_newly_surfaced, split by the scheme's value_basis"),
-    ("Accident cover surfaced", "the same sum restricted to value_basis='insurance_cover'; never added to the line above"),
+    ("Insurance cover surfaced", "the same sum restricted to value_basis='insurance_cover' (accident, life and hospital cover); never added to the line above"),
     ("Application packs", "COUNT(pack_generated)"),
-    ("Median session", "per session: MAX(ts) - MIN(ts), then the median"),
 ]
 
 
@@ -353,7 +341,7 @@ def render(conn: sqlite3.Connection, since: str = "",
     cards = [
         ("hero", f"{n['surfaced']}", "schemes newly surfaced to a worker"),
         ("hero", f"₹{split['payout']:,}", "annual entitlement surfaced (not delivered)"),
-        ("", f"₹{split['cover']:,}", "accident cover surfaced (pays only on a claim)"),
+        ("", f"₹{split['cover']:,}", "insurance cover surfaced: accident, life and hospital (pays only on a claim)"),
         # ! Not "people". One human with a Telegram account AND a WhatsApp
         # ! number is two rows here, because the two identifiers hash
         # ! differently and nothing links them — which is the same design that
@@ -363,7 +351,6 @@ def render(conn: sqlite3.Connection, since: str = "",
         ("", f"{n['screened']}", "screening sessions evaluated"),
         ("", f"{n['per_worker']}", "schemes matched per screening"),
         ("", f"{n['packs']}", "application packs generated"),
-        ("", f"{n['median_minutes']} min", "median session length"),
     ]
 
     parts = [
@@ -388,7 +375,7 @@ def render(conn: sqlite3.Connection, since: str = "",
         "<div class='note'><b>What the ₹ figures are.</b> The first is the annual value "
         "of annual payout schemes identified by the engine and not declared already held. "
         "PM-SYM is a future pension from age 60, subject to contributions and scheme terms. The second "
-        "is insurance cover, which pays only if an accident happens — it is kept separate "
+        "is insurance cover (accident, life and hospital), which pays only on a claim — it is kept separate "
         "because adding a ₹2,00,000 cover to a ₹36,000 pension would overstate what a "
         "worker actually receives. Both are entitlement surfaced, not money received. We "
         "do not claim delivery we have not verified. Counts describe screening sessions, "

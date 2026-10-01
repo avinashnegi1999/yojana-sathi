@@ -8,6 +8,7 @@ official_url = "https://www.pmuy.gov.in/faq.html"
 verified_on = "2026-09-09"
 verified_by = "Avinash Negi, checked 2026-09-09"
 
+verified_hash = "sha256:41c4781c9e203f2204d2c5f65817cc0a24c5537b4856196843fe927f2419ef83"
 [benefit]
 annual_value_inr = 0
 value_basis = "in_kind"

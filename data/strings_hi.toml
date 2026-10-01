@@ -34,6 +34,7 @@ changed = "भाषा हिंदी कर दी गई है।"
 ask = """नमस्ते, मैं योजना साथी हूँ।
 कुछ आसान सवालों के बाद बताऊँगा कि कौन सी सरकारी योजनाएँ आपको मिल सकती हैं।
 मैं आपका नाम, फ़ोन या आधार कभी नहीं पूछता। सिर्फ़ बिना नाम की गिनती रखी जाती है।
+यह सरकारी सेवा नहीं है। अंतिम फ़ैसला विभाग करता है।
 शुरू करें?"""
 yes = "शुरू करें"
 no = "अभी नहीं"
@@ -68,7 +69,7 @@ age_retry = "उम्र अंकों में लिखें, जैस�
 age_out_of_range = "कृपया {low} से {high} के बीच की उम्र बताएँ। यहाँ की योजनाएँ {low} साल की उम्र से शुरू होती हैं।"
 occupation = "आप क्या काम करते हैं?"
 occupation_free = "अपना काम कुछ शब्दों में बताइए।"
-income_band = "महीने में लगभग कितना कमाते हैं?"
+income_band = "आम तौर पर एक महीने में आप खुद लगभग कितना कमाते हैं?"
 land_holding_band = "आपके पास कितनी ज़मीन है?"
 family_size = "घर में कितने लोग रहते हैं?"
 has_bank_account = "क्या आपका बैंक खाता है?"
@@ -78,7 +79,7 @@ is_income_tax_payer = "क्या आप आयकर (इनकम टैक�
 # ! One question for all three made e-Shram stricter than its own source.
 is_epfo_or_esic_member = "क्या आपकी तनख़्वाह से PF (EPFO) या ESIC कटता है?"
 nps_exclusion_applies = "क्या आपका NPS पेंशन खाता है?"
-is_woman = "क्या आप महिला हैं? (सिर्फ़ ग़ैर-ज़रूरी सवाल छोड़ने के लिए)"
+is_woman = "क्या आप महिला हैं? यहाँ की कुछ योजनाएँ सिर्फ़ महिलाओं के लिए हैं।"
 known_schemes = """इनमें से कौन सी योजना आपके पास पहले से है?
 सभी चुनें, फिर 'आगे बढ़ें' दबाएँ।"""
 
@@ -108,9 +109,9 @@ choose = "चुनें"
 # * data/schemes/*.toml with its source_url — never here.
 no_income    = "अभी कोई कमाई नहीं"
 upto_5000    = "₹5,000 तक"
-"5001_10000" = "₹5,000 – ₹10,000"
-"10001_15000" = "₹10,000 – ₹15,000"
-"15001_25000" = "₹15,000 – ₹25,000"
+"5001_10000" = "₹5,001 – ₹10,000"
+"10001_15000" = "₹10,001 – ₹15,000"
+"15001_25000" = "₹15,001 – ₹25,000"
 above_25000  = "₹25,000 से ज़्यादा"
 
 # =====================================================================
@@ -210,13 +211,10 @@ premium_ask = "नियमित रकम — सही रकम केंद
 # ! cover is money paid only if an accident happens; adding it to a pension
 # ! would tell a worker they are getting lakhs, which is false.
 cover_line = "बीमा कवर: कुल {total} रुपये तक, हर पॉलिसी की अपनी शर्तों पर।"
-# ! Used when insurance is the ONLY thing that matched. "इसके अलावा" needs
-# ! something to come after, and with no pension line above it reads as if a
-# ! sentence went missing.
-cover_only_line = "बीमा कवर: कुल {total} रुपये तक, हर पॉलिसी की अपनी शर्तों पर।"
 # ! Honest labelling, kept in the product and not only in the README: this is
 # ! entitlement we surfaced, not money anyone has received.
 value_caveat = "पैसा अभी मिला नहीं है — आवेदन करना होगा।"
+not_government = "योजना साथी सरकारी सेवा नहीं है। अंतिम फ़ैसला विभाग करता है।"
 
 unknown_header_one = """1 योजना के बारे में मैं पक्का नहीं कह सकता।
 मैं अंदाज़ा नहीं लगाऊँगा — केंद्र पर पूछें।"""

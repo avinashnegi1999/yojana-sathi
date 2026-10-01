@@ -24,6 +24,11 @@ from sathi.render import audio, llm
 
 def startup_report(schemes: dict) -> None:
     """Say out loud what is verified and what is not, every single start."""
+    # * Which commit and which scheme files are running. deploy/install-on-vm.sh
+    # * writes VERSION; a local run has none, and says nothing.
+    version = Path(__file__).resolve().parent.parent / "VERSION"
+    if version.exists():
+        print("running " + " ".join(version.read_text(encoding="utf-8").split()))
     print(f"schemes loaded: {len(schemes)}")
     servable = 0
     for code, sc in schemes.items():
@@ -31,6 +36,10 @@ def startup_report(schemes: dict) -> None:
         # ! served to workers as UNKNOWN — that is the whole point.
         if sc.stubs:
             print(f"  {code}: {len(sc.stubs)} unresearched value(s) → served as UNKNOWN")
+        elif sc.signature_is_stale:
+            # ! Signed, then its rules or money changed: the name no longer
+            # ! vouches for what the file says now.
+            print(f"  {code}: CHANGED since signed ({sc.verified_by}) → served as UNKNOWN")
         elif not sc.is_human_verified:
             # ! Never print "verified" off a file that says PENDING. The word
             # ! used to appear here for exactly the schemes the README told

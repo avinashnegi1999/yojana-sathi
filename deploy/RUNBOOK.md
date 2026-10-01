@@ -355,6 +355,32 @@ There is no build artifact to roll back to — the code is the repo. Check out t
 last good commit and re-run `install-on-vm.sh`. The database is untouched by a
 deploy, so a rollback never loses event history.
 
+`install-on-vm.sh` refuses to run while anything it would ship (`sathi/`,
+`data/`, `tests/`, `check.py`, `pyproject.toml`) has uncommitted or untracked
+changes, and writes `/opt/sathi/VERSION` with the commit and git's hash of
+`data/schemes`. The services print it on start, so `journalctl -u sathi` says
+which rules were live at any moment.
+
+## Backups
+
+Added 1 Oct 2026, after the council audit found no copy of the database
+anywhere. `install-on-vm.sh` installs `sathi-backup.timer`, which runs
+`python3 -m sathi.metrics.backup` at 03:00 IST: a read-only snapshot of
+`/var/lib/sathi/sathi.db` through SQLite's backup API, checked, written
+owner-only to `/var/lib/sathi/backups/sathi-YYYY-MM-DD.db`, last 14 kept.
+
+```
+ssh -i ~/.ssh/sathi_aws ubuntu@13.206.84.69 'systemctl list-timers sathi-backup.timer; journalctl -u sathi-backup -n 5'
+./deploy/pull-backups.sh ubuntu@13.206.84.69          # the off-server copy, to ~/sathi-backups
+python -m sathi.metrics.backup --check ~/sathi-backups/sathi-YYYY-MM-DD.db
+```
+
+`pull-backups.sh` ends with a restore check of the newest copy: it opens the
+file as a database, runs SQLite's integrity check and counts every table. To
+restore for real: stop all three units, copy the backup over
+`/var/lib/sathi/sathi.db` (owner `sathi`), start them. Run the pull at least
+weekly; until it has run, every copy lives on the same disk as the original.
+
 ## What this deliberately does not have
 
 No Docker, and no reverse proxy, TLS or inbound port on the Telegram side — long

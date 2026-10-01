@@ -15,6 +15,7 @@
 
 import json
 import os
+import re
 import time
 import urllib.error
 import urllib.request
@@ -34,6 +35,11 @@ _TIMEOUT_S = 10
 # ! Both fail SOFT — over budget means "use the offline keyword matcher", which
 # ! is a fully supported path, never an error a worker sees.
 _MAX_INPUT_CHARS = 200
+# ! Council audit, 1 Oct 2026: the occupation text left the server without the
+# ! digit scrub the feedback box gets, so "driver, call 98xxxxxxxx" would send
+# ! a phone number to the model provider. Same rule as metrics/events.py: any
+# ! run of four or more digits goes before the text leaves. No job needs one.
+_DIGIT_RUN = re.compile(r"\d(?:[\d\s\-]*\d){3,}")
 _MAX_CALLS_PER_MIN = 30
 _MAX_CALLS_PER_DAY = 2000
 _DAY_S = 24 * 60 * 60
@@ -115,7 +121,7 @@ def propose_occupation(said: str) -> str | None:
         return None
     # ! Truncate before the wire, not after. An occupation nobody can state in
     # ! 200 characters is not an occupation; it is somebody testing the bot.
-    said = said.strip()[:_MAX_INPUT_CHARS]
+    said = _DIGIT_RUN.sub("#", said.strip()[:_MAX_INPUT_CHARS])
     menu = "\n".join(f"{o.code}: {o.label_en} / {o.label_hi}" for o in occupations())
     reply = _ask(_OCCUPATION_SYSTEM, f"Codes:\n{menu}\n\nWorker said: {said}", max_tokens=20)
     if not reply:
@@ -151,6 +157,10 @@ def _self_check() -> None:
             assert mod.propose_occupation("क" * 5000) == "construction"
             assert "क" * (mod._MAX_INPUT_CHARS + 1) not in seen[-1], \
                 "a 5000-char answer reached the model uncut"
+            # ! A phone number typed into the occupation answer never leaves.
+            mod.propose_occupation("driver, call me 98765 43210")
+            assert "98765" not in seen[-1] and "43210" not in seen[-1], seen[-1]
+            assert "driver" in seen[-1]
 
             # ! The budget must run out and fail soft, never raise.
             mod._ask = real

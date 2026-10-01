@@ -28,6 +28,7 @@ changed = "Language set to English."
 ask = """Hi, I'm Yojana Sathi.
 A few quick questions, and I'll show which government schemes may be yours.
 I never ask for your name, phone or Aadhaar. Only anonymous counts are kept.
+This is not a government service. The department makes the final decision.
 Shall we start?"""
 yes = "Start"
 no = "Not now"
@@ -63,14 +64,17 @@ age_retry = "Please type your age as a number, like 34."
 age_out_of_range = "Please give an age from {low} to {high}. The schemes here start at age {low}."
 occupation = "What work do you do?"
 occupation_free = "Tell me your work in a few words."
-income_band = "About how much do you earn a month?"
+# * Whose and when (council audit): her own earnings, in a usual month.
+income_band = "In a usual month, about how much do you yourself earn?"
 land_holding_band = "How much land do you have?"
 family_size = "How many people live in your home?"
 has_bank_account = "Do you have a bank account?"
 is_income_tax_payer = "Do you pay income tax?"
 is_epfo_or_esic_member = "Is PF (EPFO) or ESIC cut from your pay?"
 nps_exclusion_applies = "Do you have an NPS pension account?"
-is_woman = "Are you a woman? (Only to skip questions that don't apply.)"
+# * Honest about what it decides (council audit): it is not only for skipping
+# * questions; PMUY, the Punjab pensions and the widow pensions depend on it.
+is_woman = "Are you a woman? Some schemes here are only for women."
 known_schemes = """Which of these do you already have?
 Tap all that apply, then Next."""
 
@@ -99,9 +103,12 @@ choose = "Choose"
 # =====================================================================
 no_income    = "No income right now"
 upto_5000    = "Up to ₹5,000"
-"5001_10000" = "₹5,000 – ₹10,000"
-"10001_15000" = "₹10,000 – ₹15,000"
-"15001_25000" = "₹15,000 – ₹25,000"
+# ! No two labels share a number (council audit, 1 Oct): "₹10,000 – ₹15,000"
+# ! beside "₹15,000 – ₹25,000" let someone on exactly ₹15,000 tap the upper band
+# ! and lose PM-SYM. tests/test_schemes.py checks the ranges never overlap.
+"5001_10000" = "₹5,001 – ₹10,000"
+"10001_15000" = "₹10,001 – ₹15,000"
+"15001_25000" = "₹15,001 – ₹25,000"
 above_25000  = "More than ₹25,000"
 
 # =====================================================================
@@ -199,8 +206,9 @@ premium_per_year = "₹{amount} a year"
 # * Used when the scheme's premium is written only in the other language.
 premium_ask = "a regular amount — ask the centre for it"
 cover_line = "Insurance cover: up to ₹{total} in total, each policy on its own terms."
-cover_only_line = "Insurance cover: up to ₹{total} in total, each policy on its own terms."
 value_caveat = "Not paid yet — you have to apply."
+# ! On every result (council audit, 1 Oct): the sheet said so, the chat did not.
+not_government = "Yojana Sathi is not a government service. The department makes the final decision."
 
 unknown_header_one = """1 scheme I can't be sure about.
 I won't guess — ask at the centre."""

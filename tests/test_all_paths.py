@@ -72,7 +72,7 @@ def _schemes(directory: Path):
     # ! unsigned, and that every remaining stub is a recorded one.
     real = load_all(ROOT / "data" / "schemes")
     return {
-        code: replace(sc, verified_by="test-signature (tests/test_all_paths.py)",
+        code: replace(sc, verified_by="test-signature (tests/test_all_paths.py)", verified_hash=sc.content_hash,
                       stubs=())
         for code, sc in real.items()
     }

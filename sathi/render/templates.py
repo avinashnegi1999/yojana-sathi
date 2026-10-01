@@ -199,9 +199,10 @@ def eligible_block(results: tuple[Result, ...], schemes: dict[str, Scheme],
     if payout:
         lines.append(s("result.value_line", lang, total=rupees(payout)))
     if cover:
-        # * "On top of that" only makes sense when there IS something above it.
-        key = "result.cover_line" if payout else "result.cover_only_line"
-        lines.append(s(key, lang, total=rupees(cover)))
+        # * One line whether or not a pension came above it (the wording that
+        # * once differed, "on top of that", was retired; the two keys had become
+        # * the same sentence — council audit, 1 Oct 2026).
+        lines.append(s("result.cover_line", lang, total=rupees(cover)))
     if payout or cover:
         # ! The caveat ships with the number, every time, in the product and not
         # ! only in the README. "Surfaced", never "delivered".
@@ -336,6 +337,9 @@ def result_message(results: tuple[Result, ...], schemes: dict[str, Scheme],
     for block in (unknown_block(results, schemes, lang), not_for_you):
         if block:
             blocks.append(block)
+    # ! Every result says it (council audit, 1 Oct 2026). The sheet always did;
+    # ! the chat, where most workers read their result, did not.
+    blocks.append(s("result.not_government", lang))
     return "\n\n".join(blocks)
 
 
@@ -392,6 +396,7 @@ def _self_check() -> None:
     )
     results = evaluate_all(Profile(age=30), schemes)
     text = result_message(results, schemes, known=frozenset({"A"}))
+    assert text.endswith(s("result.not_government")), "every result says it is not a government service"
     assert "योजना-A" in text and "12,000" in text
     assert "2,00,000" in text, "the cover must be stated"
     assert "2,12,000" not in text, "a cover was added to a payout"
@@ -428,7 +433,7 @@ def _self_check() -> None:
     # ! the exact sentence a real pack shipped with when only PMSBY matched.
     cover_only = {"D": schemes["D"]}
     text_cover = result_message(evaluate_all(Profile(age=30), cover_only), cover_only, frozenset())
-    assert s("result.cover_only_line", "hi").split("{")[0][:12] in text_cover, text_cover
+    assert s("result.cover_line", "hi").split("{")[0][:12] in text_cover, text_cover
     assert "इसके अलावा" not in text_cover, "cover-only result still says 'on top of that'"
 
     # * Nobody eligible → never a dead end.

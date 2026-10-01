@@ -48,6 +48,7 @@ official_url = "https://sswcd.punjab.gov.in/en/social-security/pensionsfinancial
 verified_on = "2026-09-27"
 verified_by = "Avinash Negi, checked 2026-09-27"
 
+verified_hash = "sha256:01ba199939762dad794a6930a08de29b4e2ff241527f6c77d3111328466fd5e3"
 [benefit]
 annual_value_inr = 18000
 value_basis = "annual_payout"

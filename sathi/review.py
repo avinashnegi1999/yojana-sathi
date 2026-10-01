@@ -24,7 +24,9 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
-from sathi.core.schemes import PENDING_MARKER, STUB, Scheme, load_all
+import tomllib
+
+from sathi.core.schemes import PENDING_MARKER, STUB, Scheme, content_hash, load_all
 
 SCHEMES_DIR = Path(__file__).resolve().parent.parent / "data" / "schemes"
 
@@ -142,10 +144,15 @@ def sign(code: str, name: str, on: str = "", schemes_dir: Path | None = None) ->
     before = path.read_text(encoding="utf-8")
 
     signature = f'"{name}, checked {on}"'
+    # ! The signature is bound to the rules and money as they are NOW, the
+    # ! content the reviewer just read (council audit, 1 Oct 2026). Change any
+    # ! of it later and the scheme is unsigned again until someone re-reads it.
+    bound = content_hash(tomllib.loads(before))
     text, n_by = re.subn(r'(?m)^(verified_by\s*=\s*).*$', lambda m: m.group(1) + signature, before, count=1)
     text, n_on = re.subn(r'(?m)^(verified_on\s*=\s*).*$', lambda m: m.group(1) + f'"{on}"', text, count=1)
-    if not (n_by and n_on):
-        raise ReviewError(f"{path.name}: could not find verified_by/verified_on to replace")
+    text, n_hash = re.subn(r'(?m)^(verified_hash\s*=\s*).*$', lambda m: m.group(1) + f'"{bound}"', text, count=1)
+    if not (n_by and n_on and n_hash):
+        raise ReviewError(f"{path.name}: could not find verified_by/verified_on/verified_hash to replace")
 
     path.write_text(text, encoding="utf-8")
     try:
@@ -169,6 +176,7 @@ def unsign(code: str, schemes_dir: Path | None = None) -> Path:
     text = re.sub(r'(?m)^(verified_by\s*=\s*).*$',
                   lambda m: m.group(1) + f'"unconfirmed — {PENDING_MARKER}"',
                   path.read_text(encoding="utf-8"), count=1)
+    text = re.sub(r'(?m)^(verified_hash\s*=\s*).*$', lambda m: m.group(1) + '""', text, count=1)
     path.write_text(text, encoding="utf-8")
     return path
 
@@ -179,6 +187,8 @@ def unsign(code: str, schemes_dir: Path | None = None) -> Path:
 def _status_line(code: str, s: Scheme) -> str:
     if s.stubs:
         return f"  {code:12s} UNRESEARCHED — {len(s.stubs)} value(s) still TODO"
+    if s.signature_is_stale:
+        return f"  {code:12s} CHANGED since {s.verified_by} — re-read and sign again"
     if not s.is_human_verified:
         return f"  {code:12s} awaiting your signature"
     return f"  {code:12s} SIGNED — {s.verified_by}"
@@ -326,16 +336,30 @@ def _self_check() -> None:
         assert after.verified_by == "A Real Person, checked 2026-09-09"
         assert after.verified_on == "2026-09-09"
 
-        # ! Only the two signature lines may differ. This is what stops a
+        # ! Only the three signature lines may differ. This is what stops a
         # ! signature from ever carrying a data change in with it.
         diff = [(a, b) for a, b in zip(before.splitlines(),
                                        path.read_text(encoding="utf-8").splitlines())
                 if a != b]
-        assert len(diff) == 2, diff
-        assert all(x.startswith(("verified_by", "verified_on")) for x, _ in diff), diff
+        assert len(diff) == 3, diff
+        assert all(x.startswith(("verified_by", "verified_on", "verified_hash")) for x, _ in diff), diff
+
+        # ! The council's repro: change a threshold in a signed file. It must
+        # ! stop being signed at once, and say why.
+        signed_text = path.read_text(encoding="utf-8")
+        edited = re.sub(r'(?m)^(value\s*=\s*)(\d+)', lambda m: m.group(1) + str(int(m.group(2)) + 49),
+                        signed_text, count=1)
+        assert edited != signed_text, "fixture needs a numeric value to change"
+        path.write_text(edited, encoding="utf-8")
+        tampered = load_all(tmp)[code]
+        assert tampered.signature_is_stale and not tampered.is_servable, "an edited file stayed signed"
+        assert "CHANGED since" in _status_line(code, tampered)
+        path.write_text(signed_text, encoding="utf-8")
+        assert load_all(tmp)[code].is_servable, "restoring the signed content restores the signature"
 
         unsign(code, schemes_dir=tmp)
         assert not load_all(tmp)[code].is_servable
+        assert load_all(tmp)[code].verified_hash == "", "unsign clears the hash too"
 
         try:
             sign(code, "Claude", schemes_dir=tmp)

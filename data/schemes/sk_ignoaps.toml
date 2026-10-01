@@ -43,6 +43,7 @@ official_url = "https://pensionscheme.sikkim.gov.in/"
 verified_on = "2026-09-27"
 verified_by = "Avinash Negi, checked 2026-09-27"
 
+verified_hash = "sha256:22c4e4e1badcfed2b0729e906940202732f34968132f40950d3d6224a56d8ab5"
 [benefit]
 annual_value_inr = 18000
 annual_value_age_bands = [
@@ -95,5 +96,8 @@ source_url = "https://pensionscheme.sikkim.gov.in/"
 documents_en = ["SSC, COI or residential certificate", "Antyodaya (AAY) or Priority Household ration card", "Aadhaar card", "Jan Dhan bank account passbook"]
 documents = ["SSC, COI या निवास प्रमाणपत्र", "अंत्योदय (AAY) या प्राथमिकता परिवार राशन कार्ड", "आधार कार्ड", "जन धन बैंक खाते की पासबुक"]
 where_to_apply = "online"
+# * Portal printed on the sheet. Source: official_url above, the state's own pension portal.
+# ? Avinash to confirm this is the application page, not only an information page.
+apply_url = "https://pensionscheme.sikkim.gov.in/"
 renewal_en = "The amount rises at 70 and again at 80."
 renewal = "70 साल पर और फिर 80 साल पर रकम बढ़ती है।"

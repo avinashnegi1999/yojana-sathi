@@ -616,6 +616,10 @@ class WhatsAppBot(Router):
             value = self._work.get(block=block, timeout=timeout)
         except queue.Empty:
             return False
+        return self._handle_work(value)
+
+    def _handle_work(self, value: dict | None) -> bool:
+        """One queued webhook, already taken off the queue. False on the stop sentinel."""
         try:
             if value is None:
                 return False
@@ -696,8 +700,18 @@ class WhatsAppBot(Router):
                     signal.signal(signal.SIGTERM, previous_term)
 
     def _drain(self) -> None:
-        while self.work_once():
-            pass
+        # * Waits at most a minute for the next message. When none came, quiet
+        # * sessions are dropped then, not whenever somebody next writes (council
+        # * audit, 1 Oct 2026: answers sat in RAM past the 30 minutes the README
+        # * promises). This thread handles every message, so the sweep needs no lock.
+        while True:
+            try:
+                value = self._work.get(timeout=self.SWEEP_EVERY_SECONDS)
+            except queue.Empty:
+                self.expire_idle()
+                continue
+            if not self._handle_work(value):
+                return
 
 
 def _webhook_messages(payload: dict, phone_number_id: str) -> list[dict]:

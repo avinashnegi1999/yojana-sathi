@@ -18,7 +18,7 @@ def test_new_scheme_boundaries():
     # ! not about ₹ values, and UK_WIDOW's amount is a documented TODO (its
     # ! source went 404). Without clearing it the file is unservable and every
     # ! boundary below would read UNKNOWN and assert nothing.
-    schemes = {k: replace(v, verified_by='test fixture only', stubs=())
+    schemes = {k: replace(v, verified_by='test fixture only', verified_hash=v.content_hash, stubs=())
                for k,v in real.items()}
     p = Profile(state='UK', age=30, has_bank_account=True, is_woman=True,
                 is_widow=True, uk_old_age_income_or_bpl=True, uk_widow_income_or_bpl=True,
@@ -76,7 +76,7 @@ def test_the_two_state_pensions_are_never_counted_as_two_payments():
         benefit = dict(sc.benefit)
         if code in ('UK_OLD_AGE', 'UK_WIDOW'):
             benefit['annual_value_inr'] = 18000
-        signed[code] = replace(sc, verified_by='test fixture only', stubs=(),
+        signed[code] = replace(sc, verified_by='test fixture only', verified_hash=sc.content_hash, stubs=(),
                                benefit=benefit)
     # ! "No other pension" is about a pension already being RECEIVED. Someone
     # ! receiving none still qualifies for both routes on paper, which is
@@ -112,7 +112,7 @@ def test_the_sheet_a_worker_carries_is_readable_on_a_phone():
     from sathi.pack import pack
     from sathi.rules.engine import evaluate_all
     real = load_all(ROOT / 'data/schemes')
-    signed = {c: replace(v, verified_by='test fixture only', stubs=())
+    signed = {c: replace(v, verified_by='test fixture only', verified_hash=v.content_hash, stubs=())
               for c, v in real.items()}
     p = Profile(state='UK', age=30, occupation='construction', income_band='upto_5000',
                 land_holding_band='landless', family_size=4, has_bank_account=True,
@@ -161,7 +161,7 @@ def test_no_reason_is_said_to_a_worker_twice():
     """
     from sathi.render import templates
     real = load_all(ROOT / 'data/schemes')
-    signed = {c: replace(v, verified_by='test fixture only', stubs=())
+    signed = {c: replace(v, verified_by='test fixture only', verified_hash=v.content_hash, stubs=())
               for c, v in real.items()}
     p = Profile(state='UK', age=30, occupation='construction', income_band='upto_5000',
                 land_holding_band='landless', family_size=4, has_bank_account=True,
@@ -231,7 +231,7 @@ def test_all_unknown_never_tells_a_worker_they_failed():
             assert sc.name(lang) in msg, f'[{lang}] {code} missing from the list'
 
     # ! A real INELIGIBLE must still get the honest "you did not qualify" line.
-    signed = {c: replace(v, verified_by='test fixture only', stubs=())
+    signed = {c: replace(v, verified_by='test fixture only', verified_hash=v.content_hash, stubs=())
               for c, v in schemes.items()}
     hard_no = evaluate_all(replace(p, age=5), signed)
     assert any(r.verdict is Verdict.INELIGIBLE for r in hard_no)
@@ -242,7 +242,7 @@ def test_all_unknown_never_tells_a_worker_they_failed():
 def test_followups_preserve_unknown_and_language():
     real=load_all(ROOT/'data/schemes')
     # * This tests follow-up routing, including unsigned files under review.
-    schemes={code: replace(sc, verified_by='test fixture only') for code, sc in real.items()}
+    schemes={code: replace(sc, verified_by='test fixture only', verified_hash=sc.content_hash) for code, sc in real.items()}
     for lang in ('en','hi'):
         c=Conversation(schemes); c.lang=lang
         c.profile=Profile(state='UK',age=30,income_band='upto_5000')
@@ -311,7 +311,7 @@ def test_additional_answers_are_not_persisted_and_demo_has_no_events():
 def test_new_boolean_conditions_against_source_oracle():
     import itertools
     # * This sweep is about conditions, not the production sign-off state.
-    schemes={k:replace(v,verified_by='test fixture only',stubs=())
+    schemes={k:replace(v,verified_by='test fixture only', verified_hash=v.content_hash,stubs=())
              for k,v in load_all(ROOT/'data/schemes').items()}
     def expected(conditions):
         if False in conditions:

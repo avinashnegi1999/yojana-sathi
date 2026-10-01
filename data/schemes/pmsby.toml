@@ -33,6 +33,7 @@ official_url = "https://jansuraksha.gov.in/Files/PMSBY/English/Rules.pdf"
 verified_on  = "2026-09-09"
 verified_by  = "Avinash Negi, checked 2026-09-09"
 
+verified_hash = "sha256:a421b5c7e1d7fc7caba9b1618624d2bf3ad1781ef511919adcf7c731f19aa31e"
 # * WHAT THE WORKER GETS
 [benefit]
 # "Table of Benefits ... a Death — Rs. 2 Lakh"

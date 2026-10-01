@@ -6,6 +6,7 @@
 
 import sys
 import tempfile
+import tomllib
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -15,6 +16,7 @@ from sathi.core.schemes import (
     PENDING_MARKER,
     STUB,
     SchemeError,
+    content_hash,
     load_all,
     load_scheme,
 )
@@ -28,6 +30,7 @@ authority    = "Test Ministry"
 official_url = "https://example.gov.in/test"
 verified_on  = "2026-09-01"
 verified_by  = "avinash"
+verified_hash = "__BOUND__"
 
 [benefit]
 annual_value_inr = 12000
@@ -60,6 +63,10 @@ renewal        = "none"
 
 
 def _load(text: str):
+    # * GOOD is a signed file: "__BOUND__" becomes the hash of the content
+    # * being loaded, exactly as `python3 -m sathi.review` would write it.
+    if "__BOUND__" in text:
+        text = text.replace("__BOUND__", content_hash(tomllib.loads(text.replace('"__BOUND__"', '""'))))
     with tempfile.TemporaryDirectory() as d:
         p = Path(d) / "scheme.toml"
         p.write_text(text, encoding="utf-8")
@@ -91,6 +98,32 @@ def test_good_file_loads():
     assert s.criteria[0].op == "between" and s.criteria[0].value == [18, 40]
     assert s.exclusions[0].reason_hi == "आयकर"
     assert s.documents == ("Aadhaar", "Bank passbook")
+
+
+def test_a_signature_covers_only_the_content_it_was_given_on():
+    """Council audit, 1 Oct 2026: PMJJBY's age range was changed to 18-99 in a
+    copy and still loaded as signed, so an 80-year-old got ELIGIBLE."""
+    signed_text = GOOD.replace("__BOUND__", content_hash(tomllib.loads(GOOD.replace('"__BOUND__"', '""'))))
+    assert _load(signed_text).is_servable
+    widened = signed_text.replace("value      = [18, 40]", "value      = [18, 99]")
+    s = _load(widened)
+    assert s.signature_is_stale and not s.is_servable, "a widened age range stayed signed"
+    assert evaluate(Profile(age=80, is_income_tax_payer=False), s).verdict is Verdict.UNKNOWN
+    # * Comments, spacing and line endings are not content.
+    cosmetic = signed_text.replace("[benefit]", "# a comment\n[benefit]").replace("\n", "\r\n")
+    assert _load(cosmetic).is_servable
+    _rejects(GOOD.replace('"__BOUND__"', '"md5:abc"'), "verified_hash")
+
+
+def test_every_signed_file_still_has_the_content_that_was_signed():
+    """The real files. A signed file whose rules or money changed after sign-off
+    is served as UNKNOWN; this names it so it is re-read, not forgotten."""
+    root = Path(__file__).resolve().parent.parent
+    stale = sorted(code for code, sc in load_all(root / "data" / "schemes").items()
+                   if sc.signature_is_stale)
+    assert not stale, (
+        f"changed since signed, so served as UNKNOWN: {', '.join(stale)}. "
+        f"Re-read each against its source, then: python3 -m sathi.review {' '.join(stale)}")
 
 
 def test_stub_marks_unverified_but_still_loads():
@@ -275,6 +308,46 @@ def test_every_income_band_is_accounted_for_in_every_income_rule():
                 # * below the ceiling must all be present — including zero.
                 assert "no_income" in c.value, \
                     f"{code}: an income ceiling must include workers with no income at all"
+
+
+def _band_range(label: str) -> tuple[int, float]:
+    """The ₹ range a band label promises, read from the label itself."""
+    import re
+    numbers = [int(n.replace(",", "")) for n in re.findall(r"₹([\d,]+)", label)]
+    if len(numbers) == 2:
+        return numbers[0], numbers[1]
+    assert len(numbers) == 1, f"cannot read a range from {label!r}"
+    if label.startswith("Up to") or label.endswith("तक"):
+        return 0, numbers[0]
+    if label.startswith("More than") or "से ज़्यादा" in label:
+        return numbers[0] + 1, float("inf")
+    raise AssertionError(f"cannot read a range from {label!r}")
+
+
+def test_income_band_labels_never_share_a_number():
+    """Council audit, 1 Oct 2026: "₹10,000 – ₹15,000" beside "₹15,000 – ₹25,000"
+    let someone on exactly ₹15,000 tap the upper band and lose PM-SYM, whose
+    ceiling is ₹15,000. Every label must say the range its band code means,
+    and the ranges must meet without overlapping, in both languages."""
+    from sathi.core.content import s
+    from sathi.core.profile import INCOME_BANDS
+
+    for lang in ("en", "hi"):
+        previous_high = None
+        for band in INCOME_BANDS:
+            if band == "no_income":
+                continue
+            low, high = _band_range(s(f"income_bands.{band}", lang))
+            if previous_high is not None:
+                assert low == previous_high + 1, \
+                    f"{lang} {band}: starts at ₹{low}, the band before ends at ₹{previous_high}"
+            # * The label and the code agree: "5001_10000" is ₹5,001 to ₹10,000.
+            parts = band.replace("upto_", "0_").replace("above_", "").split("_")
+            if band.startswith("above_"):
+                assert low == int(parts[0]) + 1 and high == float("inf"), (lang, band)
+            else:
+                assert (low, high) == (int(parts[0]), int(parts[1])), (lang, band, low, high)
+            previous_high = high
 
 
 def test_every_shipped_signature_is_a_real_person_or_no_signature_at_all():

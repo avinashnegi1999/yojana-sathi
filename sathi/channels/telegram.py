@@ -488,6 +488,11 @@ class TelegramBot(Router):
         updates = _call(self.token, "getUpdates", {
             "offset": self._offset, "timeout": _POLL_S,
         }).get("result", [])
+        # * A long poll returns at least every _POLL_S seconds, messages or not:
+        # * quiet sessions are dropped here, on time, rather than whenever
+        # * somebody next writes (council audit, 1 Oct 2026). Same thread as
+        # * every update, so no lock is needed.
+        self.expire_idle()
         for update in updates:
             if update["update_id"] < self._offset:
                 continue

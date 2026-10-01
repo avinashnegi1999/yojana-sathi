@@ -1,0 +1,16 @@
+# =====================================================================
+# Scheme Sathi — run sathi-backup.service once a night
+# =====================================================================
+# * 21:30 UTC is 03:00 in India, when the fewest workers are screening.
+# * Persistent: a night missed while the server was off runs at next boot.
+
+[Unit]
+Description=Nightly copy of the Scheme Sathi event database
+
+[Timer]
+OnCalendar=*-*-* 21:30:00 UTC
+RandomizedDelaySec=10min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

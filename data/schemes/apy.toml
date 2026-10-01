@@ -46,9 +46,10 @@ name_en = "Atal Pension Yojana"
 name_hi = "अटल पेंशन योजना"
 authority = "Pension Fund Regulatory and Development Authority (PFRDA)"
 official_url = "https://pfrda.org.in/schemes/atal-pension-yojana-apy"
-verified_on = "2026-09-27"
-verified_by = "Avinash Negi, checked 2026-09-27"
+verified_on = "2026-10-01"
+verified_by = "Avinash Negi, checked 2026-10-01"
 
+verified_hash = "sha256:cc2354d2f8d086d20359e743d91717c6f1c6c3f463123cd139abb523ca807646"
 [benefit]
 annual_value_inr = 12000
 value_basis = "annual_payout"

@@ -18,7 +18,7 @@ from sathi.rules.operators import apply, OperatorError
 
 
 def test_worker_status_is_independent_of_income_and_job_title():
-    schemes = {code: replace(sc, verified_by="test-review-only")
+    schemes = {code: replace(sc, verified_by="test-review-only", verified_hash=sc.content_hash)
                for code, sc in load_all(ROOT / "data/schemes").items()}
     base = Profile(age=30, occupation="no_work", income_band="no_income",
                    has_bank_account=True, is_income_tax_payer=False,
@@ -68,7 +68,7 @@ def test_other_nps_does_not_cause_a_definite_refusal():
     c.state = State.NPS
     c.handle(OTHER)
     c.handle(YES)
-    signed = replace(schemes["PM_SYM"], verified_by="test-review-only")
+    signed = replace(schemes["PM_SYM"], verified_by="test-review-only", verified_hash=schemes["PM_SYM"].content_hash)
     assert evaluate(c.profile, signed).verdict is Verdict.UNKNOWN
     # ! The production gate is retained for every scheme nobody has signed.
     # ! Once a scheme IS signed it is supposed to answer, so asserting UNKNOWN

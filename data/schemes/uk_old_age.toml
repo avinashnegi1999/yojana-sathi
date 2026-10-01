@@ -21,9 +21,10 @@ name_en = "Uttarakhand old-age pension"
 name_hi = "उत्तराखंड वृद्धावस्था पेंशन"
 authority = "Government of Uttarakhand"
 official_url = "https://socialwelfare.uk.gov.in/service/old-age-pension/"
-verified_on = "2026-09-09"
-verified_by = "Avinash Negi, checked 2026-09-09"
+verified_on = "2026-10-01"
+verified_by = "Avinash Negi, checked 2026-10-01"
 
+verified_hash = "sha256:8da9d9414d12a790a1cd26675a585baabd44188a17baf89b90f63173c11fe269"
 [benefit]
 annual_value_inr = 18000
 value_basis = "annual_payout"
@@ -98,5 +99,8 @@ source_url = "https://socialwelfare.uk.gov.in/service/old-age-pension/"
 documents_en = ["Aadhaar card", "Bank passbook", "Income certificate or BPL card", "Family register (rural) or ration card (urban)", "Local selection proposal", "Attested photograph"]
 documents = ["आधार कार्ड", "बैंक पासबुक", "आय प्रमाणपत्र या बीपीएल कार्ड", "परिवार रजिस्टर (ग्रामीण) या राशन कार्ड (शहरी)", "स्थानीय चयन प्रस्ताव", "प्रमाणित फोटो"]
 where_to_apply = "online"
+# * Portal printed on the sheet. Source: the summary above: "Apply through ssp.uk.gov.in".
+# ? Avinash to confirm this is the application page, not only an information page.
+apply_url = "https://ssp.uk.gov.in/"
 renewal_en = "Follow the department's current verification instructions; report changes in eligibility. Confirm whether any existing pension affects your application."
 renewal = "विभाग के वर्तमान सत्यापन निर्देश मानें; पात्रता बदलने की सूचना दें। पहले से मिल रही पेंशन का आवेदन पर असर विभाग से पूछें।"

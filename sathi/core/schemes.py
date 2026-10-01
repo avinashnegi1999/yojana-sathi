@@ -19,6 +19,8 @@
 # ! Researched is not signed off. See `is_servable`.
 """
 
+import hashlib
+import json
 import tomllib
 from dataclasses import dataclass, field
 from math import isfinite
@@ -54,11 +56,33 @@ APPLY_LOCATIONS = frozenset(
 _TOP_KEYS = frozenset(
     {
         "code", "name_en", "name_hi", "authority", "official_url",
-        "verified_on", "verified_by", "benefit", "paperwork",
+        "verified_on", "verified_by", "verified_hash", "benefit", "paperwork",
         "criteria", "exclusions", "prerequisites",
     }
 )
 _TOP_REQUIRED = _TOP_KEYS - {"exclusions", "prerequisites"}
+
+# ! What a signature covers (council audit, 1 Oct 2026). A name and a date
+# ! said nothing about content: PMJJBY's age range was changed to 18-99 in a
+# ! copy and still loaded as signed. `python3 -m sathi.review` now writes a
+# ! hash of these parts beside the name, and a file whose parts no longer
+# ! match its hash is unsigned — served as UNKNOWN — until a person signs again.
+# * The rules (every criterion and exclusion, with the questions and reasons
+# * shown for them) and the money (the whole benefit table). Not the names,
+# * the paperwork or the comments: changing those cannot change a verdict or
+# * a ₹ figure.
+SIGNED_PARTS = ("code", "benefit", "criteria", "exclusions")
+
+
+def content_hash(raw: dict) -> str:
+    """The hash a signature is bound to: SIGNED_PARTS, in a fixed form.
+
+    # * Parsed values, not file bytes, so line endings, spacing and comments
+    # * do not matter; any changed value, operator or question does.
+    """
+    signed = {part: raw.get(part) for part in SIGNED_PARTS}
+    text = json.dumps(signed, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+    return "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 # ! Paperwork lives in its own table on purpose. In TOML a bare key written
 # ! after a [[table]] header belongs to that table, so top-level keys placed at
@@ -67,7 +91,10 @@ _PAPERWORK_KEYS = frozenset({"documents", "where_to_apply", "renewal"})
 # * English is optional everywhere. A scheme file authored only in Hindi still
 # * loads and still works — the English screen falls back to the Hindi text
 # * rather than showing a blank line. Missing translation, never missing fact.
-_PAPERWORK_OPTIONAL = frozenset({"documents_en", "renewal_en"})
+_PAPERWORK_OPTIONAL = frozenset({"documents_en", "renewal_en", "apply_url"})
+# ! An application link printed on the sheet must be a government address.
+# ! A typo or a look-alike domain would send a worker to someone else's site.
+_APPLY_URL_HOSTS = (".gov.in", ".nic.in")
 
 _BENEFIT_KEYS = frozenset(
     {"annual_value_inr", "value_basis", "premium_inr", "summary_hi", "summary_en"}
@@ -137,11 +164,35 @@ class Scheme:
     renewal: str
     documents_en: tuple[str, ...] = ()
     renewal_en: str = ""
+    # * Where to apply online, when the scheme's own source names the portal.
+    # * "" means no link is shown; the sheet never guesses one.
+    apply_url: str = ""
     prerequisites: tuple[str, ...] = ()
     # ! Dotted paths of every value still reading "TODO". Empty means research
     # ! is complete and the engine may return a real verdict.
     stubs: tuple[str, ...] = ()
     source_path: str = ""
+    # * The hash written at sign-off, and the hash of the file as it is now.
+    # * Both are "" for a scheme built in code rather than read from a file:
+    # * there is no file content for a signature to be bound to.
+    verified_hash: str = ""
+    content_hash: str = ""
+
+    @property
+    def signature_matches(self) -> bool:
+        """The rules and money are exactly what was signed.
+
+        # ! False when anything in SIGNED_PARTS changed after sign-off, or the
+        # ! file was signed before signatures carried a hash.
+        """
+        return not self.content_hash or self.verified_hash == self.content_hash
+
+    @property
+    def signature_is_stale(self) -> bool:
+        """A person signed, but the rules or money changed afterwards."""
+        by = self.verified_by.strip()
+        named = bool(by) and by != STUB and PENDING_MARKER not in by
+        return named and not self.signature_matches
 
     @property
     def is_researched(self) -> bool:
@@ -157,10 +208,13 @@ class Scheme:
         """A named human confirmed every value against the official source.
 
         # ! `verified_by` is the signature line. While it is blank, still the
-        # ! STUB, or still carries PENDING_MARKER, nobody has signed.
+        # ! STUB, or still carries PENDING_MARKER, nobody has signed. And a
+        # ! signature covers only the content it was given on: once the rules
+        # ! or money change, the name no longer vouches for them.
         """
         by = self.verified_by.strip()
-        return bool(by) and by != STUB and PENDING_MARKER not in by
+        named = bool(by) and by != STUB and PENDING_MARKER not in by
+        return named and self.signature_matches
 
     @property
     def is_servable(self) -> bool:
@@ -311,6 +365,12 @@ def load_scheme(path: Path) -> Scheme:
     for k in ("code", "name_en", "name_hi", "authority", "official_url",
               "verified_on", "verified_by"):
         _check_str(raw[k], f"{where}.{k}")
+    # * "" until signed; then exactly what review.py writes.
+    vh = raw["verified_hash"]
+    if not isinstance(vh, str) or (vh and not (
+            vh.startswith("sha256:") and len(vh) == 71
+            and all(c in "0123456789abcdef" for c in vh[7:]))):
+        raise SchemeError(f"{where}.verified_hash: expected \"\" or \"sha256:<64 hex>\", got {vh!r}")
 
     _require_keys(raw["benefit"], _BENEFIT_KEYS | _BENEFIT_OPTIONAL,
                   _BENEFIT_KEYS, f"{where}.benefit")
@@ -382,6 +442,14 @@ def load_scheme(path: Path) -> Scheme:
             f"not in {sorted(APPLY_LOCATIONS)}"
         )
 
+    if "apply_url" in pw:
+        url = pw["apply_url"]
+        _check_str(url, f"{where}.paperwork.apply_url")
+        host = url.removeprefix("https://").split("/", 1)[0]
+        if not url.startswith("https://") or not host.endswith(_APPLY_URL_HOSTS):
+            raise SchemeError(f"{where}.paperwork.apply_url: must be an https:// "
+                              f"address on {' or '.join(_APPLY_URL_HOSTS)}, got {url!r}")
+
     if not isinstance(raw["criteria"], list) or not raw["criteria"]:
         raise SchemeError(f"{where}: needs at least one [[criteria]] block")
     if not isinstance(pw["documents"], list) or not pw["documents"]:
@@ -412,9 +480,12 @@ def load_scheme(path: Path) -> Scheme:
         renewal=pw["renewal"],
         documents_en=tuple(pw.get("documents_en", [])),
         renewal_en=pw.get("renewal_en", ""),
+        apply_url=pw.get("apply_url", ""),
         prerequisites=tuple(raw.get("prerequisites", [])),
         stubs=tuple(_find_stubs(raw)),
         source_path=str(path),
+        verified_hash=raw["verified_hash"],
+        content_hash=content_hash(raw),
     )
 
 
@@ -462,6 +533,15 @@ def _self_check() -> None:
     assert not pending.is_human_verified and not pending.is_servable
 
     assert not scheme(verified_by=STUB).is_human_verified
+    # ! A signature is bound to the content it was given on (council, 1 Oct).
+    bound = scheme(content_hash="sha256:" + "a" * 64, verified_hash="sha256:" + "a" * 64)
+    assert bound.is_servable and not bound.signature_is_stale
+    changed = scheme(content_hash="sha256:" + "b" * 64, verified_hash="sha256:" + "a" * 64)
+    assert not changed.is_servable and changed.signature_is_stale, "edited after sign-off"
+    unhashed = scheme(content_hash="sha256:" + "b" * 64)
+    assert not unhashed.is_servable, "a file signed before hashes existed must be re-signed"
+    assert content_hash({"code": "T", "criteria": [{"value": 50}]}) != \
+        content_hash({"code": "T", "criteria": [{"value": 99}]}), "a changed threshold must change the hash"
     assert not scheme(verified_by="   ").is_human_verified
     assert not scheme(stubs=("benefit.annual_value_inr",)).is_servable
 
@@ -478,6 +558,26 @@ def _self_check() -> None:
             assert sc.criteria, f"{code} has no criteria"
             if not sc.is_servable:
                 print(f"  note: {code} is not servable yet → served as UNKNOWN")
+        # ! A portal link that is not a government address must stop the load,
+        # ! and adding one must not unsign the scheme (paperwork is not signed).
+        import tempfile
+        source = "\n".join(line for line in
+                           (here / "uk_old_age.toml").read_text(encoding="utf-8").splitlines()
+                           if not line.startswith("apply_url"))
+        with tempfile.TemporaryDirectory() as tmp:
+            bad = Path(tmp) / "bad.toml"
+            bad.write_text(source.replace('where_to_apply = "online"',
+                                          'where_to_apply = "online"\napply_url = "https://ssp-uk.example.com/"', 1),
+                           encoding="utf-8")
+            try:
+                load_scheme(bad)
+            except SchemeError as e:
+                assert "apply_url" in str(e), e
+            else:
+                raise AssertionError("a non-government apply_url was accepted")
+        uk = loaded.get("UK_OLD_AGE")
+        if uk is not None and uk.apply_url:
+            assert uk.is_servable, "an apply_url must not break the UK old-age signature"
     print("schemes.py OK")
 
 

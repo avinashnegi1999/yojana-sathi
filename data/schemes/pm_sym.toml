@@ -19,8 +19,9 @@ name_en      = "Pradhan Mantri Shram Yogi Maandhan"
 name_hi      = "प्रधानमंत्री श्रम योगी मानधन"
 authority    = "Ministry of Labour & Employment, Government of India"
 official_url = "https://maandhan.in/show_content.php?lang=1&level=1&ls_id=79&lid=63&page=74"
-verified_on  = "2026-09-10"
-verified_by  = "Avinash Negi, checked 2026-09-10"
+verified_on  = "2026-10-01"
+verified_by  = "Avinash Negi, checked 2026-10-01"
+verified_hash = "sha256:6df5807e17c0fcd01b6e712b2644992d98fa040a4370d01010b9736bdaa80e88"
 
 # * WHAT THE WORKER GETS
 [benefit]

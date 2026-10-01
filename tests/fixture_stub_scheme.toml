@@ -8,6 +8,7 @@ authority    = "Test"
 official_url = "TODO"
 verified_on  = "TODO"
 verified_by  = "TODO"
+verified_hash = ""
 
 [benefit]
 annual_value_inr = "TODO"

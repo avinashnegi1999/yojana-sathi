@@ -39,6 +39,7 @@ official_url = "https://cra.tn.gov.in/about_schemes_t.php"
 verified_on = "2026-09-27"
 verified_by = "claude — AUTO-RESEARCHED, PENDING HUMAN VERIFICATION"
 
+verified_hash = ""
 [benefit]
 annual_value_inr = 18000
 value_basis = "annual_payout"
@@ -99,5 +100,8 @@ source_url = "https://cra.tn.gov.in/about_schemes_t.php"
 documents_en = ["TODO"]
 documents = ["TODO"]
 where_to_apply = "online"
+# * Portal printed on the sheet. Source: the note at the top: "Apply online at https://www.tnesevai.tn.gov.in".
+# ? Avinash to confirm this is the application page, not only an information page.
+apply_url = "https://www.tnesevai.tn.gov.in/"
 renewal_en = "Paid directly to your bank account (DBT). Tamil Nadu also gives pensioners a dhoti or saree at Pongal and Deepavali."
 renewal = "सीधे आपके बैंक खाते में आती है (DBT)। तमिलनाडु पेंशनधारकों को पोंगल और दीपावली पर धोती या साड़ी भी देता है।"

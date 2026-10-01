@@ -58,6 +58,7 @@ official_url = "https://nha.gov.in/PM-JAY"
 verified_on = "2026-09-27"
 verified_by = "Avinash Negi, checked 2026-09-27"
 
+verified_hash = "sha256:20509b5cddcf0ddd6616f7c96c203c35c8dc185e7859aab4ca2fa594a89edc46"
 [benefit]
 annual_value_inr = 500000
 value_basis = "insurance_cover"
@@ -85,5 +86,8 @@ source_url = "https://www.pib.gov.in/Pressreleaseshare.aspx?PRID=2053883"
 documents_en = ["Aadhaar card"]
 documents = ["आधार कार्ड"]
 where_to_apply = "online"
+# * Portal printed on the sheet. Source: the PIB release quoted at the top: "visit www.beneficiary.nha.gov.in".
+# ? Avinash to confirm this is the application page, not only an information page.
+apply_url = "https://beneficiary.nha.gov.in/"
 renewal_en = "The cover is up to ₹5 lakh every year. Treatment is free at hospitals empanelled under PM-JAY, anywhere in India, not only in your own state."
 renewal = "कवर हर साल ₹5 लाख तक है। PM-JAY में सूचीबद्ध अस्पतालों में इलाज मुफ़्त है, पूरे भारत में, सिर्फ़ अपने राज्य में नहीं।"

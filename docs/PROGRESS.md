@@ -390,3 +390,60 @@ contradicted. Tests for each in `tests/test_flow.py`.
   23-minute explanation (`livesite/assets/video/how-it-was-built.mp4`, 92.5 MB,
   720p, captions in the video; poster is its 4-minute "Vibe-coded" frame).
   Starting one pauses the other. Loads nothing until played (`preload="none"`).
+
+## 2026-10-01 — council audit, group A
+
+- **Signatures bound to content.** `review.py` now writes `verified_hash`
+  (sha256 of each file's code, benefit, criteria and exclusions) beside the
+  name. A file whose rules or money changed after sign-off loads as unsigned
+  and is served UNKNOWN; `check.py` names it. 16 signed files kept their
+  signature: git shows their content is exactly what was signed. Five changed
+  after signing and need Avinash to re-read and re-sign: APY (the earlier-tax
+  exclusion, 29 Sep), UK_OLD_AGE and UK_WIDOW (field split, 29 Sep), PM_SYM and
+  NPS_TRADERS (`exclusive_group = "maandhan_pension"`, added after signing).
+  A copy with those five re-signed passes every check.
+- Income bands no longer share a number ("₹10,001 – ₹15,000"), with a test.
+  The income question says "in a usual month" and "you yourself".
+- The gender question says some schemes are only for women; the consent
+  screen and every result say Yojana Sathi is not a government service.
+- `install-on-vm.sh` refuses a dirty tree and writes `/opt/sathi/VERSION`
+  (commit + git hash of `data/schemes`), printed at every start.
+- Event and follow-up times are kept to the hour; the dashboard's median
+  session length is gone with them. The "accident cover" label now says
+  accident, life and hospital cover. Duplicate `cover_only_line` removed.
+- Idle sessions are swept on a timer in all three channels, not only when
+  the next message arrives. Occupation text is digit-scrubbed before the LLM.
+- Nightly backup: `sathi.metrics.backup` + `sathi-backup.timer` (03:00 IST,
+  last 14, owner-only), `deploy/pull-backups.sh` for the off-server copy with
+  a restore check. Installed by the next deploy.
+- Moved a third-party résumé and a course PDF out of `livesite/assets` to
+  `C:\Users\avina\Documents\moved-from-yojana-sathi`.
+- Not done here (official sources needed): NPS/APY wording, PM-JAY 70+ by
+  state, e-Shram and IGNWPS/IGNDPS upper ages, Punjab income, PM-SYM with APY,
+  and the deferred-pension ₹ figure.
+
+## 2026-10-01 — browser page audit and portal links
+
+- **Old phones.** The page script used `:has()` in `querySelector` (throws on
+  Chrome before 105, so the state picker died) and optional chaining (Chrome
+  before 80 cannot parse it: blank page). Both gone, CSS `inset` too, with a
+  self-check that they stay gone. `<noscript>` points to the Telegram bot.
+- **Refresh keeps her place.** The page opens with `/resume`, which redraws
+  the screen the session is on; with nothing to resume it is a `/start`.
+- **One request at a time.** A double tap on two yes/no screens in a row used
+  to answer the second question as well. Requests time out after 20 s and
+  show "Try again", which resumes rather than re-sending an answer.
+- Result screen: Print (print CSS hides the controls), "Next person" on
+  `?start=csc` links; the WhatsApp tell-a-friend share is gone. Controls at
+  least 44 px, text at least 16 px. A footer on every screen: not a
+  government website, independent and free, the department decides.
+  The page still opens in English on every link (Avinash, 1 Oct).
+- **Portal links on the sheet.** Optional `paperwork.apply_url`, https on
+  `.gov.in`/`.nic.in` only, printed under "Where to go" for online schemes.
+  Set for UK_OLD_AGE, UK_WIDOW (ssp.uk.gov.in), PMJAY_70
+  (beneficiary.nha.gov.in), the three Sikkim pensions and TN_IGNDPS, each
+  from a source the file already cites. PMUY has none: no source names an
+  application page. Paperwork is outside the signature hash, so nothing
+  needed re-signing. `# ?` on each: Avinash to confirm each is the
+  application page. New Hindi UI strings (footer, retry, print, next person)
+  are machine-drafted and need reading aloud.

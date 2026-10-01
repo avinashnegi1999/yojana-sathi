@@ -44,6 +44,7 @@ h2{margin:0 0 10px;font-size:19px;font-weight:600;line-height:1.35}
 .glance td{padding:10px 0;border-top:1px solid var(--hairline);vertical-align:top}
 .glance tr:first-child td{border-top:0}
 .glance td.where{padding-left:16px;text-align:right;color:var(--muted)}
+.glance a.portal{color:#0066cc;word-break:break-all}
 .hide{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .money{margin:12px 0 0;padding-top:12px;border-top:1px solid var(--hairline)}
 .money p{margin:0 0 4px}
@@ -70,6 +71,19 @@ h2{margin:0 0 10px;font-size:19px;font-weight:600;line-height:1.35}
 @media(max-width:520px){h1{font-size:28px}.answers{columns:1}.row .k{flex-basis:6rem}.glance td{display:block}.glance td.where{padding:0 0 10px;border-top:0;text-align:left}}
 @media print{body{background:#fff;font-size:12pt}main{max-width:none;padding:0}.card{border-color:#cccccc}}
 """
+
+
+def _portal(sc) -> str:
+    """The online portal as a link, when the scheme file names one; else nothing.
+
+    # * The address is printed as text, not hidden behind a word: on paper
+    # * a link cannot be tapped, and she or the operator types what she sees.
+    """
+    if sc.where_to_apply != "online" or not sc.apply_url:
+        return ""
+    shown = sc.apply_url.removeprefix("https://").rstrip("/")
+    return (f"<br><a class='portal' href='{_e(sc.apply_url)}' target='_blank' "
+            f"rel='noopener noreferrer'>{_e(shown)}</a>")
 
 
 def _e(text: object) -> str:
@@ -117,7 +131,8 @@ def build(
             # * The hidden arrow keeps "name → place" on one line in the text
             # * version; table cells do not become separate lines there.
             parts.append(f"<tr><td>{_e(sc.name(lang))}</td><td class='where'>"
-                         f"<span class='hide'> → </span>{_e(templates.where_label(sc, lang))}</td></tr>")
+                         f"<span class='hide'> → </span>{_e(templates.where_label(sc, lang))}"
+                         f"{_portal(sc)}</td></tr>")
         parts.append("</table>")
         # ! Same function as the screen, so the sheet can never state a
         # ! different total; payout and cover stay separate lines.
@@ -127,8 +142,7 @@ def build(
             if payout:
                 parts.append(f"<p>{_e(s('result.value_line', lang, total=templates.rupees(payout)))}</p>")
             if cover:
-                key = "result.cover_line" if payout else "result.cover_only_line"
-                parts.append(f"<p>{_e(s(key, lang, total=templates.rupees(cover)))}</p>")
+                parts.append(f"<p>{_e(s('result.cover_line', lang, total=templates.rupees(cover)))}</p>")
             # ! The caveat travels with the number onto paper too. A printed
             # ! sheet outlives the chat, and this is where it would be quoted.
             parts.append(f"<p class='caveat'>{_e(s('result.value_caveat', lang))}</p></div>")
@@ -251,6 +265,13 @@ def _self_check() -> None:
     assert "बैंक पासबुक" in text
     assert "पैसा अभी मिला नहीं" in text, "the caveat must be on the printed sheet too"
     assert "<script" not in text.lower(), "the pack is a document, not an app"
+    # * An online scheme with a portal in its file shows that address under
+    # * "Where to go"; a CSC scheme shows none, even if a URL were set.
+    online = {"A": scheme("A", 12000, [18, 40], where_to_apply="online",
+                          apply_url="https://ssp.uk.gov.in/")}
+    _, portal = build(evaluate_all(Profile(age=30), online), online, known=frozenset())
+    assert "href='https://ssp.uk.gov.in/'" in portal.decode("utf-8")
+    assert "ssp.uk.gov.in" not in text, "no portal link for a scheme applied at a CSC"
 
     # * The same pack in English, for a CSC operator filling it in for someone.
     _, en = build(results, schemes, known=frozenset(), lang="en")

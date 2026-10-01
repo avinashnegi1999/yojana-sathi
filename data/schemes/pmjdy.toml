@@ -31,6 +31,7 @@ official_url = "https://pmjdy.gov.in/"
 verified_on = "2026-09-27"
 verified_by = "Avinash Negi, checked 2026-09-27"
 
+verified_hash = "sha256:2c8ce76167f93ffddf6dc373495ecaecabaf6e386996d35c25ab91014bdcead9"
 [benefit]
 annual_value_inr = 0
 value_basis = "gateway"

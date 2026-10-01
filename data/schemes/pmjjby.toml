@@ -8,6 +8,7 @@ official_url = "https://financialservices.gov.in/pmjjby"
 verified_on = "2026-09-09"
 verified_by = "Avinash Negi, checked 2026-09-09"
 
+verified_hash = "sha256:a87089b9610eb34b2504c86d36a0ac8ab06117f04bd7ffe260ad3a9183056c66"
 [benefit]
 annual_value_inr = 200000
 value_basis = "insurance_cover"

@@ -1,0 +1,35 @@
+# =====================================================================
+# Scheme Sathi — one copy of the event database (run by sathi-backup.timer)
+# =====================================================================
+# ! Reads the live database through SQLite's backup API and writes a checked
+# ! copy to /var/lib/sathi/backups, keeping the last 14. It never writes to
+# ! the live file. Off-server copies: deploy/pull-backups.sh from a laptop.
+# * No [Install] section on purpose: the timer starts it, and the deploy's
+# * restart of every enabled sathi-*.service leaves a oneshot like this alone.
+
+[Unit]
+Description=Scheme Sathi — nightly copy of the event database
+Documentation=https://github.com/avinashnegi1999/yojana-sathi/blob/main/deploy/RUNBOOK.md
+
+[Service]
+Type=oneshot
+User=sathi
+Group=sathi
+WorkingDirectory=/opt/sathi
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 -m sathi.metrics.backup --db /var/lib/sathi/sathi.db --out /var/lib/sathi/backups
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=sathi-backup
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/sathi
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictAddressFamilies=AF_UNIX

@@ -30,6 +30,7 @@ SELF_CHECK_MODULES = [
     "sathi.rules.engine",
     "sathi.metrics.events",
     "sathi.metrics.report",
+    "sathi.metrics.backup",
     "sathi.render.templates",
     "sathi.render.llm",
     "sathi.render.audio",

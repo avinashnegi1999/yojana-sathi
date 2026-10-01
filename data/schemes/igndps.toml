@@ -27,6 +27,7 @@ official_url = "https://nsap.nic.in/"
 verified_on = "2026-09-15"
 verified_by = "Avinash Negi, checked 2026-09-15"
 
+verified_hash = "sha256:59709e8b40da477a29ca99ecf921d744a9de1b36ad5dbb25f571d3f236dc3dcd"
 [benefit]
 annual_value_inr = 3600
 annual_value_age_bands = [{ min_age = 80, annual_value_inr = 6000 }]
