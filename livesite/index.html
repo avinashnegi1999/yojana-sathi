@@ -274,8 +274,6 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
 /* hero: the trip */
 .journey{margin:52px auto 0;width:min(1000px,calc(100% - 44px))}
 .journey-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px 18px;margin-bottom:22px}
-.replay{border:0;background:none;color:var(--blue);font:inherit;font-size:14px;cursor:pointer;padding:6px 4px}
-.replay:active{transform:scale(.95)}
 .scene-wrap{overflow:hidden;border-radius:18px}
 .scene{display:block;width:100%;height:auto}
 @media(max-width:734px){
@@ -435,7 +433,6 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
         <button type="button" data-mode="without" aria-pressed="true">Without Yojana Sathi</button>
         <button type="button" data-mode="with" aria-pressed="false">With Yojana Sathi</button>
       </div>
-      <button class="replay" type="button" id="j-replay">Play again ↻</button>
     </div>
     <div class="scene-wrap"><svg class="scene" id="j-scene" viewBox="0 70 1000 290" role="img"
          aria-label="An illustrated trip. Without Yojana Sathi, a worker takes the bus to the block office and is told it is the wrong counter, walks to the service centre and is told to bring her passbook, and goes home with the day gone. With Yojana Sathi, her phone first tells her she is eligible, to go to the bank branch, and to carry her passbook and Aadhaar; she goes straight there.">
@@ -1070,7 +1067,7 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
       without:{dur:10400,segs:[[0,800,HOME,HOME],[800,3400,HOME,590],[3400,5000,590,590],[5000,6400,590,922],[6400,7800,922,922],[7800,10400,922,HOME]]},
       with:{dur:6600,segs:[[0,2000,HOME,HOME],[2000,4800,HOME,760],[4800,6600,760,760]]}
     };
-    let mode='without',raf=0,t0=0,next=null,userTook=false;
+    let mode='without',raf=0,t0=0,next=null;
     function xAt(plan,t){
       for(const [a,b,x0,x1] of plan.segs){if(t<=b){const p=Math.min(1,Math.max(0,(t-a)/((b-a)||1)));return [x0+(x1-x0)*p,x0!==x1&&t>a];}}
       const l=plan.segs[plan.segs.length-1];return [l[3],false];
@@ -1126,14 +1123,21 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
       (function loop(now){const t=now-t0;render(Math.min(t,PLANS[m].dur));
         if(t<PLANS[m].dur)raf=requestAnimationFrame(loop);else if(then)next=setTimeout(then,1600);})(t0);
     }
-    document.querySelectorAll('#journey [data-mode]').forEach(b=>b.addEventListener('click',()=>{userTook=true;play(b.dataset.mode);}));
-    $('#j-replay').addEventListener('click',()=>{userTook=true;play(mode);});
+    /* Loop forever: without, then with, then without again. A tap on either
+       version jumps to it and the loop carries on from there. The loop rests
+       while the scene is off screen, so it costs nothing when unseen. */
+    const other=m=>m==='without'?'with':'without';
+    let visible=false,started=false;
+    const cycle=m=>play(m,()=>{if(visible)cycle(other(m));else{setMode(other(m));started=false;}});
+    document.querySelectorAll('#journey [data-mode]').forEach(b=>b.addEventListener('click',()=>cycle(b.dataset.mode)));
     render(0);
-    const auto=()=>{if(!userTook)play('without',()=>{if(!userTook)play('with');});};
     if(reduce){setMode('with');render(PLANS.with.dur);}
     else if('IntersectionObserver' in window){
-      const io=new IntersectionObserver(es=>{if(es[0].isIntersecting){io.disconnect();setTimeout(auto,500);}},{threshold:.4});io.observe(scene);
-    }else auto();
+      new IntersectionObserver(es=>{
+        visible=es[0].isIntersecting;
+        if(visible&&!started){started=true;setTimeout(()=>cycle(mode),400);}
+      },{threshold:.3}).observe(scene);
+    }else{visible=true;cycle('without');}
   }
 
   /* ── Days of wages, one square each, following the calculator ── */
