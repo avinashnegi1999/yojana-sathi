@@ -89,9 +89,33 @@ h1,h2,.quote{text-wrap:balance}
 .play:active{transform:scale(.95)}
 .play:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
 .film.playing .play{opacity:0;pointer-events:none}
-.cc{position:absolute;top:14px;right:14px;z-index:2;min-width:44px;height:32px;padding:0 10px;border:1.5px solid rgba(255,255,255,.9);border-radius:8px;background:rgba(0,0,0,.45);color:#fff;font:700 14px/1 system-ui,-apple-system,sans-serif;letter-spacing:.04em;cursor:pointer;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
-.cc[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
-.cc:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+.film{container-type:inline-size}
+.film.started:not(.show),.film.started:not(.show) video{cursor:none}
+.bar{position:absolute;left:0;right:0;bottom:0;padding:30px 12px 6px;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;opacity:0;pointer-events:none;transition:opacity .25s ease}
+.film.started.show .bar{opacity:1;pointer-events:auto}
+.seek{position:relative;height:18px;margin:0 6px;cursor:pointer;touch-action:none}
+.seek::before,.seek i{content:"";position:absolute;left:0;top:7px;height:4px;border-radius:2px}
+.seek::before{right:0;background:rgba(255,255,255,.3)}
+.seek .buf{width:0;background:rgba(255,255,255,.45)}
+.seek .done{width:0;background:var(--sky)}
+.seek b{position:absolute;top:3px;left:0;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#fff;transform:scale(0);transition:transform .15s ease}
+.seek:hover b,.seek:focus-visible b,.seek.drag b{transform:scale(1)}
+.seek:focus-visible{outline:none}
+.row{display:flex;align-items:center;gap:2px;height:44px}
+.row button{display:grid;place-items:center;min-width:44px;height:44px;padding:0 8px;border:0;border-radius:10px;background:none;color:#fff;cursor:pointer}
+.row button:hover{background:rgba(255,255,255,.14)}
+.row button:focus-visible{outline:2px solid #fff;outline-offset:-3px}
+.time{margin-left:8px;font:500 13px/1 system-ui,-apple-system,sans-serif;font-variant-numeric:tabular-nums;opacity:.92;white-space:nowrap}
+.gap{flex:1}
+.b-cc span{display:block;padding:3px 5px;border:2px solid #fff;border-radius:5px;font:700 12px/1 system-ui,-apple-system,sans-serif;letter-spacing:.04em}
+.b-cc[aria-pressed="true"] span{background:#fff;color:#000;box-shadow:0 4px 0 -1px var(--sky)}
+.cap{position:absolute;left:50%;bottom:18px;max-width:88%;transform:translateX(-50%);padding:.2em .6em;border-radius:6px;background:rgba(0,0,0,.78);color:#fff;font:500 clamp(14px,2.5cqi,36px)/1.35 system-ui,-apple-system,sans-serif;text-align:center;white-space:pre-line;pointer-events:none;transition:bottom .25s ease}
+.cap:empty{display:none}
+.film.started.show .cap{bottom:84px}
+.film:fullscreen{display:flex;align-items:center;width:100vw;height:100vh;max-width:none;margin:0;border-radius:0}
+.film:fullscreen video{height:100%;aspect-ratio:auto;object-fit:contain}
+.film:-webkit-full-screen{display:flex;align-items:center;width:100vw;height:100vh;max-width:none;margin:0;border-radius:0}
+.film:-webkit-full-screen video{height:100%;aspect-ratio:auto;object-fit:contain}
 /* * The second film sits under the first in the same dark tile. */
 .film-next{margin-top:112px}
 
@@ -557,10 +581,9 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
         <source src="assets/video/yojana-sathi-in-72-seconds.mp4" type="video/mp4">
         <track kind="captions" src="assets/video/yojana-sathi-in-72-seconds.en.vtt" srclang="en" label="English">
       </video>
-      <button class="cc" type="button" aria-pressed="false" aria-label="Captions" title="Captions">CC</button>
       <button class="play" type="button" aria-label="Play the introduction"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></button>
     </figure>
-    <p class="fine">English captions: press CC.</p>
+    <p class="fine">English captions: press CC in the player.</p>
   </div>
   <div class="wrap reveal film-next">
     <p class="eyebrow">Explanation · 13 minutes</p>
@@ -573,10 +596,9 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
         <source src="assets/video/how-i-built-it.mp4" type="video/mp4">
         <track kind="captions" src="assets/video/how-i-built-it.en.vtt" srclang="en" label="English">
       </video>
-      <button class="cc" type="button" aria-pressed="false" aria-label="Captions" title="Captions">CC</button>
       <button class="play" type="button" aria-label="Play the walkthrough"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></button>
     </figure>
-    <p class="fine">English captions: press CC.</p>
+    <p class="fine">English captions: press CC in the player.</p>
   </div>
 </section>
 
@@ -1206,34 +1228,110 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
   });
 })();
 
-// * The films: tap the button or the picture to play or pause. Native controls
-// * (seek, volume, full screen) appear once one has started. Starting one
-// * pauses the other, so two soundtracks never play at once.
+// * The films: our own player bar, as YouTube lays it out. Play, sound and time
+// * on the left; CC and full screen on the right; a seek line above. Captions
+// * are drawn by the page (the track stays "hidden"), so they sit above the bar
+// * and go full screen with it. One CC switch covers both films, and starting
+// * one film pauses the other, so two soundtracks never play at once.
 (function(){
   const films=[...document.querySelectorAll('.film')];
+  const svg=d=>'<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">'+d+'</svg>';
+  const IC={
+    play:svg('<path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/>'),
+    pause:svg('<path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/>'),
+    vol:svg('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15 9a4 4 0 0 1 0 6M17.5 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'),
+    mute:svg('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9.5l5 5M20.5 9.5l-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'),
+    full:svg('<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'),
+    exit:svg('<path d="M9 4v5H4M15 4v5h5M15 20v-5h5M9 20v-5H4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'),
+  };
+  const fmt=t=>{t=Math.max(0,Math.floor(t||0));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0');};
+  const fsEl=()=>document.fullscreenElement||document.webkitFullscreenElement;
+  let ccOn=false;const players=[];
+  const setCC=on=>{ccOn=on;players.forEach(p=>p.cc());};
+
   films.forEach(film=>{
-    const v=film.querySelector('video'),b=film.querySelector('.play');
-    const toggle=()=>{if(v.paused||v.ended){v.controls=true;v.play();}else{v.pause();}};
-    b.addEventListener('click',toggle);
-    v.addEventListener('click',e=>{if(!v.controls){e.preventDefault();toggle();}});
+    const v=film.querySelector('video'),big=film.querySelector('.play'),track=v.textTracks[0];
+    film.insertAdjacentHTML('beforeend',
+      '<div class="cap"></div><div class="bar">'+
+      '<div class="seek" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuenow="0"><i class="buf"></i><i class="done"></i><b></b></div>'+
+      '<div class="row"><button type="button" class="b-play" aria-label="Play">'+IC.play+'</button>'+
+      '<button type="button" class="b-vol" aria-label="Mute">'+IC.vol+'</button>'+
+      '<span class="time">0:00 / 0:00</span><span class="gap"></span>'+
+      '<button type="button" class="b-cc" aria-pressed="false" aria-label="Captions" title="Captions (c)"><span>CC</span></button>'+
+      '<button type="button" class="b-full" aria-label="Full screen" title="Full screen (f)">'+IC.full+'</button></div></div>');
+    const $=q=>film.querySelector(q);
+    const cap=$('.cap'),seek=$('.seek'),done=$('.done'),buf=$('.buf'),knob=$('.seek b'),time=$('.time');
+    const bPlay=$('.b-play'),bVol=$('.b-vol'),bCC=$('.b-cc'),bFull=$('.b-full');
+    if(track)track.mode='hidden';
+
+    // the bar shows while paused, and for a moment after any movement
+    let idle;
+    const wake=()=>{film.classList.add('show');clearTimeout(idle);
+      idle=setTimeout(()=>{if(!v.paused&&!seek.classList.contains('drag'))film.classList.remove('show');},2500);};
+    film.addEventListener('pointermove',wake);
+    film.addEventListener('focusin',wake);
+
+    const toggle=()=>{if(v.paused||v.ended)v.play();else v.pause();};
+    big.addEventListener('click',toggle);
+    bPlay.addEventListener('click',toggle);
+    v.addEventListener('click',e=>{
+      // * on a phone, the first tap brings the bar back; the next one pauses
+      if(e.pointerType==='touch'&&!film.classList.contains('show')&&!v.paused){wake();return;}
+      toggle();});
+    v.addEventListener('dblclick',()=>bFull.click());
     v.addEventListener('play',()=>{
-      film.classList.add('playing');
+      film.classList.add('playing','started');bPlay.innerHTML=IC.pause;bPlay.setAttribute('aria-label','Pause');wake();
       films.forEach(other=>{if(other!==film)other.querySelector('video').pause();});
     });
-    v.addEventListener('pause',()=>film.classList.remove('playing'));
-    v.addEventListener('ended',()=>film.classList.remove('playing'));
+    const stopped=()=>{film.classList.remove('playing');film.classList.add('show');clearTimeout(idle);
+      bPlay.innerHTML=IC.play;bPlay.setAttribute('aria-label','Play');};
+    v.addEventListener('pause',stopped);
+    v.addEventListener('ended',stopped);
+
+    const draw=()=>{const d=v.duration||0,f=d?v.currentTime/d:0;
+      done.style.width=knob.style.left=(f*100)+'%';
+      time.textContent=fmt(v.currentTime)+' / '+fmt(d);
+      seek.setAttribute('aria-valuemax',Math.round(d));seek.setAttribute('aria-valuenow',Math.round(v.currentTime));
+      seek.setAttribute('aria-valuetext',fmt(v.currentTime)+' of '+fmt(d));};
+    v.addEventListener('timeupdate',draw);
+    v.addEventListener('loadedmetadata',draw);
+    v.addEventListener('progress',()=>{const d=v.duration,b=v.buffered;if(d&&b.length)buf.style.width=(b.end(b.length-1)/d*100)+'%';});
+
+    const at=e=>{const r=seek.getBoundingClientRect();return Math.min(1,Math.max(0,(e.clientX-r.left)/r.width));};
+    seek.addEventListener('pointerdown',e=>{if(!v.duration)return;seek.setPointerCapture(e.pointerId);seek.classList.add('drag');v.currentTime=at(e)*v.duration;draw();});
+    seek.addEventListener('pointermove',e=>{if(seek.classList.contains('drag')){v.currentTime=at(e)*v.duration;draw();}});
+    const release=()=>{seek.classList.remove('drag');wake();};
+    seek.addEventListener('pointerup',release);
+    seek.addEventListener('pointercancel',release);
+
+    bVol.addEventListener('click',()=>{v.muted=!v.muted;});
+    v.addEventListener('volumechange',()=>{bVol.innerHTML=v.muted?IC.mute:IC.vol;bVol.setAttribute('aria-label',v.muted?'Unmute':'Mute');});
+
+    const show=()=>{const c=track&&track.activeCues&&track.activeCues[0];cap.textContent=ccOn&&c?c.text:'';};
+    if(track)track.addEventListener('cuechange',show);
+    bCC.addEventListener('click',()=>setCC(!ccOn));
+    players.push({cc(){bCC.setAttribute('aria-pressed',ccOn);show();}});
+
+    bFull.addEventListener('click',()=>{
+      if(fsEl()){(document.exitFullscreen||document.webkitExitFullscreen).call(document);return;}
+      if(film.requestFullscreen)film.requestFullscreen();
+      else if(film.webkitRequestFullscreen)film.webkitRequestFullscreen();
+      else if(v.webkitEnterFullscreen)v.webkitEnterFullscreen(); // iPhone: the system player, with its own captions menu
+    });
+    const fsChange=()=>{const on=fsEl()===film;bFull.innerHTML=on?IC.exit:IC.full;bFull.setAttribute('aria-label',on?'Exit full screen':'Full screen');};
+    document.addEventListener('fullscreenchange',fsChange);
+    document.addEventListener('webkitfullscreenchange',fsChange);
+
+    film.addEventListener('keydown',e=>{
+      if(e.target.closest('button')&&(e.key===' '||e.key==='Enter'))return;
+      const k=e.key.toLowerCase();
+      if(k===' '||k==='k'){e.preventDefault();toggle();}
+      else if(k==='c'){setCC(!ccOn);wake();}
+      else if(k==='f')bFull.click();
+      else if(k==='m')v.muted=!v.muted;
+      else if(k==='arrowright'||k==='arrowleft'){e.preventDefault();v.currentTime=Math.max(0,v.currentTime+(k==='arrowright'?5:-5));wake();}
+    });
   });
-  // * One CC switch, always on the picture (not inside the player's menu). It
-  // * applies to both films, and follows the menu if a viewer uses that instead.
-  const tracks=films.map(f=>f.querySelector('video').textTracks[0]);
-  const ccs=films.map(f=>f.querySelector('.cc'));
-  const show=on=>{tracks.forEach(t=>{t.mode=on?'showing':'disabled';});ccs.forEach(c=>c.setAttribute('aria-pressed',on));};
-  ccs.forEach(c=>c.addEventListener('click',()=>show(c.getAttribute('aria-pressed')!=='true')));
-  films.forEach((f,i)=>f.querySelector('video').textTracks.addEventListener('change',()=>{
-    const on=tracks[i].mode==='showing';
-    if((ccs[i].getAttribute('aria-pressed')==='true')!==on)show(on);
-  }));
-  show(false);
 })();
 </script>
 </body></html>
