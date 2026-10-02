@@ -86,7 +86,8 @@
 
     bFull.addEventListener('click',()=>{
       if(fsEl()){(document.exitFullscreen||document.webkitExitFullscreen).call(document);return;}
-      if(film.requestFullscreen)film.requestFullscreen();
+      // turn sideways the moment full screen is granted, still inside the tap
+      if(film.requestFullscreen)film.requestFullscreen({navigationUI:'hide'}).then(()=>turn('landscape')).catch(()=>{});
       else if(film.webkitRequestFullscreen)film.webkitRequestFullscreen();
       else if(v.webkitEnterFullscreen)v.webkitEnterFullscreen(); // iPhone: the system player, with its own captions menu
     });
