@@ -20,8 +20,17 @@
 </p>
 
 <p align="center">
-  <a href="https://gitdiagram.com/avinashnegi1999/yojana-sathi/video"><img src="https://gitdiagram.com/video-badge.svg" alt="Watch a one-minute video tour of yojana-sathi"></a>
+  <a href="https://avinashnegi.com/yojana-sathi/watch/intro/"><img src="livesite/assets/video/readme-watch-intro.jpg" width="400" alt="Watch: Yojana Sathi in 72 seconds"></a>
+  &nbsp;
+  <a href="https://avinashnegi.com/yojana-sathi/watch/build/"><img src="livesite/assets/video/readme-watch-build.jpg" width="400" alt="Watch: How I built it, 13 minutes"></a>
 </p>
+
+<p align="center"><sub>
+  <a href="https://avinashnegi.com/yojana-sathi/watch/intro/">The film · 72 seconds</a>
+  &nbsp;·&nbsp;
+  <a href="https://avinashnegi.com/yojana-sathi/watch/build/">How I built it · 13 minutes</a>
+  &nbsp;·&nbsp; English captions: press CC
+</sub></p>
 
 <br>
 

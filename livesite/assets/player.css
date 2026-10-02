@@ -1,0 +1,37 @@
+/* * Film player shared by the project page and the watch pages: a round play
+   * button, then a bar laid out like YouTube's, with captions drawn above it. */
+.film{position:relative;width:min(980px,100%);margin:40px auto 0;border-radius:18px;overflow:hidden;background:#000}
+.film video{display:block;width:100%;height:auto;aspect-ratio:16/9;cursor:pointer}
+/* * One big round button in the middle: the whole picture is the target, the
+   * button says so. Hidden while playing; back on pause or at the end. */
+.play{position:absolute;left:50%;top:50%;display:grid;place-items:center;width:80px;height:80px;margin:-40px 0 0 -40px;padding:0 0 0 4px;border:0;border-radius:50%;background:rgba(255,255,255,.88);color:var(--ink,#1d1d1f);cursor:pointer;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);transition:transform .15s ease,opacity .2s ease}
+.play:active{transform:scale(.95)}
+.play:focus-visible{outline:2px solid var(--focus,#0071e3);outline-offset:3px}
+.film.playing .play{opacity:0;pointer-events:none}
+.film{container-type:inline-size}
+.film.started:not(.show),.film.started:not(.show) video{cursor:none}
+.bar{position:absolute;left:0;right:0;bottom:0;padding:30px 12px 6px;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;opacity:0;pointer-events:none;transition:opacity .25s ease}
+.film.started.show .bar{opacity:1;pointer-events:auto}
+.seek{position:relative;height:18px;margin:0 6px;cursor:pointer;touch-action:none}
+.seek::before,.seek i{content:"";position:absolute;left:0;top:7px;height:4px;border-radius:2px}
+.seek::before{right:0;background:rgba(255,255,255,.3)}
+.seek .buf{width:0;background:rgba(255,255,255,.45)}
+.seek .done{width:0;background:var(--sky,#2997ff)}
+.seek b{position:absolute;top:3px;left:0;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#fff;transform:scale(0);transition:transform .15s ease}
+.seek:hover b,.seek:focus-visible b,.seek.drag b{transform:scale(1)}
+.seek:focus-visible{outline:none}
+.row{display:flex;align-items:center;gap:2px;height:44px}
+.row button{display:grid;place-items:center;min-width:44px;height:44px;padding:0 8px;border:0;border-radius:10px;background:none;color:#fff;cursor:pointer}
+.row button:hover{background:rgba(255,255,255,.14)}
+.row button:focus-visible{outline:2px solid #fff;outline-offset:-3px}
+.time{margin-left:8px;font:500 13px/1 system-ui,-apple-system,sans-serif;font-variant-numeric:tabular-nums;opacity:.92;white-space:nowrap}
+.gap{flex:1}
+.b-cc span{display:block;padding:3px 5px;border:2px solid #fff;border-radius:5px;font:700 12px/1 system-ui,-apple-system,sans-serif;letter-spacing:.04em}
+.b-cc[aria-pressed="true"] span{background:#fff;color:#000;box-shadow:0 4px 0 -1px var(--sky,#2997ff)}
+.cap{position:absolute;left:50%;bottom:18px;max-width:88%;transform:translateX(-50%);padding:.2em .6em;border-radius:6px;background:rgba(0,0,0,.78);color:#fff;font:500 clamp(14px,2.5cqi,36px)/1.35 system-ui,-apple-system,sans-serif;text-align:center;white-space:pre-line;pointer-events:none;transition:bottom .25s ease}
+.cap:empty{display:none}
+.film.started.show .cap{bottom:84px}
+.film:fullscreen{display:flex;align-items:center;width:100vw;height:100vh;max-width:none;margin:0;border-radius:0}
+.film:fullscreen video{height:100%;aspect-ratio:auto;object-fit:contain}
+.film:-webkit-full-screen{display:flex;align-items:center;width:100vw;height:100vh;max-width:none;margin:0;border-radius:0}
+.film:-webkit-full-screen video{height:100%;aspect-ratio:auto;object-fit:contain}
