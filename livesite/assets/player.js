@@ -101,7 +101,10 @@
     const turn=to=>{if(canTurn)so.lock(to).catch(()=>{});};
     const bRot=$('.b-rot');
     bRot.addEventListener('click',()=>turn(so.type.startsWith('landscape')?'portrait':'landscape'));
-    const fsChange=()=>{const on=fsEl()===film;bFull.innerHTML=on?IC.exit:IC.full;bFull.setAttribute('aria-label',on?'Exit full screen':'Full screen');
+    // * React only when this film enters or leaves full screen: the project
+    // * page has two films, and the other one must not release the rotation.
+    let full=false;
+    const fsChange=()=>{const on=fsEl()===film;if(on===full)return;full=on;bFull.innerHTML=on?IC.exit:IC.full;bFull.setAttribute('aria-label',on?'Exit full screen':'Full screen');
       film.classList.toggle('can-turn',on&&canTurn);
       if(on)turn('landscape');else if(canTurn&&so.unlock)so.unlock();};
     document.addEventListener('fullscreenchange',fsChange);
