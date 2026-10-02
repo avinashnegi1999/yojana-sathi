@@ -35,3 +35,6 @@
 .film:fullscreen video{height:100%;aspect-ratio:auto;object-fit:contain}
 .film:-webkit-full-screen{display:flex;align-items:center;width:100vw;height:100vh;max-width:none;margin:0;border-radius:0}
 .film:-webkit-full-screen video{height:100%;aspect-ratio:auto;object-fit:contain}
+/* * The rotate button exists only in full screen on a phone that allows it. */
+.b-rot{display:none!important}
+.film.can-turn .b-rot{display:grid!important}

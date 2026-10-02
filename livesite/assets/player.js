@@ -12,6 +12,7 @@
     vol:svg('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15 9a4 4 0 0 1 0 6M17.5 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'),
     mute:svg('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9.5l5 5M20.5 9.5l-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'),
     full:svg('<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'),
+    rot:svg('<rect x="7" y="3" width="10" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 14a9 9 0 0 0 7 7M21 10a9 9 0 0 0-7-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M8 20.5l2.2.6-.5-2.3M16 3.5l-2.2-.6.5 2.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'),
     exit:svg('<path d="M9 4v5H4M15 4v5h5M15 20v-5h5M9 20v-5H4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'),
   };
   const fmt=t=>{t=Math.max(0,Math.floor(t||0));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0');};
@@ -28,6 +29,7 @@
       '<button type="button" class="b-vol" aria-label="Mute">'+IC.vol+'</button>'+
       '<span class="time">0:00 / 0:00</span><span class="gap"></span>'+
       '<button type="button" class="b-cc" aria-pressed="false" aria-label="Captions" title="Captions (c)"><span>CC</span></button>'+
+      '<button type="button" class="b-rot" aria-label="Rotate" title="Rotate">'+IC.rot+'</button>'+
       '<button type="button" class="b-full" aria-label="Full screen" title="Full screen (f)">'+IC.full+'</button></div></div>');
     const $=q=>film.querySelector(q);
     const cap=$('.cap'),seek=$('.seek'),done=$('.done'),buf=$('.buf'),knob=$('.seek b'),time=$('.time');
@@ -88,7 +90,19 @@
       else if(film.webkitRequestFullscreen)film.webkitRequestFullscreen();
       else if(v.webkitEnterFullscreen)v.webkitEnterFullscreen(); // iPhone: the system player, with its own captions menu
     });
-    const fsChange=()=>{const on=fsEl()===film;bFull.innerHTML=on?IC.exit:IC.full;bFull.setAttribute('aria-label',on?'Exit full screen':'Full screen');};
+    // * On a phone, full screen turns the film sideways, as YouTube does; the
+    // * rotate button (full screen only) turns it back upright or sideways again.
+    // * Browsers allow this only in full screen, and iPhones not at all: there
+    // * the system player turns with the phone instead.
+    const phone=matchMedia('(pointer:coarse)').matches;
+    const so=screen.orientation;
+    const canTurn=phone&&so&&typeof so.lock==='function';
+    const turn=to=>{if(canTurn)so.lock(to).catch(()=>{});};
+    const bRot=$('.b-rot');
+    bRot.addEventListener('click',()=>turn(so.type.startsWith('landscape')?'portrait':'landscape'));
+    const fsChange=()=>{const on=fsEl()===film;bFull.innerHTML=on?IC.exit:IC.full;bFull.setAttribute('aria-label',on?'Exit full screen':'Full screen');
+      film.classList.toggle('can-turn',on&&canTurn);
+      if(on)turn('landscape');else if(canTurn&&so.unlock)so.unlock();};
     document.addEventListener('fullscreenchange',fsChange);
     document.addEventListener('webkitfullscreenchange',fsChange);
 
