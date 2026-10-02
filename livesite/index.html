@@ -544,32 +544,34 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
 <!-- 2b · the films: a short introduction, then the full explanation -->
 <section class="tile dark center" id="film">
   <div class="wrap reveal">
-    <p class="eyebrow">Introduction · 51 seconds</p>
-    <h2>See it in<br>51 seconds.</h2>
+    <p class="eyebrow">Introduction · 72 seconds</p>
+    <h2>See it in<br>72 seconds.</h2>
     <p class="tagline">The problem, the flow, and why a model never decides.</p>
     <figure class="film">
       <video playsinline preload="none" width="1280" height="720"
-             poster="assets/video/poster.jpg"
-             aria-label="A 51-second explainer: a wasted trip costs a casual labourer a day's wage; Yojana Sathi asks her state, then national, state or both schemes, then only the questions those schemes need; the verdict shows what she gets, why and where to go, with a one-page sheet; it runs in a browser, on Telegram and on WhatsApp behind one rule engine, which imports no language model; every scheme is a cited rule file, and an unsigned one answers unknown.">
-        <source src="assets/video/avinashnegi1999-yojana-sathi-explained.mp4" type="video/mp4">
+             poster="assets/video/yojana-sathi-in-72-seconds-poster.jpg"
+             aria-label="A 72-second film: a wasted trip to the wrong counter costs a woman a day's wage; Yojana Sathi lets her ask first, in a short chat in Hindi or English; it answers yes, no or unknown, every rule is checked and signed by a person, and she leaves knowing where to go and what to carry.">
+        <source src="assets/video/yojana-sathi-in-72-seconds.mp4" type="video/mp4">
+        <track kind="captions" src="assets/video/yojana-sathi-in-72-seconds.en.vtt" srclang="en" label="English">
       </video>
       <button class="play" type="button" aria-label="Play the introduction"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></button>
     </figure>
-    <p class="fine">Captions are in the video.</p>
+    <p class="fine">English captions are available. Turn them on in the player.</p>
   </div>
   <div class="wrap reveal film-next">
-    <p class="eyebrow">Explanation · 23 minutes</p>
-    <h2>How it was built.</h2>
-    <p class="tagline">I vibe-coded the software, then had to learn how to trust it.</p>
+    <p class="eyebrow">Explanation · 13 minutes</p>
+    <h2>How I built it.</h2>
+    <p class="tagline">Every tool, and why it is there.</p>
     <figure class="film">
       <video playsinline preload="none" width="1280" height="720"
-             poster="assets/video/how-it-was-built-poster.jpg"
-             aria-label="A 23-minute explanation of how Yojana Sathi was built: the problem it answers, how the code was written with an AI coding assistant — plan first, then edit, with a second opinion — and the checks that decide what ships.">
-        <source src="assets/video/how-it-was-built.mp4" type="video/mp4">
+             poster="assets/video/how-i-built-it-poster.jpg"
+             aria-label="A 13-minute walkthrough of how Yojana Sathi was built: why Python's standard library, TOML rule files and SQLite; the rule engine; the AWS EC2 server, systemd services, secrets and the deploy gate; the Telegram, WhatsApp and web doors behind Caddy; GitHub Actions, Docker and the tests; what broke, and where it stands today.">
+        <source src="assets/video/how-i-built-it.mp4" type="video/mp4">
+        <track kind="captions" src="assets/video/how-i-built-it.en.vtt" srclang="en" label="English">
       </video>
-      <button class="play" type="button" aria-label="Play the explanation"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></button>
+      <button class="play" type="button" aria-label="Play the walkthrough"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></button>
     </figure>
-    <p class="fine">Captions are in the video.</p>
+    <p class="fine">English captions are available. Turn them on in the player.</p>
   </div>
 </section>
 

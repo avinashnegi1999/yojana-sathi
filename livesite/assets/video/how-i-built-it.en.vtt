@@ -1,0 +1,713 @@
+WEBVTT
+
+00:00:03.100 --> 00:00:05.240
+₹315.
+
+00:00:06.120 --> 00:00:11.536
+That is a day's wage for a woman doing
+casual work in India.
+
+00:00:11.616 --> 00:00:12.990
+₹455 for a man.
+
+00:00:14.110 --> 00:00:18.330
+One wasted trip to a government office
+costs her that whole day.
+
+00:00:19.930 --> 00:00:23.588
+India has about 44 crore unorganised
+workers.
+
+00:00:23.668 --> 00:00:27.240
+31 crore are already registered on
+e-Shram.
+
+00:00:28.150 --> 00:00:29.315
+The schemes exist.
+
+00:00:29.395 --> 00:00:33.060
+What nobody tells her is whether one will
+accept her.
+
+00:00:34.080 --> 00:00:37.290
+So I built something that answers before
+she goes.
+
+00:00:38.890 --> 00:00:39.897
+I'm Avinash.
+
+00:00:39.977 --> 00:00:41.880
+This is Yojana Sathi.
+
+00:00:42.540 --> 00:00:47.682
+A short chat, in Hindi or English, that
+tells a worker which schemes fit,
+
+00:00:47.762 --> 00:00:49.980
+what to carry, and where to go.
+
+00:00:50.790 --> 00:00:54.553
+In the next few minutes I'll show you how
+it is built.
+
+00:00:54.633 --> 00:00:56.910
+Every tool, and why it is there.
+
+00:01:01.010 --> 00:01:02.810
+It began as a hackathon.
+
+00:01:02.890 --> 00:01:07.120
+My first project was Saans, an air-
+exposure assistant.
+
+00:01:07.840 --> 00:01:09.639
+I built it to completion.
+
+00:01:09.719 --> 00:01:12.650
+Then I noticed nobody had asked for it.
+
+00:01:13.400 --> 00:01:14.658
+So I parked it.
+
+00:01:14.738 --> 00:01:21.250
+The lesson stayed: real users beat a
+repository that only looks finished.
+
+00:01:22.850 --> 00:01:24.713
+I'll be direct about this.
+
+00:01:24.793 --> 00:01:27.110
+Yojana Sathi was built with AI.
+
+00:01:27.980 --> 00:01:32.848
+Claude Code wrote most of the code, the
+tests and the scripts.
+
+00:01:32.928 --> 00:01:36.040
+ChatGPT and Codex gave second opinions.
+
+00:01:36.990 --> 00:01:39.613
+What I owned was everything else.
+
+00:01:39.693 --> 00:01:40.759
+The decisions.
+
+00:01:40.839 --> 00:01:41.742
+The sources.
+
+00:01:41.822 --> 00:01:42.807
+The accounts.
+
+00:01:42.887 --> 00:01:43.708
+The server.
+
+00:01:43.788 --> 00:01:46.900
+And the call on what was safe to ship.
+
+00:01:48.500 --> 00:01:51.520
+Before writing a line, I made four
+decisions.
+
+00:01:52.310 --> 00:01:54.760
+The AI never decides eligibility.
+
+00:01:55.690 --> 00:01:57.710
+There are three answers, not two.
+
+00:01:58.630 --> 00:02:02.600
+A missing fact is written as TODO, never
+as zero.
+
+00:02:03.440 --> 00:02:05.396
+And no third-party packages.
+
+00:02:05.476 --> 00:02:07.730
+Python's standard library only.
+
+00:02:08.770 --> 00:02:11.300
+Everything you'll see follows from those
+four.
+
+00:02:15.400 --> 00:02:16.850
+Here is the whole system.
+
+00:02:17.490 --> 00:02:18.289
+Her phone.
+
+00:02:18.369 --> 00:02:22.590
+Three doors: Telegram, WhatsApp, and a web
+page.
+
+00:02:23.210 --> 00:02:24.783
+One server in Mumbai.
+
+00:02:24.863 --> 00:02:27.540
+One rule engine behind every door.
+
+00:02:32.140 --> 00:02:34.360
+The project has zero dependencies.
+
+00:02:35.140 --> 00:02:38.793
+On Saans, I had planned three popular
+libraries.
+
+00:02:38.873 --> 00:02:43.540
+Each turned out to be about 80 lines of
+Python's own urllib.
+
+00:02:44.450 --> 00:02:47.632
+So here I started from the standard
+library.
+
+00:02:47.712 --> 00:02:52.746
+HTTP, the database, the rule files, the
+web server, the cryptography.
+
+00:02:52.826 --> 00:02:53.790
+All built in.
+
+00:02:54.470 --> 00:02:59.140
+There is no install step that can fail on
+deploy day.
+
+00:03:00.740 --> 00:03:03.600
+Each scheme's rules live in a TOML file.
+
+00:03:04.480 --> 00:03:06.825
+Python reads TOML with no library.
+
+00:03:06.905 --> 00:03:09.891
+And a comment can sit right beside a
+value,
+
+00:03:09.971 --> 00:03:14.250
+so every threshold carries the official
+source it came from.
+
+00:03:15.280 --> 00:03:19.960
+A reviewer at an NGO can check a rule
+without reading any code.
+
+00:03:20.760 --> 00:03:25.590
+Rules written in Python would be
+unreviewable to the people who matter
+most.
+
+00:03:27.190 --> 00:03:30.438
+Everything I count lands in SQLite.
+
+00:03:30.518 --> 00:03:31.293
+One file.
+
+00:03:31.373 --> 00:03:33.180
+No database server.
+
+00:03:33.720 --> 00:03:36.193
+One module is its only writer.
+
+00:03:36.273 --> 00:03:37.890
+One place to audit.
+
+00:03:38.680 --> 00:03:41.716
+And it holds coarse facts only.
+
+00:03:41.796 --> 00:03:47.748
+There is no name column, no phone column,
+no Aadhaar column.
+
+00:03:47.828 --> 00:03:52.150
+A field that does not exist can never
+leak.
+
+00:03:53.750 --> 00:03:56.491
+One function decides eligibility.
+
+00:03:56.571 --> 00:03:58.372
+It is a pure function.
+
+00:03:58.452 --> 00:04:01.530
+No network, no clock, no randomness.
+
+00:04:02.200 --> 00:04:05.029
+Same answers in, same verdict out.
+
+00:04:05.109 --> 00:04:06.050
+Every time.
+
+00:04:07.210 --> 00:04:12.620
+When she taps "don't know", the answer
+stays unknown, all the way to her screen.
+
+00:04:13.530 --> 00:04:20.070
+And a test fails the build if the rules
+code ever imports a model or an HTTP
+client.
+
+00:04:21.670 --> 00:04:27.872
+Claude has one optional job: turning a job
+typed in her own words into a category
+
+00:04:27.952 --> 00:04:28.960
+she confirms.
+
+00:04:29.850 --> 00:04:33.610
+It never sees a rule, a rupee figure, or a
+verdict.
+
+00:04:34.430 --> 00:04:37.376
+Running without it is a tested setting.
+
+00:04:37.456 --> 00:04:40.479
+On the server today, it is switched off.
+
+00:04:40.559 --> 00:04:43.430
+The answers are identical either way.
+
+00:04:47.530 --> 00:04:49.554
+The server runs on AWS.
+
+00:04:49.634 --> 00:04:56.220
+One EC2 t4g.micro, an ARM machine, in
+Mumbai, the region closest to her.
+
+00:04:57.020 --> 00:04:59.809
+I built it with the AWS CLI, from one
+script.
+
+00:04:59.889 --> 00:05:00.575
+No clicking.
+
+00:05:00.655 --> 00:05:01.930
+The same every time.
+
+00:05:02.530 --> 00:05:05.756
+It checks which account it is on.
+
+00:05:05.836 --> 00:05:09.564
+It keeps the private key on my laptop.
+
+00:05:09.644 --> 00:05:12.850
+It opens SSH to my address only.
+
+00:05:13.620 --> 00:05:19.260
+And it sets a zero-spend budget alert, so
+I hear the moment real money starts.
+
+00:05:22.860 --> 00:05:26.398
+Inside, three services run from one
+codebase.
+
+00:05:26.478 --> 00:05:29.050
+Telegram, WhatsApp, and the web.
+
+00:05:30.170 --> 00:05:34.560
+systemd keeps each one alive and restarts
+any that falls.
+
+00:05:35.530 --> 00:05:41.510
+Each runs as its own user, with no login
+shell, and can write to one folder only.
+
+00:05:42.680 --> 00:05:47.296
+A timer copies the database every night at
+3 a.m., Indian time,
+
+00:05:47.376 --> 00:05:50.060
+when the fewest people are using it.
+
+00:05:51.660 --> 00:05:55.362
+The bot token, the WhatsApp token, the app
+secret.
+
+00:05:55.442 --> 00:06:00.510
+They live in one locked file on the server
+that only root can read.
+
+00:06:01.390 --> 00:06:02.750
+They never go to GitHub.
+
+00:06:03.700 --> 00:06:07.668
+Deploying merges my laptop's settings into
+that file.
+
+00:06:07.748 --> 00:06:09.272
+It never replaces it.
+
+00:06:09.352 --> 00:06:15.310
+An earlier version did, and quietly
+dropped settings that only the server had.
+
+00:06:16.910 --> 00:06:20.430
+Deploying is a second script, over SSH.
+
+00:06:21.100 --> 00:06:24.510
+It copies the code, never my laptop's
+database.
+
+00:06:25.310 --> 00:06:26.428
+Then the gate.
+
+00:06:26.508 --> 00:06:29.590
+Every test runs on the server first.
+
+00:06:30.230 --> 00:06:33.525
+If one fails, the live code is untouched.
+
+00:06:33.605 --> 00:06:37.310
+If all pass, every service restarts
+together.
+
+00:06:43.410 --> 00:06:47.970
+Telegram was first, because it was the
+easiest door to build and test.
+
+00:06:48.910 --> 00:06:55.390
+My server asks Telegram for messages and
+waits up to 50 seconds for an answer.
+
+00:06:55.610 --> 00:06:57.107
+That is long polling.
+
+00:06:57.187 --> 00:07:03.341
+A webhook would need a public address, a
+certificate, and a host that never sleeps.
+
+00:07:03.421 --> 00:07:06.500
+Three things that can fail on deploy day.
+
+00:07:08.010 --> 00:07:10.730
+Long polling needs one outgoing
+connection.
+
+00:07:14.330 --> 00:07:16.838
+WhatsApp works the other way round.
+
+00:07:16.918 --> 00:07:18.470
+Meta calls my server.
+
+00:07:19.250 --> 00:07:23.404
+Every message carries a signature, sealed
+with my app secret.
+
+00:07:23.484 --> 00:07:26.400
+My server checks it before reading a word.
+
+00:07:27.370 --> 00:07:30.380
+Without the secret, the service refuses to
+start.
+
+00:07:31.490 --> 00:07:35.588
+WhatsApp is tested end to end on Meta's
+test number.
+
+00:07:35.668 --> 00:07:37.275
+It is not public yet.
+
+00:07:37.355 --> 00:07:40.890
+Code that works is not the same as a
+launch.
+
+00:07:42.490 --> 00:07:46.586
+For everyone without either app, there is
+a web page.
+
+00:07:46.666 --> 00:07:47.453
+No account.
+
+00:07:47.533 --> 00:07:48.400
+No install.
+
+00:07:49.120 --> 00:07:52.158
+Because it is public, it has guards.
+
+00:07:52.238 --> 00:07:53.890
+Small requests only.
+
+00:07:53.970 --> 00:07:55.622
+A 10-second timeout.
+
+00:07:55.702 --> 00:07:59.087
+Sessions that end after 30 idle minutes.
+
+00:07:59.167 --> 00:08:03.930
+And a cap on new sessions, so no one can
+crowd her out.
+
+00:08:05.530 --> 00:08:07.790
+In front of everything sits Caddy.
+
+00:08:08.600 --> 00:08:09.987
+One door, port 443.
+
+00:08:10.067 --> 00:08:13.308
+It sends each request to the right
+service,
+
+00:08:13.388 --> 00:08:16.940
+and gets free certificates from Let's
+Encrypt.
+
+00:08:17.600 --> 00:08:21.410
+My domain's DNS points two names at that
+one door.
+
+00:08:23.010 --> 00:08:25.630
+And Caddy is where I found a privacy leak.
+
+00:08:26.740 --> 00:08:31.088
+My Python code never logged a worker's
+private sheet link.
+
+00:08:31.168 --> 00:08:36.130
+But Caddy, in front of it, logged every
+one, with her IP address.
+
+00:08:37.060 --> 00:08:42.300
+Now Caddy deletes the address and blanks
+the link before it writes a single line.
+
+00:08:43.570 --> 00:08:47.360
+Privacy belongs to the whole system, not
+to one function.
+
+00:08:53.460 --> 00:08:55.360
+Every change goes through GitHub.
+
+00:08:56.170 --> 00:08:59.759
+GitHub Actions runs the full check on
+every push.
+
+00:08:59.839 --> 00:09:06.130
+Then it builds a Docker image, and the
+image runs every check again while it
+builds.
+
+00:09:06.940 --> 00:09:10.290
+An image that fails its own tests cannot
+exist.
+
+00:09:11.300 --> 00:09:14.880
+A second workflow publishes the website to
+GitHub Pages.
+
+00:09:17.980 --> 00:09:19.972
+There is no test framework.
+
+00:09:20.052 --> 00:09:26.190
+Plain asserts, a self-check in every
+module, and one command that runs them
+all.
+
+00:09:27.220 --> 00:09:33.910
+One walker presses every button on every
+screen, in both languages.
+
+00:09:33.990 --> 00:09:35.000
+954 paths.
+
+00:09:36.040 --> 00:09:41.076
+Another rewrites each scheme's rules from
+the official text, separately,
+
+00:09:41.156 --> 00:09:45.490
+and compares the two across more than 3
+million combinations.
+
+00:09:46.350 --> 00:09:48.289
+They catch different failures.
+
+00:09:48.369 --> 00:09:51.800
+Pressing buttons can never catch a wrong
+threshold.
+
+00:09:57.400 --> 00:10:01.687
+The day it went live, I used it like a
+worker.
+
+00:10:01.767 --> 00:10:04.140
+It broke within the hour.
+
+00:10:04.980 --> 00:10:05.731
+Six bugs.
+
+00:10:05.811 --> 00:10:08.318
+Telegram rejected a message.
+
+00:10:08.398 --> 00:10:12.105
+Hinglish like "mistri" went unrecognised.
+
+00:10:12.185 --> 00:10:15.510
+An English screen had Hindi buttons.
+
+00:10:16.300 --> 00:10:18.592
+Every one was in the conversation.
+
+00:10:18.672 --> 00:10:22.090
+None was in the rule engine I had tested
+hardest.
+
+00:10:23.690 --> 00:10:26.780
+The most serious bug hid in a double tap.
+
+00:10:27.600 --> 00:10:32.581
+A button said only "yes", not which
+question it answered.
+
+00:10:32.661 --> 00:10:35.600
+On a slow network, she taps again.
+
+00:10:35.680 --> 00:10:39.320
+By then, the next question is income tax.
+
+00:10:40.100 --> 00:10:42.644
+Some pensions exclude taxpayers.
+
+00:10:42.724 --> 00:10:46.250
+One impatient tap could change her
+verdict.
+
+00:10:47.190 --> 00:10:50.519
+Now a tap on an old button is refused.
+
+00:10:50.599 --> 00:10:54.108
+On my laptop, a double tap looked silly.
+
+00:10:54.188 --> 00:10:56.610
+On her phone, it is normal.
+
+00:11:00.210 --> 00:11:05.130
+The worst bug was mine, and ChatGPT found
+it in an outside review.
+
+00:11:06.010 --> 00:11:09.504
+My code treated a finished file as a
+verified one.
+
+00:11:09.584 --> 00:11:14.660
+Researched data was serving real verdicts
+before anyone had checked it.
+
+00:11:15.550 --> 00:11:19.873
+Now only a scheme signed by a person can
+answer.
+
+00:11:19.953 --> 00:11:21.616
+The demo got worse.
+
+00:11:21.696 --> 00:11:22.980
+It got honest.
+
+00:11:24.580 --> 00:11:29.345
+My impact number was adding a yearly
+pension to an insurance cover.
+
+00:11:29.425 --> 00:11:30.863
+It looked impressive.
+
+00:11:30.943 --> 00:11:32.100
+It was nonsense.
+
+00:11:32.810 --> 00:11:35.207
+They are two separate numbers now.
+
+00:11:35.287 --> 00:11:40.452
+And when I checked my own headline
+statistics, three of four were wrong.
+
+00:11:40.532 --> 00:11:42.273
+One had no source at all.
+
+00:11:42.353 --> 00:11:43.300
+I deleted it.
+
+00:11:44.900 --> 00:11:47.580
+The server found bugs my laptop couldn't.
+
+00:11:48.250 --> 00:11:51.368
+The logs looked empty while the bot was
+healthy.
+
+00:11:51.448 --> 00:11:53.380
+Python was holding them back.
+
+00:11:54.170 --> 00:11:59.930
+And my update script restarted stopped
+services, but left running ones on old
+code.
+
+00:12:04.030 --> 00:12:07.110
+Today it is live on Telegram and on the
+web.
+
+00:12:07.910 --> 00:12:12.740
+21 schemes, each signed by a person, serve
+real verdicts.
+
+00:12:13.720 --> 00:12:18.832
+Two drafts, Tamil Nadu disability and
+Mizoram old-age, still answer unknown,
+
+00:12:18.912 --> 00:12:23.420
+because I could not find an official list
+of the papers they need.
+
+00:12:24.470 --> 00:12:26.432
+There is no field pilot yet.
+
+00:12:26.512 --> 00:12:29.715
+No worker outside my own testing has used
+it.
+
+00:12:29.795 --> 00:12:33.150
+That matters more than any of the
+engineering.
+
+00:12:34.750 --> 00:12:36.982
+Writing code became cheap.
+
+00:12:37.062 --> 00:12:38.840
+Trusting it did not.
+
+00:12:39.750 --> 00:12:41.325
+A green test can lie.
+
+00:12:41.406 --> 00:12:44.480
+A running process is not a healthy one.
+
+00:12:45.450 --> 00:12:48.632
+A finished file is not a verified one.
+
+00:12:48.712 --> 00:12:51.630
+A working adapter is not a launch.
+
+00:12:53.230 --> 00:12:56.910
+The behaviour I value most looks the least
+impressive.
+
+00:12:57.480 --> 00:12:59.506
+The bot saying: I don't know.
+
+00:12:59.586 --> 00:13:01.910
+Ask this question at the office.
+
+00:13:02.780 --> 00:13:05.150
+She does not need a confident bot.
+
+00:13:05.230 --> 00:13:07.680
+She needs the right trip, or none.
+
+00:13:09.280 --> 00:13:10.382
+Yojana Sathi.
+
+00:13:10.462 --> 00:13:12.190
+Know before you go.
+
+00:13:12.850 --> 00:13:14.883
+The code is public on GitHub.
+
+00:13:14.963 --> 00:13:16.049
+The bot is live.
+
+00:13:16.129 --> 00:13:20.210
+And I'm looking for my first role as a
+Python developer.
