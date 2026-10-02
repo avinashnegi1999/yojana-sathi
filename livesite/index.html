@@ -89,6 +89,9 @@ h1,h2,.quote{text-wrap:balance}
 .play:active{transform:scale(.95)}
 .play:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
 .film.playing .play{opacity:0;pointer-events:none}
+.cc{position:absolute;top:14px;right:14px;z-index:2;min-width:44px;height:32px;padding:0 10px;border:1.5px solid rgba(255,255,255,.9);border-radius:8px;background:rgba(0,0,0,.45);color:#fff;font:700 14px/1 system-ui,-apple-system,sans-serif;letter-spacing:.04em;cursor:pointer;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.cc[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.cc:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
 /* * The second film sits under the first in the same dark tile. */
 .film-next{margin-top:112px}
 
@@ -554,9 +557,10 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
         <source src="assets/video/yojana-sathi-in-72-seconds.mp4" type="video/mp4">
         <track kind="captions" src="assets/video/yojana-sathi-in-72-seconds.en.vtt" srclang="en" label="English">
       </video>
+      <button class="cc" type="button" aria-pressed="false" aria-label="Captions" title="Captions">CC</button>
       <button class="play" type="button" aria-label="Play the introduction"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></button>
     </figure>
-    <p class="fine">English captions are available. Turn them on in the player.</p>
+    <p class="fine">English captions: press CC.</p>
   </div>
   <div class="wrap reveal film-next">
     <p class="eyebrow">Explanation · 13 minutes</p>
@@ -569,9 +573,10 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
         <source src="assets/video/how-i-built-it.mp4" type="video/mp4">
         <track kind="captions" src="assets/video/how-i-built-it.en.vtt" srclang="en" label="English">
       </video>
+      <button class="cc" type="button" aria-pressed="false" aria-label="Captions" title="Captions">CC</button>
       <button class="play" type="button" aria-label="Play the walkthrough"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></button>
     </figure>
-    <p class="fine">English captions are available. Turn them on in the player.</p>
+    <p class="fine">English captions: press CC.</p>
   </div>
 </section>
 
@@ -1218,6 +1223,17 @@ footer{background:var(--parchment);color:var(--muted);font-size:12px;padding:0 0
     v.addEventListener('pause',()=>film.classList.remove('playing'));
     v.addEventListener('ended',()=>film.classList.remove('playing'));
   });
+  // * One CC switch, always on the picture (not inside the player's menu). It
+  // * applies to both films, and follows the menu if a viewer uses that instead.
+  const tracks=films.map(f=>f.querySelector('video').textTracks[0]);
+  const ccs=films.map(f=>f.querySelector('.cc'));
+  const show=on=>{tracks.forEach(t=>{t.mode=on?'showing':'disabled';});ccs.forEach(c=>c.setAttribute('aria-pressed',on));};
+  ccs.forEach(c=>c.addEventListener('click',()=>show(c.getAttribute('aria-pressed')!=='true')));
+  films.forEach((f,i)=>f.querySelector('video').textTracks.addEventListener('change',()=>{
+    const on=tracks[i].mode==='showing';
+    if((ccs[i].getAttribute('aria-pressed')==='true')!==on)show(on);
+  }));
+  show(false);
 })();
 </script>
 </body></html>
