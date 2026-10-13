@@ -23,9 +23,11 @@ Run: python -m sathi.local_web                       # local, no event log
 import argparse
 import html
 import json
+import os
 import secrets
 import threading
 import time
+import urllib.parse
 import urllib.request
 from collections import deque
 from copy import deepcopy
@@ -275,11 +277,15 @@ async function nav(value){const r=await send(value);if(r===undefined)return;if(r
 // ! answer the second question too. While a request is out, taps are ignored.
 // * undefined: ignored (busy). null: the network failed or took over 20 s.
 let busy=false;
+// * Turnstile (only when the server put the widget on the page). A token is
+// * sent until the server says this session passed; each one is single use.
+let human='',humanId=null,needHuman=true;
 async function send(value){if(busy)return undefined;busy=true;const main=document.querySelector('main');main.classList.add('busy');
 const ctl=typeof AbortController==='function'?new AbortController():null;const timer=ctl?setTimeout(()=>ctl.abort(),20000):0;
-try{return await fetch('/answer',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({answer:value}),signal:ctl?ctl.signal:undefined});}
+const token=needHuman?human:'';if(token){human='';if(window.turnstile&&humanId!==null)turnstile.reset(humanId);}
+try{return await fetch('/answer',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(token?{answer:value,human:token}:{answer:value}),signal:ctl?ctl.signal:undefined});}
 catch(e){return null;}finally{if(timer)clearTimeout(timer);busy=false;main.classList.remove('busy');}}
-function show(data){chosen=data.chosen||'';guard(!!(data.nav&&data.nav.back));document.querySelector('main').classList.remove('wide');const ui=UI[data.lang]||UI.hi;document.documentElement.lang=data.lang==='en'?'en':'hi';document.getElementById('restart').textContent=ui.restart;current=data.lang==='hi'?'hi':'en';const sw=document.getElementById('switch');sw.textContent=ui.other;sw.lang=ui.otherLang;document.getElementById('brand').textContent=ui.brand;document.getElementById('note').innerHTML=`${text(ui.note)} <a href="https://github.com/avinashnegi1999/yojana-sathi" target="_blank" rel="noopener">${text(ui.noteLink)}</a>`;const last=data.replies.length-1;const hasResult=data.replies.some(r=>r.kind==='result');let out=steps(data.nav,ui)+topRow(data,ui,hasResult)+sceneArt(data,hasResult)+data.replies.map((r,i)=>{if(r.kind==='recap'){const body=r.text.split('\n').slice(1).join('\n');return `<details class="recap"><summary>${ui.answers}</summary><p class="message">${text(body)}</p></details>`;}const nb=r.buttons?r.buttons.length:0;const asks=i===last&&(nb||r.typed);return `${r.kind==='result'?`<div class="result">${blocks(r.text,true,'q')}</div>${resultActions(ui)}`:blocks(r.text,asks,hasResult?'q2':'q')}${r.map?`<div id="maptab"><p class="maphint">${ui.mapHint}</p><div class="map" id="map"></div><div id="mapgo"></div></div><p class="maphint" id="listhint" hidden>${ui.listHint}</p>`:''}${introCard(r,ui)}${nb?`<div class="choices${r.buttons.some(b=>b.grid)?' has-grid':''}${r.buttons.some(b=>b.scale)?' has-scale':''}"${r.map?' hidden':''}>${r.buttons.map(button).join('')}</div>`:''}${r.document?`<div class="sheet"><a class="download" href="${r.document}" download>${ui.download}</a><a class="view" href="${r.document.replace('/document/','/sheet/')}" target="_blank" rel="noopener">${ui.view}</a></div><p class="viewnote">${ui.viewNote}</p>`:''}`;}).join('');const agePick=data.replies[last]&&data.replies[last].age;const typed=!agePick&&!!(data.replies[last]&&data.replies[last].typed);if(agePick)out+=agePicker(agePick,ui);if(typed)out+=`<form class="composer"><input name="answer" aria-label="${ui.type}" autocomplete="off" inputmode="text" placeholder="${ui.type}"${chosen&&!chosen.startsWith('/')?` value="${text(chosen)}"`:''}><button class="send">${ui.send}</button></form>`;screen.innerHTML=out;window.scrollTo({top:0});afterShow(data,ui);if(agePick)wireAge(agePick);screen.querySelectorAll('.step').forEach(b=>b.onclick=()=>nav(b.dataset.nav));// * Only buttons that carry an answer. The age picker's Continue is styled as a
+function show(data){chosen=data.chosen||'';needHuman=!data.verified;guard(!!(data.nav&&data.nav.back));document.querySelector('main').classList.remove('wide');const ui=UI[data.lang]||UI.hi;document.documentElement.lang=data.lang==='en'?'en':'hi';document.getElementById('restart').textContent=ui.restart;current=data.lang==='hi'?'hi':'en';const sw=document.getElementById('switch');sw.textContent=ui.other;sw.lang=ui.otherLang;document.getElementById('brand').textContent=ui.brand;document.getElementById('note').innerHTML=`${text(ui.note)} <a href="https://github.com/avinashnegi1999/yojana-sathi" target="_blank" rel="noopener">${text(ui.noteLink)}</a>`;const last=data.replies.length-1;const hasResult=data.replies.some(r=>r.kind==='result');let out=steps(data.nav,ui)+topRow(data,ui,hasResult)+sceneArt(data,hasResult)+data.replies.map((r,i)=>{if(r.kind==='recap'){const body=r.text.split('\n').slice(1).join('\n');return `<details class="recap"><summary>${ui.answers}</summary><p class="message">${text(body)}</p></details>`;}const nb=r.buttons?r.buttons.length:0;const asks=i===last&&(nb||r.typed);return `${r.kind==='result'?`<div class="result">${blocks(r.text,true,'q')}</div>${resultActions(ui)}`:blocks(r.text,asks,hasResult?'q2':'q')}${r.map?`<div id="maptab"><p class="maphint">${ui.mapHint}</p><div class="map" id="map"></div><div id="mapgo"></div></div><p class="maphint" id="listhint" hidden>${ui.listHint}</p>`:''}${introCard(r,ui)}${nb?`<div class="choices${r.buttons.some(b=>b.grid)?' has-grid':''}${r.buttons.some(b=>b.scale)?' has-scale':''}"${r.map?' hidden':''}>${r.buttons.map(button).join('')}</div>`:''}${r.document?`<div class="sheet"><a class="download" href="${r.document}" download>${ui.download}</a><a class="view" href="${r.document.replace('/document/','/sheet/')}" target="_blank" rel="noopener">${ui.view}</a></div><p class="viewnote">${ui.viewNote}</p>`:''}`;}).join('');const agePick=data.replies[last]&&data.replies[last].age;const typed=!agePick&&!!(data.replies[last]&&data.replies[last].typed);if(agePick)out+=agePicker(agePick,ui);if(typed)out+=`<form class="composer"><input name="answer" aria-label="${ui.type}" autocomplete="off" inputmode="text" placeholder="${ui.type}"${chosen&&!chosen.startsWith('/')?` value="${text(chosen)}"`:''}><button class="send">${ui.send}</button></form>`;screen.innerHTML=out;window.scrollTo({top:0});afterShow(data,ui);if(agePick)wireAge(agePick);screen.querySelectorAll('.step').forEach(b=>b.onclick=()=>nav(b.dataset.nav));// * Only buttons that carry an answer. The age picker's Continue is styled as a
 // * choice but has no data-value; wiring it here sent "undefined" as a second answer.
 screen.querySelectorAll('.choice[data-value]').forEach(b=>b.onclick=()=>{const v=decodeURIComponent(b.dataset.value);if(v==='/start')restart();else answer(v);});drawMap(ui);const form=screen.querySelector('form');if(form){form.onsubmit=e=>{e.preventDefault();const input=e.currentTarget.answer;if(input.value.trim())answer(input.value);};form.answer.focus();}}
 // * Two small scenes: a wave hello on the first (consent) screen, and on the
@@ -446,6 +452,59 @@ _MAP_SEEDS = Path(__file__).resolve().parent.parent / "data" / "maps" / "india_m
 _MAP = _MAP_IMAGE.read_bytes() if _MAP_IMAGE.exists() else None
 _SEEDS = _MAP_SEEDS.read_bytes() if _MAP_SEEDS.exists() else None
 
+# * ------------------------------------------------------------- bot check
+#
+# ! Cloudflare Turnstile, so a script cannot inflate the impact numbers. It
+# ! VERIFIES, it never BLOCKS: a worker whose cheap phone fails the check, or
+# ! whose page never loads Cloudflare's script, still gets her whole
+# ! screening. Her session is only left out of the reported numbers
+# ! (report._where). Losing a real worker to a captcha costs more than a
+# ! bot costs us.
+# * TURNSTILE_SITE_KEY puts the widget on the page; TURNSTILE_SECRET turns on
+# * the server check. Both unset is a supported configuration: no widget, no
+# * check, every session counts, exactly as before.
+TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+
+
+def verify_human(token: str) -> bool:
+    """Ask Cloudflare whether this Turnstile token is a pass. False on any doubt.
+
+    # ! The worker's IP is NOT sent (remoteip is optional). Cloudflare already
+    # ! saw her browser when the widget ran; it does not need to hear it from
+    # ! us as well.
+    """
+    secret = os.environ.get("TURNSTILE_SECRET", "")
+    # * Real tokens are well under 2048 characters (Cloudflare's own limit).
+    if not secret or not token or len(token) > 2048:
+        return False
+    body = urllib.parse.urlencode({"secret": secret, "response": token}).encode("ascii")
+    try:
+        with urllib.request.urlopen(TURNSTILE_VERIFY_URL, body, timeout=5) as resp:
+            return json.loads(resp.read(10_000)).get("success") is True
+    except (OSError, ValueError):
+        # * Cloudflare down or slow: the session is unverified, not refused.
+        return False
+
+
+def _with_turnstile(page: str, site_key: str) -> str:
+    """The page with the Turnstile widget added, or unchanged without a key.
+
+    # * appearance 'interaction-only': most visitors never see anything. The
+    # * box shows only when Cloudflare wants a tap, above the footer.
+    """
+    if not site_key:
+        return page
+    widget = ('<div id="human" style="display:flex;justify-content:center;margin:8px 16px"></div>'
+              '<footer class="note" id="note"></footer>')
+    loader = ("<script>window.onHumanLoad=function(){humanId=turnstile.render('#human',"
+              "{sitekey:" + json.dumps(site_key) + ",appearance:'interaction-only',"
+              "callback:function(t){human=t;},'error-callback':function(){human='';},"
+              "'expired-callback':function(){human='';}});};</script>"
+              '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js'
+              '?onload=onHumanLoad&render=explicit" async defer></script></body>')
+    return (page.replace('<footer class="note" id="note"></footer>', widget, 1)
+                .replace("</body>", loader, 1))
+
 
 @dataclass
 class _Step:
@@ -496,10 +555,19 @@ class LocalWeb:
     TICK_STATES = frozenset({State.SCHEME_PICKER, State.KNOWN_SCHEMES, State.DOCUMENTS})
 
     def __init__(self, schemes: dict[str, Scheme], log: EventLog | None = None,
-                 clock=time.monotonic) -> None:
+                 clock=time.monotonic, verify=None) -> None:
         self.schemes = schemes
         self.log = log
         self.clock = clock  # * injectable so the self-check can age sessions
+        # * The bot check: token -> passed?. None means the check is off.
+        # * Injectable so the self-check never calls Cloudflare.
+        if verify is None and os.environ.get("TURNSTILE_SECRET"):
+            verify = verify_human
+        self.verify = verify
+        # * cookie -> the event-log session id that passed the check. Keyed to
+        # * the event session, not the cookie: "Start again" opens a new event
+        # * session under the same cookie, and that one must pass on its own.
+        self._verified: dict[str, str] = {}
         self.sessions: dict[str, Conversation] = {}
         self._last_seen: dict[str, float] = {}
         # * token -> (filename, bytes, created at)
@@ -558,6 +626,7 @@ class LocalWeb:
         self._last_seen.pop(session, None)
         self._steps.pop(session, None)
         self._at.pop(session, None)
+        self._verified.pop(session, None)
 
     def _copy(self, convo: Conversation) -> Conversation:
         """A private copy of a conversation. The schemes and the log are shared, not copied."""
@@ -604,6 +673,10 @@ class LocalWeb:
             # ponytail: if cross-visit dedupe ever matters.
             if self.log is not None:
                 convo.person = self.log.feedback_id(session)
+                # * Marks the session as one the report must see pass the bot
+                # * check before it counts. Logged before anything else.
+                if self.verify is not None and convo.session is not None:
+                    self.log.log(convo.session, "human_check_required")
             self.sessions[session] = convo
             self._last_seen[session] = now
             # * The browser opens in English, straight at the consent screen:
@@ -621,7 +694,8 @@ class LocalWeb:
             return [convo.set_language(words[1])[-1]]
         return convo.handle(answer)
 
-    def payload(self, session: str, answer: str, client: str = "local") -> tuple[int, bytes]:
+    def payload(self, session: str, answer: str, client: str = "local",
+                human: str = "") -> tuple[int, bytes]:
         """(HTTP status, JSON body). A failed turn is a message, never a dropped socket."""
         if answer in ("/back", "/forward"):
             return self._navigate(session, answer[1:])
@@ -653,6 +727,7 @@ class LocalWeb:
             return 429, self._message(text)
 
         convo = self.sessions.get(session)
+        self._check_human(session, convo, human)
         items = self._render(convo, replies)
         with self._lock:
             self._remember(session, answer, convo, items)
@@ -746,6 +821,22 @@ class LocalWeb:
             at -= 1
         self._at[session] = at
 
+    def _check_human(self, session: str, convo: Conversation | None, token: str) -> None:
+        """Spend one Turnstile token on this session, if it has not passed yet.
+
+        # ! Outside the lock: the call to Cloudflare can take seconds, and every
+        # ! other worker's turn waits on that lock.
+        """
+        if self.verify is None or not token or convo is None or convo.session is None:
+            return
+        with self._lock:
+            if self._verified.get(session) == convo.session.id:
+                return
+        if self.verify(token):
+            self.log.log(convo.session, "human_verified")
+            with self._lock:
+                self._verified[session] = convo.session.id
+
     def _navigate(self, session: str, direction: str) -> tuple[int, bytes]:
         """Show the screen before or after this one. 409 when there is none."""
         with self._lock:
@@ -822,6 +913,9 @@ class LocalWeb:
             # * same question (a tick on a list, its next page) is not a new
             # * step: counting each one showed "Step 41" on the held-schemes list
             # * (29 Sep). No total: the number of questions depends on her answers.
+            # * Tells the page whether to keep sending a Turnstile token.
+            verified = (convo is not None and convo.session is not None
+                        and self._verified.get(session) == convo.session.id)
             step = 0
             if 0 <= at < len(steps):
                 step = 1 + sum(1 for i in range(1, at + 1)
@@ -831,7 +925,7 @@ class LocalWeb:
         lang = convo.lang if convo is not None else DEFAULT_LANG
         return json.dumps({"replies": items, "lang": lang,
                            "nav": {"back": back, "forward": forward}, "chosen": chosen,
-                           "step": step},
+                           "step": step, "verified": verified},
                           ensure_ascii=False).encode("utf-8")
 
     def document(self, token: str) -> tuple[str, bytes] | None:
@@ -853,6 +947,8 @@ MAX_BODY = 10_000
 
 
 def handler_class(app: LocalWeb, secure_cookie: bool = False) -> type[BaseHTTPRequestHandler]:
+    page = _with_turnstile(_PAGE, os.environ.get("TURNSTILE_SITE_KEY", "")).encode("utf-8")
+
     class Handler(BaseHTTPRequestHandler):
         def setup(self) -> None:
             # ! A client that opens a socket and sends nothing must not hold a
@@ -902,7 +998,7 @@ def handler_class(app: LocalWeb, secure_cookie: bool = False) -> type[BaseHTTPRe
 
         def do_GET(self) -> None:  # noqa: N802
             if self.path == "/" or self.path.startswith("/?"):
-                self._send(HTTPStatus.OK, _PAGE.encode("utf-8"), "text/html; charset=utf-8")
+                self._send(HTTPStatus.OK, page, "text/html; charset=utf-8")
                 return
             if self.path == "/logo.jpg":
                 self._send(HTTPStatus.OK, _LOGO, "image/jpeg")
@@ -980,8 +1076,11 @@ def handler_class(app: LocalWeb, secure_cookie: bool = False) -> type[BaseHTTPRe
             if not isinstance(answer, str):
                 self._bad()
                 return
+            human = data.get("human")
+            if not isinstance(human, str):
+                human = ""
             session = self._session()
-            status, body = app.payload(session, answer, self._client())
+            status, body = app.payload(session, answer, self._client(), human)
             self._send(status, body, "application/json; charset=utf-8",
                        session if status == 200 else "")
 
@@ -1295,6 +1394,31 @@ def _self_check() -> None:
     finally:
         server.shutdown()
         server.server_close()
+
+    # ! The bot check verifies, never blocks: a failed token still gets the
+    # ! next screen. Only a pass logs human_verified, once per event session,
+    # ! and "Start again" needs a new pass.
+    assert _with_turnstile(_PAGE, "") == _PAGE, "no site key must mean no widget"
+    assert "turnstile/v0/api.js" in _with_turnstile(_PAGE, "0xKEY")
+    with tempfile.TemporaryDirectory() as d:
+        log = EventLog(Path(d) / "human.db")
+        spent: list[str] = []
+        checked = LocalWeb(schemes, log, verify=lambda t: spent.append(t) or t == "good")
+        assert body(checked.payload("h", "/start", human="bad"))["verified"] is False
+        assert body(checked.payload("h", "/lang hi", human="good"))["verified"] is True
+        assert body(checked.payload("h", "/lang en", human="good"))["verified"] is True
+        assert spent == ["bad", "good"], f"a passed session spent another token: {spent}"
+        first = checked.sessions["h"].session.id
+        assert body(checked.payload("h", "/start"))["verified"] is False, "restart inherited a pass"
+        second = checked.sessions["h"].session.id
+        rows = log._conn.execute("SELECT session_id, event_type FROM events"
+                                 " WHERE event_type LIKE 'human%'").fetchall()
+        log.close()
+        assert sorted((r[0], r[1]) for r in rows) == sorted([
+            (first, "human_check_required"), (first, "human_verified"),
+            (second, "human_check_required")]), rows
+    # * Check off (no secret, nothing injected): no events, nothing reported.
+    assert LocalWeb(schemes).verify is None
     print("local_web.py OK")
 
 

@@ -223,6 +223,27 @@ message instead of editing the Caddyfile: replace that `log` line by hand with
 the `log { … }` block above, then `sudo caddy validate --config
 /etc/caddy/Caddyfile && sudo systemctl reload caddy`.
 
+**Bot check (Cloudflare Turnstile), optional.** It keeps scripted sessions out
+of the impact numbers. It never blocks anyone: a session that fails or never
+runs the check still gets a full screening, and the report simply leaves it
+out. To turn it on:
+
+1. In the Cloudflare dashboard, go to Turnstile and add a widget. Set the
+   hostname to `sathi.avinashnegi.com` and the mode to **Managed**. You do not
+   need to move DNS to Cloudflare.
+2. Add both keys to `/etc/sathi/sathi.env`:
+
+       TURNSTILE_SITE_KEY=<site key>
+       TURNSTILE_SECRET=<secret key>
+
+3. Restart the web unit with `sudo systemctl restart sathi-web`.
+
+Check it: open the site, answer the consent question, then run
+`sudo sqlite3 /var/lib/sathi/sathi.db "SELECT event_type, COUNT(*) FROM events WHERE event_type LIKE 'human%' GROUP BY 1"`.
+It should show both `human_check_required` and `human_verified`. To turn the
+check off, remove both lines and restart. Sessions logged while it was on keep
+their result.
+
 DNS first: an A record `sathi` → `13.206.84.69` at Spaceship. Caddy fetches
 the certificate on first request, so the record must resolve before the
 site block goes in. Then, after `install-on-vm.sh` has synced the code:

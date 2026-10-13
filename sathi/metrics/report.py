@@ -51,8 +51,18 @@ def _where(since: str = "", cohort: str = "", include_cli: bool = False) -> tupl
     # !     it is excluded unless --include-cli asks for it;
     # !   - cohort narrows to sessions that arrived through one link slug, e.g.
     # !     the `csc` link handed out in the pilot (see events.SOURCE_SLUGS).
+    # !   - a web session opened under the Turnstile bot check and never passed
+    # !     it is dropped. A script hitting /answer directly runs no JavaScript,
+    # !     so it never passes; a worker whose phone fails the check still gets
+    # !     her answer, she is only left out of the numbers. Sessions from
+    # !     before the check existed, or with TURNSTILE_SECRET unset, never
+    # !     logged human_check_required and still count.
     """
-    clauses: list[str] = []
+    clauses: list[str] = [
+        "session_id NOT IN (SELECT c.session_id FROM events c"
+        " WHERE c.event_type = 'human_check_required' AND c.session_id NOT IN"
+        " (SELECT v.session_id FROM events v WHERE v.event_type = 'human_verified'))"
+    ]
     params: list[str] = []
     if since:
         clauses.append("ts >= ?")
@@ -627,6 +637,31 @@ def _self_check() -> None:
         conn.close()
         assert split["payout"] == 72000, (
             f"a second session's pension was swallowed: payout={split['payout']}, wanted 72000")
+
+    # ! The bot check. A web session opened under it counts only once it has
+    # ! passed; a session that never saw the check (older, or the check off)
+    # ! still counts. A script that skips the JavaScript never passes.
+    with tempfile.TemporaryDirectory() as d:
+        db = Path(d) / "human.db"
+        log = EventLog(db)
+        p = Profile(state="UK", age=34)
+        for checked, passed in ((True, True), (True, False), (False, False)):
+            sess = log.start_session("web")
+            if checked:
+                log.log(sess, "human_check_required")
+            if passed:
+                log.log(sess, "human_verified")
+            log.grant_consent(sess)
+            log.log(sess, "eligibility_evaluated", profile=p)
+            log.log(sess, "scheme_newly_surfaced", profile=p, scheme_code="PMSBY",
+                    value_inr=200000)
+        log.close()
+
+        conn = _connect(str(db))
+        n = numbers(conn)
+        conn.close()
+        assert n["screened"] == 2 and n["surfaced"] == 2, (
+            f"an unverified web session reached the numbers: {n}")
 
     print("report.py OK")
 

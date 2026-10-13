@@ -447,3 +447,23 @@ contradicted. Tests for each in `tests/test_flow.py`.
   needed re-signing. `# ?` on each: Avinash to confirm each is the
   application page. New Hindi UI strings (footer, retry, print, next person)
   are machine-drafted and need reading aloud.
+
+## 2026-10-13 — security review and bot check
+
+- **Security review** of the code and the live headers. No critical finding:
+  queries are parameterised, the page escapes all output, the cookie is
+  `SameSite=Strict`, WhatsApp webhooks are HMAC-checked, `stats.json` CORS
+  is an allowlist, and no secret appears in the git history. Open: the web
+  host sends no HSTS, CSP or frame header, and its `Server` header names the
+  Python version (fix in the Caddyfile).
+- **Bot check (Cloudflare Turnstile), built and off by default.** Set
+  `TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET` to turn it on (RUNBOOK, "The
+  browser channel"). It verifies and never blocks. A web session opened
+  under the check logs `human_check_required`, and a pass logs
+  `human_verified`. `report._where` drops sessions with the first event and
+  not the second, so `stats.json` and the report count only verified web
+  sessions. Older sessions, and every session while the check is off, still
+  count. The worker's IP is not sent to Cloudflare by our server.
+- `# ?` Cloudflare sees each visitor's browser while the widget runs. The
+  consent text should say so before the check is turned on. That is new
+  Hindi copy and needs Avinash.

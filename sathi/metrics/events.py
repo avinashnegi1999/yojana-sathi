@@ -47,11 +47,18 @@ EVENT_TYPES = frozenset(
         "session_complete",
         "followup_sent",
         "followup_response",
+        # * Web only, and only while TURNSTILE_SECRET is set: the session was
+        # * opened under a bot check, then passed it. The report drops a web
+        # * session that has the first and not the second (report._where).
+        "human_check_required",
+        "human_verified",
     }
 )
 
 # * Events allowed before consent. Everything else is refused.
-_PRE_CONSENT = frozenset({"session_start", "consent_granted", "consent_declined"})
+# * The bot check carries no profile data and runs before the consent tap.
+_PRE_CONSENT = frozenset({"session_start", "consent_granted", "consent_declined",
+                          "human_check_required", "human_verified"})
 
 # ! The complete list of profile-derived columns. Adding to it is a privacy
 # ! decision, not a refactor — test_privacy.py pins this exact set.
